@@ -1,0 +1,40 @@
+<h1>Collecting query execution flamegraphs using system.trace_log | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-queries-and-syntax/">Queries &amp; Syntax</a></li><li aria-current="page" class="breadcrumb-item active">trace_log</li></ol></nav><div class="td-content"><h1>Collecting query execution flamegraphs using system.trace_log</h1><div class="lead"></div><p>ClickHouse® has embedded functionality to analyze the details of query performance.</p><p>It’s <code>system.trace_log</code> table.</p><p>By default it collects information only about queries when runs longer than 1 sec (and collects stacktraces every second).</p><p>You can adjust that per query using settings <code>query_profiler_real_time_period_ns</code> &amp; <code>query_profiler_cpu_time_period_ns</code>.</p><p>Both works very similar (with desired interval dump the stacktraces of all the threads which execute the query).
+real timer - allows to ‘see’ the situations when cpu was not working much, but time was spend for example on IO.
+cpu timer - allows to see the ‘hot’ points in calculations more accurately (skip the io time).</p><p>Trying to collect stacktraces with a frequency higher than few KHz is usually not possible.</p><p>To check where most of the RAM is used you can collect stacktraces during memory allocations / deallocation, by using the
+setting <code>memory_profiler_sample_probability</code>.</p><h3 id="clickhouse-speedscope">clickhouse-speedscope</h3><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># install </span>
+</span></span><span style="display:flex"><span>wget https://github.com/laplab/clickhouse-speedscope/archive/refs/heads/master.tar.gz -O clickhouse-speedscope.tar.gz
+</span></span><span style="display:flex"><span>tar -xvzf clickhouse-speedscope.tar.gz
+</span></span><span style="display:flex"><span><span style="color:#204a87">cd</span> clickhouse-speedscope-master/
+</span></span><span style="display:flex"><span>pip3 install -r requirements.txt
+</span></span></code></pre></div><p>For debugging particular query:</p><pre tabindex="0"><code>clickhouse-client 
+
+SET query_profiler_cpu_time_period_ns=1000000; -- 1000 times per 'cpu' sec
+-- or SET query_profiler_real_time_period_ns=2000000; -- 500 times per 'real' sec.
+-- or SET memory_profiler_sample_probability=0.1; -- to debug the memory allocations
+
+SELECT ... &lt;your select&gt;
+
+SYSTEM FLUSH LOGS;
+
+-- get the query_id from the clickhouse-client output or from system.query_log (also pay attention on query_id vs initial_query_id for distributed queries).
+</code></pre><p>Now let’s process that:</p><pre tabindex="0"><code>python3 main.py &amp;  # start the proxy in background
+python3 main.py --query-id 908952ee-71a8-48a4-84d5-f4db92d45a5d # process the stacktraces
+fg # get the proxy from background 
+Ctrl + C  # stop it.
+</code></pre><p>To access ClickHouse with other username / password etc. - see the sources of <a href="https://github.com/laplab/clickhouse-speedscope/blob/master/main.py" target="_blank">https://github.com/laplab/clickhouse-speedscope/blob/master/main.py</a></p><h3 id="clickhouse-flamegraph">clickhouse-flamegraph</h3><p>Installation &amp; usage instructions: <a href="https://github.com/Slach/clickhouse-flamegraph" target="_blank">https://github.com/Slach/clickhouse-flamegraph</a></p><h3 id="pure-flamegraphpl-examples">pure flamegraph.pl examples</h3><pre tabindex="0"><code>git clone https://github.com/brendangregg/FlameGraph /opt/flamegraph
+
+clickhouse-client -q "SELECT  arrayStringConcat(arrayReverse(arrayMap(x -&gt; concat( addressToLine(x), '#', demangle(addressToSymbol(x)) ), trace)), ';') AS stack, count() AS samples FROM system.trace_log WHERE event_time &gt;= subtractMinutes(now(),10) GROUP BY trace FORMAT TabSeparated" | /opt/flamegraph/flamegraph.pl &gt; flamegraph.svg
+
+clickhouse-client -q "SELECT  arrayStringConcat((arrayMap(x -&gt; concat(splitByChar('/', addressToLine(x))[-1], '#', demangle(addressToSymbol(x)) ), trace)), ';') AS stack, sum(abs(size)) AS samples FROM system.trace_log where trace_type = 'Memory' and event_date = today() group by trace order by samples desc FORMAT TabSeparated" | /opt/flamegraph/flamegraph.pl &gt; allocs.svg
+clickhouse-client -q "SELECT  arrayStringConcat(arrayReverse(arrayMap(x -&gt; concat(splitByChar('/', addressToLine(x))[-1], '#', demangle(addressToSymbol(x)) ), trace)), ';') AS stack, count() AS samples FROM system.trace_log where trace_type = 'Memory' group by trace FORMAT TabSeparated SETTINGS allow_introspection_functions=1" | /opt/flamegraph/flamegraph.pl &gt; ~/mem1.svg
+</code></pre><h3 id="similar-using-perf">similar using perf</h3><pre tabindex="0"><code>apt-get update -y 
+apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`git
+apt-get install -y clickhouse-common-static-dbg clickhouse-common-dbg
+mkdir -p /opt/flamegraph
+git clone https://github.com/brendangregg/FlameGraph /opt/flamegraph
+
+perf record -F 99 -p $(pidof clickhouse) -G
+perf script &gt; /tmp/out.perf
+/opt/flamegraph/stackcollapse-perf.pl /tmp/out.perf | /opt/flamegraph/flamegraph.pl &gt; /tmp/flamegraph.svg
+</code></pre><h3 id="also">also</h3><p><a href="https://kb.altinity.com/altinity-kb-queries-and-syntax/troubleshooting/#flamegraph" target="_blank">https://kb.altinity.com/altinity-kb-queries-and-syntax/troubleshooting/#flamegraph</a></p><p><a href="https://github.com/samber/grafana-flamegraph-panel/pull/2" target="_blank">https://github.com/samber/grafana-flamegraph-panel/pull/2</a></p><div class="td-page-meta__lastmod">Last modified 2025.01.16: <a href="https://github.com/Altinity/altinityknowledgebase/commit/afe0f3c3e76e848e6941903e93f05dd41fccfea0">Streamlined page metadata, simplified directory structure (afe0f3c)</a></div></div></main>

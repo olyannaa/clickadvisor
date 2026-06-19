@@ -1,0 +1,27 @@
+case_id: clickbench_q24
+source: clickbench
+sql: 'SELECT * FROM hits WHERE URL LIKE ''%google%'' ORDER BY EventTime LIMIT 10;
+
+  '
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: Top-level `SELECT *` reads all columns from the wide `hits` table,
+    which is wasteful on a columnar layout.
+- issue_id: I-2
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: Predicate `URL LIKE '%google%'` starts with a leading wildcard and
+    is expected to bypass index-friendly filtering.
+expected_rules_to_fire:
+- D-003
+- D-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: 2 confirmed finding(s) after rule-card precondition check.'
+expected_findings_count: 2
+status: reviewed

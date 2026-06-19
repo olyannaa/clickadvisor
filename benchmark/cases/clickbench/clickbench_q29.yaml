@@ -1,0 +1,15 @@
+case_id: clickbench_q29
+source: clickbench
+sql: 'SELECT REGEXP_REPLACE(Referer, ''^https?://(?:www\.)?([^/]+)/.*$'', ''\1'')
+  AS k, AVG(length(Referer)) AS l, COUNT(*) AS c, MIN(Referer) FROM hits WHERE Referer
+  <> '''' GROUP BY k HAVING COUNT(*) > 100000 ORDER BY l DESC LIMIT 25;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

@@ -1,0 +1,24 @@
+case_id: tpch_q18
+source: tpch
+sql: "SELECT\n    c_name,\n    c_custkey,\n    o_orderkey,\n    o_orderdate,\n    o_totalprice,\n    sum(l_quantity) AS total_quantity\nFROM\n    customer,\n    orders,\n    lineitem\nWHERE\n    o_orderkey IN (\n        SELECT\n            l_orderkey\n        FROM\n            lineitem\n        GROUP BY\n            l_orderkey\n        HAVING\n            sum(l_quantity) > 300\n    )\n    AND c_custkey = o_custkey\n    AND o_orderkey = l_orderkey\nGROUP BY\n    c_name,\n    c_custkey,\n    o_orderkey,\n    o_orderdate,\n    o_totalprice\nORDER BY\n    o_totalprice DESC,\n    o_orderdate\nLIMIT 100;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM customer, orders, lineitem — implicit JOIN
+- issue_id: I-2
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT (оригинал имел :n 100)
+expected_rules_to_fire:
+- D-002
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q18: Large Volume Customer.'
+expected_findings_count: 2
+status: reviewed

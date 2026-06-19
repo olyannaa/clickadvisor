@@ -1,0 +1,305 @@
+<h1>Syntax | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Syntax</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/syntax.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Syntax</h1></header><p>In this section, we will take a look at ClickHouse's SQL syntax.
+ClickHouse uses a syntax based on SQL but offers a number of extensions and optimizations.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="query-parsing">Query Parsing<a aria-label="Direct link to Query Parsing" class="hash-link" href="#query-parsing" title="Direct link to Query Parsing">​</a></h2>
+<p>There are two types of parsers in ClickHouse:</p>
+<ul class="custom-ul">
+<li class="custom-li"><em>A full SQL parser</em> (a recursive descent parser).</li>
+<li class="custom-li"><em>A data format parser</em> (a fast stream parser).</li>
+</ul>
+<p>The full SQL parser is used in all cases except for the <code>INSERT</code> query, which uses both parsers.</p>
+<p>Let's examine the query below:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO t VALUES (1, 'Hello, world'), (2, 'abc'), (3, 'def')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As mentioned already, the <code>INSERT</code> query makes use of both parsers.
+The <code>INSERT INTO t VALUES</code> fragment is parsed by the full parser,
+and the data <code>(1, 'Hello, world'), (2, 'abc'), (3, 'def')</code> is parsed by the data format parser, or fast stream parser.</p>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true"><summary>Turning on the full parser</summary><div><div class="collapsibleContent_i85q"><p>You can also turn on the full parser for the data
+by using the <a href="/docs/operations/settings/formats#input_format_values_interpret_expressions"><code>input_format_values_interpret_expressions</code></a> setting.<p>When the aforementioned setting is set to <code>1</code>,
+ClickHouse first tries to parse values with the fast stream parser.
+If it fails, ClickHouse tries to use the full parser for the data, treating it like an SQL <a href="#expressions">expression</a>.</p></p></div></div></details>
+<p>The data can have any format.
+When a query is received, the server calculates no more than <a href="/docs/operations/settings/settings#max_query_size">max_query_size</a> bytes of the request in RAM
+(by default, 1 MB), and the rest is stream parsed.
+This is to allow for avoiding issues with large <code>INSERT</code> queries, which is the recommended way to insert your data in ClickHouse.</p>
+<p>When using the <a href="/docs/interfaces/formats/Values"><code>Values</code></a> format in an <code>INSERT</code> query,
+it may appear that data is parsed the same as for expressions in a <code>SELECT</code> query however this is not the case.
+The <code>Values</code> format is much more limited.</p>
+<p>The rest of this section covers the full parser.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>For more information about format parsers, see the <a href="/docs/interfaces/formats">Formats</a> section.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="spaces">Spaces<a aria-label="Direct link to Spaces" class="hash-link" href="#spaces" title="Direct link to Spaces">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">There may be any number of space symbols between syntactical constructions (including the beginning and end of a query).</li>
+<li class="custom-li">Space symbols include the space, tab, line feed, CR, and form feed.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="comments">Comments<a aria-label="Direct link to Comments" class="hash-link" href="#comments" title="Direct link to Comments">​</a></h2>
+<p>ClickHouse supports both SQL-style and C-style comments:</p>
+<ul class="custom-ul">
+<li class="custom-li">SQL-style comments begin with <code>--</code>, <code>#!</code> or <code># </code> and continue to the end of the line. A space after <code>--</code> and <code>#!</code> can be omitted.</li>
+<li class="custom-li">C-style comments:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>//</code> (or more than 2 <code>/</code> characters) followed by text until the end of the line. Spaces after <code>/</code> are not required.</li>
+<li class="custom-li">Can span from <code>/*</code> to <code>*/</code> for multiline comments. Spaces are not required either.</li>
+<li class="custom-li">C-style comments can be nested.</li>
+</ul>
+</li>
+</ul>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">/*
+ * Compute the number of days between two dates.
+ * /* Returns NULL if either argument is NULL */
+ */
+SELECT
+    dateDiff('day', toDate('2024-01-01'), toDate('2024-12-31')) AS days_in_year, -- 365
+    dateDiff('day', toDate('2020-01-01'), today()) AS days_since  #! since 2020
+    ///////////////////////////////////////////////////////////////////
+    # TODO: add hour/minute variants
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="keywords">Keywords<a aria-label="Direct link to Keywords" class="hash-link" href="#keywords" title="Direct link to Keywords">​</a></h2>
+<p>Keywords in ClickHouse can be either <em>case-sensitive</em> or <em>case-insensitive</em> depending on the context.</p>
+<p>Keywords are <strong>case-insensitive</strong> when they correspond to:</p>
+<ul class="custom-ul">
+<li class="custom-li">SQL standard. For example, <code>SELECT</code>, <code>select</code> and <code>SeLeCt</code> are all valid.</li>
+<li class="custom-li">Implementation in some popular DBMS (MySQL or Postgres). For example, <code>DateTime</code> is the same as <code>datetime</code>.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>You can check whether a data type name is case-sensitive in the <a href="/docs/operations/system-tables/data_type_families">system.data_type_families</a> table.</p></div></div>
+<p>In contrast to standard SQL, all other keywords (including functions names) are <strong>case-sensitive</strong>.</p>
+<p>Furthermore, Keywords are not reserved.
+They are treated as such only in the corresponding context.
+If you use <a href="#identifiers">identifiers</a> with the same name as the keywords, enclose them into double-quotes or backticks.</p>
+<p>For example, the following query is valid if the table <code>table_name</code> has a column with the name <code>"FROM"</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT "FROM" FROM table_name
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="identifiers">Identifiers<a aria-label="Direct link to Identifiers" class="hash-link" href="#identifiers" title="Direct link to Identifiers">​</a></h2>
+<p>Identifiers are:</p>
+<ul class="custom-ul">
+<li class="custom-li">Cluster, database, table, partition, and column names.</li>
+<li class="custom-li"><a href="#functions">Functions</a>.</li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types">Data types</a>.</li>
+<li class="custom-li"><a href="#expression-aliases">Expression aliases</a>.</li>
+</ul>
+<p>Identifiers can be quoted or non-quoted, although the latter is preferred.</p>
+<p>Non-quoted identifiers must match the regex <code>^[a-zA-Z_][0-9a-zA-Z_]*$</code> and cannot be equal to <a href="#keywords">keywords</a>.
+See the table below for examples of valid and invalid identifiers:</p>
+<table><thead><tr><th>Valid identifiers<th>Invalid identifiers<tbody><tr><td><code>xyz</code>, <code>_internal</code>, <code>Id_with_underscores_123_</code><td><code>1x</code>, <code><a class="__cf_email__" data-cfemail="61150e0c21060c00080d4f020e0c" href="/cdn-cgi/l/email-protection">[email protected]</a></code>, <code>äußerst_schön</code></td></td></tr></tbody></th></th></tr></thead></table>
+<p>If you want to use identifiers the same as keywords or you want to use other symbols in identifiers, quote it using double quotes or backticks, for example, <code>"id"</code>, <code>`id`</code>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The same rules that apply for escaping in quoted identifiers also apply for string literals. See <a href="#string">String</a> for more details.</p></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Avoid using dots in column names</div><p>Column names containing dots, columns sharing a common dot-prefix, and columns with the <code>Array</code> type can each be interpreted as part of a flattened Nested structure when <code>flatten_nested = 1</code> (the default). This can cause unexpected array-length validation on inserts and renaming restrictions.<p>Avoid using dots in column names if possible.
+Use underscores (<code>_</code>) or another separator instead of dots in column names unless you intentionally need <code>Nested</code> semantics.</p></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="literals">Literals<a aria-label="Direct link to Literals" class="hash-link" href="#literals" title="Direct link to Literals">​</a></h2>
+<p>In ClickHouse, a literal is a value which is directly represented in a query.
+In other words it is a fixed value which does not change during query execution.</p>
+<p>Literals can be:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#string">String</a></li>
+<li class="custom-li"><a href="#numeric">Numeric</a></li>
+<li class="custom-li"><a href="#compound">Compound</a></li>
+<li class="custom-li"><a href="#null"><code>NULL</code></a></li>
+<li class="custom-li"><a href="#heredoc">Heredocs</a> (custom string literals)</li>
+</ul>
+<p>We take a look at each of these in more detail in the sections below.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="string">String<a aria-label="Direct link to String" class="hash-link" href="#string" title="Direct link to String">​</a></h3>
+<p>String literals must be enclosed in single quotes. Double quotes are not supported.</p>
+<p>Escaping works by either:</p>
+<ul class="custom-ul">
+<li class="custom-li">using a preceding single quote where the single-quote character <code>'</code> (and only this character) can be escaped as <code>''</code>, or</li>
+<li class="custom-li">using the preceding backslash with the following supported escape sequences listed in the table below.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The backslash loses its special meaning i.e. it is interpreted literally should it precede characters other than the ones listed below.</p></div></div>
+<table><thead><tr><th>Supported Escape<th>Description<tbody><tr><td><code>\xHH</code><td>8-bit character specification followed by any number of hex digits (H).<tr><td><code>\N</code><td>reserved, does nothing (eg <code>SELECT 'a\Nb'</code> returns <code>ab</code>)<tr><td><code>\a</code><td>alert<tr><td><code>\b</code><td>backspace<tr><td><code>\e</code><td>escape character<tr><td><code>\f</code><td>form feed<tr><td><code>\n</code><td>line feed<tr><td><code>\r</code><td>carriage return<tr><td><code>\t</code><td>horizontal tab<tr><td><code>\v</code><td>vertical tab<tr><td><code>\0</code><td>null character<tr><td><code>\\</code><td>backslash<tr><td><code>\'</code> (or <code>''</code>)<td>single quote<tr><td><code>\"</code><td>double quote<tr><td><code>`</code><td>backtick<tr><td><code>\/</code><td>forward slash<tr><td><code>\=</code><td>equal sign<tr><td>ASCII control characters (c &lt;= 31).<td></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In string literals, you need to escape at least <code>'</code> and <code>\</code> using escape codes <code>\'</code> (or: <code>''</code>) and <code>\\</code>.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="numeric">Numeric<a aria-label="Direct link to Numeric" class="hash-link" href="#numeric" title="Direct link to Numeric">​</a></h3>
+<p>Numeric literals are parsed as follows:</p>
+<ul class="custom-ul">
+<li class="custom-li">If the literal is prefixed with a minus sign <code>-</code>, the token is skipped and the result is negated after parsing.</li>
+<li class="custom-li">The numeric literal is first parsed as a 64-bit unsigned integer, using the <a href="https://en.cppreference.com/w/cpp/string/byte/strtoul" rel="noopener noreferrer" target="_blank">strtoull</a> function.<!-- -->
+<ul class="custom-ul">
+<li class="custom-li">If the value is prefixed with <code>0b</code> or <code>0x</code>/<code>0X</code>, the number is parsed as binary or hexadecimal, respectively.</li>
+<li class="custom-li">If the value is negative and the absolute magnitude is greater than 2<sup>63</sup>, an error is returned.</li>
+</ul>
+</li>
+<li class="custom-li">If unsuccessful, the value is next parsed as a floating-point number using the <a href="https://en.cppreference.com/w/cpp/string/byte/strtof" rel="noopener noreferrer" target="_blank">strtod</a> function.</li>
+<li class="custom-li">Otherwise, an error is returned.</li>
+</ul>
+<p>Literal values are cast to the smallest type that the value fits in.
+For example:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> is parsed as <code>UInt8</code></li>
+<li class="custom-li"><code>256</code> is parsed as <code>UInt16</code>.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Important</div><p>Integer values wider than 64-bit (<code>UInt128</code>, <code>Int128</code>, <code>UInt256</code>, <code>Int256</code>) must be cast to a larger type to parse properly:<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-170141183460469231731687303715884105728::Int128
+340282366920938463463374607431768211455::UInt128
+-57896044618658097711785492504343953926634992332820282019728792003956564819968::Int256
+115792089237316195423570985008687907853269984665640564039457584007913129639935::UInt256
+</code></pre></div><div class="activity_PoTP"></div></div><p>This bypasses the above algorithm and parses the integer with a routine that supports arbitrary precision.<p>Otherwise, the literal will be parsed as a floating-point number and thus subject to loss of precision due to truncation.</p></p></p></div></div>
+<p>For more information, see <a href="/docs/sql-reference/data-types">Data types</a>.</p>
+<p>Underscores <code>_</code> inside numeric literals are ignored and can be used for better readability.</p>
+<p>The following Numeric literals are supported:</p>
+<table><thead><tr><th>Numeric Literal<th>Examples<tbody><tr><td><strong>Integers</strong><td><code>1</code>, <code>10_000_000</code>, <code>18446744073709551615</code>, <code>01</code><tr><td><strong>Decimals</strong><td><code>0.1</code><tr><td><strong>Exponential notation</strong><td><code>1e100</code>, <code>-1e-100</code><tr><td><strong>Floating point numbers</strong><td><code>123.456</code>, <code>inf</code>, <code>nan</code><tr><td><strong>Hex</strong><td><code>0xc0fe</code><tr><td><strong>SQL Standard compatible hex string</strong><td><code>x'c0fe'</code><tr><td><strong>Binary</strong><td><code>0b1101</code><tr><td><strong>SQL Standard compatible binary string</strong><td><code>b'1101'</code></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Octal literals are not supported to avoid accidental errors in interpretation.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="compound">Compound<a aria-label="Direct link to Compound" class="hash-link" href="#compound" title="Direct link to Compound">​</a></h3>
+<p>Arrays are constructed with <code>[]</code>: <code>[1, 2, 3]</code>. Tuples are constructed with <code>()</code>: <code>(1, 'Hello, world!', 2)</code>.
+Technically these are not literals, but expressions with the array creation operator and the tuple creation operator, respectively.
+An array must consist of at least one item, and a tuple must have at least two items.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>There is a separate case when tuples appear in the <code>IN</code> clause of a <code>SELECT</code> query.
+Query results can include tuples, but tuples cannot be saved to a database (except for tables using the <a href="/docs/engines/table-engines/special/memory">Memory</a> engine).</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="null">NULL<a aria-label="Direct link to NULL" class="hash-link" href="#null" title="Direct link to NULL">​</a></h3>
+<p><code>NULL</code> is used to indicate that a value is missing.
+To store <code>NULL</code> in a table field, it must be of the <a href="/docs/sql-reference/data-types/nullable">Nullable</a> type.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The following should be noted for <code>NULL</code>:<ul class="custom-ul">
+<li class="custom-li">Depending on the data format (input or output), <code>NULL</code> may have a different representation. For more information, see <a href="/docs/interfaces/formats">data formats</a>.</li>
+<li class="custom-li"><code>NULL</code> processing is nuanced. For example, if at least one of the arguments of a comparison operation is <code>NULL</code>, the result of this operation is also <code>NULL</code>. The same is true for multiplication, addition, and other operations. We recommend to read the documentation for each operation.</li>
+<li class="custom-li">In queries, you can check <code>NULL</code> using the <a href="/docs/sql-reference/functions/functions-for-nulls#isNull"><code>IS NULL</code></a> and <a href="/docs/sql-reference/functions/functions-for-nulls#isNotNull"><code>IS NOT NULL</code></a> operators and the related functions <code>isNull</code> and <code>isNotNull</code>.</li>
+</ul></p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="heredoc">Heredoc<a aria-label="Direct link to Heredoc" class="hash-link" href="#heredoc" title="Direct link to Heredoc">​</a></h3>
+<p>A <a href="https://en.wikipedia.org/wiki/Here_document" rel="noopener noreferrer" target="_blank">heredoc</a> is a way to define a string (often multiline), while maintaining the original formatting.
+A heredoc is defined as a custom string literal, placed between two <code>$</code> symbols.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT $heredoc$SHOW CREATE VIEW my_view$heredoc$;
+
+┌─'SHOW CREATE VIEW my_view'─┐
+│ SHOW CREATE VIEW my_view   │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><ul class="custom-ul">
+<li class="custom-li">A value between two heredocs is processed "as-is".</li>
+</ul></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><ul class="custom-ul">
+<li class="custom-li">You can use a heredoc to embed snippets of SQL, HTML, or XML code, etc.</li>
+</ul></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="defining-and-using-query-parameters">Defining and Using Query Parameters<a aria-label="Direct link to Defining and Using Query Parameters" class="hash-link" href="#defining-and-using-query-parameters" title="Direct link to Defining and Using Query Parameters">​</a></h2>
+<p>Query parameters allow you to write generic queries that contain abstract placeholders instead of concrete identifiers.
+When a query with query parameters is executed,
+all placeholders are resolved and replaced by the actual query parameter values.</p>
+<p>Query parameters can be defined in several ways:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>SET param_&lt;name&gt;=&lt;value&gt;</code> — using a <code>SET</code> command in a query.</li>
+<li class="custom-li"><code>--param_&lt;name&gt;='&lt;value&gt;'</code> — as an argument to <code>clickhouse-client</code> on the command line.</li>
+<li class="custom-li"><code>param_&lt;name&gt;=&lt;value&gt;</code> — as a URL query string parameter for the HTTP interface.</li>
+</ul>
+<p>A query parameter can be referenced in a query using <code>{&lt;name&gt;: &lt;datatype&gt;}</code>, where <code>&lt;name&gt;</code> is the query parameter name and <code>&lt;datatype&gt;</code> is the datatype it is converted to.</p>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true"><summary>Example with SET command</summary><div><div class="collapsibleContent_i85q"><p>For example, the following SQL defines parameters named <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code> - each with a different data type:<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET param_a = 13;
+SET param_b = 'str';
+SET param_c = '2022-08-04 18:30:53';
+SET param_d = {'10': [11, 12], '13': [14, 15]};
+
+SELECT
+   {a: UInt32},
+   {b: String},
+   {c: DateTime},
+   {d: Map(String, Array(UInt8))};
+
+13    str    2022-08-04 18:30:53    {'10':[11,12],'13':[14,15]}
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></details>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true"><summary>Example with clickhouse-client</summary><div><div class="collapsibleContent_i85q"><p>If you are using <code>clickhouse-client</code>, the parameters are specified as <code>--param_name=value</code>. For example, the following parameter has the name <code>message</code> and it is retrieved as a <code>String</code>:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">clickhouse-client --param_message='hello' --query="SELECT {message: String}"
+
+hello
+</code></pre></div><div class="activity_PoTP"></div></div><p>If the query parameter represents the name of a database, table, function or other identifier, use <code>Identifier</code> for its type. For example, the following query returns rows from a table named <code>uk_price_paid</code>:<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET param_mytablename = "uk_price_paid";
+SELECT * FROM {mytablename:Identifier};
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></div></div></details>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true"><summary>Example with the HTTP interface</summary><div><div class="collapsibleContent_i85q"><p>Query parameters can be passed as URL query string parameters with the <code>param_</code> prefix. For example:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">curl -s "http://localhost:8123/?param_message=hello" --data-binary "SELECT {message: String}"
+
+hello
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></details>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true"><summary>Example with the Web UI</summary><div><div class="collapsibleContent_i85q"><p>The built-in Web UI (<code>play.html</code>) automatically detects <code>{name:Type}</code> parameter placeholders in the query and displays labeled input fields for each parameter. The parameter values are included in the HTTP request and also persisted in the page URL for bookmarking and sharing.</p></div></div></details>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Query parameters are not general text substitutions which can be used in arbitrary places in arbitrary SQL queries.
+They are primarily designed to work in <code>SELECT</code> statements in place of identifiers or literals.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="functions">Functions<a aria-label="Direct link to Functions" class="hash-link" href="#functions" title="Direct link to Functions">​</a></h2>
+<p>Function calls are written like an identifier with a list of arguments (possibly empty) in <code>()</code>.
+In contrast to standard SQL, the brackets are required, even for an empty argument list.
+For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">now()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>There are also:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/functions/overview">Regular functions</a>.</li>
+<li class="custom-li"><a href="/docs/sql-reference/aggregate-functions">Aggregate functions</a>.</li>
+</ul>
+<p>Some aggregate functions can contain two lists of arguments in brackets. For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">quantile (0.9)(x) 
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>These aggregate functions are called "parametric" functions,
+and the arguments in the first list are called "parameters".</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The syntax of aggregate functions without parameters is the same as for regular functions.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="operators">Operators<a aria-label="Direct link to Operators" class="hash-link" href="#operators" title="Direct link to Operators">​</a></h2>
+<p>Operators are converted to their corresponding functions during query parsing, taking their priority and associativity into account.</p>
+<p>For example, the expression</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">1 + 2 * 3 + 4
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>is transformed to</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">plus(plus(1, multiply(2, 3)), 4)`
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="data-types-and-database-table-engines">Data Types and Database Table Engines<a aria-label="Direct link to Data Types and Database Table Engines" class="hash-link" href="#data-types-and-database-table-engines" title="Direct link to Data Types and Database Table Engines">​</a></h2>
+<p>Data types and table engines in the <code>CREATE</code> query are written the same way as identifiers or functions.
+In other words, they may or may not contain an argument list in brackets.</p>
+<p>For more information, see the sections:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/data-types">Data types</a></li>
+<li class="custom-li"><a href="/docs/engines/table-engines">Table engines</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/create">CREATE</a>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="expressions">Expressions<a aria-label="Direct link to Expressions" class="hash-link" href="#expressions" title="Direct link to Expressions">​</a></h2>
+<p>An expression can be any of the following:</p>
+<ul class="custom-ul">
+<li class="custom-li">a function</li>
+<li class="custom-li">an identifier</li>
+<li class="custom-li">a literal</li>
+<li class="custom-li">the application of an operator</li>
+<li class="custom-li">an expression in brackets</li>
+<li class="custom-li">a subquery</li>
+<li class="custom-li">an asterisk</li>
+</ul>
+<p>It can also contain an <a href="#expression-aliases">alias</a>.</p>
+<p>A list of expressions is one or more expressions separated by commas.
+Functions and operators, in turn, can have expressions as arguments.</p>
+<p>A constant expression is an expression whose result is known during query analysis, i.e. before execution.
+For example, expressions over literals are constant expressions.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="expression-aliases">Expression Aliases<a aria-label="Direct link to Expression Aliases" class="hash-link" href="#expression-aliases" title="Direct link to Expression Aliases">​</a></h2>
+<p>An alias is a user-defined name for an <a href="#expressions">expression</a> in a query.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">expr AS alias
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The parts of the syntax above are explained below.</p>
+<table><thead><tr><th>Part of syntax<th>Description<th>Example<th>Notes<tbody><tr><td><code>AS</code><td>The keyword for defining aliases. You can define the alias for a table name or a column name in a <code>SELECT</code> clause without using the <code>AS</code> keyword.<td><code>SELECT table_name_alias.column_name FROM table_name table_name_alias</code>.<td>In the <a href="/docs/sql-reference/functions/type-conversion-functions#CAST">CAST</a> function, the <code>AS</code> keyword has another meaning. See the description of the function.<tr><td><code>expr</code><td>Any expression supported by ClickHouse.<td><code>SELECT column_name * 2 AS double FROM some_table</code><td><tr><td><code>alias</code><td>Name for <code>expr</code>. Aliases should comply with the <a href="#identifiers">identifiers</a> syntax.<td><code>SELECT "table t".column_name FROM table_name AS "table t"</code>.<td></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notes-on-usage">Notes on Usage<a aria-label="Direct link to Notes on Usage" class="hash-link" href="#notes-on-usage" title="Direct link to Notes on Usage">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">Aliases are global for a query or subquery, and you can define an alias in any part of a query for any expression. For example:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT (1 AS n) + 2, n`.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Aliases are not visible in subqueries and between subqueries. For example, while executing the following query ClickHouse generates the exception <code>Unknown identifier: num</code>:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">`SELECT (SELECT sum(b.a) + num FROM b) - a.a AS num FROM a`
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">If an alias is defined for the result columns in the <code>SELECT</code> clause of a subquery, these columns are visible in the outer query. For example:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT n + m FROM (SELECT 1 AS n, 2 AS m)`.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Be careful with aliases that are the same as column or table names. Let's consider the following example:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t
+(
+    a Int,
+    b Int
+)
+ENGINE = TinyLog();
+
+SELECT
+    argMax(a, b),
+    sum(b) AS b
+FROM t;
+
+Received exception from server (version 18.14.17):
+Code: 184. DB::Exception: Received from localhost:9000, 127.0.0.1. DB::Exception: Aggregate function sum(b) is found inside another aggregate function in query.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In the preceding example, we declared table <code>t</code> with column <code>b</code>.
+Then, when selecting data, we defined the <code>sum(b) AS b</code> alias.
+As aliases are global,
+ClickHouse substituted the literal <code>b</code> in the expression <code>argMax(a, b)</code> with the expression <code>sum(b)</code>.
+This substitution caused the exception.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>You can change this default behavior by setting <a href="/docs/operations/settings/settings#prefer_column_name_to_alias">prefer_column_name_to_alias</a> to <code>1</code>.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="asterisk">Asterisk<a aria-label="Direct link to Asterisk" class="hash-link" href="#asterisk" title="Direct link to Asterisk">​</a></h2>
+<p>In a <code>SELECT</code> query, an asterisk can replace the expression.
+For more information, see the section <a href="/docs/sql-reference/statements/select#asterisk">SELECT</a>.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">SQL Reference</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/formats"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Input and Output Formats</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#query-parsing">Query Parsing</a><li><a class="table-of-contents__link toc-highlight" href="#spaces">Spaces</a><li><a class="table-of-contents__link toc-highlight" href="#comments">Comments</a><li><a class="table-of-contents__link toc-highlight" href="#keywords">Keywords</a><li><a class="table-of-contents__link toc-highlight" href="#identifiers">Identifiers</a><li><a class="table-of-contents__link toc-highlight" href="#literals">Literals</a><ul><li><a class="table-of-contents__link toc-highlight" href="#string">String</a><li><a class="table-of-contents__link toc-highlight" href="#numeric">Numeric</a><li><a class="table-of-contents__link toc-highlight" href="#compound">Compound</a><li><a class="table-of-contents__link toc-highlight" href="#null">NULL</a><li><a class="table-of-contents__link toc-highlight" href="#heredoc">Heredoc</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#defining-and-using-query-parameters">Defining and Using Query Parameters</a><li><a class="table-of-contents__link toc-highlight" href="#functions">Functions</a><li><a class="table-of-contents__link toc-highlight" href="#operators">Operators</a><li><a class="table-of-contents__link toc-highlight" href="#data-types-and-database-table-engines">Data Types and Database Table Engines</a><li><a class="table-of-contents__link toc-highlight" href="#expressions">Expressions</a><li><a class="table-of-contents__link toc-highlight" href="#expression-aliases">Expression Aliases</a><ul><li><a class="table-of-contents__link toc-highlight" href="#notes-on-usage">Notes on Usage</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#asterisk">Asterisk</a></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

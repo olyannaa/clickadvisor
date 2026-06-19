@@ -1,0 +1,24 @@
+case_id: tpch_q15
+source: tpch
+sql: "CREATE VIEW revenue_q15 AS\nSELECT\n    l_suppkey AS supplier_no,\n    sum(l_extendedprice * (1 - l_discount)) AS total_revenue\nFROM\n    lineitem\nWHERE\n    l_shipdate >= toDate('1996-01-01')\n    AND l_shipdate < toDate('1996-01-01') + INTERVAL 3 MONTH\nGROUP BY\n    l_suppkey;\n\nSELECT\n    s_suppkey,\n    s_name,\n    s_address,\n    s_phone,\n    total_revenue\nFROM\n    supplier,\n    revenue_q15\nWHERE\n    s_suppkey = supplier_no\n    AND total_revenue = (\n        SELECT\n            max(total_revenue)\n        FROM\n            revenue_q15\n    )\nORDER BY\n    s_suppkey;\n\nDROP VIEW IF EXISTS revenue_q15;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: CTE + подзапрос в WHERE — вложенность
+- issue_id: I-2
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM supplier, revenue — implicit JOIN
+expected_rules_to_fire:
+- D-013
+- D-002
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q15: Top Supplier. Использует VIEW (revenue).'
+expected_findings_count: 2
+status: reviewed

@@ -1,0 +1,18 @@
+case_id: synthetic_12
+source: synthetic
+sql: |
+  SELECT * FROM events WHERE TRUE AND user_id = 5
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: constant_predicate_elimination
+  detected_by_rule: R-012
+  severity: high
+  description: Константный предикат TRUE в WHERE избыточен и должен быть устранён.
+expected_rules_to_fire:
+- R-012
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-012.
+expected_findings_count: 1
+status: validated

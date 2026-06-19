@@ -1,0 +1,575 @@
+<h1>Functions for working with time series | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">TimeSeries</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/time-series-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for working with time series</h1></header><p>The functions below are designed to be used with <code>timeSeries*()</code> aggregate functions like
+<a href="/docs/sql-reference/aggregate-functions/reference/timeSeriesInstantRateToGrid"><code>timeSeriesInstantRateToGrid</code></a>,
+<a href="/docs/sql-reference/aggregate-functions/reference/timeSeriesResampleToGridWithStaleness"><code>timeSeriesLastToGrid</code></a>,
+and so on.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="seriesDecomposeSTL">seriesDecomposeSTL<a aria-label="Direct link to seriesDecomposeSTL" class="hash-link" href="#seriesDecomposeSTL" title="Direct link to seriesDecomposeSTL">​</a></h2>
+<p>Introduced in: v24.1.0</p>
+<p>Decomposes a series data using STL <a href="https://www.wessa.net/download/stl.pdf" rel="noopener noreferrer" target="_blank">(Seasonal-Trend Decomposition Procedure Based on Loess)</a> into a season, a trend and a residual component.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">seriesDecomposeSTL(series, period)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>series</code> — An array of numeric values <a href="/docs/sql-reference/data-types/array"><code>Array((U)Int8/16/32/64)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(Float*)</code></a></li>
+<li class="custom-li"><code>period</code> — A positive integer <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of four arrays where the first array includes seasonal components, the second array - trend, the third array - residue component, and the fourth array - baseline(seasonal + trend) component. <a href="/docs/sql-reference/data-types/array"><code>Array(Array(Float32), Array(Float32), Array(Float32), Array(Float32))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Decompose series data using STL</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT seriesDecomposeSTL([10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34], 3) AS print_0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:377px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────────print_0──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [[
+        -13.529999, -3.1799996, 16.71,      -13.53,     -3.1799996, 16.71,      -13.53,     -3.1799996,
+        16.71,      -13.530001, -3.18,      16.710001,  -13.530001, -3.1800003, 16.710001,  -13.530001,
+        -3.1800003, 16.710001,  -13.530001, -3.1799994, 16.71,      -13.529999, -3.1799994, 16.709997
+    ],
+    [
+        23.63,     23.63,     23.630003, 23.630001, 23.630001, 23.630001, 23.630001, 23.630001,
+        23.630001, 23.630001, 23.630001, 23.63,     23.630001, 23.630001, 23.63,     23.630001,
+        23.630001, 23.63,     23.630001, 23.630001, 23.630001, 23.630001, 23.630001, 23.630003
+    ],
+    [
+        0, 0.0000019073486, -0.0000019073486, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.0000019073486, 0,
+        0
+    ],
+    [
+        10.1, 20.449999, 40.340004, 10.100001, 20.45, 40.34, 10.100001, 20.45, 40.34, 10.1, 20.45, 40.34,
+        10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.1, 20.45, 40.34, 10.100002, 20.45, 40.34
+    ]]                                                                                                                   │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="seriesOutliersDetectTukey">seriesOutliersDetectTukey<a aria-label="Direct link to seriesOutliersDetectTukey" class="hash-link" href="#seriesOutliersDetectTukey" title="Direct link to seriesOutliersDetectTukey">​</a></h2>
+<p>Introduced in: v24.2.0</p>
+<p>Detects outliers in series data using <a href="https://en.wikipedia.org/wiki/Outlier#Tukey%27s_fences" rel="noopener noreferrer" target="_blank">Tukey Fences</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">seriesOutliersDetectTukey(series[, min_percentile, max_percentile, K])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>series</code> — An array of numeric values. <a href="/docs/sql-reference/data-types/array"><code>Array((UInt8/16/32/64))</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(Float*)</code></a></li>
+<li class="custom-li"><code>min_percentile</code> — Optional. The minimum percentile to be used to calculate inter-quantile range <a href="https://en.wikipedia.org/wiki/Interquartile_range" rel="noopener noreferrer" target="_blank">(IQR)</a>. The value must be in range [0.02,0.98]. The default is 0.25. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>max_percentile</code> — Optional. The maximum percentile to be used to calculate inter-quantile range (IQR). The value must be in range [0.02,0.98]. The default is 0.75. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>K</code> — Optional. Non-negative constant value to detect mild or stronger outliers. The default value is 1.5. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of the same length as the input array where each value represents score of possible anomaly of corresponding element in the series. A non-zero score indicates a possible anomaly. <a href="/docs/sql-reference/data-types/array"><code>Array(Float32)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic outlier detection</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT seriesOutliersDetectTukey([-3, 2, 15, 3, 5, 6, 4, 5, 12, 45, 12, 3, 3, 4, 5, 6]) AS print_0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────────print_0─────────────────┐
+│[0,0,0,0,0,0,0,0,0,27,0,0,0,0,0,0] │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Custom parameters outlier detection</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT seriesOutliersDetectTukey([-3, 2, 15, 3, 5, 6, 4.50, 5, 12, 45, 12, 3.40, 3, 4, 5, 6], 0.2, 0.8, 1.5) AS print_0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─print_0──────────────────────────────┐
+│ [0,0,0,0,0,0,0,0,0,19.5,0,0,0,0,0,0] │
+└──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="seriesPeriodDetectFFT">seriesPeriodDetectFFT<a aria-label="Direct link to seriesPeriodDetectFFT" class="hash-link" href="#seriesPeriodDetectFFT" title="Direct link to seriesPeriodDetectFFT">​</a></h2>
+<p>Introduced in: v23.12.0</p>
+<p>Finds the period of the given series data using FFT - <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform" rel="noopener noreferrer" target="_blank">Fast Fourier transform</a></p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">seriesPeriodDetectFFT(series)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>series</code> — An array of numeric values. <a href="/docs/sql-reference/data-types/array"><code>Array((U)Int8/16/32/64)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(Float*)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a real value equal to the period of series data. NaN when number of data points are less than four. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Period detection with simple pattern</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT seriesPeriodDetectFFT([1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6]) AS print_0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────────print_0──────┐
+│                      3 │
+└────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Period detection with complex pattern</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT seriesPeriodDetectFFT(arrayMap(x -&gt; abs((x % 6) - 3), range(1000))) AS print_0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─print_0─┐
+│       6 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesCopyTag">timeSeriesCopyTag<a aria-label="Direct link to timeSeriesCopyTag" class="hash-link" href="#timeSeriesCopyTag" title="Direct link to timeSeriesCopyTag">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Copies a specified tag from one group of tags (<code>src_group</code>) to another (<code>dest_group</code>).
+The function replaces any previous values of the copied tag in <code>dest_group</code>.
+If the copied tag is not present in <code>src_group</code>, then the function will remove it from <code>dest_group</code> as well.
+The function mimics the copying logic of the prometheus
+<a href="https://prometheus.io/docs/prometheus/latest/querying/operators/#group-modifiers" rel="noopener noreferrer" target="_blank">group left/group right</a> modifiers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesCopyTag(dest_group, src_group, tag_to_copy)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>dest_group</code> — The destination group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>src_group</code> — The source group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tag_to_copy</code> — The name of a tag to copy. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a group of tags containing the tags from <code>dest_group</code> along with the copied tags from <code>src_group</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS dest_group,
+       timeSeriesTagsToGroup([('code', '404'), ('message', 'Page not found')], '__name__', 'http_codes') AS src_group,
+       timeSeriesCopyTag(dest_group, src_group, '__name__') AS result_group,
+       timeSeriesGroupToTags(result_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─dest_group─┬─src_group─┬─result_group─┬─timeSeriesGroupToTags(result_group)────────────────────────┐
+│          1 │         2 │            3 │ [('__name__','http_codes'),('code','404'),('region','eu')] │
+└────────────┴───────────┴──────────────┴────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesCopyTags">timeSeriesCopyTags<a aria-label="Direct link to timeSeriesCopyTags" class="hash-link" href="#timeSeriesCopyTags" title="Direct link to timeSeriesCopyTags">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Copies specified tags from one group of tags (<code>src_group</code>) to another (<code>dest_group</code>).
+The function replaces any previous values of the copied tags in <code>dest_group</code>.
+If some of the copied tags don't present in <code>src_group</code> then the function will remove them in <code>dest_group</code> as well.
+The function mimics the copying logic of the prometheus
+<a href="https://prometheus.io/docs/prometheus/latest/querying/operators/#group-modifiers" rel="noopener noreferrer" target="_blank">group left/group right</a> modifiers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesCopyTags(dest_group, src_group, tags_to_copy)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>dest_group</code> — The destination group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>src_group</code> — The source group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tags_to_copy</code> — The names of tags to copy. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a group of tags containing the tags from <code>dest_group</code> along with the copied tags from <code>src_group</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS dest_group,
+       timeSeriesTagsToGroup([('code', '404'), ('message', 'Page not found')], '__name__', 'http_codes') AS src_group,
+       timeSeriesCopyTags(dest_group, src_group, ['__name__', 'code', 'env']) AS result_group,
+       timeSeriesGroupToTags(result_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─dest_group─┬─src_group─┬─result_group─┬─timeSeriesGroupToTags(result_group)────────────────────────┐
+│          1 │         2 │            3 │ [('__name__','http_codes'),('code','404'),('region','eu')] │
+└────────────┴───────────┴──────────────┴────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesExtractTag">timeSeriesExtractTag<a aria-label="Direct link to timeSeriesExtractTag" class="hash-link" href="#timeSeriesExtractTag" title="Direct link to timeSeriesExtractTag">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Extracts the value of a specified tag from the group. Returns NULL if not found.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesGroupToTags">timeSeriesGroupToTags()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesExtractTag(group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tag_to_extract</code> — The name of a tag to extract from the group <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value of a specified tag. <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group,
+       timeSeriesExtractTag(group, '__name__'),
+       timeSeriesExtractTag(group, 'env'),
+       timeSeriesExtractTag(group, 'instance')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─timeSeriesExtractTag(group, '__name__')─┬─timeSeriesExtractTag(group, 'env')─┬─timeSeriesExtractTag(group, 'instance')─┐
+│     1 │ http_requests_count                     │ dev                                │ ᴺᵁᴸᴸ                                    │
+└───────┴─────────────────────────────────────────┴────────────────────────────────────┴─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesFromGrid">timeSeriesFromGrid<a aria-label="Direct link to timeSeriesFromGrid" class="hash-link" href="#timeSeriesFromGrid" title="Direct link to timeSeriesFromGrid">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Converts an array of values <code>[x1, x2, x3, ...]</code> to an array of tuples
+<code>[(start_timestamp, x1), (start_timestamp + step, x2), (start_timestamp + 2 * step, x3), ...]</code>.</p>
+<p>The current timestamp is increased by <code>step</code> until it becomes greater than <code>end_timestamp</code>
+If the number of the values doesn't match the number of the timestamps, the function throws an exception.</p>
+<p>NULL values in <code>[x1, x2, x3, ...]</code> are skipped but the current timestamp is still incremented.
+For example, for <code>[value1, NULL, x2]</code> the function returns <code>[(start_timestamp, x1), (start_timestamp + 2 * step, x2)]</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesFromGrid(start_timestamp, end_timestamp, step, values)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>start_timestamp</code> — Start of the grid. <a href="/docs/sql-reference/data-types/datetime64"><code>DateTime64</code></a> or <a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+<li class="custom-li"><code>end_timestamp</code> — End of the grid. <a href="/docs/sql-reference/data-types/datetime64"><code>DateTime64</code></a> or <a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+<li class="custom-li"><code>step</code> — Step of the grid in seconds <a href="/docs/sql-reference/data-types/decimal"><code>Decimal64</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal32</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32/64</code></a></li>
+<li class="custom-li"><code>values</code> — Array of values <a href="/docs/sql-reference/data-types/array"><code>Array(Float*)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(Nullable(Float*))</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values from the source array of values combined with timestamps on a regular time grid described by <code>start_timestamp</code> and <code>step</code>. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(DateTime64, Float64))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesFromGrid('2025-06-01 00:00:00'::DateTime64(3), '2025-06-01 00:01:30.000'::DateTime64(3), 30, [10, 20, NULL, 30]) AS result;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────────────────────────────────────result─────────────────────────────────────────────┐
+│ [('2025-06-01 00:00:00.000',10),('2025-06-01 00:00:30.000',20),('2025-06-01 00:01:30.000',30)] │
+└────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesGroupToSamplingKey">timeSeriesGroupToSamplingKey<a aria-label="Direct link to timeSeriesGroupToSamplingKey" class="hash-link" href="#timeSeriesGroupToSamplingKey" title="Direct link to timeSeriesGroupToSamplingKey">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Returns a stable <code>UInt64</code> sampling key derived from the tags of a specified group.</p>
+<p>The value is deterministic: identical input tags always produce the same key.
+It's intended as a sort key for sampling operators like <code>limitk</code> and <code>limit_ratio</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesGroupToSamplingKey(group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A stable <code>UInt64</code> hash derived from the tags associated with the group. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group,
+       timeSeriesGroupToSamplingKey(group) AS sampling_key
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─────────sampling_key─┐
+│     1 │ 12876543210987654321 │
+└───────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesGroupToTags">timeSeriesGroupToTags<a aria-label="Direct link to timeSeriesGroupToTags" class="hash-link" href="#timeSeriesGroupToTags" title="Direct link to timeSeriesGroupToTags">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Returns the names and values of the tags associated with a specified group.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesTagsToGroup">timeSeriesTagsToGroup()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesGroupToTags(group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>timeSeriesTagsGroupToTags</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of pairs <code>(tag_name, tag_value)</code>.
+The returned array is always sorted by <code>tag_name</code> and never contains the same <code>tag_name</code> more than once.
+<a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group,
+       timeSeriesGroupToTags(group) AS sorted_tags,
+       timeSeriesTagsToGroup(sorted_tags) AS same_group,
+       throwIf(same_group != group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─sorted_tags────────────────────────────────────────────────────────┬─same_group─┬─throwIf(notE⋯up, group))─┐
+│     1 │ [('__name__','http_requests_count'),('env','dev'),('region','eu')] │          1 │                        0 │
+└───────┴────────────────────────────────────────────────────────────────────┴────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesIdToGroup">timeSeriesIdToGroup<a aria-label="Direct link to timeSeriesIdToGroup" class="hash-link" href="#timeSeriesIdToGroup" title="Direct link to timeSeriesIdToGroup">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Returns the names and values of the tags associated with a specified identifier of a time series.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesStoreTags">timeSeriesStoreTags()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesIdToGroup(id)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>timeSeriesIdToTagsGroup</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>id</code> — Identifier of a time series. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt128</code></a> or <a href="/docs/sql-reference/data-types/uuid"><code>UUID</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a group of tags associated with the identifier <code>id</code> of a time series. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 8374283493092 AS id,
+       timeSeriesStoreTags(id, [('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS same_id,
+       throwIf(same_id != id),
+       timeSeriesIdToGroup(same_id) AS group,
+       timeSeriesGroupToTags(group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────────id─┬───────same_id─┬─throwIf(notE⋯me_id, id))─┬─group─┬─timeSeriesGroupToTags(group)───────────────────────────────────────┐
+│ 8374283493092 │ 8374283493092 │                        0 │     1 │ [('__name__','http_requests_count'),('env','dev'),('region','eu')] │
+└───────────────┴───────────────┴──────────────────────────┴───────┴────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesIdToTags">timeSeriesIdToTags<a aria-label="Direct link to timeSeriesIdToTags" class="hash-link" href="#timeSeriesIdToTags" title="Direct link to timeSeriesIdToTags">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Returns tags associated with a specified identifier of a time series.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesStoreTags">timeSeriesStoreTags()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesIdToTags(id)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>id</code> — Identifier of a time series. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt128</code></a> or <a href="/docs/sql-reference/data-types/uuid"><code>UUID</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of pairs <code>(tag_name, tag_value)</code>.
+The returned array is always sorted by <code>tag_name</code> and never contains the same <code>tag_name</code> more than once.
+<a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 8374283493092 AS id,
+       timeSeriesStoreTags(id, [('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS same_id,
+       throwIf(same_id != id),
+       timeSeriesIdToTags(same_id)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────────id─┬───────same_id─┬─throwIf(notE⋯me_id, id))─┬─timeSeriesIdToTags(same_id)────────────────────────────────────────┐
+│ 8374283493092 │ 8374283493092 │                        0 │ [('__name__','http_requests_count'),('env','dev'),('region','eu')] │
+└───────────────┴───────────────┴──────────────────────────┴────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesJoinTags">timeSeriesJoinTags<a aria-label="Direct link to timeSeriesJoinTags" class="hash-link" href="#timeSeriesJoinTags" title="Direct link to timeSeriesJoinTags">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Joins the values of specified tags extracted from a group of tags.
+The function inserts a separator between joined values and returns a new group of tags
+with the tag <code>dest_tag</code> set to the joined value.
+This function mimics the logic of the prometheus function
+<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#label_join" rel="noopener noreferrer" target="_blank">label_join()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesJoinTags(group, dest_tag, separator, src_tags)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>dest_tag</code> — The name of a tag with the joined result which will be added to the <code>group</code>. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>separator</code> — A separator to insert between joined values. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>src_tags</code> — The names of source tags with values which will be joined. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a new group of tags with the <code>dest_tag</code> tag set to the joined result. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('__name__', 'up'), ('job', 'api-server'), ('src1', 'a'), ('src2', 'b'), ('src3', 'c')]) AS group,
+       timeSeriesJoinTags(group, 'foo', ',', ['src1', 'src2', 'src3']) AS result_group,
+       timeSeriesGroupToTags(result_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─result_group─┬─timeSeriesGroupToTags(result_group)─────────────────────────────────────────────────────────────┐
+│     1 │            2 │ [('__name__','up'),('foo','a,b,c'),('job','api-server'),('src1','a'),('src2','b'),('src3','c')] │
+└───────┴──────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesRange">timeSeriesRange<a aria-label="Direct link to timeSeriesRange" class="hash-link" href="#timeSeriesRange" title="Direct link to timeSeriesRange">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Generates a range of timestamps [start_timestamp, start_timestamp + step, start_timestamp + 2 * step, ..., end_timestamp].</p>
+<p>If <code>start_timestamp</code> is equal to <code>end_timestamp</code>, the function returns a 1-element array containing <code>[start_timestamp]</code>.</p>
+<p>Function <code>timeSeriesRange()</code> is similar to function <a href="/docs/sql-reference/functions/array-functions#range">range</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesRange(start_timestamp, end_timestamp, step)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>start_timestamp</code> — Start of the range. <a href="/docs/sql-reference/data-types/datetime64"><code>DateTime64</code></a> or <a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+<li class="custom-li"><code>end_timestamp</code> — End of the range. <a href="/docs/sql-reference/data-types/datetime64"><code>DateTime64</code></a> or <a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+<li class="custom-li"><code>step</code> — Step of the range in seconds <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32/64</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a range of timestamps. <a href="/docs/sql-reference/data-types/array"><code>Array(DateTime64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesRange('2025-06-01 00:00:00'::DateTime64(3), '2025-06-01 00:01:00'::DateTime64(3), 30)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────────────────────────────────result─────────────────────────────────────────┐
+│ ['2025-06-01 00:00:00.000', '2025-06-01 00:00:30.000', '2025-06-01 00:01:00.000'] │
+└───────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesRemoveAllTagsExcept">timeSeriesRemoveAllTagsExcept<a aria-label="Direct link to timeSeriesRemoveAllTagsExcept" class="hash-link" href="#timeSeriesRemoveAllTagsExcept" title="Direct link to timeSeriesRemoveAllTagsExcept">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Removes all tags except specified ones from a group of tags.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveTag">timeSeriesRemoveTag()</a>,
+<a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveTags">timeSeriesRemoveTags()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesRemoveAllTagsExcept(group, tags_to_keep)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tags_to_keep</code> — The names of tags to keep in the group. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A new group of tags with only the specified tags kept. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group,
+       timeSeriesRemoveAllTagsExcept(group, ['env']) AS result_group,
+       timeSeriesGroupToTags(result_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─result_group─┬─timeSeriesGroupToTags(result_group)─┐
+│     1 │            2 │ [('env','dev')]                     │
+└───────┴──────────────┴─────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesRemoveTag">timeSeriesRemoveTag<a aria-label="Direct link to timeSeriesRemoveTag" class="hash-link" href="#timeSeriesRemoveTag" title="Direct link to timeSeriesRemoveTag">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Removes a specified tag from a group of tags.
+If there is no such tag in the group then the group is returned unchanged.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveTags">timeSeriesRemoveTags()</a>,
+<a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveAllTagsExcept">timeSeriesRemoveAllTagsExcept()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesRemoveTag(group, tag_to_remove)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tag_to_remove</code> — The name of a tag to remove from the group. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A new group of tags without the specified tag. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group_of_3,
+       timeSeriesRemoveTag(group_of_3, '__name__') AS group_of_2,
+       timeSeriesGroupToTags(group_of_2),
+       timeSeriesRemoveTag(group_of_2, 'env') AS group_of_1,
+       timeSeriesGroupToTags(group_of_1),
+       timeSeriesRemoveTag(group_of_1, 'region') AS empty_group,
+       timeSeriesGroupToTags(empty_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group_of_3─┬─group_of_2─┬─timeSeriesGroupToTags(group_of_2)─┬─group_of_1─┬─timeSeriesGroupToTags(group_of_1)─┬─empty_group─┬─timeSeriesGroupToTags(empty_group)─┐
+│          1 │          2 │ [('env','dev'),('region','eu')]   │          3 │ [('region','eu')]                 │           0 │ []                                 │
+└────────────┴────────────┴───────────────────────────────────┴────────────┴───────────────────────────────────┴─────────────┴────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesRemoveTags">timeSeriesRemoveTags<a aria-label="Direct link to timeSeriesRemoveTags" class="hash-link" href="#timeSeriesRemoveTags" title="Direct link to timeSeriesRemoveTags">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Removes specified tags from a group of tags.
+If some of the specified tags are not in the group of tags the function ignores them.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveTag">timeSeriesRemoveTag()</a>,
+<a href="/docs/sql-reference/functions/time-series-functions#timeSeriesRemoveAllTagsExcept">timeSeriesRemoveAllTagsExcept()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesRemoveTags(group, tags_to_remove)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>tags_to_remove</code> — The names of tags to remove from the group. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A new group of tags without the specified tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group_of_3,
+       timeSeriesRemoveTags(group_of_3, ['env', 'region']) AS group_of_1,
+       timeSeriesGroupToTags(group_of_1),
+       timeSeriesRemoveTags(group_of_1, ['__name__', 'nonexistent']) AS empty_group,
+       timeSeriesGroupToTags(empty_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group_of_3─┬─group_of_1─┬─timeSeriesGroupToTags(group_of_1)────┬─empty_group─┬─timeSeriesGroupToTags(empty_group)─┐
+│          1 │          2 │ [('__name__','http_requests_count')] │           0 │ []                                 │
+└────────────┴────────────┴──────────────────────────────────────┴─────────────┴────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesReplaceTag">timeSeriesReplaceTag<a aria-label="Direct link to timeSeriesReplaceTag" class="hash-link" href="#timeSeriesReplaceTag" title="Direct link to timeSeriesReplaceTag">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Matches the regular expression <code>regex</code> against the value of the tag <code>src_tag</code>.
+If it matches, the value of the tag <code>dest_tag</code> in the returned group will be the expansion of <code>replacement</code>,
+together with the original tags in the input.
+This function mimics the logic of the prometheus function
+<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#label_replace" rel="noopener noreferrer" target="_blank">label_replace()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesReplaceTag(group, dest_tag, replacement, src_tag, regex)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>group</code> — A group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>dest_tag</code> — The name of a destination tag to get the result group. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>replacement</code> — A replacement pattern, can contain <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">1, </annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em"></span><span class="mord">1</span><span class="mpunct">,</span></span></span></span>2 or $name to refer capturing groups in the regular expression 'regex'. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>src_tag</code> — The name of a tag which value is used to match the regular expression 'regex'. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>regex</code> — A regular expression. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A new group of tags with maybe <code>dest_tag</code> added. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('__name__', 'up'), ('job', 'api-server'), ('service', 'a:c')]) AS group,
+       timeSeriesReplaceTag(group, 'foo', '$1', 'service', '(.*):.*') AS result_group,
+       timeSeriesGroupToTags(result_group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group─┬─result_group─┬─timeSeriesGroupToTags(result_group)────────────────────────────────────┐
+│     1 │            2 │ [('__name__','up'),('foo','a'),('job','api-server'),('service','a:c')] │
+└───────┴──────────────┴────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesStoreTags">timeSeriesStoreTags<a aria-label="Direct link to timeSeriesStoreTags" class="hash-link" href="#timeSeriesStoreTags" title="Direct link to timeSeriesStoreTags">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Stores in the query context a mapping between a specified identifier of a time series and a set of tags.
+Functions <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesIdToTags">timeSeriesIdToTags()</a>
+and <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesIdToGroup">timeSeriesIdToGroup()</a>
+can be used to access this mapping later during the query execution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesStoreTags(id, tags_array, separate_tag_name_1, separate_tag_value_1, ...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>id</code> — Identifier of a time series. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt128</code></a> or <a href="/docs/sql-reference/data-types/uuid"><code>UUID</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></li>
+<li class="custom-li"><code>tags_array</code> — Array of pairs (tag_name, tag_value). <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a> or <a href="/docs/sql-reference/syntax#null"><code>NULL</code></a></li>
+<li class="custom-li"><code>separate_tag_name_i</code> — The name of a tag. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>separate_tag_value_i</code> — The value of a tag. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a> or <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the identifier of a time series (i.e. just the first argument).</p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 8374283493092 AS id,
+       timeSeriesStoreTags(id, [('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS same_id,
+       throwIf(same_id != id),
+       timeSeriesIdToTags(same_id),
+       timeSeriesGroupToTags(timeSeriesIdToGroup(same_id))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────────id─┬───────same_id─┬─throwIf(notEquals(same_id, id))─┬─timeSeriesIdToTags(same_id)────────────────────────────────────────┬─timeSeriesGroupToTags(timeSeriesIdToGroup(same_id))────────────────┐
+│ 8374283493092 │ 8374283493092 │                               0 │ [('__name__','http_requests_count'),('env','dev'),('region','eu')] │ [('__name__','http_requests_count'),('env','dev'),('region','eu')] │
+└───────────────┴───────────────┴─────────────────────────────────┴────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesTagsToGroup">timeSeriesTagsToGroup<a aria-label="Direct link to timeSeriesTagsToGroup" class="hash-link" href="#timeSeriesTagsToGroup" title="Direct link to timeSeriesTagsToGroup">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Returns a group of tags associated with specified tags.
+If the same group of tags is found multiple times during the query execution, the function returns the same group.
+For an empty set of tags the function always returns 0.
+See also function <a href="/docs/sql-reference/functions/time-series-functions#timeSeriesGroupToTags">timeSeriesGroupToTags()</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesTagsToGroup(tags_array, tag_name_1, tag_value_1, tag_name2, tag_value2, ...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tags_array</code> — Array of pairs (tag_name, tag_value). <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a> or <a href="/docs/sql-reference/syntax#null"><code>NULL</code></a></li>
+<li class="custom-li"><code>tag_name_i</code> — The name of a tag. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>tag_value_i</code> — The value of a tag. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a> or <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a group of tags associated with the specified tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timeSeriesTagsToGroup([('region', 'eu'), ('env', 'dev')], '__name__', 'http_requests_count') AS group1,
+       timeSeriesTagsToGroup([], '__name__', 'http_failures') AS group2,
+       timeSeriesTagsToGroup([]) AS empty_group,
+       timeSeriesTagsToGroup([], '__name__', 'http_failures') AS same_group2,
+       throwIf(same_group2 != group2),
+       timeSeriesGroupToTags(group2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─group1─┬─group2─┬─empty_group─┬─same_group2─┬─throwIf(notEquals(same_group2, group2))─┬─timeSeriesGroupToTags(group2)──┐
+│      1 │      2 │           0 │           2 │                                       0 │ [('__name__','http_failures')] │
+└────────┴────────┴─────────────┴─────────────┴─────────────────────────────────────────┴────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="timeSeriesThrowDuplicateSeriesIf">timeSeriesThrowDuplicateSeriesIf<a aria-label="Direct link to timeSeriesThrowDuplicateSeriesIf" class="hash-link" href="#timeSeriesThrowDuplicateSeriesIf" title="Direct link to timeSeriesThrowDuplicateSeriesIf">​</a></h2>
+<p>Introduced in: v26.2.0</p>
+<p>Checks the <code>condition</code> and if it's true throws an exception with the following message
+<code>Multiple series have the same tags &lt;tags&gt;, duplicate series in the same result set are not allowed</code>.
+If the <code>condition</code> is false the function returns <code>0</code>.
+This function is similar to <a href="/docs/sql-reference/functions/other-functions#throwIf">throwIf()</a>,
+but uses a different error code and formats the error message differently.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">timeSeriesThrowDuplicateSeriesIf(condition, group)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>condition</code> — Condition to check, usually contains function <a href="/docs/sql-reference/aggregate-functions/reference/count#count">count()</a> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>group</code> — Group of tags. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test(tags Array(Tuple(String, String))) engine=Memory;
+
+INSERT INTO test VALUES ([('__name__', 'up')]);
+
+SELECT timeSeriesTagsToGroup(tags) AS group
+FROM test
+GROUP BY group
+HAVING timeSeriesThrowDuplicateSeriesIf(count() &gt; 1, group) = 0;  -- OK
+
+INSERT INTO test VALUES ([('__name__', 'up')]);
+
+SELECT timeSeriesTagsToGroup(tags) AS group
+FROM test
+GROUP BY group
+HAVING timeSeriesThrowDuplicateSeriesIf(count() &gt; 1, group) = 0;  -- Throws exception "Multiple series have the same tags {'__name__': 'up'}"
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/string-search-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">String search</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/time-window-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Time window</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#seriesDecomposeSTL">seriesDecomposeSTL</a><li><a class="table-of-contents__link toc-highlight" href="#seriesOutliersDetectTukey">seriesOutliersDetectTukey</a><li><a class="table-of-contents__link toc-highlight" href="#seriesPeriodDetectFFT">seriesPeriodDetectFFT</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesCopyTag">timeSeriesCopyTag</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesCopyTags">timeSeriesCopyTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesExtractTag">timeSeriesExtractTag</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesFromGrid">timeSeriesFromGrid</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesGroupToSamplingKey">timeSeriesGroupToSamplingKey</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesGroupToTags">timeSeriesGroupToTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesIdToGroup">timeSeriesIdToGroup</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesIdToTags">timeSeriesIdToTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesJoinTags">timeSeriesJoinTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesRange">timeSeriesRange</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesRemoveAllTagsExcept">timeSeriesRemoveAllTagsExcept</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesRemoveTag">timeSeriesRemoveTag</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesRemoveTags">timeSeriesRemoveTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesReplaceTag">timeSeriesReplaceTag</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesStoreTags">timeSeriesStoreTags</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesTagsToGroup">timeSeriesTagsToGroup</a><li><a class="table-of-contents__link toc-highlight" href="#timeSeriesThrowDuplicateSeriesIf">timeSeriesThrowDuplicateSeriesIf</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

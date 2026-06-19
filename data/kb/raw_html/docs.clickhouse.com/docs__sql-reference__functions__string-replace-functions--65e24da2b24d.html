@@ -1,0 +1,310 @@
+<h1>Functions for string replacement | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">String replacement</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/string-replace-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for string replacement</h1></header><p><a href="/docs/sql-reference/functions/string-functions">General strings functions</a> and <a href="/docs/sql-reference/functions/string-search-functions">functions for searching in strings</a> are described separately.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The documentation below is generated from the <code>system.functions</code> system table.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="format">format<a aria-label="Direct link to format" class="hash-link" href="#format" title="Direct link to format">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Format the <code>pattern</code> string with the values (strings, integers, etc.) listed in the arguments, similar to formatting in Python.
+The pattern string can contain replacement fields surrounded by curly braces <code>{}</code>.
+Anything not contained in braces is considered literal text and copied verbatim into the output.
+Literal brace character can be escaped by two braces: <code>{{</code> and <code>}}</code>.
+Field names can be numbers (starting from zero) or empty (then they are implicitly given monotonically increasing numbers).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">format(pattern, s0[, s1, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>pattern</code> — The format string containing placeholders. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>s0[, s1, ...]</code> — One or more values to substitute into the pattern. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a formatted string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Numbered placeholders</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT format('{1} {0} {1}', 'World', 'Hello')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─format('{1} {0} {1}', 'World', 'Hello')─┐
+│ Hello World Hello                       │
+└─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Implicit numbering</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT format('{} {}', 'Hello', 'World')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─format('{} {}', 'Hello', 'World')─┐
+│ Hello World                       │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overlay">overlay<a aria-label="Direct link to overlay" class="hash-link" href="#overlay" title="Direct link to overlay">​</a></h2>
+<p>Introduced in: v24.9.0</p>
+<p>Replaces part of the string <code>input</code> with another string <code>replace</code>, starting at the 1-based index <code>offset</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">overlay(s, replace, offset[, length])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>replace</code> — The replacement string <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>offset</code> — An integer type <code>Int</code> (1-based). If <code>offset</code> is negative, it is counted from the end of the string <code>s</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int</code></a></li>
+<li class="custom-li"><code>length</code> — Optional. An integer type <code>Int</code>. <code>length</code> specifies the length of the snippet within the input string <code>s</code> to be replaced. If <code>length</code> is not specified, the number of bytes removed from <code>s</code> equals the length of <code>replace</code>; otherwise <code>length</code> bytes are removed. <a href="/docs/sql-reference/data-types/int-uint"><code>Int</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with replacement. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic replacement</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT overlay('My father is from Mexico.', 'mother', 4) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────────────┐
+│ My mother is from Mexico.│
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Replacement with length</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT overlay('My father is from Mexico.', 'dad', 4, 6) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────────────┐
+│ My dad is from Mexico.│
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overlayUTF8">overlayUTF8<a aria-label="Direct link to overlayUTF8" class="hash-link" href="#overlayUTF8" title="Direct link to overlayUTF8">​</a></h2>
+<p>Introduced in: v24.9.0</p>
+<p>Replace part of the string <code>s</code> with another string <code>replace</code>, starting at the 1-based index <code>offset</code>.
+Assumes that the string contains valid UTF-8 encoded text.
+If this assumption is violated, no exception is thrown and the result is undefined.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">overlayUTF8(s, replace, offset[, length])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>replace</code> — The replacement string. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>offset</code> — An integer type <code>Int</code> (1-based). If <code>offset</code> is negative, it is counted from the end of the input string <code>s</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>length</code> — Optional. Specifies the length of the snippet within the input string <code>s</code> to be replaced. If <code>length</code> is not specified, the number of characters removed from <code>s</code> equals the length of <code>replace</code>, otherwise <code>length</code> characters are removed. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with replacement. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>UTF-8 replacement</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT overlayUTF8('Mein Vater ist aus Österreich.', 'der Türkei', 20) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────────────────────┐
+│ Mein Vater ist aus der Türkei.│
+└───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="printf">printf<a aria-label="Direct link to printf" class="hash-link" href="#printf" title="Direct link to printf">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>The <code>printf</code> function formats the given string with the values (strings, integers, floating-points etc.) listed in the arguments, similar to printf function in C++.
+The format string can contain format specifiers starting with <code>%</code> character.
+Anything not contained in <code>%</code> and the following format specifier is considered literal text and copied verbatim into the output.
+Literal <code>%</code> character can be escaped by <code>%%</code>.
+The format string can be either a constant or a column expression, allowing different format patterns per row.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">printf(format[, sub1, sub2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>format</code> — The format string with <code>%</code> specifiers. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>sub1, sub2, ...</code> — Optional. Zero or more values to substitute into the format string. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a formatted string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>C++-style formatting</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT printf('%%%s %s %d', 'Hello', 'World', 2024);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─printf('%%%s %s %d', 'Hello', 'World', 2024)─┐
+│ %Hello World 2024                            │
+└──────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="regexpQuoteMeta">regexpQuoteMeta<a aria-label="Direct link to regexpQuoteMeta" class="hash-link" href="#regexpQuoteMeta" title="Direct link to regexpQuoteMeta">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Adds a backslash before these characters with special meaning in regular expressions: <code>\0</code>, <code>\\</code>, <code>|</code>, <code>(</code>, <code>)</code>, <code>^</code>, <code>$</code>, <code>.</code>, <code>[</code>, <code>]</code>, <code>?</code>, <code>*</code>, <code>+</code>, <code>{</code>, <code>:</code>, <code>-</code>.
+This implementation slightly differs from re2::RE2::QuoteMeta.
+It escapes zero byte as <code>\0</code> instead of <code>\x00</code> and it escapes only required characters.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">regexpQuoteMeta(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string containing characters to be escaped for regex. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with regex special characters escaped. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Escape regex special characters</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT regexpQuoteMeta('Hello. [World]? (Yes)*') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────────────────────┐
+│ Hello\. \[World\]\? \(Yes\)\* │
+└───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replaceAll">replaceAll<a aria-label="Direct link to replaceAll" class="hash-link" href="#replaceAll" title="Direct link to replaceAll">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Replaces all occurrences of the substring <code>pattern</code> in <code>haystack</code> by the <code>replacement</code> string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">replaceAll(haystack, pattern, replacement)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>replace</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>haystack</code> — The input string to search in. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>pattern</code> — The substring to find and replace. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>replacement</code> — The string to replace the pattern with. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with all occurrences of pattern replaced. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Replace all occurrences</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT replaceAll('Hello, Hello world', 'Hello', 'Hi') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────┐
+│ Hi, Hi world │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replaceOne">replaceOne<a aria-label="Direct link to replaceOne" class="hash-link" href="#replaceOne" title="Direct link to replaceOne">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Replaces the first occurrence of the substring <code>pattern</code> in <code>haystack</code> by the <code>replacement</code> string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">replaceOne(haystack, pattern, replacement)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>haystack</code> — The input string to search in. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>pattern</code> — The substring to find and replace. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>replacement</code> — The string to replace the pattern with. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with the first occurrence of pattern replaced. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Replace first occurrence</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT replaceOne('Hello, Hello world', 'Hello', 'Hi') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─────────────┐
+│ Hi, Hello world │
+└─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replaceRegexpAll">replaceRegexpAll<a aria-label="Direct link to replaceRegexpAll" class="hash-link" href="#replaceRegexpAll" title="Direct link to replaceRegexpAll">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Like <code>replaceRegexpOne</code> but replaces all occurrences of the pattern.
+As an exception, if a regular expression worked on an empty substring, the replacement is not made more than once.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">replaceRegexpAll(haystack, pattern, replacement)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>REGEXP_REPLACE</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>haystack</code> — The input string to search in. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>pattern</code> — The regular expression pattern to find. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>replacement</code> — The string to replace the pattern with, may contain substitutions. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with all regex matches replaced. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Replace all characters with doubled version</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT replaceRegexpAll('Hello123', '.', '\\\\0\\\\0') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────────┐
+│ HHeelllloo112233     │
+└──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Empty substring replacement example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT replaceRegexpAll('Hello, World!', '^', 'here: ') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─────────────────┐
+│ here: Hello, World! │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replaceRegexpOne">replaceRegexpOne<a aria-label="Direct link to replaceRegexpOne" class="hash-link" href="#replaceRegexpOne" title="Direct link to replaceRegexpOne">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Replaces the first occurrence of the substring matching the regular expression <code>pattern</code> (in re2 syntax) in <code>haystack</code> by the <code>replacement</code> string.
+<code>replacement</code> can contain substitutions <code>\0-\9</code>.
+Substitutions <code>\1-\9</code> correspond to the 1st to 9th capturing group (submatch), substitution <code>\0</code> corresponds to the entire match.
+To use a verbatim <code>\</code> character in the <code>pattern</code> or <code>replacement</code> strings, escape it using <code>\</code>.
+Also keep in mind that string literals require extra escaping.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">replaceRegexpOne(haystack, pattern, replacement)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>haystack</code> — The input string to search in. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>pattern</code> — The regular expression pattern to find. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>replacement</code> — The string to replace the pattern with, may contain substitutions. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with the first regex match replaced. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Converting ISO dates to American format</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT DISTINCT
+    EventDate,
+    replaceRegexpOne(toString(EventDate), '(\\d{4})-(\\d{2})-(\\d{2})', '\\2/\\3/\\1') AS res
+FROM test.hits
+LIMIT 7
+FORMAT TabSeparated
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2014-03-17      03/17/2014
+2014-03-18      03/18/2014
+2014-03-19      03/19/2014
+2014-03-20      03/20/2014
+2014-03-21      03/21/2014
+2014-03-22      03/22/2014
+2014-03-23      03/23/2014
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Copying a string ten times</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT replaceRegexpOne('Hello, World!', '.*', '\\\\0\\\\0\\\\0\\\\0\\\\0\\\\0\\\\0\\\\0\\\\0\\\\0') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World! │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="translate">translate<a aria-label="Direct link to translate" class="hash-link" href="#translate" title="Direct link to translate">​</a></h2>
+<p>Introduced in: v22.7.0</p>
+<p>Replaces characters in the string <code>s</code> using a one-to-one character mapping defined by <code>from</code> and <code>to</code> strings.
+<code>from</code> and <code>to</code> must be constant ASCII strings.
+If <code>from</code> and <code>to</code> have equal sizes, each occurrence of the first character of <code>first</code> in <code>s</code> is replaced by the first character of <code>to</code>, the second character of <code>first</code> in <code>s</code> is replaced by the second character of <code>to</code>, etc.
+If <code>from</code> contains more characters than <code>to</code>, all occurrences of the characters at the end of <code>from</code> that have no corresponding character in <code>to</code> are deleted from <code>s</code>.
+Non-ASCII characters in <code>s</code> are not modified by the function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">translate(s, from, to)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to translate. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>from</code> — A constant ASCII string containing characters to replace. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>to</code> — A constant ASCII string containing replacement characters. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with character translations applied. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Character mapping</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT translate('Hello, World!', 'delor', 'DELOR') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────┐
+│ HELLO, WORLD! │
+└───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Different lengths</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT translate('clickhouse', 'clickhouse', 'CLICK') AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───┐
+│ CLICK │
+└───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="translateUTF8">translateUTF8<a aria-label="Direct link to translateUTF8" class="hash-link" href="#translateUTF8" title="Direct link to translateUTF8">​</a></h2>
+<p>Introduced in: v22.7.0</p>
+<p>Like <a href="#translate"><code>translate</code></a> but assumes <code>s</code>, <code>from</code> and <code>to</code> are UTF-8 encoded strings.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">translateUTF8(s, from, to)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — UTF-8 input string to translate. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>from</code> — A constant UTF-8 string containing characters to replace. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>to</code> — A constant UTF-8 string containing replacement characters. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a <code>String</code> data type value. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>UTF-8 character translation</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT translateUTF8('Münchener Straße', 'üß', 'us') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────┐
+│ Munchener Strase │
+└──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/string-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">String</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/string-search-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">String search</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#format">format</a><li><a class="table-of-contents__link toc-highlight" href="#overlay">overlay</a><li><a class="table-of-contents__link toc-highlight" href="#overlayUTF8">overlayUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#printf">printf</a><li><a class="table-of-contents__link toc-highlight" href="#regexpQuoteMeta">regexpQuoteMeta</a><li><a class="table-of-contents__link toc-highlight" href="#replaceAll">replaceAll</a><li><a class="table-of-contents__link toc-highlight" href="#replaceOne">replaceOne</a><li><a class="table-of-contents__link toc-highlight" href="#replaceRegexpAll">replaceRegexpAll</a><li><a class="table-of-contents__link toc-highlight" href="#replaceRegexpOne">replaceRegexpOne</a><li><a class="table-of-contents__link toc-highlight" href="#translate">translate</a><li><a class="table-of-contents__link toc-highlight" href="#translateUTF8">translateUTF8</a></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

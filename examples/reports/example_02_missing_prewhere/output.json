@@ -1,0 +1,44 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-05-25T11:08:00Z",
+  "analyzer_version": "0.1.0",
+  "llm_mode": "none",
+  "input_summary": {
+    "statements_total": 1,
+    "target_statements": 1,
+    "schema_tables_seen": 1,
+    "explain_kinds": ["PLAN"]
+  },
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "finding_type": "rule_match",
+      "rule_id": "ENV-PREWHERE-001",
+      "tier": "2",
+      "title": "Potential PREWHERE optimization",
+      "severity": "medium",
+      "confidence": 0.74,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "wide-row read with selective filter",
+        "plan_signals": ["Sorting", "ReadFromMergeTree"],
+        "metadata_signals": ["payload column is wide", "event_type is low-cardinality candidate"]
+      },
+      "recommendation": {
+        "before_sql": "SELECT user_id, event_time, payload FROM analytics.events WHERE event_type = 'purchase' AND event_date >= toDate('2026-05-01') ORDER BY event_time DESC LIMIT 100;",
+        "after_sql": null,
+        "notes": [
+          "Tier 2 cost-based suggestion.",
+          "No direct rewrite emitted because automatic PREWHERE shape depends on planner behavior."
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "findings_total": 1,
+    "by_tier": {
+      "2": 1
+    },
+    "estimated_cost_reduction": "medium"
+  }
+}

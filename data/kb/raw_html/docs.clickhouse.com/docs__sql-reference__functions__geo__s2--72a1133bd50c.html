@@ -1,0 +1,226 @@
+<h1>Functions for Working with S2 Index | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/geo" itemprop="item"><span itemprop="name">Geometry</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">S2 Geometry</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/geo/s2.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for Working with S2 Index</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2index">S2Index<a aria-label="Direct link to S2Index" class="hash-link" href="#s2index" title="Direct link to S2Index">​</a></h2>
+<p><a href="https://s2geometry.io/" rel="noopener noreferrer" target="_blank">S2</a> is a geographical indexing system where all geographical data is represented on a sphere (similar to a globe).</p>
+<p>In the S2 library points are represented as the S2 Index - a specific number which encodes internally a point on the surface of a unit sphere, unlike traditional (latitude, longitude) pairs. To get the S2 point index for a given point specified in the format (latitude, longitude) use the <a href="#geotos2">geoToS2</a> function. Also, you can use the <a href="#s2togeo">s2ToGeo</a> function for getting geographical coordinates corresponding to the specified S2 point index.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="geotos2">geoToS2<a aria-label="Direct link to geoToS2" class="hash-link" href="#geotos2" title="Direct link to geoToS2">​</a></h2>
+<p>Returns <a href="#s2index">S2</a> point index corresponding to the provided coordinates <code>(longitude, latitude)</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">geoToS2(lon, lat)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>lon</code> — Longitude. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lat</code> — Latitude. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">S2 point index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT geoToS2(37.79506683, 55.71290588) AS s2Index;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─────────────s2Index─┐
+│ 4704772434919038107 │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2togeo">s2ToGeo<a aria-label="Direct link to s2ToGeo" class="hash-link" href="#s2togeo" title="Direct link to s2ToGeo">​</a></h2>
+<p>Returns geo coordinates <code>(longitude, latitude)</code> corresponding to the provided <a href="#s2index">S2</a> point index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2ToGeo(s2index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2index</code> — S2 Index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">A <a href="/docs/sql-reference/data-types/tuple">tuple</a> consisting of two values:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>lon</code>. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lat</code>. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2ToGeo(4704772434919038107) AS s2Coodrinates;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─s2Coodrinates────────────────────────┐
+│ (37.79506681471008,55.7129059052841) │
+└──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2getneighbors">s2GetNeighbors<a aria-label="Direct link to s2GetNeighbors" class="hash-link" href="#s2getneighbors" title="Direct link to s2GetNeighbors">​</a></h2>
+<p>Returns S2 neighbor indexes corresponding to the provided <a href="#s2index">S2</a>. Each cell in the S2 system is a quadrilateral bounded by four geodesics. So, each cell has 4 neighbors.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2GetNeighbors(s2index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2index</code> — S2 Index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">An array consisting of 4 neighbor indexes: <code>array[s2index1, s2index3, s2index2, s2index4]</code>. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2GetNeighbors(5074766849661468672) AS s2Neighbors;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─s2Neighbors───────────────────────────────────────────────────────────────────────┐
+│ [5074766987100422144,5074766712222515200,5074767536856236032,5074767261978329088] │
+└───────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2cellsintersect">s2CellsIntersect<a aria-label="Direct link to s2CellsIntersect" class="hash-link" href="#s2cellsintersect" title="Direct link to s2CellsIntersect">​</a></h2>
+<p>Determines if the two provided <a href="#s2index">S2</a> cells intersect or not.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2CellsIntersect(s2index1, s2index2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>siIndex1</code>, <code>s2index2</code> — S2 Index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — If the cells intersect. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li"><code>0</code> — If the cells don't intersect. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2CellsIntersect(9926595209846587392, 9926594385212866560) AS intersect;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─intersect─┐
+│         1 │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2capcontains">s2CapContains<a aria-label="Direct link to s2CapContains" class="hash-link" href="#s2capcontains" title="Direct link to s2CapContains">​</a></h2>
+<p>Determines if a cap contains a S2 point. A cap represents a part of the sphere that has been cut off by a plane. It is defined by a point on a sphere and a radius in degrees.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2CapContains(center, degrees, point)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>center</code> — S2 point index corresponding to the cap. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>degrees</code> — Radius of the cap in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>point</code> — S2 point index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — If the cap contains the S2 point index. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li"><code>0</code> — If the cap doesn't contain the S2 point index. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2CapContains(1157339245694594829, 1.0, 1157347770437378819) AS capContains;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─capContains─┐
+│           1 │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2capunion">s2CapUnion<a aria-label="Direct link to s2CapUnion" class="hash-link" href="#s2capunion" title="Direct link to s2CapUnion">​</a></h2>
+<p>Determines the smallest cap that contains the given two input caps. A cap represents a portion of the sphere that has been cut off by a plane. It is defined by a point on a sphere and a radius in degrees.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2CapUnion(center1, radius1, center2, radius2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>center1</code>, <code>center2</code> — S2 point indexes corresponding to the two input caps. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>radius1</code>, <code>radius2</code> — Radius of the two input caps in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>center</code> — S2 point index corresponding the center of the smallest cap containing the two input caps. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>radius</code> — Radius of the smallest cap containing the two input caps. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2CapUnion(3814912406305146967, 1.0, 1157347770437378819, 1.0) AS capUnion;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─capUnion───────────────────────────────┐
+│ (4534655147792050737,60.2088283994957) │
+└────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2rectadd">s2RectAdd<a aria-label="Direct link to s2RectAdd" class="hash-link" href="#s2rectadd" title="Direct link to s2RectAdd">​</a></h2>
+<p>Increases the size of the bounding rectangle to include the given S2 point. In the S2 system, a rectangle is represented by a type of S2Region called a <code>S2LatLngRect</code> that represents a rectangle in latitude-longitude space.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2RectAdd(s2pointLow, s2pointHigh, s2Point)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2PointLow</code> — Low S2 point index corresponding to the rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2PointHigh</code> — High S2 point index corresponding to the rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2Point</code> — Target S2 point index that the bound rectangle should be grown to include. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2PointLow</code> — Low S2 cell id corresponding to the grown rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2PointHigh</code> — Height S2 cell id corresponding to the grown rectangle. <a href="/docs/sql-reference/data-types/float">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2RectAdd(5178914411069187297, 5177056748191934217, 5179056748191934217) AS rectAdd;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─rectAdd───────────────────────────────────┐
+│ (5179062030687166815,5177056748191934217) │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2rectcontains">s2RectContains<a aria-label="Direct link to s2RectContains" class="hash-link" href="#s2rectcontains" title="Direct link to s2RectContains">​</a></h2>
+<p>Determines if a given rectangle contains a S2 point. In the S2 system, a rectangle is represented by a type of S2Region called a <code>S2LatLngRect</code> that represents a rectangle in latitude-longitude space.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2RectContains(s2PointLow, s2PointHi, s2Point)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2PointLow</code> — Low S2 point index corresponding to the rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2PointHigh</code> — High S2 point index corresponding to the rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2Point</code> — Target S2 point index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — If the rectangle contains the given S2 point.</li>
+<li class="custom-li"><code>0</code> — If the rectangle doesn't contain the given S2 point.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2RectContains(5179062030687166815, 5177056748191934217, 5177914411069187297) AS rectContains;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─rectContains─┐
+│            0 │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2rectunion">s2RectUnion<a aria-label="Direct link to s2RectUnion" class="hash-link" href="#s2rectunion" title="Direct link to s2RectUnion">​</a></h2>
+<p>Returns the smallest rectangle containing the union of this rectangle and the given rectangle. In the S2 system, a rectangle is represented by a type of S2Region called a <code>S2LatLngRect</code> that represents a rectangle in latitude-longitude space.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2RectUnion(s2Rect1PointLow, s2Rect1PointHi, s2Rect2PointLow, s2Rect2PointHi)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2Rect1PointLow</code>, <code>s2Rect1PointHi</code> — Low and High S2 point indexes corresponding to the first rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2Rect2PointLow</code>, <code>s2Rect2PointHi</code> — Low and High S2 point indexes corresponding to the second rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2UnionRect2PointLow</code> — Low S2 cell id corresponding to the union rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2UnionRect2PointHi</code> — High S2 cell id corresponding to the union rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2RectUnion(5178914411069187297, 5177056748191934217, 5179062030687166815, 5177056748191934217) AS rectUnion;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─rectUnion─────────────────────────────────┐
+│ (5179062030687166815,5177056748191934217) │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="s2rectintersection">s2RectIntersection<a aria-label="Direct link to s2RectIntersection" class="hash-link" href="#s2rectintersection" title="Direct link to s2RectIntersection">​</a></h2>
+<p>Returns the smallest rectangle containing the intersection of this rectangle and the given rectangle. In the S2 system, a rectangle is represented by a type of S2Region called a <code>S2LatLngRect</code> that represents a rectangle in latitude-longitude space.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s2RectIntersection(s2Rect1PointLow, s2Rect1PointHi, s2Rect2PointLow, s2Rect2PointHi)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2Rect1PointLow</code>, <code>s2Rect1PointHi</code> — Low and High S2 point indexes corresponding to the first rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2Rect2PointLow</code>, <code>s2Rect2PointHi</code> — Low and High S2 point indexes corresponding to the second rectangle. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s2UnionRect2PointLow</code> — Low S2 cell id corresponding to the rectangle containing the intersection of the given rectangles. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>s2UnionRect2PointHi</code> — High S2 cell id corresponding to the rectangle containing the intersection of the given rectangles. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT s2RectIntersection(5178914411069187297, 5177056748191934217, 5179062030687166815, 5177056748191934217) AS rectIntersection;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─rectIntersection──────────────────────────┐
+│ (5178914411069187297,5177056748191934217) │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/geo/polygons"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Polygons</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/geo/svg"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">SVG</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#s2index">S2Index</a><li><a class="table-of-contents__link toc-highlight" href="#geotos2">geoToS2</a><li><a class="table-of-contents__link toc-highlight" href="#s2togeo">s2ToGeo</a><li><a class="table-of-contents__link toc-highlight" href="#s2getneighbors">s2GetNeighbors</a><li><a class="table-of-contents__link toc-highlight" href="#s2cellsintersect">s2CellsIntersect</a><li><a class="table-of-contents__link toc-highlight" href="#s2capcontains">s2CapContains</a><li><a class="table-of-contents__link toc-highlight" href="#s2capunion">s2CapUnion</a><li><a class="table-of-contents__link toc-highlight" href="#s2rectadd">s2RectAdd</a><li><a class="table-of-contents__link toc-highlight" href="#s2rectcontains">s2RectContains</a><li><a class="table-of-contents__link toc-highlight" href="#s2rectunion">s2RectUnion</a><li><a class="table-of-contents__link toc-highlight" href="#s2rectintersection">s2RectIntersection</a></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

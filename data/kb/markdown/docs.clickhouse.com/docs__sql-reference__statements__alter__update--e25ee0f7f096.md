@@ -1,0 +1,43 @@
+# ALTER TABLE ... UPDATE Statements \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- [ALTER](/docs/sql-reference/statements/alter)- UPDATE
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/alter/update.md)# ALTER TABLE ... UPDATE Statements
+
+
+```
+ALTER TABLE [db.]table [ON CLUSTER cluster] UPDATE column1 = expr1 [, ...] [IN PARTITION partition_id] WHERE filter_expr
+
+```
+
+Manipulates data matching the specified filtering expression. Implemented as a [mutation](/docs/sql-reference/statements/alter#mutations).
+
+
+NoteThe `ALTER TABLE` prefix makes this syntax different from most other systems supporting SQL. It is intended to signify that unlike similar queries in OLTP databases this is a heavy operation not designed for frequent use.
+
+
+The `filter_expr` must be of type `UInt8`. This query updates values of specified columns to the values of corresponding expressions in rows for which the `filter_expr` takes a non\-zero value. Values are cast to the column type using the `CAST` operator. Updating columns that are used in the calculation of the primary or the partition key is not supported.
+
+
+One query can contain several commands separated by commas.
+
+
+The synchronicity of the query processing is defined by the [mutations\_sync](/docs/operations/settings/settings#mutations_sync) setting. By default, it is asynchronous.
+
+
+**See also**
+
+
+- [Mutations](/docs/sql-reference/statements/alter#mutations)
+- [Synchronicity of ALTER Queries](/docs/sql-reference/statements/alter#synchronicity-of-alter-queries)
+- [mutations\_sync](/docs/operations/settings/settings#mutations_sync) setting
+- [Lightweight `UPDATE`](/docs/sql-reference/statements/update) \- Alternative lightweight update using patch parts
+- [`APPLY PATCHES`](/docs/sql-reference/statements/alter/apply-patches) \- Manually apply patches from lightweight updates
+
+
+## Related content[​](#related-content "Direct link to Related content")
+
+
+- Blog: [Handling Updates and Deletes in ClickHouse](https://clickhouse.com/blog/handling-updates-and-deletes-in-clickhouse)
+[PreviousDELETE](/docs/sql-reference/statements/alter/delete)[NextORDER BY](/docs/sql-reference/statements/alter/order-by)- [Related content](#related-content)
+Was this page helpful?

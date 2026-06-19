@@ -1,0 +1,24 @@
+case_id: tpch_q13
+source: tpch
+sql: "SELECT\n    c_count,\n    count(*) AS custdist\nFROM\n    (\n        SELECT\n            c_custkey,\n            count(o_orderkey) AS c_count\n        FROM\n            customer\n            LEFT OUTER JOIN orders ON c_custkey = o_custkey\n                AND o_comment NOT LIKE '%special%requests%'\n        GROUP BY\n            c_custkey\n    ) AS c_orders\nGROUP BY\n    c_count\nORDER BY\n    custdist DESC,\n    c_count DESC;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Подзапрос в FROM + внешний SELECT — вложенность >2
+- issue_id: I-2
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: o_comment NOT LIKE '%special%requests%' — leading wildcard
+expected_rules_to_fire:
+- D-013
+- D-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q13: Customer Distribution.'
+expected_findings_count: 2
+status: reviewed

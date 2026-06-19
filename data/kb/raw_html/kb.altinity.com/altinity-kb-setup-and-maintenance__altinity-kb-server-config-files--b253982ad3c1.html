@@ -1,0 +1,151 @@
+<h1>Server configuration files | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">Server config files</li></ol></nav><div class="td-content"><h1>Server configuration files</h1><div class="lead">How to organize configuration files in ClickHouse® and how to manage changes</div><h2 id="сonfig-management-recommended-structure">Сonfig management (recommended structure)</h2><p>ClickHouse® server config consists of two parts server settings (config.xml) and users settings (users.xml).</p><p>By default they are stored in the folder <strong>/etc/clickhouse-server/</strong> in two files config.xml &amp; users.xml.</p><p>We suggest never change vendor config files and place your changes into separate .xml files in sub-folders. This way is easier to maintain and ease ClickHouse upgrades.</p><p><strong>/etc/clickhouse-server/users.d</strong> – sub-folder for <a href="/altinity-kb-setup-and-maintenance/rbac/">user settings</a>
+(derived from <code>users.xml</code> filename).</p><p><strong>/etc/clickhouse-server/config.d</strong> – sub-folder for server settings (derived from <code>config.xml</code> filename).</p><p><strong>/etc/clickhouse-server/conf.d</strong> – sub-folder for any (both) settings.</p><p>If the root config (xml or yaml) has a different name, such as <code>keeper_config.xml</code> or <code>config_instance_66.xml</code>, then the <code>keeper_config.d</code> and <code>config_instance_66.d</code> folders will be used. But <code>conf.d</code> is always used and processed last.</p><p>File names of your xml files can be arbitrary but they are applied in alphabetical order.</p><p>Examples:</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/listen_host.xml
+&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+  &lt;listen_host&gt;::&lt;/listen_host&gt;
+&lt;/clickhouse&gt;
+
+
+$ cat /etc/clickhouse-server/config.d/macros.xml
+&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+  &lt;macros&gt;
+    &lt;cluster&gt;test&lt;/cluster&gt;
+    &lt;replica&gt;host22&lt;/replica&gt;
+    &lt;shard&gt;0&lt;/shard&gt;
+    &lt;server_id&gt;41295&lt;/server_id&gt;
+    &lt;server_name&gt;host22.server.com&lt;/server_name&gt;
+  &lt;/macros&gt;
+&lt;/clickhouse&gt;
+
+cat /etc/clickhouse-server/config.d/zoo.xml
+&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+  &lt;zookeeper&gt;
+    &lt;node&gt;
+      &lt;host&gt;localhost&lt;/host&gt;
+      &lt;port&gt;2181&lt;/port&gt;
+    &lt;/node&gt;
+  &lt;/zookeeper&gt;
+  &lt;distributed_ddl&gt;
+    &lt;path&gt;/clickhouse/test/task_queue/ddl&lt;/path&gt;
+  &lt;/distributed_ddl&gt;
+&lt;/clickhouse&gt;
+
+cat /etc/clickhouse-server/users.d/enable_access_management_for_user_default.xml
+&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+  &lt;users&gt;
+    &lt;default&gt;
+      &lt;access_management&gt;1&lt;/access_management&gt;
+    &lt;/default&gt;
+  &lt;/users&gt;
+&lt;/clickhouse&gt;
+
+cat /etc/clickhouse-server/users.d/memory_usage.xml
+&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+    &lt;profiles&gt;
+        &lt;default&gt;
+            &lt;max_bytes_before_external_group_by&gt;25290221568&lt;/max_bytes_before_external_group_by&gt;
+            &lt;max_memory_usage&gt;50580443136&lt;/max_memory_usage&gt;
+        &lt;/default&gt;
+    &lt;/profiles&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>BTW, you can define any macro in your configuration and use them in <a href="https://docs.altinity.com/operationsguide/clickhouse-zookeeper/zookeeper-installation/" target="_blank">Zookeeper</a>
+paths</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span> ReplicatedMergeTree('/clickhouse/{cluster}/tables/my_table','{replica}')
+</span></span></code></pre></div><p>or in your code using function getMacro:</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">CREATE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">OR</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">REPLACE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">VIEW</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">srv_server_info</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000;font-weight:700">(</span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">getMacro</span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'shard'</span><span style="color:#000;font-weight:700">))</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">AS</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">shard_num</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">       </span><span style="color:#000;font-weight:700">(</span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">getMacro</span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'server_name'</span><span style="color:#000;font-weight:700">))</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">AS</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">server_name</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">       </span><span style="color:#000;font-weight:700">(</span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">getMacro</span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'server_id'</span><span style="color:#000;font-weight:700">))</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">AS</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">server_key</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><p>Settings can be appended to an XML tree (default behaviour) or replaced or removed.</p><p>Example how to delete <strong>tcp_port</strong> &amp; <strong>http_port</strong> defined on higher level in the main config.xml (it disables open tcp &amp; http ports if you configured secure ssl):</p><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/config.d/disable_open_network.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+  &lt;http_port remove="1"/&gt;
+  &lt;tcp_port remove="1"/&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>Example how to replace <strong>remote_servers</strong> section defined on higher level in the main config.xml (it allows to remove default test clusters.</p><pre tabindex="0"><code class="language-markup" data-lang="markup">&lt;?xml version="1.0" ?&gt;
+&lt;clickhouse&gt;
+  &lt;remote_servers replace="1"&gt;
+    &lt;mycluster&gt;
+      ....
+    &lt;/mycluster&gt;
+  &lt;/remote_servers&gt;
+&lt;/clickhouse&gt;
+</code></pre><h2 id="settings--restart">Settings &amp; restart</h2><p>General ‘rule of thumb’:</p><ul><li><strong>server</strong> settings (<code>config.xml</code> and <code>config.d</code>) changes <strong>require restart</strong>;</li><li><strong>user</strong> settings (<code>users.xml</code> and <code>users.d</code>) changes <strong>don’t require restart</strong>.</li></ul><p>But there are <strong>exceptions</strong> from those rules (see below).</p><h3 id="server-config-configxml-sections-which-dont-require-restart">Server config (config.xml) sections which don’t require restart</h3><ul><li><code>&lt;max_server_memory_usage&gt;</code></li><li><code>&lt;max_server_memory_usage_to_ram_ratio&gt;</code></li><li><code>&lt;max_table_size_to_drop&gt;</code> (since 19.12)</li><li><code>&lt;max_partition_size_to_drop&gt;</code> (since 19.12)</li><li><code>&lt;max_concurrent_queries&gt;</code> (since 21.11, also for versions older than v24 system tables are not updated with the new config values)</li><li><code>&lt;macros&gt;</code></li><li><code>&lt;remote_servers&gt;</code></li><li><code>&lt;dictionaries_config&gt;</code></li><li><code>&lt;user_defined_executable_functions_config&gt;</code></li><li><code>&lt;models_config&gt;</code></li><li><code>&lt;keeper_server&gt;</code></li><li><code>&lt;zookeeper&gt;</code> (but reconnect don’t happen automatically)</li><li><code>&lt;storage_configuration&gt;</code> – only if you add a new entity (disk/volume/policy), to modify these enitities restart is mandatory.</li><li><code>&lt;user_directories&gt;</code></li><li><code>&lt;access_control_path&gt;</code></li><li><code>&lt;encryption_codecs&gt;</code></li><li><code>&lt;logger&gt;</code> (since 21.11)</li></ul><p>Those sections (live in separate files):</p><ul><li><code>&lt;dictionaries&gt;</code></li><li><code>&lt;functions&gt;</code></li><li><code>&lt;models&gt;</code></li></ul><p>See also <a href="https://github.com/ClickHouse/ClickHouse/blob/445b0ba7cc6b82e69fef28296981fbddc64cd634/programs/server/Server.cpp#L809-L883" target="_blank">https://github.com/ClickHouse/ClickHouse/blob/445b0ba7cc6b82e69fef28296981fbddc64cd634/programs/server/Server.cpp#L809-L883</a></p><h3 id="user-settings-which-require-restart">User settings which require restart.</h3><p>Most of user setting changes don’t require restart, but they get applied at the connect time, so existing connection may still use old user-level settings.
+That means that that new setting will be applied to new sessions / after reconnect.</p><p>The list of user setting which require server restart:</p><ul><li><code>&lt;background_buffer_flush_schedule_pool_size&gt;</code></li><li><code>&lt;background_pool_size&gt;</code></li><li><code>&lt;background_merges_mutations_concurrency_ratio&gt;</code></li><li><code>&lt;background_move_pool_size&gt;</code></li><li><code>&lt;background_fetches_pool_size&gt;</code></li><li><code>&lt;background_common_pool_size&gt;</code></li><li><code>&lt;background_schedule_pool_size&gt;</code></li><li><code>&lt;background_message_broker_schedule_pool_size&gt;</code></li><li><code>&lt;background_distributed_schedule_pool_size&gt;</code></li><li><code>&lt;max_replicated_fetches_network_bandwidth_for_server&gt;</code></li><li><code>&lt;max_replicated_sends_network_bandwidth_for_server&gt;</code></li></ul><p>See also <code>select * from system.settings where description ilike '%start%'</code></p><p>Also there are several ’long-running’ user sessions which are almost never restarted and can keep the setting from the server start (it’s DDLWorker, <a href="https://altinity.com/blog/kafka-engine-the-story-continues" target="_blank">Kafka</a>
+, and some other service things).</p><h2 id="dictionaries">Dictionaries</h2><p>We suggest to store each dictionary description in a separate (own) file in a <strong>/etc/clickhouse-server/dict</strong> sub-folder.</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/dict/country.xml
+&lt;?xml version="1.0"?&gt;
+&lt;dictionaries&gt;
+  &lt;dictionary&gt;
+    &lt;name&gt;country&lt;/name&gt;
+    &lt;source&gt;
+      &lt;http&gt;
+      ...
+  &lt;/dictionary&gt;
+&lt;/dictionaries&gt;
+</code></pre><p>and add to the configuration</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/dictionaries.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+  &lt;dictionaries_config&gt;dict/*.xml&lt;/dictionaries_config&gt;
+  &lt;dictionaries_lazy_load&gt;true&lt;/dictionaries_lazy_load&gt;
+&lt;/clickhouse&gt;
+</code></pre><p><strong>dict/*.xml</strong> – relative path, servers seeks files in the folder <strong>/etc/clickhouse-server/dict</strong>. More info in <a href="#Multiple-ClickHouse-instances-at-one-host">Multiple ClickHouse instances</a>
+.</p><h2 id="incl-attribute--metricaxml">incl attribute &amp; metrica.xml</h2><p><strong>incl</strong> attribute allows to include some XML section from a special <strong>include</strong> file multiple times.</p><p>By default <strong>include</strong> file is <strong>/etc/metrika.xml</strong>. You can use many include files for each XML section.</p><p>For example to avoid repetition of user/password for each dictionary you can create an XML file:</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/dict_sources.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+  &lt;mysql_config&gt;
+      &lt;port&gt;3306&lt;/port&gt;
+      &lt;user&gt;user&lt;/user&gt;
+      &lt;password&gt;123&lt;/password&gt;
+      &lt;replica&gt;
+        &lt;host&gt;mysql_host&lt;/host&gt;
+        &lt;priority&gt;1&lt;/priority&gt;
+      &lt;/replica&gt;
+      &lt;db&gt;my_database&lt;/db&gt;
+  &lt;/mysql_config&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>Include this file:</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/dictionaries.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+  ...
+  &lt;include_from&gt;/etc/clickhouse-server/dict_sources.xml&lt;/include_from&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>And use in dictionary descriptions (<strong>incl=“mysql_config”</strong>):</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/dict/country.xml
+&lt;?xml version="1.0"?&gt;
+&lt;dictionaries&gt;
+  &lt;dictionary&gt;
+    &lt;name&gt;country&lt;/name&gt;
+    &lt;source&gt;
+        &lt;mysql incl="mysql_config"&gt;
+            &lt;table&gt;my_table&lt;/table&gt;
+            &lt;invalidate_query&gt;select max(id) from my_table&lt;/invalidate_query&gt;
+        &lt;/mysql&gt;
+    &lt;/source&gt;
+      ...
+  &lt;/dictionary&gt;
+&lt;/dictionaries&gt;
+</code></pre><h2 id="multiple-clickhouse-instances-at-one-host">Multiple ClickHouse instances at one host</h2><p>By default ClickHouse server configs are in <strong>/etc/clickhouse-server/</strong> because clickhouse-server runs with a parameter <strong>–config-file /etc/clickhouse-server/config.xml</strong></p><p><strong>config-file</strong> is defined in startup scripts:</p><ul><li><strong>/etc/init.d/clickhouse-server</strong> – init-V</li><li><strong>/etc/systemd/system/clickhouse-server.service</strong> – systemd</li></ul><p>ClickHouse uses the path from <strong>config-file</strong> parameter as base folder and seeks for other configs by relative path. All sub-folders <strong>users.d / config.d</strong> are relative.</p><p>You can start multiple <strong>clickhouse-server</strong> each with own <strong>–config-file.</strong></p><p>For example:</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>/usr/bin/clickhouse-server --config-file /etc/clickhouse-server-node1/config.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node1/  config.xml ... users.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node1/config.d/disable_open_network.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node1/users.d/....
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>/usr/bin/clickhouse-server --config-file /etc/clickhouse-server-node2/config.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node2/   config.xml ... users.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node2/config.d/disable_open_network.xml
+</span></span><span style="display:flex"><span>  /etc/clickhouse-server-node2/users.d/....
+</span></span></code></pre></div><p>If you need to run multiple servers for CI purposes you can combine all settings in a single fat XML file and start ClickHouse without config folders/sub-folders.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>/usr/bin/clickhouse-server --config-file /tmp/ch1.xml
+</span></span><span style="display:flex"><span>/usr/bin/clickhouse-server --config-file /tmp/ch2.xml
+</span></span><span style="display:flex"><span>/usr/bin/clickhouse-server --config-file /tmp/ch3.xml
+</span></span></code></pre></div><p>Each ClickHouse instance must work with own <strong>data-folder</strong> and <strong>tmp-folder</strong>.</p><p>By default ClickHouse uses <strong>/var/lib/clickhouse/</strong>. It can be overridden in path settings</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;path&gt;</span>/data/clickhouse-ch1/<span style="color:#204a87;font-weight:700">&lt;/path&gt;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;tmp_path&gt;</span>/data/clickhouse-ch1/tmp/<span style="color:#204a87;font-weight:700">&lt;/tmp_path&gt;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;user_files_path&gt;</span>/data/clickhouse-ch1/user_files/<span style="color:#204a87;font-weight:700">&lt;/user_files_path&gt;</span>
+</span></span><span style="display:flex"><span>  <span style="color:#204a87;font-weight:700">&lt;local_directory&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;path&gt;</span>/data/clickhouse-ch1/access/<span style="color:#204a87;font-weight:700">&lt;/path&gt;</span>
+</span></span><span style="display:flex"><span>  <span style="color:#204a87;font-weight:700">&lt;/local_directory&gt;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;format_schema_path&gt;</span>/data/clickhouse-ch1/format_schemas/<span style="color:#204a87;font-weight:700">&lt;/format_schema_path&gt;</span>
+</span></span></code></pre></div><h2 id="preprocessed_configs">preprocessed_configs</h2><p>ClickHouse server watches config files and folders. When you change, add or remove XML files ClickHouse immediately assembles XML files into a combined file. These combined files are stored in <strong>/var/lib/clickhouse/preprocessed_configs/</strong> folders.</p><p>You can verify that your changes are valid by checking <strong>/var/lib/clickhouse/preprocessed_configs/config.xml</strong>, <strong>/var/lib/clickhouse/preprocessed_configs/users.xml</strong>.</p><p>If something wrong with with your settings e.g. unclosed XML element or typo you can see alerts about this mistakes in <strong>/var/log/clickhouse-server/clickhouse-server.log</strong></p><p>If you see your changes in <strong>preprocessed_configs</strong> it does not mean that changes are applied on running server, check Settings and restart.</p><div class="td-page-meta__lastmod">Last modified 2025.02.05: <a href="https://github.com/Altinity/altinityknowledgebase/commit/66ef987b386f0cd19e63b3900aa1d2f3d6c33368">Updated broken webinar links, added internal links, etc. (66ef987)</a></div></div></main>

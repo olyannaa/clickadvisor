@@ -1,0 +1,19 @@
+case_id: synthetic_19
+source: synthetic
+sql: |
+  -- таблица events имеет 25 колонок
+  SELECT * FROM events
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: Top-level SELECT * читает все 25 колонок широкой таблицы events.
+expected_rules_to_fire:
+- D-003
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for D-003.
+expected_findings_count: 1
+status: validated

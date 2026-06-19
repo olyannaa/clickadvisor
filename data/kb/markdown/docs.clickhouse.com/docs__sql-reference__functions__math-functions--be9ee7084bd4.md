@@ -1,0 +1,2215 @@
+# Mathematical functions \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Regular functions](/docs/sql-reference/functions/regular-functions)- Mathematical
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/math-functions.md)# Mathematical functions
+
+## acos[​](#acos "Direct link to acos")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the arc cosine of the argument.
+
+
+**Syntax**
+
+
+
+```
+acos(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The value for which to find arc cosine of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the arc cosine of x [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT acos(0.5);
+
+```
+
+
+```
+1.0471975511965979
+
+```
+
+## acosh[​](#acosh "Direct link to acosh")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the inverse hyperbolic cosine.
+
+
+**Syntax**
+
+
+
+```
+acosh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Hyperbolic cosine of angle. Values from the interval: `1 ≤ x < +∞`. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the angle, in radians. Values from the interval: `0 ≤ acosh(x) < +∞`. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT acosh(1)
+
+```
+
+
+```
+0
+
+```
+
+## asin[​](#asin "Direct link to asin")
+
+
+Introduced in: v1\.1\.0
+
+
+Calculates the arcsine of the provided argument.
+For arguments in the range `[-1, 1]` it returns the value in the range of `[-pi() / 2, pi() / 2]`.
+
+
+**Syntax**
+
+
+
+```
+asin(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Argument for which to calculate arcsine of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the arcsine value of the provided argument `x` [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**inverse**
+
+
+
+```
+SELECT asin(1.0) = pi() / 2, sin(asin(1)), asin(sin(1))
+
+```
+
+
+```
+1 1 1
+
+```
+
+**float32**
+
+
+
+```
+SELECT toTypeName(asin(1.0::Float32))
+
+```
+
+
+```
+Float64
+
+```
+
+**nan**
+
+
+
+```
+SELECT asin(1.1), asin(-2), asin(inf), asin(nan)
+
+```
+
+
+```
+nan nan nan nan
+
+```
+
+## asinh[​](#asinh "Direct link to asinh")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the inverse hyperbolic sine.
+
+
+**Syntax**
+
+
+
+```
+asinh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Hyperbolic sine of angle. Values from the interval: `-∞ < x < +∞`. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the angle, in radians. Values from the interval: `-∞ < asinh(x) < +∞`. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT asinh(0)
+
+```
+
+
+```
+0
+
+```
+
+## atan[​](#atan "Direct link to atan")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the arc tangent of the argument.
+
+
+**Syntax**
+
+
+
+```
+atan(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The value for which to find arc tangent of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the arc tangent of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT atan(1);
+
+```
+
+
+```
+0.7853981633974483
+
+```
+
+## atan2[​](#atan2 "Direct link to atan2")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the atan2 as the angle in the Euclidean plane, given in radians, between the positive x axis and the ray to the point `(x, y) ≠ (0, 0)`.
+
+
+**Syntax**
+
+
+
+```
+atan2(y, x)
+
+```
+
+**Arguments**
+
+
+- `y` — y\-coordinate of the point through which the ray passes. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+- `x` — x\-coordinate of the point through which the ray passes. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the angle `θ` such that `-π < θ ≤ π`, in radians [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT atan2(1, 1)
+
+```
+
+
+```
+0.7853981633974483
+
+```
+
+## atanh[​](#atanh "Direct link to atanh")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the inverse hyperbolic tangent.
+
+
+**Syntax**
+
+
+
+```
+atanh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Hyperbolic tangent of angle. Values from the interval: \-1 \< x \< 1\. `(U)Int*`, `Float*` or `Decimal*`. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the angle, in radians. Values from the interval: \-∞ \< atanh(x) \< \+∞ [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT atanh(0)
+
+```
+
+
+```
+0
+
+```
+
+## cbrt[​](#cbrt "Direct link to cbrt")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the cubic root of the argument.
+
+
+**Syntax**
+
+
+
+```
+cbrt(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The value for which to find the cubic root of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the cubic root of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT cbrt(8);
+
+```
+
+
+```
+2
+
+```
+
+## cos[​](#cos "Direct link to cos")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the cosine of the argument.
+
+
+**Syntax**
+
+
+
+```
+cos(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The angle in radians. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the cosine of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT cos(0);
+
+```
+
+
+```
+1
+
+```
+
+## cosh[​](#cosh "Direct link to cosh")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the hyperbolic cosine of the argument.
+
+
+**Syntax**
+
+
+
+```
+cosh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The angle, in radians. Values from the interval: `-∞ < x < +∞`. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns values from the interval: `1 ≤ cosh(x) < +∞` [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT cosh(0)
+
+```
+
+
+```
+1
+
+```
+
+## degrees[​](#degrees "Direct link to degrees")
+
+
+Introduced in: v22\.2\.0
+
+
+Converts radians to degrees.
+
+
+**Syntax**
+
+
+
+```
+degrees(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Input in radians. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the value of `x` in degrees. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT degrees(3.141592653589793)
+
+```
+
+
+```
+180
+
+```
+
+## e[​](#e "Direct link to e")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns Euler's constant (e).
+
+
+**Syntax**
+
+
+
+```
+e()
+
+```
+
+**Arguments**
+
+
+- None.
+
+
+**Returned value**
+
+
+Returns Euler's constant [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT e();
+
+```
+
+
+```
+2.718281828459045
+
+```
+
+## erf[​](#erf "Direct link to erf")
+
+
+Introduced in: v1\.1\.0
+
+
+If `x` is non\-negative, then `erf(x/(σ√2))` is the probability that a random variable having a normal distribution with standard deviation `σ` takes the value that is separated from the expected value by more than `x`.
+
+
+**Syntax**
+
+
+
+```
+erf(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The value for which to compute the error function value. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the error function value [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Three sigma rule**
+
+
+
+```
+SELECT erf(3 / sqrt(2))
+
+```
+
+
+```
+┌─erf(divide(3, sqrt(2)))─┐
+│      0.9973002039367398 │
+└─────────────────────────┘
+
+```
+
+## erfc[​](#erfc "Direct link to erfc")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns a number close to `1-erf(x)` without loss of precision for large `x` values.
+
+
+**Syntax**
+
+
+
+```
+erfc(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The value for which to find the error function value. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the complementary error function value [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT erfc(0);
+
+```
+
+
+```
+1
+
+```
+
+## exp[​](#exp "Direct link to exp")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns e raised to the power of `x`, where `x` is the given argument to the function.
+
+
+**Syntax**
+
+
+
+```
+exp(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The exponent. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns `e^x` [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT round(exp(-1), 4)
+
+```
+
+
+```
+┌─round(exp(-1), 4)─┐
+│            0.3679 │
+└───────────────────┘
+
+```
+
+## exp10[​](#exp10 "Direct link to exp10")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns 10 to the power of the given argument.
+
+
+**Syntax**
+
+
+
+```
+exp10(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The exponent. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns 10^x [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT exp10(2);
+
+```
+
+
+```
+100
+
+```
+
+## exp2[​](#exp2 "Direct link to exp2")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns 2 to the power of the given argument.
+
+
+**Syntax**
+
+
+
+```
+exp2(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The exponent. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns 2^x [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT exp2(3);
+
+```
+
+
+```
+8
+
+```
+
+## factorial[​](#factorial "Direct link to factorial")
+
+
+Introduced in: v22\.11\.0
+
+
+Computes the factorial of an integer value.
+The factorial of 0 is 1\. Likewise, the `factorial()` function returns `1` for any negative value.
+The maximum positive value for the input argument is `20`, a value of `21` or greater will cause an exception.
+
+
+**Syntax**
+
+
+
+```
+factorial(n)
+
+```
+
+**Arguments**
+
+
+- `n` — Integer value for which to calculate the factorial. Maximum value is 20\. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Returned value**
+
+
+Returns the factorial of the input as UInt64\. Returns 1 for input 0 or any negative value. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+factorial(10)
+
+```
+
+
+```
+3628800
+
+```
+
+## hypot[​](#hypot "Direct link to hypot")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the length of the hypotenuse of a right\-angle triangle.
+Hypot avoids problems that occur when squaring very large or very small numbers.
+
+
+**Syntax**
+
+
+
+```
+hypot(x, y)
+
+```
+
+**Arguments**
+
+
+- `x` — The first cathetus of a right\-angle triangle. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+- `y` — The second cathetus of a right\-angle triangle. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the length of the hypotenuse of a right\-angle triangle. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT hypot(1, 1)
+
+```
+
+
+```
+1.4142135623730951
+
+```
+
+## intExp10[​](#intExp10 "Direct link to intExp10")
+
+
+Introduced in: v1\.1\.0
+
+
+Like [exp10](#exp10) but returns a `UInt64` number.
+
+
+**Syntax**
+
+
+
+```
+intExp10(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The exponent. [`Int*`](/docs/sql-reference/data-types/int-uint) or [`UInt*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Returned value**
+
+
+Returns 10^x. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT intExp10(2);
+
+```
+
+
+```
+100
+
+```
+
+## intExp2[​](#intExp2 "Direct link to intExp2")
+
+
+Introduced in: v1\.1\.0
+
+
+Like [exp2](#exp2) but returns a `UInt64` number.
+
+
+**Syntax**
+
+
+
+```
+intExp2(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The exponent. [`Int*`](/docs/sql-reference/data-types/int-uint) or [`UInt*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Returned value**
+
+
+Returns 2^x. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT intExp2(3);
+
+```
+
+
+```
+8
+
+```
+
+## isPrime[​](#isPrime "Direct link to isPrime")
+
+
+Introduced in: v26\.5\.0
+
+
+Returns `1` if the argument is a prime number, otherwise `0`.
+
+
+Uses an exact lookup bitmap for small values and a deterministic [Miller\-Rabin test](https://en.wikipedia.org/wiki/Miller-Rabin_primality_test)
+for larger values. The result is exact for every supported input type.
+
+
+For wider unsigned integer types (`UInt128`, `UInt256`), use [`isProbablePrime`](/docs/sql-reference/functions/math-functions#isProbablePrime) instead.
+
+
+**Syntax**
+
+
+
+```
+isPrime(n)
+
+```
+
+**Arguments**
+
+
+- `n` — Unsigned integer to test for primality. [`UInt8`](/docs/sql-reference/data-types/int-uint) or [`UInt16`](/docs/sql-reference/data-types/int-uint) or [`UInt32`](/docs/sql-reference/data-types/int-uint) or [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Returned value**
+
+
+Returns `1` if `n` is prime, `0` otherwise. [`UInt8`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Prime number**
+
+
+
+```
+SELECT isPrime(17)
+
+```
+
+
+```
+1
+
+```
+
+**Composite number**
+
+
+
+```
+SELECT isPrime(18)
+
+```
+
+
+```
+0
+
+```
+
+**Large `UInt64` prime**
+
+
+
+```
+SELECT isPrime(18446744073709551557)
+
+```
+
+
+```
+1
+
+```
+
+**Maximum `UInt64` value**
+
+
+
+```
+SELECT isPrime(18446744073709551615)
+
+```
+
+
+```
+0
+
+```
+
+## isProbablePrime[​](#isProbablePrime "Direct link to isProbablePrime")
+
+
+Introduced in: v26\.5\.0
+
+
+Returns `1` if the argument is probably prime, `0` if it is definitely composite.
+
+
+For `UInt8`, `UInt16`, `UInt32`, and `UInt64`, the result is exact and matches
+[`isPrime`](/docs/sql-reference/functions/math-functions#isPrime). The `rounds` argument is ignored.
+
+
+For `UInt128` and `UInt256`, a return value of `1` is probabilistic. The optional `rounds` argument controls
+how many [Miller\-Rabin](https://en.wikipedia.org/wiki/Miller-Rabin_primality_test) rounds are used:
+more rounds reduce the chance of a false positive and increase the running time. With uniformly random
+witnesses, the false\-positive rate for a fixed composite is bounded by `4^(-rounds)`; the default of `25`
+keeps this bound below `10^-15`, and the maximum of `256` keeps it below `10^-154`.
+
+
+The function is deterministic: witnesses are seeded from `n`, so the same `(n, rounds)` pair always produces
+the same result. The `4^(-rounds)` bound is the per\-input probability under uniformly random witnesses;
+with our deterministic seeding it instead describes a fraction over inputs — a composite that fools its
+witness sequence will reproducibly return `1`.
+
+
+**Syntax**
+
+
+
+```
+isProbablePrime(n[, rounds])
+
+```
+
+**Arguments**
+
+
+- `n` — Unsigned integer to test for primality. [`UInt8`](/docs/sql-reference/data-types/int-uint) or [`UInt16`](/docs/sql-reference/data-types/int-uint) or [`UInt32`](/docs/sql-reference/data-types/int-uint) or [`UInt64`](/docs/sql-reference/data-types/int-uint) or [`UInt128`](/docs/sql-reference/data-types/int-uint) or [`UInt256`](/docs/sql-reference/data-types/int-uint)
+- `rounds` — Optional positive integer constant in `[1, 256]`. Number of Miller\-Rabin rounds for `UInt128`/`UInt256` (ignored for narrower types). Default `25`. [`UInt8`](/docs/sql-reference/data-types/int-uint) or [`UInt16`](/docs/sql-reference/data-types/int-uint) or [`UInt32`](/docs/sql-reference/data-types/int-uint) or [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Returned value**
+
+
+Returns `1` if `n` is probably prime, `0` if it is definitely composite. [`UInt8`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Small prime**
+
+
+
+```
+SELECT isProbablePrime(17)
+
+```
+
+
+```
+1
+
+```
+
+**Small composite**
+
+
+
+```
+SELECT isProbablePrime(18)
+
+```
+
+
+```
+0
+
+```
+
+**Largest `UInt64` prime (exact result)**
+
+
+
+```
+SELECT isProbablePrime(18446744073709551557)
+
+```
+
+
+```
+1
+
+```
+
+**Mersenne prime `M_127` (`UInt128`)**
+
+
+
+```
+SELECT isProbablePrime(toUInt128('170141183460469231731687303715884105727'))
+
+```
+
+
+```
+1
+
+```
+
+**Curve25519 base field prime `2^255 - 19` (`UInt256`)**
+
+
+
+```
+SELECT isProbablePrime(toUInt256('57896044618658097711785492504343953926634992332820282019728792003956564819949'))
+
+```
+
+
+```
+1
+
+```
+
+**Faster, lower\-confidence check: 5 rounds**
+
+
+
+```
+SELECT isProbablePrime(toUInt256('57896044618658097711785492504343953926634992332820282019728792003956564819949'), 5)
+
+```
+
+
+```
+1
+
+```
+
+## lgamma[​](#lgamma "Direct link to lgamma")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the logarithm of the gamma function.
+
+
+**Syntax**
+
+
+
+```
+lgamma(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The number for which to compute the logarithm of the gamma function. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the logarithm of the gamma function of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT lgamma(5);
+
+```
+
+
+```
+3.1780538303479458
+
+```
+
+## log[​](#log "Direct link to log")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the natural logarithm of the argument.
+
+
+**Syntax**
+
+
+
+```
+log(x)
+
+```
+
+**Aliases**: `ln`
+
+
+**Arguments**
+
+
+- `x` — The number for which to compute the natural logarithm of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the natural logarithm of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT log(10);
+
+```
+
+
+```
+2.302585092994046
+
+```
+
+## log10[​](#log10 "Direct link to log10")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the decimal logarithm of the argument.
+
+
+**Syntax**
+
+
+
+```
+log10(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Number for which to compute the decimal logarithm of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the decimal logarithm of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT log10(100);
+
+```
+
+
+```
+2
+
+```
+
+## log1p[​](#log1p "Direct link to log1p")
+
+
+Introduced in: v20\.12\.0
+
+
+Calculates log(1\+x).
+The calculation log1p(x) is more accurate than log(1\+x) for small values of `x`.
+
+
+**Syntax**
+
+
+
+```
+log1p(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Values from the interval: `-1 < x < +∞`. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns values from the interval: \-∞ \< log1p(x) \< \+∞ [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT log1p(0)
+
+```
+
+
+```
+0
+
+```
+
+## log2[​](#log2 "Direct link to log2")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the binary logarithm of the argument.
+
+
+**Syntax**
+
+
+
+```
+log2(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The number for which to compute the binary logarithm of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the binary logarithm of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT log2(8);
+
+```
+
+
+```
+3
+
+```
+
+## pi[​](#pi "Direct link to pi")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns pi (π).
+
+
+**Syntax**
+
+
+
+```
+pi()
+
+```
+
+**Arguments**
+
+
+- None.
+
+
+**Returned value**
+
+
+Returns pi [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT pi();
+
+```
+
+
+```
+3.141592653589793
+
+```
+
+## pow[​](#pow "Direct link to pow")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns x raised to the power of y.
+
+
+**Syntax**
+
+
+
+```
+pow(x, y)
+
+```
+
+**Aliases**: `power`
+
+
+**Arguments**
+
+
+- `x` — The base. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+- `y` — The exponent. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns x^y [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT pow(2, 3);
+
+```
+
+
+```
+8
+
+```
+
+## proportionsZTest[​](#proportionsZTest "Direct link to proportionsZTest")
+
+
+Introduced in: v22\.3\.0
+
+
+Returns test statistics for the two proportion Z\-test \- a statistical test for comparing the proportions from two populations x and y.
+The function supports both pooled and unpooled estimation methods for the standard error.
+In the pooled version, the two proportions are averaged and only one proportion is used to estimate the standard error.
+In the unpooled version, the two proportions are used separately.
+
+
+**Syntax**
+
+
+
+```
+proportionsZTest(successes_x, successes_y, trials_x, trials_y, conf_level, pool_type)
+
+```
+
+**Arguments**
+
+
+- `successes_x` — Number of successes in population x. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+- `successes_y` — Number of successes in population y. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+- `trials_x` — Number of trials in population x. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+- `trials_y` — Number of trials in population y. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+- `conf_level` — Confidence level for the test. [`Float64`](/docs/sql-reference/data-types/float)
+- `pool_type` — Selection of pooling method for standard error estimation. Can be either 'unpooled' or 'pooled'. [`String`](/docs/sql-reference/data-types/string)
+
+
+**Returned value**
+
+
+Returns a tuple containing: `z_stat` (Z statistic), `p_val` (P value), `ci_low` (lower confidence interval), `ci_high` (upper confidence interval). [`Tuple(Float64, Float64, Float64, Float64)`](/docs/sql-reference/data-types/tuple)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled');
+
+```
+
+
+```
+┌─proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled')───────────────────────────────┐
+│ (-0.20656724435948853,0.8363478437079654,-0.09345975390115283,0.07563797172293502) │
+└────────────────────────────────────────────────────────────────────────────────────┘
+
+```
+
+## radians[​](#radians "Direct link to radians")
+
+
+Introduced in: v22\.2\.0
+
+
+Converts degrees to radians.
+
+
+**Syntax**
+
+
+
+```
+radians(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Input in degrees. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns value in radians [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT radians(180)
+
+```
+
+
+```
+3.141592653589793
+
+```
+
+## sigmoid[​](#sigmoid "Direct link to sigmoid")
+
+
+Introduced in: v20\.1\.0
+
+
+Calculates the sigmoid function: `1 / (1 + exp(-x))`. The sigmoid function maps any real number to the range (0, 1\) and is commonly used in machine learning.
+
+
+**Syntax**
+
+
+
+```
+sigmoid(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The input value. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Returned value**
+
+
+Returns the sigmoid of the input value, in the range (0, 1\). [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic usage**
+
+
+
+```
+SELECT sigmoid(0)
+
+```
+
+
+```
+0.5
+
+```
+
+## sign[​](#sign "Direct link to sign")
+
+
+Introduced in: v21\.2\.0
+
+
+Returns the sign of a real number.
+
+
+**Syntax**
+
+
+
+```
+sign(x)
+
+```
+
+**Arguments**
+
+
+- `x` — Values from \-∞ to \+∞. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Decimal*`](/docs/sql-reference/data-types/decimal) or [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Returned value**
+
+
+Returns `-1` for `x < 0`, `0` for `x = 0`, `1` for `x > 0`. [`Int8`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Sign for zero**
+
+
+
+```
+SELECT sign(0)
+
+```
+
+
+```
+0
+
+```
+
+**Sign for positive**
+
+
+
+```
+SELECT sign(1)
+
+```
+
+
+```
+1
+
+```
+
+**Sign for negative**
+
+
+
+```
+SELECT sign(-1)
+
+```
+
+
+```
+-1
+
+```
+
+## sin[​](#sin "Direct link to sin")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the sine of the argument.
+
+
+**Syntax**
+
+
+
+```
+sin(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The number whose sine will be returned. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the sine of x.
+
+
+**Examples**
+
+
+**simple**
+
+
+
+```
+SELECT sin(1.23)
+
+```
+
+
+```
+0.9424888019316975
+
+```
+
+## sinh[​](#sinh "Direct link to sinh")
+
+
+Introduced in: v20\.12\.0
+
+
+Returns the hyperbolic sine.
+
+
+**Syntax**
+
+
+
+```
+sinh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The angle, in radians. Values from the interval: \-∞ \< x \< \+∞. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns values from the interval: \-∞ \< sinh(x) \< \+∞ [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT sinh(0)
+
+```
+
+
+```
+0
+
+```
+
+## sqrt[​](#sqrt "Direct link to sqrt")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the square root of the argument.
+
+
+**Syntax**
+
+
+
+```
+sqrt(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The number for which to find the square root of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the square root of x [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT sqrt(16);
+
+```
+
+
+```
+4
+
+```
+
+## tan[​](#tan "Direct link to tan")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the tangent of the argument.
+
+
+**Syntax**
+
+
+
+```
+tan(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The angle in radians. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the tangent of `x`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT tan(0);
+
+```
+
+
+```
+0
+
+```
+
+## tanh[​](#tanh "Direct link to tanh")
+
+
+Introduced in: v20\.1\.0
+
+
+Returns the hyperbolic tangent.
+
+
+**Syntax**
+
+
+
+```
+tanh(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The angle in radians. Values from the interval: \-∞ \< x \< \+∞. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns values from the interval: \-1 \< tanh(x) \< 1 [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT tanh(0)
+
+```
+
+
+```
+0
+
+```
+
+## tgamma[​](#tgamma "Direct link to tgamma")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the gamma function.
+
+
+**Syntax**
+
+
+
+```
+tgamma(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The number for which to compute the gamma function of. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the gamma function value [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT tgamma(5);
+
+```
+
+
+```
+24
+
+```
+
+## widthBucket[​](#widthBucket "Direct link to widthBucket")
+
+
+Introduced in: v23\.3\.0
+
+
+Returns the number of the bucket in which parameter `operand` falls in a histogram having count equal\-width buckets spanning the range `low` to `high`. Returns 0 if `operand` is less than `low`, and returns `count`\+1 if `operand` is greater than or equal to `high`.
+There is also a case insensitive alias called `WIDTH_BUCKET` to provide compatibility with other databases.
+
+
+**Syntax**
+
+
+
+```
+widthBucket(operand, low, high, count)
+
+```
+
+**Aliases**: `width_bucket`
+
+
+**Arguments**
+
+
+- `operand` — The value for which to determine the bucket. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+- `low` — The lower bound of the histogram range. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+- `high` — The upper bound of the histogram range. [`(U)Int8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+- `count` — The number of equal\-width buckets. Cannot be zero. [`UInt8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Returned value**
+
+
+Returns the bucket number as an integer. Returns 0 if operand \< low, returns count\+1 if operand \>\= high. [`UInt8/16/32/64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+widthBucket(10.15, -8.6, 23, 18)
+
+```
+
+
+```
+11
+
+```
+[PreviousMachine Learning](/docs/sql-reference/functions/machine-learning-functions)[NextNLP](/docs/sql-reference/functions/nlp-functions)- [acos](#acos)- [acosh](#acosh)- [asin](#asin)- [asinh](#asinh)- [atan](#atan)- [atan2](#atan2)- [atanh](#atanh)- [cbrt](#cbrt)- [cos](#cos)- [cosh](#cosh)- [degrees](#degrees)- [e](#e)- [erf](#erf)- [erfc](#erfc)- [exp](#exp)- [exp10](#exp10)- [exp2](#exp2)- [factorial](#factorial)- [hypot](#hypot)- [intExp10](#intExp10)- [intExp2](#intExp2)- [isPrime](#isPrime)- [isProbablePrime](#isProbablePrime)- [lgamma](#lgamma)- [log](#log)- [log10](#log10)- [log1p](#log1p)- [log2](#log2)- [pi](#pi)- [pow](#pow)- [proportionsZTest](#proportionsZTest)- [radians](#radians)- [sigmoid](#sigmoid)- [sign](#sign)- [sin](#sin)- [sinh](#sinh)- [sqrt](#sqrt)- [tan](#tan)- [tanh](#tanh)- [tgamma](#tgamma)- [widthBucket](#widthBucket)
+Was this page helpful?

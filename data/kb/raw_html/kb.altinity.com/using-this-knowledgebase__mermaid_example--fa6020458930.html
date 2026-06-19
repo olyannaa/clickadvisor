@@ -1,0 +1,14 @@
+<h1>Mermaid Example | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/using-this-knowledgebase/">Using This Knowledge Base</a></li><li aria-current="page" class="breadcrumb-item active">Mermaid Example</li></ol></nav><div class="td-content"><h1>Mermaid Example</h1><div class="lead">A short example of using the Mermaid library to add charts.</div><p>This Knowledge Base now supports <a href="https://mermaid-js.github.io/mermaid/#/" target="_blank">Mermaid</a>
+, a handy way to create charts from text. The following example shows a very simple chart, and the code to use.</p><p>To add a Mermaid chart, encase the Mermaid code between {{&lt; mermaid &gt;}}, as follows:</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-text" data-lang="text"><span style="display:flex"><span>{{&lt;mermaid&gt;}}
+</span></span><span style="display:flex"><span>graph TD;
+</span></span><span style="display:flex"><span>  A--&gt;B;
+</span></span><span style="display:flex"><span>  A--&gt;C;
+</span></span><span style="display:flex"><span>  B--&gt;D;
+</span></span><span style="display:flex"><span>  C--&gt;D;
+</span></span><span style="display:flex"><span>{{&lt;/mermaid&gt;}}
+</span></span></code></pre></div><p>And it renders as so:</p><script async="" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js" type="application/javascript">var config={startOnLoad:!0,theme:"dark",align:"center"};mermaid.initialize(config)</script><div class="mermaid">graph TD;
+A--&gt;B;
+A--&gt;C;
+B--&gt;D;
+C--&gt;D;</div><div class="td-page-meta__lastmod">Last modified 2021.09.09: <a href="https://github.com/Altinity/altinityknowledgebase/commit/3b6fd39a2e8a823d284b759e6f0e0b415969a733">Added mermaid example. (3b6fd39)</a></div></div></main>

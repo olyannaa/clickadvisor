@@ -1,0 +1,402 @@
+<h1>Bitmap Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Bitmap</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/bitmap-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Bitmap Functions</h1></header><p>Bitmaps can be constructed in two ways. The first way is constructed by aggregation function groupBitmap with <code>-State</code>, the other way is to constructed a bitmap from an Array object.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapAnd">bitmapAnd<a aria-label="Direct link to bitmapAnd" class="hash-link" href="#bitmapAnd" title="Direct link to bitmapAnd">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Computes the logical conjunction (AND) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapAnd(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing bits present in both input bitmaps <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapAnd(bitmapBuild([1, 2, 3]), bitmapBuild([3, 4, 5]))) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│ [3] │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapAndCardinality">bitmapAndCardinality<a aria-label="Direct link to bitmapAndCardinality" class="hash-link" href="#bitmapAndCardinality" title="Direct link to bitmapAndCardinality">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the cardinality of the logical conjunction (AND) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapAndCardinality(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of set bits in the intersection of the two bitmaps <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapAndCardinality(bitmapBuild([1,2,3]), bitmapBuild([3,4,5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   1 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapAndnot">bitmapAndnot<a aria-label="Direct link to bitmapAndnot" class="hash-link" href="#bitmapAndnot" title="Direct link to bitmapAndnot">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Computes the set difference A AND-NOT B of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapAndnot(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing set bits present in the first bitmap but not in the second <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapAndnot(bitmapBuild([1, 2, 3]), bitmapBuild([3, 4, 5]))) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res────┐
+│ [1, 2] │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapAndnotCardinality">bitmapAndnotCardinality<a aria-label="Direct link to bitmapAndnotCardinality" class="hash-link" href="#bitmapAndnotCardinality" title="Direct link to bitmapAndnotCardinality">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the cardinality of the AND-NOT operation of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapAndnotCardinality(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of set bits in the result of <code>bitmap1 AND-NOT bitmap2</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapAndnotCardinality(bitmapBuild([1,2,3]), bitmapBuild([3,4,5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   2 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapBuild">bitmapBuild<a aria-label="Direct link to bitmapBuild" class="hash-link" href="#bitmapBuild" title="Direct link to bitmapBuild">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Builds a bitmap from an unsigned integer array. It is the opposite of function <a href="/docs/sql-reference/functions/bitmap-functions#bitmapToArray"><code>bitmapToArray</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapBuild(array)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>array</code> — Unsigned integer array. <a href="/docs/sql-reference/data-types/array"><code>Array(UInt*)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap from the provided array <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapBuild([1, 2, 3, 4, 5]) AS res, toTypeName(res);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┬─toTypeName(bitmapBuild([1, 2, 3, 4, 5]))─────┐
+│     │ AggregateFunction(groupBitmap, UInt8)        │
+└─────┴──────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapCardinality">bitmapCardinality<a aria-label="Direct link to bitmapCardinality" class="hash-link" href="#bitmapCardinality" title="Direct link to bitmapCardinality">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the number of bits set (the cardinality) in the bitmap.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapCardinality(bitmap)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of bits set in the bitmap <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapCardinality(bitmapBuild([1, 3, 3, 5, 7, 7])) AS res
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   4 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapContains">bitmapContains<a aria-label="Direct link to bitmapContains" class="hash-link" href="#bitmapContains" title="Direct link to bitmapContains">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Checks if the bitmap contains a specific element.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapContains(bitmap, value)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>value</code> — Element to check for. <a href="/docs/sql-reference/data-types/int-uint">(U)Int8/16/32/64</a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the bitmap contains the specified value, otherwise <code>0</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapContains(bitmapBuild([1, 2, 3]), 2) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│  1  │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapHasAll">bitmapHasAll<a aria-label="Direct link to bitmapHasAll" class="hash-link" href="#bitmapHasAll" title="Direct link to bitmapHasAll">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Checks if the first bitmap contains all set bits of the second bitmap.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapHasAll(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if all set bits of the second bitmap are present in the first bitmap, otherwise <code>0</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapHasAll(bitmapBuild([1, 2, 3]), bitmapBuild([2, 3])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│  1  │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapHasAny">bitmapHasAny<a aria-label="Direct link to bitmapHasAny" class="hash-link" href="#bitmapHasAny" title="Direct link to bitmapHasAny">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Checks if the first bitmap contains any set bits of the second bitmap.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapHasAny(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if any bits of the second bitmap are present in the first bitmap, otherwise <code>0</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapHasAny(bitmapBuild([1, 2, 3]), bitmapBuild([3, 4, 5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│  1  │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapMax">bitmapMax<a aria-label="Direct link to bitmapMax" class="hash-link" href="#bitmapMax" title="Direct link to bitmapMax">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the position of the greatest bit set in a bitmap, or <code>0</code> if the bitmap is empty.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapMax(bitmap)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the position of the greatest bit set in the bitmap, otherwise <code>0</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapMax(bitmapBuild([1, 2, 3, 4, 5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   5 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapMin">bitmapMin<a aria-label="Direct link to bitmapMin" class="hash-link" href="#bitmapMin" title="Direct link to bitmapMin">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the position of the smallest bit set in a bitmap. If all bits are unset, or <code>UINT32_MAX</code> (<code>UINT64_MAX</code> if the bitmap contains more than <code>2^64</code> bits).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapMin(bitmap)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the position of the smallest bit set in the bitmap, or <code>UINT32_MAX</code>/<code>UINT64_MAX</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapMin(bitmapBuild([3, 5, 2, 6])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   2 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapOr">bitmapOr<a aria-label="Direct link to bitmapOr" class="hash-link" href="#bitmapOr" title="Direct link to bitmapOr">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Computes the logical disjunction (OR) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapOr(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing set bits present in either input bitmap <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapOr(bitmapBuild([1, 2, 3]), bitmapBuild([3, 4, 5]))) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─────────────┐
+│ [1, 2, 3, 4, 5] │
+└─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapOrCardinality">bitmapOrCardinality<a aria-label="Direct link to bitmapOrCardinality" class="hash-link" href="#bitmapOrCardinality" title="Direct link to bitmapOrCardinality">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the cardinality of the logical disjunction (OR) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapOrCardinality(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of set bits in the union of the two bitmaps <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapOrCardinality(bitmapBuild([1,2,3]), bitmapBuild([3,4,5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   5 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapSubsetInRange">bitmapSubsetInRange<a aria-label="Direct link to bitmapSubsetInRange" class="hash-link" href="#bitmapSubsetInRange" title="Direct link to bitmapSubsetInRange">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns a subset of the bitmap, containing only the set bits in the specified range [start, end). Uses 1-based indexing.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapSubsetInRange(bitmap, start, end)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap to extract the subset from. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>start</code> — Start of the range (inclusive). <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> - <code>end</code> — End of the range (exclusive). <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing only the set bits in the specified range <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapSubsetInRange(bitmapBuild([1, 2, 3, 4, 5]), 2, 5)) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────┐
+│ [2, 3, 4] │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapSubsetLimit">bitmapSubsetLimit<a aria-label="Direct link to bitmapSubsetLimit" class="hash-link" href="#bitmapSubsetLimit" title="Direct link to bitmapSubsetLimit">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns a subset of a bitmap from position <code>range_start</code> with at most <code>cardinality_limit</code> set bits. Uses 1-based indexing.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapSubsetLimit(bitmap, range_start, cardinality_limit)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>range_start</code> — Start of the range (inclusive). <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a> - <code>cardinality_limit</code> — Maximum cardinality of the subset. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing at most <code>cardinality_limit</code> set bits, starting from <code>range_start</code> <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapSubsetLimit(bitmapBuild([1, 5, 3, 2, 8]), 3, 2)) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res────┐
+│ [5, 3] │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapToArray">bitmapToArray<a aria-label="Direct link to bitmapToArray" class="hash-link" href="#bitmapToArray" title="Direct link to bitmapToArray">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Converts a bitmap to an array of unsigned integers. It is the opposite of function <a href="/docs/sql-reference/functions/bitmap-functions#bitmapBuild"><code>bitmapBuild</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapToArray(bitmap)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap to convert. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of unsigned integers contained in the bitmap <a href="/docs/sql-reference/data-types/array"><code>Array(UInt*)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapBuild([1, 2, 3, 4, 5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─────────────┐
+│ [1, 2, 3, 4, 5] │
+└─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapTransform">bitmapTransform<a aria-label="Direct link to bitmapTransform" class="hash-link" href="#bitmapTransform" title="Direct link to bitmapTransform">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Changes up to N bits in a bitmap by swapping specific bit values in <code>from_array</code> with corresponding ones in <code>to_array</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapTransform(bitmap, from_array, to_array)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>from_array</code> — Array of original set bits to be replaced. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a>. - <code>to_array</code> — Array of new set bits to replace with. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap with elements transformed according to the given mapping <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapTransform(bitmapBuild([1, 2, 3, 4, 5]), [2, 4], [20, 40])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────────┐
+│ [1, 3, 5, 20, 40] │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapXor">bitmapXor<a aria-label="Direct link to bitmapXor" class="hash-link" href="#bitmapXor" title="Direct link to bitmapXor">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Computes the symmetric difference (XOR) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapXor(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing set bits present in either input bitmap, but not in both <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(bitmapXor(bitmapBuild([1, 2, 3]), bitmapBuild([3, 4, 5]))) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────┐
+│ [1, 2, 4, 5] │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitmapXorCardinality">bitmapXorCardinality<a aria-label="Direct link to bitmapXorCardinality" class="hash-link" href="#bitmapXorCardinality" title="Direct link to bitmapXorCardinality">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the cardinality of the XOR (symmetric difference) of two bitmaps.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitmapXorCardinality(bitmap1, bitmap2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap1</code> — First bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>bitmap2</code> — Second bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of set bits in the symmetric difference of the two bitmaps <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapXorCardinality(bitmapBuild([1,2,3]), bitmapBuild([3,4,5])) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   4 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="subBitmap">subBitmap<a aria-label="Direct link to subBitmap" class="hash-link" href="#subBitmap" title="Direct link to subBitmap">​</a></h2>
+<p>Introduced in: v21.9.0</p>
+<p>Returns a subset of the bitmap, starting from position <code>offset</code>. The maximum cardinality of the returned bitmap is <code>cardinality_limit</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">subBitmap(bitmap, offset, cardinality_limit)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>bitmap</code> — Bitmap object. <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a>. - <code>offset</code> — Number of set bits to skip from the beginning (zero-based). <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a> - <code>cardinality_limit</code> — Maximum number of set bits to include in the subset. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a bitmap containing at most <code>limit</code> set bits, starting after skipping <code>offset</code> set bits in ascending order <a href="/docs/sql-reference/data-types/aggregatefunction"><code>AggregateFunction(groupBitmap, T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitmapToArray(subBitmap(bitmapBuild([1, 2, 3, 4, 5]), 2, 2)) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res────┐
+│ [3, 4] │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/bit-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Bit</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/comparison-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Comparison</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#bitmapAnd">bitmapAnd</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapAndCardinality">bitmapAndCardinality</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapAndnot">bitmapAndnot</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapAndnotCardinality">bitmapAndnotCardinality</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapBuild">bitmapBuild</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapCardinality">bitmapCardinality</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapContains">bitmapContains</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapHasAll">bitmapHasAll</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapHasAny">bitmapHasAny</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapMax">bitmapMax</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapMin">bitmapMin</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapOr">bitmapOr</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapOrCardinality">bitmapOrCardinality</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapSubsetInRange">bitmapSubsetInRange</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapSubsetLimit">bitmapSubsetLimit</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapToArray">bitmapToArray</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapTransform">bitmapTransform</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapXor">bitmapXor</a><li><a class="table-of-contents__link toc-highlight" href="#bitmapXorCardinality">bitmapXorCardinality</a><li><a class="table-of-contents__link toc-highlight" href="#subBitmap">subBitmap</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

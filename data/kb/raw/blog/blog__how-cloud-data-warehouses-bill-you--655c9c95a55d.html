@@ -1,0 +1,777 @@
+<h1>How the 5 major cloud data warehouses really bill you: A unified, engineer-friendly guide</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">How the 5 major cloud data warehouses really bill you: A unified, engineer-friendly guide</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:2"><img alt="tom schreiber" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Ftom_schreiber_aa58c99e87.jpg&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Ftom_schreiber_aa58c99e87.jpg&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Ftom_schreiber_aa58c99e87.jpg&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Flio_headshot_singapore_7cc9852011.jpg&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Flio_headshot_singapore_7cc9852011.jpg&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Flio_headshot_singapore_7cc9852011.jpg&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base">Tom Schreiber &amp; Lionel Palacin</div><div class="text-sm text-neutral-300">Dec 1, 2025 · 20 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><blockquote>
+<p><strong>TL;DR</strong><br/><br/>Price lists don’t tell you real costs.<br/><br/>Compute models do.<br/><br/>This post explains how all five major cloud data warehouses actually turn your queries into dollars, so you can compare them on equal footing.<br/><br/><strong>If you build, optimize, or pay for analytical workloads, this gives you the lens you need to understand true compute costs.</strong></p>
+</blockquote>
+<br/>
+<p><strong>Prefer a visual walkthrough?</strong><br/>
+This post started as a whiteboard-style walkthrough of how the major cloud data warehouses actually turn queries into compute costs.
+If you’d rather watch the explanation, the video below covers the same mental model and examples.</p>
+<div class="relative styles_responsiveEmbed__qDlEx"><div class="absolute inset-0 flex bg-black"><div class="m-auto aspect-square w-10 animate-spin rounded-full border-4 border-primary-300/20 border-t-primary-300"></div></div><div></div></div>
+<p><em>(The video follows the same structure as this post, so you can switch between reading and watching at any point.)</em></p>
+<br/>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="why-compute-billing-is-so-confusing" level="2">Why compute billing is so confusing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#why-compute-billing-is-so-confusing">#</a></span></h2>
+<p>You have a dataset and a set of analytical queries. You have more cloud data warehouse options than ever. And before you can answer the obvious question:</p>
+<blockquote>
+<p>Which one gives you the best performance per dollar?</p>
+</blockquote>
+<p>You need to understand something much simpler:</p>
+<blockquote>
+<p>How do these systems actually bill you for compute?</p>
+</blockquote>
+<p>That should be straightforward. Every vendor has a public price list. But in practice, price lists are almost meaningless because:</p>
+<ul>
+<li>
+<p>Each platform measures compute differently (“credits”, “DBUs”, “compute units”, “slot-seconds”, “RPUs”, …)</p>
+</li>
+<li>
+<p>These units map to fundamentally different execution models</p>
+</li>
+<li>
+<p>Query runtimes scale differently as data grows</p>
+</li>
+<li>
+<p>And the same query can burn radically different amounts of compute depending on the query engine</p>
+</li>
+</ul>
+<p>So even with all price lists in front of you, you still can’t answer “which one is cheaper?” Not without understanding what their billing units <em>really</em> mean.</p>
+<p>This post is step 1 in that journey:</p>
+<blockquote>
+<p>A clear, no-nonsense explanation of how all five major cloud data warehouses allocate, scale, and bill compute.</p>
+</blockquote>
+<p>When you’re done, you’ll understand how CPU cycles become dollars in:</p>
+<ul>
+<li>
+<p><strong>Snowflake</strong></p>
+</li>
+<li>
+<p><strong>Databricks (SQL Serverless)</strong></p>
+</li>
+<li>
+<p><strong>ClickHouse Cloud</strong></p>
+</li>
+<li>
+<p><strong>Google BigQuery</strong></p>
+</li>
+<li>
+<p><strong>Amazon Redshift Serverless</strong></p>
+</li>
+</ul>
+<blockquote>
+<p><strong>What about storage costs?</strong><br/>This post focuses entirely on <strong>compute costs</strong>, because that’s where the real differences between systems lie. Storage costs, by comparison, are <strong>much simpler</strong> and, crucially, often <strong>negligible relative to compute</strong>, since most systems store data in low-cost cloud object storage with very similar pricing.
+That said, our <strong>CostBench</strong> framework (see next section) does fully calculate storage costs for every system. We simply don’t highlight them here because they don’t materially affect the comparison.</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="before-we-dive-in-how-we-calculate-costs-with-costbench" level="2">Before we dive in: How we calculate costs with CostBench<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#before-we-dive-in-how-we-calculate-costs-with-costbench">#</a></span></h2>
+<p>This post is the foundation for a broader cost-comparison analysis we built on top of <a href="https://benchmark.clickhouse.com">ClickBench</a>.</p>
+<blockquote>
+<p>If you’re here only to understand how each system’s compute model and billing work, you can skip this section and the small <strong>How CostBench computes … costs</strong> subsections at the end of each system. Those parts are only relevant if you want to see how we translate benchmark results into real dollar costs for the <a href="https://clickhouse.com/blog/cloud-data-warehouses-cost-performance-comparison">companion cost-comparison analysis</a>.</p>
+</blockquote>
+<p>To make benchmark results comparable across systems with radically different billing models, we built a framework for attaching real price tags to ClickBench (or any benchmark, really). We call it <strong>CostBench</strong>.</p>
+<p>Everything in this study is fully reproducible; the <a href="https://github.com/ClickHouse/CostBench/blob/main/">CostBench repository</a> includes all scripts, pricing models, and generated datasets we used.</p>
+<p>At a high level, CostBench does three things:</p>
+<ol>
+<li><strong>Takes existing raw ClickBench runtimes</strong></li>
+<li><strong>Looks up the system’s compute pricing model</strong></li>
+<li><strong>Produces an enriched JSON file</strong> that contains, for every query:
+<ul>
+<li>runtime</li>
+<li>compute cost</li>
+</ul>
+</li>
+</ol>
+<p><em>(Additionally, CostBench also calculates storage costs.)</em></p>
+<p>Each system’s section later in this post contains a small <strong>How CostBench computes … costs</strong> subsection at the end that shows how exactly we applied CostBench to each system (e.g., which benchmark file we used, what pricing data we mapped in, etc.).</p>
+<p>This allows us to perform a clean comparison of the costs-per-benchmark across Snowflake, Databricks, ClickHouse Cloud, BigQuery, and Redshift Serverless.</p>
+<p>With that foundation in place, let’s walk through how each system actually allocates and bills compute.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="snowflake" level="2">Snowflake<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#snowflake">#</a></span></h2>
+<div style="border-radius:12px;padding:24px 28px;margin:28px 0;background:#111317;border:1px solid #1f242a;box-shadow:0 8px 18px rgba(0,0,0,0.45);color:#f4f4f5">
+<div style="font-size:20px;font-weight:600;margin:0 0 4px">Snowflake compute pricing TL;DR</div>
+<div style="font-size:14px;color:#9ca3af;margin:0">Warehouses are fixed t-shirt sizes; each size consumes a fixed number of credits per hour while running.<br/>(Values shown are for standard Gen 1 warehouses.)</div>
+<div style="font-size:13px;color:#6b7280;margin-top:4px">(Prices as of November 2025)</div>
+<div style="height:1px;background:#1d2126;margin:16px 0 20px"></div>
+<div style="display:flex;gap:40px;flex-wrap:wrap">
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Billing units</div>
+<ul style="margin:0;padding-left:20px">
+<li><strong style="color:#fdff88">Credits per hour</strong> (Snowflake’s compute billing unit)</li>
+</ul>
+<div style="font-weight:600;margin-top:18px;margin-bottom:6px">Example warehouse sizes</div>
+<ul style="margin:0;padding-left:20px">
+<li>X-Small → <strong style="color:#fdff88">1 credit / hour</strong></li>
+<li>Small → <strong style="color:#fdff88">2 credits / hour</strong></li>
+<li>Medium → <strong style="color:#fdff88">4 credits / hour</strong></li>
+</ul>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Price per credit (AWS, US East)</div>
+<ul style="margin:0;padding-left:20px">
+<li>Standard: <strong style="color:#fdff88">$2.00 / credit / hour</strong></li>
+<li>Enterprise: <strong style="color:#fdff88">$3.00 / credit / hour</strong></li>
+<li>Business Critical: <strong style="color:#fdff88">$4.00 / credit / hour</strong></li>
+</ul>
+</div>
+</div>
+</div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-model-provisioned-warehouses" level="3">Compute model: provisioned warehouses<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-model-provisioned-warehouses">#</a></span></h3>
+<p>Snowflake is the canonical example of a <strong>provisioned-cluster compute model</strong>: you choose a warehouse size and pay for its uptime, not per individual query.</p>
+<p>Under the hood, Snowflake’s warehouses are fixed-size clusters that run Snowflake’s query engine (engine paper: <a href="https://www.cs.cmu.edu/~15721-f24/papers/Snowflake.pdf">The Snowflake Elastic Data Warehouse</a>).</p>
+<p>Each warehouse has a <strong>t-shirt size</strong> (XS, S, M, …), and that size determines both:</p>
+<ul>
+<li><strong>How many compute nodes you get</strong> (shown in the diagram below)</li>
+<li><strong>How many “credits” are consumed per hour</strong></li>
+</ul>
+<p>For example:</p>
+<ul>
+<li><strong>XS → 1 node → 1 credit/hour</strong></li>
+<li><strong>S → 2 nodes → 2 credits/hour</strong></li>
+<li><strong>M → 4 nodes → 4 credits/hour</strong></li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.001.png" loading="lazy" src="/uploads/Blog_Costs_001_aa09baa628.png"/></span>
+<em>(Note: Snowflake does not publish hardware specs, but it is widely <a href="https://select.dev/posts/snowflake-warehouse-sizing">understood</a> that each node roughly corresponds to <strong>8 vCPUs, 16 GiB RAM, and ~200 GB local disk cache</strong>.)</em>
+<blockquote>
+<p><strong>Note on Snowflake warehouse generations and Interactive warehouses</strong>:<br/><br/>
+All examples in this guide use Snowflake’s standard (Gen 1) warehouses, which remain the default unless users explicitly select Gen2.<br/><br/>Snowflake’s newer <a href="https://docs.snowflake.com/en/en/user-guide/warehouses-gen2">Gen 2 warehouses</a> run on updated hardware and <a href="https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf">consume 25–35% more credits per hour than Gen 1 for the same size</a>.<br/><br/>
+Snowflake’s <a href="https://docs.snowflake.com/en/user-guide/interactive">Interactive warehouses</a> (in preview as of November 2025) are optimized for low-latency, high-concurrency workloads. They are <a href="https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf">priced lower</a> per hour than standard warehouses (e.g., 0.6 vs 1 credit/hour at XS), but they enforce a <a href="https://docs.snowflake.com/en/user-guide/interactive#limitations-of-interactive-warehouses">5-second timeout for SELECT queries</a> and carry a <a href="https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations">1-hour minimum billing period</a>, with each resume triggering a full minimum charge.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scaling-vertical-vs-multi-cluster" level="3">Scaling: vertical vs. multi-cluster<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#scaling-vertical-vs-multi-cluster">#</a></span></h3>
+<p>Snowflake scales in two ways, and <strong>each form of scaling affects your bill</strong>:</p>
+<ol>
+<li>
+<p>Vertical scaling (manual resize)<br/><br/></p>
+<ul>
+<li>
+<p>You manually choose a bigger warehouse size (e.g., <strong>S → M → L</strong>)</p>
+</li>
+<li>
+<p>More nodes → more parallelism → faster queries…but also <strong>more credits/hour</strong>, billed linearly.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Horizontal scaling (multi-cluster, automatic)<br/><br/></p>
+<ul>
+<li>Snowflake can automatically add more clusters of the <strong>same size</strong> when concurrency spikes.</li>
+<li>These extra clusters <strong>do not speed up single queries</strong>; they only provide additional capacity for incoming queries, thereby preventing queries from queuing up.</li>
+<li>Snowflake’s Standard/Economy <a href="https://docs.snowflake.com/en/user-guide/warehouses-multicluster#setting-the-scaling-policy-for-a-multi-cluster-warehouse">policies</a> control when extra clusters start/stop.</li>
+<li>Each active extra cluster <strong>bills its own credits/hour</strong>, identical to the primary cluster.</li>
+</ul>
+</li>
+</ol>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="query-acceleration-service-qas" level="3"><strong>Query Acceleration Service (QAS)</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#query-acceleration-service-qas">#</a></span></h3>
+<p>Snowflake offers an optional enterprise-level feature called <strong><a href="https://docs.snowflake.com/en/user-guide/query-acceleration-service">Query Acceleration Service (QAS)</a></strong>.</p>
+<p>When enabled, Snowflake will automatically use <strong>additional serverless compute resources</strong> to accelerate “spiky” or scan-heavy parts of a query.</p>
+<p>Note that <a href="https://docs.snowflake.com/en/user-guide/query-acceleration-service#query-acceleration-service-cost">this introduces an additional billing dimension</a>.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-pricing" level="3">Compute pricing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-pricing">#</a></span></h3>
+<p><em>(Official pricing, November 2025 → <a href="https://www.snowflake.com/en/pricing-options/">https://www.snowflake.com/en/pricing-options</a>)</em></p>
+<p>Pricing depends on <strong>Edition</strong> (Standard, Enterprise, Business Critical) and <strong>Cloud/Region</strong>, e.g. in AWS, US-East:</p>
+<ul>
+<li><strong>Standard → $2.00 per credit/hour</strong></li>
+<li><strong>Enterprise → $3.00 per credit/hour</strong></li>
+<li><strong>Business Critical → $4.00 per credit/hour</strong></li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metering-granularity" level="3">Metering granularity<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#metering-granularity">#</a></span></h3>
+<p><em>(Metering behavior, November 2025 → Snowflake docs: <a href="https://docs.snowflake.com/en/user-guide/warehouses-considerations#how-are-credits-charged-for-warehouses">How credits are charged</a>)</em></p>
+<p>Snowflake bills per second, with a 1-minute minimum each time a warehouse is running.</p>
+<p>Warehouses support AUTO-SUSPEND and AUTO-RESUME, so you can automatically shut them down after a period of inactivity and restart when a query arrives. You are billed while the warehouse is running, regardless of actual CPU usage.</p>
+<p>Warehouse AUTO-RESUME is generally very fast (e.g. <a href="https://docs.snowflake.com/en/user-guide/warehouses-considerations?utm_source=chatgpt.com#automating-warehouse-suspension">1 or 2 seconds</a>); depending on the size of the warehouse and the availability of compute resources to provision, it can take longer.</p>
+<blockquote>
+<p><strong>Interactive warehouses</strong> meter per second but enforce a <a href="https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations">1-hour minimum</a>, and every resume starts a new minimum billing window.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="how-costbench-computes-snowflake-costs" level="3">How CostBench computes Snowflake costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#how-costbench-computes-snowflake-costs">#</a></span></h3>
+<details>
+<summary>Click to see the pricing logic</summary>
+<p>
+<br/>
+To translate Snowflake’s ClickBench runtimes into dollars, we applied our “CostBench” pipeline, which joins existing <strong>raw benchmark timings</strong>, <strong>warehouse configuration</strong>, and <strong>Snowflake’s pricing tables</strong> into one unified cost dataset.
+</p>
+<p>
+<br/>
+Snowflake’s ClickBench results (e.g., <a href="https://github.com/ClickHouse/CostBench/blob/main/snowflake/clickbench/results_100b/4xl.json">4xl.json</a>) contain runtimes measured on a fixed warehouse size, in this case a <strong>4X-Large (128 credits/hour)</strong> warehouse.
+</p>
+<p>
+<br/>
+Separately, we encoded Snowflake’s official pricing data (warehouse T-shirt sizes, credits/hour, and per-credit dollar prices across editions and regions) into <a href="https://github.com/ClickHouse/CostBench/blob/main/snowflake/pricings/standard_warehouse.json">standard_warehouse.json</a>.
+</p>
+<p>
+<br/>
+A script (<a href="enrich.sh">enrich.sh</a>) merges these inputs:
+</p>
+<ul>
+<li>identifies the warehouse size used in the benchmark (e.g., 4X-Large)</li>
+<li>multiplies each query’s runtime by <strong>credits/hour × price per credit</strong></li>
+<li>attaches Snowflake storage pricing</li>
+<li>outputs a fully enriched file (<a href="https://github.com/ClickHouse/CostBench/blob/main/snowflake/results_100B/4xl_enriched.json">4xl_enriched.json</a>) containing:</li>
+<ul>
+<li>per-query runtime</li>
+<li>per-query compute cost</li>
+<li>total monthly storage cost</li>
+</ul>
+</ul>
+<p>
+This enriched dataset is what we use later in the <a href="https://clickhouse.com/blog/cloud-data-warehouses-cost-performance-comparison">high-level comparison post</a> where we evaluate cost-per-benchmark across the five systems.
+</p>
+</details>
+<p>Databricks uses a similar provisioned-cluster model, but replaces Snowflake’s credits with DBUs.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="databricks-sql-serverless" level="2">Databricks (SQL Serverless)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#databricks-sql-serverless">#</a></span></h2>
+<div style="border-radius:12px;padding:24px 28px;margin:28px 0;background:#111317;border:1px solid #1f242a;box-shadow:0 8px 18px rgba(0,0,0,0.45);color:#f4f4f5">
+<div style="font-size:20px;font-weight:600;margin:0 0 4px">Databricks compute pricing TL;DR</div>
+<div style="font-size:15px;color:#9ca3af;margin:0">Each SQL warehouse size has a fixed DBU burn-rate per hour.</div>
+<div style="font-size:13px;color:#6b7280;margin-top:4px">(Prices as of November 2025)</div>
+<div style="height:1px;background:#1d2126;margin:16px 0 20px"></div>
+<div style="display:flex;gap:40px;flex-wrap:wrap">
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Billing units</div>
+<ul style="margin:0;padding-left:20px">
+<li><strong style="color:#fdff88">DBUs per hour</strong> (DBU = Databricks Unit, Databricks’ abstract compute billing unit)</li>
+</ul>
+<div style="font-weight:600;margin-top:18px;margin-bottom:6px">Example warehouse sizes</div>
+<ul style="margin:0;padding-left:20px">
+<li>2X-Small → <strong style="color:#fdff88">4 DBUs / hour</strong></li>
+<li>Small → <strong style="color:#fdff88">12 DBUs / hour</strong></li>
+<li>Medium → <strong style="color:#fdff88">24 DBUs / hour</strong></li>
+</ul>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Price per DBU (AWS, US East)</div>
+<ul style="margin:0;padding-left:20px">
+<li>Premium: <strong style="color:#fdff88">$0.70 / DBU / hour</strong></li>
+<li>Enterprise: <strong style="color:#fdff88">$0.70 / DBU / hour</strong></li>
+</ul>
+</div>
+</div>
+<div style="font-size:12px;color:#6b7280;margin-top:16px">
+    (Note: Premium and Enterprise DBU prices are identical as of November 2025. This is not a typo.)
+  </div>
+</div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-model-fixed-shape-warehouses" level="3">Compute model: fixed-shape warehouses<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-model-fixed-shape-warehouses">#</a></span></h3>
+<p>Like Snowflake, Databricks SQL Serverless uses a <strong>provisioned-cluster model</strong>: you pick a warehouse size, and Databricks brings up a <strong>fixed-shape cluster</strong> (engine paper: <a href="https://people.eecs.berkeley.edu/~matei/papers/2022/sigmod_photon.pdf">Photon: A Fast Query Engine for Lakehouse Systems</a>) that runs until you shut it down or it auto-stops when idle.</p>
+<p>Each warehouse size (2X-Small, Small, Medium, …) corresponds to a fixed cluster with:</p>
+<ul>
+<li><strong>One driver node</strong></li>
+<li><strong>Multiple executor nodes</strong> (the main cost driver)</li>
+</ul>
+<p>Your chosen <strong>cluster size</strong> determines:</p>
+<ul>
+<li><strong>How many executors you get</strong></li>
+<li><strong>How many DBUs per hour the cluster burns</strong> (DBU = Databricks Unit, Databricks’ abstract compute billing unit)</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li><strong>2X-Small</strong> → ~1 executor → <strong>4 DBUs/hour</strong></li>
+<li><strong>Small</strong> → ~3 executors → <strong>12 DBUs/hour</strong></li>
+<li><strong>Medium</strong> → ~6 executors → <strong>24 DBUs/hour</strong></li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.002.png" loading="lazy" src="/uploads/Blog_Costs_002_c7cc179f23.png"/></span>
+<em>(Note that Databricks abstracts the exact hardware and node counts, so the diagram is illustrative, not literal. For clarity, we omit driver nodes.)</em>
+<p>Larger sizes mean more executors → more parallelism → faster queries.</p>
+<p>But <strong>billing is strictly linear with DBUs/hour</strong>, regardless of how much CPU your queries actually consume internally.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scaling-vertical-vs-multi-cluster-1" level="3">Scaling: vertical vs multi-cluster<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#scaling-vertical-vs-multi-cluster-1">#</a></span></h3>
+<p>Databricks warehouses scale in two ways, and each directly affects your cost:</p>
+<p><strong>1. Vertical scaling (manual resize)</strong></p>
+<ul>
+<li>You explicitly choose a bigger warehouse size (2X-Small → Small → Medium).</li>
+<li>Larger sizes have more executors and burn proportionally more <strong>DBUs/hour</strong>.</li>
+<li>This makes individual queries faster, but increases hourly burn.</li>
+</ul>
+<p><strong>2. Horizontal scaling (multi-cluster, automatic)</strong></p>
+<ul>
+<li>In the UI you set <strong>Min / Max clusters</strong> for a given size.</li>
+<li>When concurrency increases, Databricks automatically launches <strong>additional clusters of the same size</strong> to handle queued queries.</li>
+<li><strong>These extra clusters do not speed up single queries</strong>; they only provide additional capacity for incoming queries, thereby preventing queries from queuing up.</li>
+<li><strong>Each extra cluster bills its own DBUs/hour</strong> while it is active. <br/>
+Example: running 3 × “Small” clusters means <strong>3 × 12 DBUs/hour</strong>.</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-pricing-1" level="3">Compute pricing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-pricing-1">#</a></span></h3>
+<p><em>(Official pricing, November 2025 → <a href="https://www.databricks.com/product/pricing/databricks-sql">https://www.databricks.com/product/pricing/databricks-sql</a>)</em></p>
+<p>Finally, DBU → USD conversion depends on:</p>
+<ul>
+<li><strong>Edition / tier</strong> (Standard, Premium, Enterprise)</li>
+<li><strong>Cloud &amp; region</strong> (AWS, Azure, GCP)</li>
+</ul>
+<p>Typical AWS (US-East) pricing:</p>
+<ul>
+<li><strong>Premium</strong> → ~$0.70 / DBU/hour</li>
+<li><strong>Enterprise</strong> → ~$0.70 / DBU/hour</li>
+</ul>
+<p><em>(Note: Premium and Enterprise DBU prices are identical as of November 2025. This is not a typo.)</em></p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metering-granularity-1" level="3">Metering granularity<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#metering-granularity-1">#</a></span></h3>
+<p><em>(Metering behavior, November 2025 → Databrick docs: <a href="https://www.databricks.com/product/databricks-pricing">How does Databricks pricing work?</a>)</em></p>
+<p>Databricks bills DBUs with per-second granularity while the warehouse is active.</p>
+<p>SQL Warehouses have an auto-stop idle timeout, so you can automatically shut them down after a configured period of inactivity.</p>
+<p>Warehouses automatically start again (“auto-start”) when a new query arrives.</p>
+<p>Billing continues until the warehouse fully stops, regardless of CPU utilization.</p>
+<p>Warehouses have a rapid startup time (typically <a href="https://docs.databricks.com/aws/en/compute/sql-warehouse/warehouse-types?utm_source=chatgpt.com#serverless-sql-warehouses">between 2 and 6 seconds</a>).</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="how-costbench-computes-databricks-costs" level="3">How CostBench computes Databricks costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#how-costbench-computes-databricks-costs">#</a></span></h3>
+<details>
+<summary>Click to see the pricing logic</summary>
+<p>
+<br/>
+To convert Databricks’ ClickBench runtimes into dollars, we ran the same <strong>CostBench</strong> pipeline used for Snowflake, this time joining the raw benchmark timings with Databricks’ <strong>warehouse-size → DBUs/hour</strong> mapping and <strong>DBU → dollar </strong>pricing.
+</p>
+<p>
+<br/>
+For example, a Databricks ClickBench file (<a href="https://github.com/ClickHouse/CostBench/blob/main/databricks/clickbench/large/results_100B/clickbench_4X-Large.json">clickbench_4X-Large.json</a>) contains runtimes measured on a fixed SQL warehouse size, here a <strong>4X-Large</strong> warehouse (528 DBUs/hour).
+</p>
+<p>
+<br/>
+Separately, we encoded Databricks’ official pricing tables (cluster sizes, DBUs/hour, and DBU prices per cloud/region/tier) into <a href="https://github.com/ClickHouse/CostBench/blob/main/databricks/pricings/sql_serverless_compute.json">sql_serverless_compute.json</a>.
+</p>
+<p>
+<br/>
+The enrichment script (<a href="enrich.sh">enrich.sh</a>) merges these inputs and:
+</p>
+<ul>
+<li>detects the warehouse size used in the benchmark (4X-Large)</li>
+<li>multiplies each query’s runtime by <strong>DBUs/hour × DBU price</strong></li>
+<li>attaches Databricks storage pricing</li>
+<li>writes out an enriched file (<a href="https://github.com/ClickHouse/CostBench/blob/main/databricks/results_100B/clickbench_4X-Large_enriched.json">clickbench_4X-Large_enriched.json</a>) containing</li>
+<ul>
+<li>per-query runtime</li>
+<li>per-query compute cost</li>
+<li>total storage cost</li>
+</ul>
+</ul>
+<p>
+This enriched dataset feeds into the <a href="https://clickhouse.com/blog/cloud-data-warehouses-cost-performance-comparison">high-level comparison post</a> where we evaluate the <strong>true cost-per-benchmark</strong> across all five systems.
+</p>
+</details>
+<p>ClickHouse Cloud also uses provisioned compute, but with fully flexible node sizes and a normalized billing unit.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouse-cloud" level="2">ClickHouse Cloud<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#clickhouse-cloud">#</a></span></h2>
+<div style="border-radius:12px;padding:24px 28px;margin:28px 0;background:#111317;border:1px solid #1f242a;box-shadow:0 8px 18px rgba(0,0,0,0.45);color:#f4f4f5">
+<div style="font-size:20px;font-weight:600;margin:0 0 4px">ClickHouse Cloud compute pricing TL;DR</div>
+<div style="font-size:15px;color:#9ca3af;margin:0">A service size defines how many compute units your cluster consumes per hour.</div>
+<div style="font-size:13px;color:#6b7280;margin-top:4px">(Prices as of November 2025)</div>
+<div style="height:1px;background:#1d2126;margin:16px 0 20px"></div>
+<div style="display:flex;gap:40px;flex-wrap:wrap">
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Billing units</div>
+<ul style="margin:0;padding-left:20px">
+<li><strong style="color:#fdff88">Compute units per hour</strong> (1 compute unit = 8 GiB RAM + 2 vCPU)</li>
+</ul>
+<div style="font-weight:600;margin-top:18px;margin-bottom:6px">Example service sizes</div>
+<ul style="margin:0;padding-left:20px">
+<li>2-node service (8 GiB RAM / node) → <strong style="color:#fdff88">2 compute units / hour</strong></li>
+<li>3-node service (16 GiB RAM / node) → <strong style="color:#fdff88">6 compute units / hour</strong></li>
+<li>4-node service (32 GiB RAM / node) → <strong style="color:#fdff88">16 compute units / hour</strong></li>
+</ul>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Price per compute unit (AWS, US East)</div>
+<ul style="margin:0;padding-left:20px">
+<li>Basic: <strong style="color:#fdff88">$0.22 / unit / hour</strong></li>
+<li>Scale: <strong style="color:#fdff88">$0.30 / unit / hour</strong></li>
+<li>Enterprise: <strong style="color:#fdff88">$0.39 / unit / hour</strong></li>
+</ul>
+</div>
+</div>
+</div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-model-flexible-services-compute-units" level="3">Compute model: flexible services, compute units<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-model-flexible-services-compute-units">#</a></span></h3>
+<p>ClickHouse Cloud is a provisioned-compute service built on the ClickHouse engine (engine paper: <a href="https://www.vldb.org/pvldb/vol17/p3731-schulze.pdf">ClickHouse - Lightning Fast Analytics for Everyone</a>), but with fully flexible node sizing instead of fixed warehouse shapes.</p>
+<p>A service has two independent dimensions:</p>
+<p><strong>1. Number of compute nodes (horizontal dimension)</strong></p>
+<ul>
+<li>
+<p>You choose <strong>any number of nodes</strong> for a service—1, 2, 3… or dozens, or hundreds.</p>
+</li>
+<li>
+<p>This controls both <strong>inter-query scaling</strong> (how many queries can run concurrently) and <strong>intra-query scaling</strong> (<a href="https://clickhouse.com/blog/clickhouse-parallel-replicas">how much parallel CPU+RAM a single query can use across nodes</a>).</p>
+</li>
+</ul>
+<p><strong>2. Size of each compute node (vertical dimension)</strong></p>
+<ul>
+<li>Each compute node can be provisioned with a <strong>wide range of RAM/vCPU configurations.</strong></li>
+<li>Examples include 8 GiB/2 vCPU, 16 GiB/4 vCPU, 32 GiB/8 vCPU, all the way to 356 GiB/89 vCPU, and many intermediate sizes.</li>
+</ul>
+<p>To bill such flexible service sizes uniformly, ClickHouse uses a <strong>normalized compute unit</strong>:</p>
+<p><strong>1 compute unit = 8 GiB RAM + 2 vCPU</strong></p>
+<p>All possible DRAM/vCPU node configurations are multiples of this.</p>
+<p>ClickHouse Cloud calculates the total compute units for a service as:</p>
+<p><strong>Total compute units = (# of nodes) × (compute units per node)</strong></p>
+<p>A service consumes <strong>exactly its total number of compute units per hour</strong> while it is running.</p>
+<p>The diagram below shows typical examples:</p>
+<ul>
+<li>
+<p><strong>2-node service with 8 GiB RAM + 2 vCPU per node</strong>
+<br/>→ 1 compute unit per node
+<br/>→ <strong>2 compute units/hour</strong></p>
+</li>
+<li>
+<p><strong>3-node service with 16 GiB RAM + 4 vCPU per node</strong>
+<br/>→ 2 compute units per node
+<br/>→ <strong>6 compute units/hour</strong></p>
+</li>
+<li>
+<p><strong>4-node service with 32 GiB RAM + 8 vCPU per node</strong>
+<br/>→ 4 compute units per node
+<br/>→ <strong>16 compute units/hour</strong></p>
+</li>
+</ul>
+<p>This is different from Snowflake and Databricks: node sizes aren’t tied to fixed t-shirt sizes.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.003.png" loading="lazy" src="/uploads/Blog_Costs_003_927c26b1a7.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scaling-auto-vertical--manual-horizontal" level="3">Scaling: auto-vertical + manual horizontal<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#scaling-auto-vertical--manual-horizontal">#</a></span></h3>
+<p>ClickHouse Cloud scales in two ways, and both directly affect how many <strong>compute units/hour</strong> a service consumes.</p>
+<p><strong>1. Vertical scaling (change size of all nodes, automatically)</strong></p>
+<p>In ClickHouse Cloud, node size (RAM + vCPUs) can scale <a href="https://clickhouse.com/docs/manage/scaling">automatically</a> up and down based on CPU and memory pressure, within a configurable min/max range.</p>
+<p>This contrasts with systems like Snowflake and Databricks, where vertical scaling is always manual, and you must explicitly choose a larger or smaller warehouse/cluster.</p>
+<p><strong>2. Horizontal scaling (add or remove nodes, manually)</strong></p>
+<p>Unlike Snowflake or Databricks, where clusters have a hard upper compute size limit and additional clusters only improve <strong>inter-query</strong> concurrency and a single query always runs on <em>one</em> cluster, ClickHouse Cloud’s horizontal scaling is effectively unbounded. Adding more nodes increases:</p>
+<ul>
+<li><strong>inter-query scaling:</strong> more queries can run at the same time, and</li>
+<li><strong>intra-query scaling:</strong> a <em>single</em> query can use CPU cores and RAM across <strong>all</strong> nodes in the service (via <a href="https://clickhouse.com/blog/clickhouse-parallel-replicas">distributed execution</a>).</li>
+</ul>
+<p>This means horizontal scaling in ClickHouse accelerates both throughput <em>and</em> individual query performance. Scaling the number of nodes is currently manual, but <strong>automatic horizontal scaling</strong> is in active development.</p>
+<p><em>(ClickHouse Cloud also supports <a href="https://clickhouse.com/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud">Warehouses</a>, a form of <strong>compute-compute separation</strong>, that lets you isolate compute for different workloads while still sharing the same data.)</em></p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-pricing-2" level="3">Compute pricing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-pricing-2">#</a></span></h3>
+<p><em>(Official pricing, November 2025 → <a href="https://clickhouse.com/pricing">https://clickhouse.com/pricing</a>)</em></p>
+<p>Pricing depends on the <strong>tier</strong> (Basic, Scale, Enterprise) and <strong>cloud/region</strong>, with typical AWS US-East pricing around:</p>
+<ul>
+<li><strong>Basic:</strong> ~$0.22 per compute unit/hour</li>
+<li><strong>Scale:</strong> ~$0.30 per compute unit/hour</li>
+<li><strong>Enterprise:</strong> ~$0.39 per compute unit/hour</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metering-granularity-2" level="3">Metering granularity<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#metering-granularity-2">#</a></span></h3>
+<p><em>(Metering behavior, November 2025 → <em>ClickHouse Cloud</em> docs: <a href="https://clickhouse.com/docs/cloud/manage/billing/overview#how-is-compute-metered">How is compute metered?</a>)</em></p>
+<p>ClickHouse Cloud meters compute per minute in normalized compute units.</p>
+<p>Services can be configured with an idle timeout, causing the compute layer to stop automatically after a period of inactivity. When a new query arrives, the service automatically resumes (“auto-start”) and begins consuming compute units again.</p>
+<p>Billing continues while the service is active, even if no queries are running.</p>
+<p>Services may take <a href="https://clickhouse.com/docs/manage/scaling#automatic-idling">20-30 seconds</a> to resume after idling.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="how-costbench-computes-clickhouse-cloud-costs" level="3">How CostBench computes ClickHouse Cloud costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#how-costbench-computes-clickhouse-cloud-costs">#</a></span></h3>
+<details>
+<summary>Click to see the pricing logic</summary>
+<p>
+<br/>
+As with Snowflake and Databricks, ClickHouse Cloud goes through the same CostBench pipeline. For compute we start from an existing ClickBench result file for a fixed service size, for example a <strong>3-node, 64 GiB</strong> service captured in <a href="https://github.com/ClickHouse/CostBench/blob/main/clickhouse-cloud/results/aws.3.64.json">aws.3.64.json</a>. Separately, <a href="https://github.com/ClickHouse/CostBench/blob/main//clickhouse-cloud/pricings">we encode ClickHouse Cloud list prices</a> per <strong>compute unit / hour</strong> and per <strong>TB-month of storage</strong> for each tier (Basic, Scale, Enterprise).
+</p>
+<p>
+<br/>
+The CostBench script (<a href="enrich.sh">enrich.sh</a>) then:
+</p>
+<ul>
+<li>reads the service configuration (3 nodes × 2 compute units per node) and derives the total <strong>compute units / hour</strong> for the benchmarked service,</li>
+<li>multiplies each query’s runtime by that burn-rate and the tier’s <strong>$/unit/hour</strong> to get a per-query <strong>compute cost</strong>,</li>
+<li>adds a <strong>monthly storage cost</strong> based on the dataset size and the <strong>$/TB-month</strong> price,</li>
+<li>writes out an enriched JSON file (<a href="https://github.com/ClickHouse/CostBench/blob/main/clickhouse-cloud/results/aws.3.64.json">aws.3.64_enriched.json</a>) that includes, for each tier:</li>
+<ul>
+<li>per-query runtimes,</li>
+<li>per-query compute costs,</li>
+<li>total monthly storage cost.</li>
+</ul>
+</ul>
+<p>
+That enriched file is what we use later in the [companion post](https://clickhouse.com/blog/cloud-data-warehouses-cost-performance-comparison) when we compare ClickHouse Cloud’s cost-per-benchmark against the other systems.
+</p>
+</details>
+<p>BigQuery takes a completely different approach. No clusters to size at all.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="bigquery" level="2">BigQuery<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#bigquery">#</a></span></h2>
+<div style="border-radius:12px;padding:24px 28px;margin:28px 0;background:#111317;border:1px solid #1f242a;box-shadow:0 8px 18px rgba(0,0,0,0.45);color:#f4f4f5">
+<div style="font-size:20px;font-weight:600;margin:0 0 4px">BigQuery compute pricing TL;DR</div>
+<div style="font-size:15px;color:#9ca3af;margin:0">You pay either per data scanned (on-demand) or by the active slot-time used by your queries (capacity).</div>
+<div style="font-size:13px;color:#6b7280;margin-top:4px">(Prices as of November 2025)</div>
+<div style="height:1px;background:#1d2126;margin:16px 0 20px"></div>
+<div style="display:flex;gap:40px;flex-wrap:wrap">
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Billing units</div>
+<ul style="margin:0;padding-left:20px">
+<li>On-demand: <strong style="color:#fdff88">Bytes scanned</strong></li>
+<li>Capacity: <strong style="color:#fdff88">Slot-hours</strong> (active slot time, slots = logical units of compute)</li>
+</ul>
+<div style="font-weight:600;margin-top:18px;margin-bottom:6px">Examples</div>
+<ul style="margin:0;padding-left:20px">
+<li>Query scanning 2 TiB → <strong style="color:#fdff88">2 TiB billed</strong></li>
+<li>Project using 500 slots for 1 hour → <strong style="color:#fdff88">500 slot-hours billed</strong></li>
+</ul>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Price per unit (GCP, US East)</div>
+<ul style="margin:0;padding-left:20px">
+<li>On-demand: <strong style="color:#fdff88">$6.25 / TiB scanned</strong></li>
+<li>Capacity (Standard): <strong style="color:#fdff88">$0.04 / slot / hour</strong></li>
+<li>Capacity (Enterprise): <strong style="color:#fdff88">$0.06 / slot / hour</strong></li>
+<li>Capacity (Enterprise Plus): <strong style="color:#fdff88">$0.10 / slot / hour</strong></li>
+</ul>
+</div>
+</div>
+</div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-model-slots-on-serverless-shared-compute" level="3">Compute model: slots on serverless shared compute<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-model-slots-on-serverless-shared-compute">#</a></span></h3>
+<p>The three systems we covered so far — <strong>Snowflake, Databricks, and ClickHouse Cloud</strong> — all follow the <strong>Provisioned Clusters</strong> model: you reserve a fixed amount of compute resources, and you pay for the time that provisioned compute is running.</p>
+<p><strong>BigQuery is completely different.</strong></p>
+<p>BigQuery uses a <strong>Serverless Shared Compute</strong> model: there are <strong>no warehouses or clusters to size</strong>, and queries run on a large <strong>shared, pre-provisioned compute fabric</strong>. You only pay for <strong>what each query actually consumes</strong>, not for the size or uptime of a cluster.</p>
+<p>What follows is a concise breakdown of how BigQuery’s compute model works, how it scales, and how billing is derived from that model.</p>
+<p>BigQuery executes each query using its engine, running on a shared pool of pre-provisioned compute (engine paper: <a href="https://storage.googleapis.com/gweb-research2023-media/pubtools/3293.pdf">Dremel: Interactive Analysis of Web-Scale Datasets</a>). For each query, the engine:</p>
+<p><strong>① Allocates <a href="https://docs.cloud.google.com/bigquery/docs/slots">slots</a></strong> — logical units of compute that roughly correspond to concurrent execution threads.</p>
+<p><strong>② Schedules those slots</strong> across many machines in the shared serverless fabric.</p>
+<p>The number of slots used is <strong>dynamic</strong> and depends on the query plan:</p>
+<ul>
+<li><strong>Scan &amp; filter</strong> stages can be highly parallel (many slots) if there are lots of partitions or column chunks to read.</li>
+<li><strong>Aggregation</strong> stages often use fewer slots, shaped by grouping cardinality and data distribution.</li>
+<li><strong>Final merge</strong> stages usually need only a handful of slots to combine partial results.</li>
+</ul>
+<p>In other words, BigQuery tries to give each stage <strong>as much parallelism as it can actually use</strong>, and that slot allocation can change from stage to stage.</p>
+<p>Users are billed by the amount of <strong>active slot-time</strong> a query consumes.</p>
+<p>The diagram below shows how BigQuery allocates slots to each stage and schedules them across its serverless compute fabric:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.004.png" loading="lazy" src="/uploads/Blog_Costs_004_3afcac3bb3.png"/></span>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="example" level="4">Example<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#example">#</a></span></h4>
+<p>To make this concrete, imagine a query with a <strong>wall-clock runtime of 20 seconds</strong>, consisting of three sequential stages:</p>
+<p>Stage 1 — Scan</p>
+<ul>
+<li><strong>Duration:</strong> 12 seconds</li>
+<li><strong>Slots used:</strong> 1,000</li>
+<li><strong>Slot-time:</strong> 12 seconds × 1,000 slots = <strong>12,000 slot-seconds</strong></li>
+</ul>
+<p>Stage 2 — Aggregation</p>
+<ul>
+<li><strong>Duration:</strong> 6 seconds</li>
+<li><strong>Slots used:</strong> 600</li>
+<li><strong>Slot-time:</strong> 6 seconds × 600 slots = <strong>3,600 slot-seconds</strong></li>
+</ul>
+<p>Stage 3 — Final merge</p>
+<ul>
+<li><strong>Duration:</strong> 2 seconds</li>
+<li><strong>Slots used:</strong> 4</li>
+<li><strong>Slot-time:</strong> 2 seconds × 4 slots = <strong>8 slot-seconds</strong></li>
+</ul>
+<p>Now sum up the slot-time:</p>
+<ul>
+<li><strong>Total slot-seconds:</strong> 12,000 + 3,600 + 8 = <strong>15,608 slot-seconds</strong></li>
+<li><strong>Wall-clock runtime:</strong> <strong>20 seconds</strong></li>
+<li><strong>Billed compute:</strong> <strong>15,608 slot-seconds</strong></li>
+</ul>
+<p>So even though the user only sees a <strong>20-second query</strong>, BigQuery’s billing reflects the <strong>aggregate parallel work</strong> across all slots and stages.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scaling-dynamic-slot-allocation" level="3">Scaling: dynamic slot allocation<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#scaling-dynamic-slot-allocation">#</a></span></h3>
+<p>BigQuery automatically scales slot usage up or down based on how much parallelism each query stage can use.</p>
+<p><strong>Slot scaling limits</strong></p>
+<p>You buy a <a href="https://docs.cloud.google.com/bigquery/docs/reservations-intro">fixed reservation of slots</a> for your workload. BigQuery will use <strong>exactly up to that many slots</strong>, never more. The only time this limit changes is when <em>you</em> resize the reservation.</p>
+<p>Alternatively, with on-demand pricing (see below), you will have access to <a href="https://docs.cloud.google.com/bigquery/docs/reservations-intro">up to 2,000 concurrent slots</a>, shared among all queries in a single project.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-pricing-3" level="3">Compute pricing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-pricing-3">#</a></span></h3>
+<p><em>(Official pricing, November 2025 → <a href="https://cloud.google.com/bigquery/pricing">https://cloud.google.com/bigquery/pricing</a>)</em></p>
+<p>Slot prices depend on <strong>Edition</strong> (Standard / Enterprise / Enterprise Plus) and commitment model (on-demand vs. 1- or 3-year CUDs).</p>
+<p>For <strong>on-demand, hourly billing</strong> in <strong>US-East</strong> (South Carolina):</p>
+<ul>
+<li><strong>Standard Edition</strong> → <strong>$0.04 per slot-hour</strong></li>
+<li><strong>Enterprise Edition</strong> → <strong>$0.06 per slot-hour</strong></li>
+<li><strong>Enterprise Plus Edition</strong> → <strong>$0.10 per slot-hour</strong></li>
+</ul>
+<p>(Commitments reduce these to ~$0.032–0.09 per slot-hour depending on term and edition)</p>
+<p>BigQuery also offers an alternative (and actually the <strong>default</strong>) pricing model: <strong>on-demand query pricing</strong>.</p>
+<p>Instead of paying for slot-hours, you simply pay for the <strong>amount of data each query scans</strong>, regardless of how many slots the engine used internally.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.005.png" loading="lazy" src="/uploads/Blog_Costs_005_f2231c9ea7.png"/></span>
+<p>For <strong>US-East (South Carolina)</strong>:</p>
+<ul>
+<li><strong>First 1 TiB/month per account is free</strong></li>
+<li><strong>After that: $6.25 per TiB scanned</strong></li>
+</ul>
+<p>Billing is per-query and purely based on logical bytes scanned (after pruning, filters, clustering, etc.). Slot allocation and scale-out are fully internal and do not affect the bill under on-demand pricing.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metering-granularity-3" level="3">Metering granularity<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#metering-granularity-3">#</a></span></h3>
+<p><strong>Capacity-based (slots):</strong></p>
+<p><em>(Metering behavior, November 2025 → <em>BigQuery</em> docs: <a href="https://cloud.google.com/bigquery/pricing">Capacity compute pricing details</a>)</em></p>
+<p>BigQuery bills slot usage <strong>per second</strong>, with a <strong>1-minute minimum</strong> each time slot capacity is consumed.</p>
+<p><strong>On-demand (bytes scanned):</strong></p>
+<p><em>(Metering behavior, November 2025 → BigQuery docs: <a href="https://cloud.google.com/bigquery/pricing">On-demand compute pricing details</a>)</em></p>
+<p>For on-demand queries, there is <strong>no time-based metering at all</strong>.</p>
+<p>BigQuery charges <strong>purely per byte scanned</strong>, with the first <strong>1 TiB per month free</strong>.</p>
+<p>Because BigQuery allocates compute dynamically within a shared pool, there is no warehouse/service to idle or suspend. Idle timeout concepts do not apply.</p>
+<p>Because compute is always available from the shared pool, there is effectively no startup delay: queries can be executed immediately at any time.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="how-costbench-computes-bigquery-costs" level="3">How CostBench computes BigQuery costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#how-costbench-computes-bigquery-costs">#</a></span></h3>
+<details>
+<summary>Click to see the pricing logic</summary>
+<p>
+<br/>
+BigQuery required more work, because it supports <strong>two different billing models </strong>(capacity-based slots and on-demand bytes-scanned), and because the engine exposes both <strong>billed slot-seconds</strong> and <strong>billed bytes</strong> per query.
+</p>
+<p>
+<br/>
+To make CostBench work for BigQuery, we extended the benchmark runner and added a dedicated enrichment step:
+</p>
+<br/>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="1-extending-the-clickbench-runner-to-capture-bigquery-billing-metrics" level="4">1. Extending the ClickBench runner to capture BigQuery billing metrics<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#1-extending-the-clickbench-runner-to-capture-bigquery-billing-metrics">#</a></span></h4>
+<p>
+<br/>
+We added a BigQuery-specific runner (<a href="https://github.com/ClickHouse/CostBench/blob/main/bigquery/clickbench/bigquery_extended/run_bq_bench.sh">run_bq_bench.sh</a>) that wraps each query execution in the BigQuery CLI and extracts three things:
+</p>
+<br/>
+<ul>
+<li><strong>Wall-clock runtime</strong></li>
+<li><strong>Billed slot-seconds</strong> (jobQueryStatistics.totalSlotMs)</li>
+<li><strong>Billed bytes</strong> (jobQueryStatistics.totalBytesProcessed)</li>
+</ul>
+<p>
+This required rerunning the entire ClickBench suite to ensure every query produced the necessary metadata.
+</p>
+<br/>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="2-mapping-bigquerys-two-pricing-models" level="4">2. Mapping BigQuery’s two pricing models<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#2-mapping-bigquerys-two-pricing-models">#</a></span></h4>
+<p>
+<br/>
+We created a pricing descriptor file, <a href="https://github.com/ClickHouse/CostBench/blob/main/bigquery/pricings/serverless.json">serverless.json</a>, containing:
+</p>
+<br/>
+<ul>
+<li><strong>Capacity-based compute pricing<br/></strong>(Standard / Enterprise / Enterprise Plus), with per-slot-second rates per region</li>
+<li><strong>On-demand compute pricing</strong></li>
+<li><strong>Storage pricing</strong> for both logical and physical storage<br/>(active + long-term tiers)</li>
+</ul>
+<p>
+This matches the structure we already used for the other engines.
+</p>
+<br/>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="3-enriching-the-benchmark-results-with-costs" level="4">3. Enriching the benchmark results with costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#3-enriching-the-benchmark-results-with-costs">#</a></span></h4>
+<p>
+<br/>
+A dedicated script (<a href="enrich.sh">enrich.sh</a>) takes:
+</p>
+<ul>
+<li>The raw benchmark results (<a href="https://github.com/ClickHouse/CostBench/blob/main/bigquery/clickbench/bigquery_extended/results/result.json">result.json</a>)</li>
+<li>The pricing metadata (<a href="https://github.com/ClickHouse/CostBench/blob/main/bigquery/pricings/serverless.json">serverless.json</a>)</li>
+</ul>
+<p>
+It then computes (and outputs into <a href="https://github.com/ClickHouse/CostBench/blob/main/bigquery/results/result_enriched.json">result_enriched.json</a>):
+</p>
+<ul>
+<li><strong>Capacity-mode costs <br/></strong></li>
+<li><strong>On-demand costs<br/></strong></li>
+<li><strong>Estimated monthly storage costs</strong>
+</li></ul></details>
+<p>Redshift Serverless takes a similar serverless approach, but with predictive ML-driven scaling.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="redshift-serverless" level="2">Redshift Serverless<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#redshift-serverless">#</a></span></h2>
+<div style="border-radius:12px;padding:24px 28px;margin:28px 0;background:#111317;border:1px solid #1f242a;box-shadow:0 8px 18px rgba(0,0,0,0.45);color:#f4f4f5">
+<div style="font-size:20px;font-weight:600;margin:0 0 4px">Redshift Serverless compute pricing TL;DR</div>
+<div style="font-size:15px;color:#9ca3af;margin:0">You configure a minimum and maximum number of RPUs; Redshift automatically adjusts within that range using ML-based predictive scaling.</div>
+<div style="font-size:13px;color:#6b7280;margin-top:4px">(Prices as of November 2025)</div>
+<div style="height:1px;background:#1d2126;margin:16px 0 20px"></div>
+<div style="display:flex;gap:40px;flex-wrap:wrap">
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Billing units</div>
+<ul style="margin:0;padding-left:20px">
+<li><strong style="color:#fdff88">RPU-hours</strong> (RPU = Redshift Processing Unit)</li>
+</ul>
+<div style="font-weight:600;margin-top:18px;margin-bottom:6px">Example usage</div>
+<ul style="margin:0;padding-left:20px">
+<li>Query using 4 RPUs for 60 s → <strong style="color:#fdff88">240 RPU-seconds billed</strong></li>
+<li>Scaling spike to 24 RPUs → <strong style="color:#fdff88">billed only for active RPU-seconds</strong></li>
+</ul>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font-weight:600;margin-bottom:6px">Price per RPU (AWS, US East)</div>
+<ul style="margin:0;padding-left:20px">
+<li><strong style="color:#fdff88">$0.36 / RPU / hour</strong></li>
+</ul>
+</div>
+</div>
+</div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-model-serverless-rpus" level="3">Compute model: serverless RPUs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-model-serverless-rpus">#</a></span></h3>
+<p>Redshift Serverless, like BigQuery, uses a <strong>Serverless Shared Compute</strong> model: there are no clusters to size, and queries run on a large pool of pre-provisioned compute managed entirely by AWS. Instead of warehouses or fixed cluster sizes, Redshift allocates compute in <strong>Redshift Processing Units (<a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-capacity.html">RPUs</a>)</strong>, bundles of CPU and memory, and automatically adjusts how many RPUs are used based on workload demand (engine paper: <a href="https://assets.amazon.science/4b/37/223ac61e450898244a31bed53734/amazon-redshift-re-invented.pdf">Amazon Redshift Re-Architected</a>).</p>
+<p>A unique aspect of Redshift Serverless is its <strong><a href="https://assets.amazon.science/64/da/6f7ad2174272ae22a20f6058baca/intelligent-scaling-in-amazon-redshift.pdf">ML-based predictive scaling (RAIS)</a></strong>: Redshift analyzes query structure, expected scan sizes, concurrency, and historical patterns to pre-allocate compute <em>before</em> heavy queries are run. This allows scaling to happen proactively rather than reactively.</p>
+<p>You are billed for <strong>RPU-time</strong> while compute is active.</p>
+<p>The diagram below illustrates how RPUs scale within a workgroup’s configured range:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.006.png" loading="lazy" src="/uploads/Blog_Costs_006_4f05cc9507.png"/></span>
+<em>(<a href="https://medium.com/@surojitchowdhury/exploring-aws-redshift-serverless-a-closer-look-59e531790722">Each RPU is equivalent to 16 GB memory and 2 vCPU</a>)</em>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="example-1" level="4">Example<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#example-1">#</a></span></h4>
+<p>Suppose a query arrives and Redshift decides, based on its ML-based predictive model, to run it with <strong>16 RPUs</strong> (as sketched in the diagram above).</p>
+<p>If the query’s wall-clock runtime is <strong>60 seconds</strong>, then the billed compute is simply:</p>
+<p><strong>16 RPUs × 60 seconds = 960 RPU-seconds</strong></p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scaling-ml-driven-predictive-allocation" level="3">Scaling: ML-driven predictive allocation<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#scaling-ml-driven-predictive-allocation">#</a></span></h3>
+<p>Redshift Serverless automatically scales the compute assigned to your workgroup within a range you configure. The range has two bounds:</p>
+<ul>
+<li><strong>Base capacity</strong> — the minimum number of RPUs always available to your workgroup (<a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-capacity.html">default 128 RPUs</a>, configurable from <strong>4 to 512 RPUs</strong>, or up to <strong>1024 RPUs</strong> in select regions).</li>
+<li><strong>Maximum capacity</strong> — the upper limit that Redshift is allowed to scale to under load.</li>
+</ul>
+<p>Scaling is:</p>
+<ul>
+<li><strong>Automatic</strong> (no clusters or nodes to resize)</li>
+<li><strong>Predictive</strong> (ML models pre-allocate RPUs when heavy queries are likely)</li>
+<li><strong>Constrained</strong> by your configured base and max limits to keep costs predictable</li>
+</ul>
+<p>When load drops, Redshift scales down toward the base capacity, releasing unused RPUs. RPUs will drop to zero if you don't run queries in the Redshift serverless environment, and if this remains at zero for an extended period, a cold start will occur (see the Metering granularity section below).</p>
+<blockquote>
+<p><strong>How Redshift’s scaling differs from BigQuery’s</strong><br/><br/>BigQuery scales threads dynamically during execution; Redshift scales the entire compute envelope upfront: Compared with BigQuery’s slot-based model, Redshift Serverless <strong>adjusts the entire query’s compute size (RPUs) upfront</strong>, whereas BigQuery <strong>redistributes many small execution threads (slots) across stages while the query runs</strong>. <br/><br/>Once Redshift selects the RPU level, the whole query runs on that fixed amount of compute.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="compute-pricing-4" level="3">Compute pricing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#compute-pricing-4">#</a></span></h3>
+<p><em>(Official pricing, November 2025 → <a href="https://aws.amazon.com/redshift/pricing/">https://aws.amazon.com/redshift/pricing/</a>)</em></p>
+<p>For <strong>US East (N. Virginia)</strong>, the on-demand price is <strong>$0.375 per RPU-hour</strong>.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metering-granularity-4" level="3">Metering granularity<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#metering-granularity-4">#</a></span></h3>
+<p><em>(Metering behavior, November 2025 → AWS docs: <a href="https://aws.amazon.com/redshift/pricing/">Amazon Redshift Serverless compute pricing details</a>)</em></p>
+<p>Redshift Serverless bills RPU usage per second, with a 60-second minimum charge.</p>
+<p>Redshift automatically manages compute capacity and instantly scales to zero when not in use. There is no manual idle-timeout setting, the service auto-pauses internally until new queries arrive.</p>
+<p>Redshift Serverless typically resumes quickly when the warm pool is still active. However, after longer idle periods, AWS may de-allocate resources and a cold start can introduce tens of seconds of delay, even though this behavior is not surfaced explicitly in public documentation.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="how-costbench-computes-redshift-serverless-costs" level="3">How CostBench computes Redshift Serverless costs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#how-costbench-computes-redshift-serverless-costs">#</a></span></h3>
+<details>
+<summary>Click to see the pricing logic</summary>
+<p>
+<br/>
+Mapping Redshift Serverless to cost follows the same CostBench pattern as the other engines, with one important twist:
+</p>
+<p>
+<br/>
+<strong>Redshift does not bill for wall-clock runtime. It bills for RPU-time.</strong>
+</p>
+<p>
+<br/>
+That means:
+</p>
+<p>
+<br/>
+RPU-time = (wall-clock runtime) × (RPUs actively used)<br/><br/>…and the raw ClickBench output only contains wall-clock runtime.
+</p>
+<p>
+<br/>
+To compute real dollar costs, we extended the ClickBench runner to also fetch <strong>billed RPU-seconds</strong> for every query using Redshift’s system tables and AWS APIs.
+</p>
+<p>
+<br/>
+That extension lives in <a href="https://github.com/ClickHouse/CostBench/blob/main/redshift-serverless/clickbench/redshift-serverless_extended/get_metrics.sh">get_metrics.sh</a>
+</p>
+<p>
+<br/>
+With that in place, the pipeline works like this:
+</p>
+<br/>
+<ol>
+<li><strong>Re-run ClickBench with the extended runner<br/></strong>This produced a Redshift-specific result file containing both the usual wall-clock runtimes <strong>and</strong> the RPU-time for every execution: e.g. <a href="https://github.com/ClickHouse/CostBench/blob/main/redshift-serverless/clickbench/redshift-serverless_extended/results/serverless_100m.json">serverless_100m.json</a><br/></li>
+<li><strong>Load Redshift’s pricing model<br/></strong>CostBench uses a pricing descriptor (<a href="https://github.com/ClickHouse/CostBench/blob/main/redshift-serverless/pricings/serverless.json">serverless.json</a>) that contains RPU rates and storage pricing.<br/></li>
+<li><strong>Enrich results with dollar costs<br/></strong>The enrich.sh script joins the benchmark results with the pricing model and emits a fully enriched JSON file containing per-query compute cost (based on RPU-time) and storage cost: e.g. <a href="https://github.com/ClickHouse/CostBench/blob/main/redshift-serverless/results/enriched_100m.json">enriched_100m.json</a> </li>
+</ol>
+<p>
+The output has:
+</p>
+<br/>
+<ul>
+<li>wall-clock time</li>
+<li>billed RPU-time</li>
+<li>compute cost in USD</li>
+<li>storage cost in USD</li>
+</ul>
+<p>
+<br/>
+This now aligns Redshift with the other systems for the final cost-per-query comparison.
+</p>
+</details>
+<p>And that’s the last system. We’ve now walked through how all five major cloud data warehouses actually meter compute. Let’s wrap up and look at what all this tells us about cloud data warehouse economics.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="what-this-tells-us-about-cloud-data-warehouse-economics" level="2">What this tells us about cloud data warehouse economics<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/how-cloud-data-warehouses-bill-you#what-this-tells-us-about-cloud-data-warehouse-economics">#</a></span></h2>
+<p>We just walked through how all five major cloud data warehouses really meter compute. And the core lesson is simple:</p>
+<blockquote>
+<p>Raw runtime doesn’t determine cost. Billing models do.</p>
+</blockquote>
+<p><strong>Snowflake</strong>, <strong>Databricks</strong>, and <strong>ClickHouse Cloud</strong> all use <strong>provisioned capacity</strong>, but ClickHouse is the outlier in the best way:</p>
+<ul>
+<li>
+<p>Snowflake/Databricks: opaque billing units.</p>
+</li>
+<li>
+<p><strong>ClickHouse: hardware-grounded compute units (8 GiB RAM + 2 vCPU).</strong></p>
+</li>
+<li>
+<p>It’s also the only system with <strong>unbounded horizontal scale</strong> and <strong>automatic vertical scale</strong>, so a single query can use CPU and RAM across <em>all</em> nodes.</p>
+</li>
+</ul>
+<p><strong>BigQuery</strong> and <strong>Redshift Serverless</strong> take the opposite approach: <strong>serverless shared compute</strong>. You don’t size anything; you simply pay for what the engine decides your query consumes.</p>
+<p>Every system defines “what you pay for” differently, which is why price lists alone tell you nothing.</p>
+<p>That’s why we built <strong>CostBench</strong>, a clean, vendor-neutral way to turn benchmark runtimes into comparable cost-per-query numbers.</p>
+<p>This post gave you the mental model.</p>
+<p>The <a href="https://clickhouse.com/blog/cloud-data-warehouses-cost-performance-comparison">companion post</a> answers the question you actually care about:</p>
+<blockquote>
+<p>Which system delivers the best overall cost-performance for analytical queries?</p>
+</blockquote>
+<p>And here’s the teaser:</p>
+<blockquote>
+<p>For analytical workloads at scale, <strong>ClickHouse Cloud delivers an order-of-magnitude better value than any other system</strong>.</p>
+<br/>
+</blockquote>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs-animation01_small.gif" loading="lazy" src="/uploads/Blog_Costs_animation01_small_de9ac301cc.gif"/></span></div></div><div class="rich_content rich-text-content mt-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-footer&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. At the end of your 30-day trial, continue with a pay-as-you-go plan, or <a href="/company/contact?loc=blog-cta-footer">contact us</a> to learn more about our volume-based discounts. Visit our <a href="/pricing?loc=blog-cta-header">pricing page</a> for details.</p></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

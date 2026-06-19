@@ -1,0 +1,30 @@
+id: R-110
+name: join_algorithm_choice
+tier: '2'
+category: query_plan
+status: proposed
+statement: Выбрать join_algorithm в зависимости от размеров
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '22.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: ''
+  baseline: ''
+  projected: ''
+ddl_template: '`SET join_algorithm = ''...''`'
+decision_tree: right < RAM/2 → hash; right > RAM → grace_hash; both sorted → partial_merge

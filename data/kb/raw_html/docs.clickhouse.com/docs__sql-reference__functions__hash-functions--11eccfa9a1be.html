@@ -1,0 +1,1565 @@
+<h1>Hash Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Hash</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/hash-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Hash Functions</h1></header><p>Hash functions can be used for the deterministic pseudo-random shuffling of elements.</p>
+<p>Simhash is a hash function, which returns close hash values for close (similar) arguments.</p>
+<p>Most hash functions accept any number of arguments of any types.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Hash of NULL is NULL. To get a non-NULL hash of a Nullable column, wrap it in a tuple:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cityHash64(tuple(NULL))
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>To calculate hash of the whole contents of a table, use <code>sum(cityHash64(tuple(*)))</code> (or other hash function). <code>tuple</code> ensures that rows with NULL values are not skipped. <code>sum</code> ensures that the order of rows doesn't matter.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="BLAKE3">BLAKE3<a aria-label="Direct link to BLAKE3" class="hash-link" href="#BLAKE3" title="Direct link to BLAKE3">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Calculates BLAKE3 hash string and returns the resulting set of bytes as FixedString.
+This cryptographic hash-function is integrated into ClickHouse with BLAKE3 Rust library.
+The function is rather fast and shows approximately two times faster performance compared to SHA-2, while generating hashes of the same length as SHA-256.
+It returns a BLAKE3 hash as a byte array with type FixedString(32).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">BLAKE3(message)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>message</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the 32-byte BLAKE3 hash of the input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(32)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>hash</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(BLAKE3('ABC'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(BLAKE3('ABC'))───────────────────────────────────────────────┐
+│ D1717274597CF0289694F75D96D444B992A096F1AFD8E7BBFA6EBB1D360FEDFC │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="MD4">MD4<a aria-label="Direct link to MD4" class="hash-link" href="#MD4" title="Direct link to MD4">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the MD4 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">MD4(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the MD4 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(MD4('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(MD4('abc'))──────────────────┐
+│ A448017AAF21D8525FC10AE87AA6729D │
+└──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="MD5">MD5<a aria-label="Direct link to MD5" class="hash-link" href="#MD5" title="Direct link to MD5">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the MD5 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">MD5(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the MD5 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(MD5('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(MD5('abc'))──────────────────┐
+│ 900150983CD24FB0D6963F7D28E17F72 │
+└──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="RIPEMD160">RIPEMD160<a aria-label="Direct link to RIPEMD160" class="hash-link" href="#RIPEMD160" title="Direct link to RIPEMD160">​</a></h2>
+<p>Introduced in: v24.10.0</p>
+<p>Calculates the RIPEMD-160 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">RIPEMD160(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the RIPEMD160 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(20)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(RIPEMD160('The quick brown fox jumps over the lazy dog'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─HEX(RIPEMD160('The quick brown fox jumps over the lazy dog'))─┐
+│ 37F332F68DB77BD9D7EDD4969571AD671CF9DD3B                      │
+└───────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA1">SHA1<a aria-label="Direct link to SHA1" class="hash-link" href="#SHA1" title="Direct link to SHA1">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA1 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA1(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA1 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(20)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA1('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA1('abc'))─────────────────────────┐
+│ A9993E364706816ABA3E25717850C26C9CD0D89D │
+└──────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA224">SHA224<a aria-label="Direct link to SHA224" class="hash-link" href="#SHA224" title="Direct link to SHA224">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA224 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA224(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input value to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA224 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(28)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA224('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA224('abc'))───────────────────────────────────────┐
+│ 23097D223405D8228642A477BDA255B32AADBCE4BDA0B3F7E36C9DA7 │
+└──────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA256">SHA256<a aria-label="Direct link to SHA256" class="hash-link" href="#SHA256" title="Direct link to SHA256">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA256 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA256(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA256 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(32)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA256('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA256('abc'))───────────────────────────────────────────────┐
+│ BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA384">SHA384<a aria-label="Direct link to SHA384" class="hash-link" href="#SHA384" title="Direct link to SHA384">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA384 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA384(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA384 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(48)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA384('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA384('abc'))───────────────────────────────────────────────────────────────────────────────┐
+│ CB00753F45A35E8BB5A03D699AC65007272C32AB0EDED1631A8B605A43FF5BED8086072BA1E7CC2358BAECA134C825A7 │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA512">SHA512<a aria-label="Direct link to SHA512" class="hash-link" href="#SHA512" title="Direct link to SHA512">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA512 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA512(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA512 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA512('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA512('abc'))───────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ DDAF35A193617ABACC417349AE20413112E6FA4E89A97EA20A9EEEE64B55D39A2192992A274FC1A836BA3C23A3FEEBBD454D4423643CE80E2A9AC94FA54CA49F │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="SHA512_256">SHA512_256<a aria-label="Direct link to SHA512_256" class="hash-link" href="#SHA512_256" title="Direct link to SHA512_256">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the SHA512_256 hash of the given string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHA512_256(s)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the SHA512_256 hash of the given input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(32)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(SHA512_256('abc'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(SHA512_256('abc'))───────────────────────────────────────────┐
+│ 53048E2681941EF99B2E29B76B4C7DABE4C2D0C634FC6D46E0E2F13107E7AF23 │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="URLHash">URLHash<a aria-label="Direct link to URLHash" class="hash-link" href="#URLHash" title="Direct link to URLHash">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>A fast, decent-quality non-cryptographic hash function for a string obtained from a URL using some type of normalization.</p>
+<p>This hash function has two modes:</p>
+<table><thead><tr><th>Mode<th>Description<tbody><tr><td><code>URLHash(url)</code><td>Calculates a hash from a string without one of the trailing symbols <code>/</code>,<code>?</code> or <code>#</code> at the end, if present.<tr><td><code>URLHash(url, N)</code><td>Calculates a hash from a string up to the N level in the URL hierarchy, without one of the trailing symbols <code>/</code>,<code>?</code> or <code>#</code> at the end, if present. Levels are the same as in <code>URLHierarchy</code>.</td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">URLHash(url[, N])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>N</code> — Optional. Level in the URL hierarchy. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of <code>url</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT URLHash('https://www.clickhouse.com')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─URLHash('htt⋯house.com')─┐
+│     13614512636072854701 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Hash of url with specified level</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT URLHash('https://www.clickhouse.com/docs', 0);
+SELECT URLHash('https://www.clickhouse.com/docs', 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-- hash of https://www.clickhouse.com
+┌─URLHash('htt⋯m/docs', 0)─┐
+│     13614512636072854701 │
+└──────────────────────────┘
+-- hash of https://www.clickhouse.com/docs
+┌─URLHash('htt⋯m/docs', 1)─┐
+│     13167253331440520598 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cityHash64">cityHash64<a aria-label="Direct link to cityHash64" class="hash-link" href="#cityHash64" title="Direct link to cityHash64">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Produces a 64-bit <a href="https://github.com/google/cityhash" rel="noopener noreferrer" target="_blank">CityHash</a> hash value.</p>
+<p>This is a fast non-cryptographic hash function.
+It uses the CityHash algorithm for string parameters and implementation-specific fast non-cryptographic hash function for parameters with other data types.
+The function uses the CityHash combinator to get the final results.</p>
+<div class="theme-admonition theme-admonition-info alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>Google changed the algorithm of CityHash after it was added to ClickHouse.
+In other words, ClickHouse's cityHash64 and Google's upstream CityHash now produce different results.
+ClickHouse cityHash64 corresponds to CityHash v1.0.2.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cityHash64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Call example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cityHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS CityHash, toTypeName(CityHash) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────CityHash─┬─type───┐
+│ 12072650598913549138 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Computing the checksum of the entire table with accuracy up to the row order</strong></p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE users (
+    id UInt32,
+    name String,
+    age UInt8,
+    city String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO users VALUES
+(1, 'Alice', 25, 'New York'),
+(2, 'Bob', 30, 'London'),
+(3, 'Charlie', 35, 'Tokyo');
+
+SELECT groupBitXor(cityHash64(*)) FROM users;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─groupBitXor(⋯age, city))─┐
+│     11639977218258521182 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="farmFingerprint64">farmFingerprint64<a aria-label="Direct link to farmFingerprint64" class="hash-link" href="#farmFingerprint64" title="Direct link to farmFingerprint64">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Produces a 64-bit <a href="https://github.com/google/farmhash" rel="noopener noreferrer" target="_blank">FarmHash</a> value using the <code>Fingerprint64</code> method.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p><code>farmFingerprint64</code> is preferred for a stable and portable value over <a href="#farmHash64"><code>farmHash64</code></a>.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">farmFingerprint64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT farmFingerprint64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS FarmFingerprint, toTypeName(FarmFingerprint) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────FarmFingerprint─┬─type───┐
+│ 5752020380710916328 │ UInt64 │
+└─────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="farmHash64">farmHash64<a aria-label="Direct link to farmHash64" class="hash-link" href="#farmHash64" title="Direct link to farmHash64">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Produces a 64-bit <a href="https://github.com/google/farmhash" rel="noopener noreferrer" target="_blank">FarmHash</a> using the <code>Hash64</code> method.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p><a href="#farmFingerprint64"><code>farmFingerprint64</code></a> is preferred for a stable and portable value.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">farmHash64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT farmHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS FarmHash, toTypeName(FarmHash) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────FarmHash─┬─type───┐
+│ 18125596431186471178 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="gccMurmurHash">gccMurmurHash<a aria-label="Direct link to gccMurmurHash" class="hash-link" href="#gccMurmurHash" title="Direct link to gccMurmurHash">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Computes the 64-bit <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash2</a> hash of the input value using the same seed as used by <a href="https://github.com/gcc-mirror/gcc/blob/41d6b10e96a1de98e90a7c0378437c3255814b16/libstdc%2B%2B-v3/include/bits/functional_hash.h#L191" rel="noopener noreferrer" target="_blank">GCC</a>.</p>
+<p>It is portable between Clang and GCC builds.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">gccMurmurHash(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the calculated hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    gccMurmurHash(1, 2, 3) AS res1,
+    gccMurmurHash(('a', [1, 2, 3], 4, (4, ['foo', 'bar'], 1, (1, 2)))) AS res2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────────res1─┬────────────────res2─┐
+│ 12384823029245979431 │ 1188926775431157506 │
+└──────────────────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="halfMD5">halfMD5<a aria-label="Direct link to halfMD5" class="hash-link" href="#halfMD5" title="Direct link to halfMD5">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p><a href="/docs/sql-reference/functions/type-conversion-functions#reinterpretAsString">Interprets</a> all the input
+parameters as strings and calculates the MD5 hash value for each of them. Then combines hashes, takes the first 8 bytes of the hash of the
+resulting string, and interprets them as <a href="/docs/sql-reference/data-types/int-uint">UInt64</a> in big-endian byte order. The function is
+relatively slow (5 million short strings per second per processor core).</p>
+<p>Consider using the <a href="#sipHash64"><code>sipHash64</code></a> function instead.</p>
+<p>The function takes a variable number of input parameters.
+Arguments can be any of the supported data types.
+For some data types calculated value of hash function may be the same for the same values even if types of arguments differ (integers of different size, named and unnamed Tuple with the same data, Map and the corresponding Array(Tuple(key, value)) type with the same data).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">halfMD5(arg1[, arg2, ..., argN])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ..., argN]</code> — Variable number of arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed half MD5 hash of the given input params returned as a <code>UInt64</code> in big-endian byte order. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT HEX(halfMD5('abc', 'cde', 'fgh'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(halfMD5('abc', 'cde', 'fgh'))─┐
+│ 2C9506B7374CFAF4                  │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="hiveHash">hiveHash<a aria-label="Direct link to hiveHash" class="hash-link" href="#hiveHash" title="Direct link to hiveHash">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates a "HiveHash" from a string.
+This is just <a href="#javaHash"><code>JavaHash</code></a> with zeroed out sign bits.
+This function is used in <a href="https://en.wikipedia.org/wiki/Apache_Hive" rel="noopener noreferrer" target="_blank">Apache Hive</a> for versions before 3.0.</p>
+<div class="theme-admonition theme-admonition-caution alert alert--warning admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 16 16"><path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This hash function is unperformant.
+Use it only when this algorithm is already used in another system and you need to calculate the same result.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">hiveHash(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — Input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed "hive hash" of the input string. <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hiveHash('Hello, world!');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hiveHash('Hello, world!')─┐
+│                 267439093 │
+└───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="icebergHash">icebergHash<a aria-label="Direct link to icebergHash" class="hash-link" href="#icebergHash" title="Direct link to icebergHash">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Implements the logic of the iceberg <a href="https://iceberg.apache.org/spec/#appendix-b-32-bit-hash-requirements" rel="noopener noreferrer" target="_blank">hashing transform</a></p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">icebergHash(value)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>value</code> — Source value to take the hash of <a href="/docs/sql-reference/data-types/int-uint"><code>Integer</code></a> or <a href="/docs/sql-reference/data-types/boolean"><code>Bool</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a> or <a href="/docs/sql-reference/data-types/uuid"><code>UUID</code></a> or <a href="/docs/sql-reference/data-types/date"><code>Date</code></a> or <a href="/docs/sql-reference/data-types/time"><code>Time</code></a> or <a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a 32-bit Murmur3 hash, x86 variant, seeded with 0 <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT icebergHash(1.0 :: Float32)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-142385009
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intHash32">intHash32<a aria-label="Direct link to intHash32" class="hash-link" href="#intHash32" title="Direct link to intHash32">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates a 32-bit hash of an integer.</p>
+<p>The hash function is relatively fast but not cryptographic hash function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intHash32(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — Integer to hash. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 32-bit hash code of the input integer <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intHash32(42);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─intHash32(42)─┐
+│    1228623923 │
+└───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intHash64">intHash64<a aria-label="Direct link to intHash64" class="hash-link" href="#intHash64" title="Direct link to intHash64">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates a 64-bit hash of an integer.</p>
+<p>The hash function is relatively fast (even faster than <a href="#intHash32"><code>intHash32</code></a>) but not a cryptographic hash function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intHash64(int)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>int</code> — Integer to hash. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>64-bit hash code. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intHash64(42);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────intHash64(42)─┐
+│ 11490350930367293593 │
+└──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="javaHash">javaHash<a aria-label="Direct link to javaHash" class="hash-link" href="#javaHash" title="Direct link to javaHash">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates JavaHash from:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="http://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/String.java#l1452" rel="noopener noreferrer" target="_blank">string</a>,</li>
+<li class="custom-li"><a href="https://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/Byte.java#l405" rel="noopener noreferrer" target="_blank">Byte</a>,</li>
+<li class="custom-li"><a href="https://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/Short.java#l410" rel="noopener noreferrer" target="_blank">Short</a>,</li>
+<li class="custom-li"><a href="https://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/Integer.java#l959" rel="noopener noreferrer" target="_blank">Integer</a>,</li>
+<li class="custom-li"><a href="https://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/Long.java#l1060" rel="noopener noreferrer" target="_blank">Long</a>.</li>
+</ul>
+<div class="theme-admonition theme-admonition-caution alert alert--warning admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 16 16"><path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This hash function is unperformant.
+Use it only when this algorithm is already in use in another system and you need to calculate the same result.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Java only supports calculating the hash of signed integers,
+so if you want to calculate a hash of unsigned integers you must cast them to the proper signed ClickHouse types.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">javaHash(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — Input value to hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of <code>arg</code> <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT javaHash(toInt32(123));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─javaHash(toInt32(123))─┐
+│               123      │
+└────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example 2</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT javaHash('Hello, world!');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─javaHash('Hello, world!')─┐
+│               -1880044555 │
+└───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="javaHashUTF16LE">javaHashUTF16LE<a aria-label="Direct link to javaHashUTF16LE" class="hash-link" href="#javaHashUTF16LE" title="Direct link to javaHashUTF16LE">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/jdk/file/478a4add975b/src/share/classes/java/lang/String.java#l1452" rel="noopener noreferrer" target="_blank">JavaHash</a> from a string, assuming it contains bytes representing a string in UTF-16LE encoding.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">javaHashUTF16LE(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — A string in UTF-16LE encoding. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the UTF-16LE encoded string. <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT javaHashUTF16LE(convertCharset('test', 'utf-8', 'utf-16le'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─javaHashUTF16LE(convertCharset('test', 'utf-8', 'utf-16le'))─┐
+│                                                      3556498 │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="jumpConsistentHash">jumpConsistentHash<a aria-label="Direct link to jumpConsistentHash" class="hash-link" href="#jumpConsistentHash" title="Direct link to jumpConsistentHash">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the <a href="https://arxiv.org/pdf/1406.2294.pdf" rel="noopener noreferrer" target="_blank">jump consistent hash</a> for an integer.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">jumpConsistentHash(key, buckets)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>key</code> — The input key. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>buckets</code> — The number of buckets. <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT jumpConsistentHash(256, 4)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─jumpConsistentHash(256, 4)─┐
+│                          3 │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="kafkaMurmurHash">kafkaMurmurHash<a aria-label="Direct link to kafkaMurmurHash" class="hash-link" href="#kafkaMurmurHash" title="Direct link to kafkaMurmurHash">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Calculates the 32-bit <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash2</a> hash of the input value using the same seed as used by <a href="https://github.com/apache/kafka/blob/461c5cfe056db0951d9b74f5adc45973670404d7/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L482" rel="noopener noreferrer" target="_blank">Kafka</a> and without the highest bit to be compatible with <a href="https://github.com/apache/kafka/blob/139f7709bd3f5926901a21e55043388728ccca78/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java#L328" rel="noopener noreferrer" target="_blank">Default Partitioner</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">kafkaMurmurHash(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of parameters for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the calculated hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    kafkaMurmurHash('foobar') AS res1,
+    kafkaMurmurHash(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS res2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────res1─┬─────res2─┐
+│ 1357151166 │ 85479775 │
+└────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="keccak256">keccak256<a aria-label="Direct link to keccak256" class="hash-link" href="#keccak256" title="Direct link to keccak256">​</a></h2>
+<p>Introduced in: v25.4.0</p>
+<p>Calculates the Keccak-256 cryptographic hash of the given string.
+This hash function is widely used in blockchain applications, particularly Ethereum.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">keccak256(message)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>message</code> — The input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the 32-byte Keccak-256 hash of the input string as a fixed-length string. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(32)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(keccak256('hello'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(keccak256('hello'))──────────────────────────────────────────┐
+│ 1C8AFF950685C2ED4BC3174F3472287B56D9517B9C948127319A09A7A36DEAC8 │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="kostikConsistentHash">kostikConsistentHash<a aria-label="Direct link to kostikConsistentHash" class="hash-link" href="#kostikConsistentHash" title="Direct link to kostikConsistentHash">​</a></h2>
+<p>Introduced in: v22.6.0</p>
+<p>An O(1) time and space consistent hash algorithm by Konstantin 'Kostik' Oblakov.
+Only efficient with <code>n &lt;= 32768</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">kostikConsistentHash(input, n)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>yandexConsistentHash</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>input</code> — An integer key. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>n</code> — The number of buckets. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT kostikConsistentHash(16045690984833335023, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─kostikConsistentHash(16045690984833335023, 2)─┐
+│                                             1 │
+└───────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="metroHash64">metroHash64<a aria-label="Direct link to metroHash64" class="hash-link" href="#metroHash64" title="Direct link to metroHash64">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Produces a 64-bit <a href="http://www.jandrewrogers.com/2015/05/27/metrohash/" rel="noopener noreferrer" target="_blank">MetroHash</a> hash value.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">metroHash64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT metroHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MetroHash, toTypeName(MetroHash) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────────MetroHash─┬─type───┐
+│ 14235658766382344533 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="murmurHash2_32">murmurHash2_32<a aria-label="Direct link to murmurHash2_32" class="hash-link" href="#murmurHash2_32" title="Direct link to murmurHash2_32">​</a></h2>
+<p>Introduced in: v18.5.0</p>
+<p>Computes the <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash2</a> hash of the input value.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">murmurHash2_32(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT murmurHash2_32(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash2, toTypeName(MurmurHash2) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─MurmurHash2─┬─type───┐
+│  3681770635 │ UInt32 │
+└─────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="murmurHash2_64">murmurHash2_64<a aria-label="Direct link to murmurHash2_64" class="hash-link" href="#murmurHash2_64" title="Direct link to murmurHash2_64">​</a></h2>
+<p>Introduced in: v18.10.0</p>
+<p>Computes the <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash2</a> hash of the input value.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">murmurHash2_64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT murmurHash2_64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash2, toTypeName(MurmurHash2) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────MurmurHash2─┬─type───┐
+│ 11832096901709403633 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="murmurHash3_128">murmurHash3_128<a aria-label="Direct link to murmurHash3_128" class="hash-link" href="#murmurHash3_128" title="Direct link to murmurHash3_128">​</a></h2>
+<p>Introduced in: v18.10.0</p>
+<p>Computes the 128-bit <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash3</a> hash of the input value.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">murmurHash3_128(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 128-bit <code>MurmurHash3</code> hash value of the input arguments. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(murmurHash3_128('foo', 'foo', 'foo'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(murmurHash3_128('foo', 'foo', 'foo'))─┐
+│ F8F7AD9B6CD4CF117A71E277E2EC2931          │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="murmurHash3_32">murmurHash3_32<a aria-label="Direct link to murmurHash3_32" class="hash-link" href="#murmurHash3_32" title="Direct link to murmurHash3_32">​</a></h2>
+<p>Introduced in: v18.10.0</p>
+<p>Produces a <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash3</a> hash value.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">murmurHash3_32(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT murmurHash3_32(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash3, toTypeName(MurmurHash3) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─MurmurHash3─┬─type───┐
+│     2152717 │ UInt32 │
+└─────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="murmurHash3_64">murmurHash3_64<a aria-label="Direct link to murmurHash3_64" class="hash-link" href="#murmurHash3_64" title="Direct link to murmurHash3_64">​</a></h2>
+<p>Introduced in: v18.10.0</p>
+<p>Computes the <a href="https://github.com/aappleby/smhasher" rel="noopener noreferrer" target="_blank">MurmurHash3</a> hash of the input value.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">murmurHash3_64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT murmurHash3_64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash3, toTypeName(MurmurHash3) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────MurmurHash3─┬─type───┐
+│ 11832096901709403633 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHash">ngramMinHash<a aria-label="Direct link to ngramMinHash" class="hash-link" href="#ngramMinHash" title="Direct link to ngramMinHash">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and calculates hash values for each n-gram and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case sensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHash(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHash('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────┐
+│ (18333312859352735453,9054248444481805918) │
+└────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashArg">ngramMinHashArg<a aria-label="Direct link to ngramMinHashArg" class="hash-link" href="#ngramMinHashArg" title="Direct link to ngramMinHashArg">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and returns the n-grams with minimum and maximum hashes, calculated by the <a href="#ngramMinHash"><code>ngramMinHash</code></a> function with the same input.
+It is case sensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashArg(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> n-grams each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashArg('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','Hou','kHo','use'),('Hou','lic','ick','ous','ckH','Cli')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashArgCaseInsensitive">ngramMinHashArgCaseInsensitive<a aria-label="Direct link to ngramMinHashArgCaseInsensitive" class="hash-link" href="#ngramMinHashArgCaseInsensitive" title="Direct link to ngramMinHashArgCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and returns the n-grams with minimum and maximum hashes, calculated by the <a href="#ngramMinHashCaseInsensitive"><code>ngramMinHashCaseInsensitive</code></a> function with the same input.
+It is case insensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashArgCaseInsensitive(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> n-grams each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashArgCaseInsensitive('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','kHo','use','Cli'),('kHo','lic','ick','ous','ckH','Hou')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashArgCaseInsensitiveUTF8">ngramMinHashArgCaseInsensitiveUTF8<a aria-label="Direct link to ngramMinHashArgCaseInsensitiveUTF8" class="hash-link" href="#ngramMinHashArgCaseInsensitiveUTF8" title="Direct link to ngramMinHashArgCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into n-grams of <code>ngramsize</code> symbols and returns the n-grams with minimum and maximum hashes, calculated by the ngramMinHashCaseInsensitiveUTF8 function with the same input.
+It is case insensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashArgCaseInsensitiveUTF8(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> n-grams each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashArgCaseInsensitiveUTF8('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ckH','ous','ick','lic','kHo','use'),('kHo','lic','ick','ous','ckH','Hou')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashArgUTF8">ngramMinHashArgUTF8<a aria-label="Direct link to ngramMinHashArgUTF8" class="hash-link" href="#ngramMinHashArgUTF8" title="Direct link to ngramMinHashArgUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into n-grams of <code>ngramsize</code> symbols and returns the n-grams with minimum and maximum hashes, calculated by the <code>ngramMinHashUTF8</code> function with the same input.
+It is case sensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashArgUTF8(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> n-grams each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashArgUTF8('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','Hou','kHo','use'),('kHo','Hou','lic','ick','ous','ckH')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashCaseInsensitive">ngramMinHashCaseInsensitive<a aria-label="Direct link to ngramMinHashCaseInsensitive" class="hash-link" href="#ngramMinHashCaseInsensitive" title="Direct link to ngramMinHashCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and calculates hash values for each n-gram and returns a tuple with these hashes
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case insensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashCaseInsensitive(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String. <a href="/docs/sql-reference/data-types/string">String</a>. - <code>ngramsize</code> — The size of an n-gram. Optional. Possible values: any number from <code>1</code> to <code>25</code>. Default value: <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>. - <code>hashnum</code> — The number of minimum and maximum hashes used to calculate the result. Optional. Possible values: any number from <code>1</code> to <code>25</code>. Default value: <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple">Tuple</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>, <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>). <a href="/docs/sql-reference/data-types/tuple"><code>Tuple</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashCaseInsensitive('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────┐
+│ (2106263556442004574,13203602793651726206) │
+└────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashCaseInsensitiveUTF8">ngramMinHashCaseInsensitiveUTF8<a aria-label="Direct link to ngramMinHashCaseInsensitiveUTF8" class="hash-link" href="#ngramMinHashCaseInsensitiveUTF8" title="Direct link to ngramMinHashCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into n-grams of <code>ngramsize</code> symbols and calculates hash values for each n-gram and returns a tuple with these hashes..
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case insensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashCaseInsensitiveUTF8(string [, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashCaseInsensitiveUTF8('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple───────────────────────────────────────┐
+│ (12493625717655877135,13203602793651726206) │
+└─────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramMinHashUTF8">ngramMinHashUTF8<a aria-label="Direct link to ngramMinHashUTF8" class="hash-link" href="#ngramMinHashUTF8" title="Direct link to ngramMinHashUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into n-grams of <code>ngramsize</code> symbols and calculates hash values for each n-gram and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case sensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramMinHashUTF8(string[, ngramsize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramMinHashUTF8('ClickHouse') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────┐
+│ (18333312859352735453,6742163577938632877) │
+└────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramSimHash">ngramSimHash<a aria-label="Direct link to ngramSimHash" class="hash-link" href="#ngramSimHash" title="Direct link to ngramSimHash">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and returns the n-gram <code>simhash</code>.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramSimHash(string[, ngramsize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the case sensitive <code>simhash</code>. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is<code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the input string. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramSimHash('ClickHouse') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 1627567969 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramSimHashCaseInsensitive">ngramSimHashCaseInsensitive<a aria-label="Direct link to ngramSimHashCaseInsensitive" class="hash-link" href="#ngramSimHashCaseInsensitive" title="Direct link to ngramSimHashCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into n-grams of <code>ngramsize</code> symbols and returns the n-gram <code>simhash</code>.
+It is case insensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramSimHashCaseInsensitive(string[, ngramsize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the case insensitive <code>simhash</code>. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Hash value. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramSimHashCaseInsensitive('ClickHouse') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────Hash─┐
+│ 562180645 │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramSimHashCaseInsensitiveUTF8">ngramSimHashCaseInsensitiveUTF8<a aria-label="Direct link to ngramSimHashCaseInsensitiveUTF8" class="hash-link" href="#ngramSimHashCaseInsensitiveUTF8" title="Direct link to ngramSimHashCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into n-grams of <code>ngramsize</code> symbols and returns the n-gram <code>simhash</code>.
+It is case insensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance">bitHammingDistance</a>. The smaller is the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming Distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramSimHashCaseInsensitiveUTF8(string[, ngramsize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramSimHashCaseInsensitiveUTF8('ClickHouse') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 1636742693 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngramSimHashUTF8">ngramSimHashUTF8<a aria-label="Direct link to ngramSimHashUTF8" class="hash-link" href="#ngramSimHashUTF8" title="Direct link to ngramSimHashUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 encoded string into n-grams of <code>ngramsize</code> symbols and returns the n-gram <code>simhash</code>.
+It is case sensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngramSimHashUTF8(string[, ngramsize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ngramsize</code> — Optional. The size of an n-gram, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngramSimHashUTF8('ClickHouse') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 1628157797 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash128">sipHash128<a aria-label="Direct link to sipHash128" class="hash-link" href="#sipHash128" title="Direct link to sipHash128">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Like <a href="#sipHash64"><code>sipHash64</code></a> but produces a 128-bit hash value, i.e. the final xor-folding state is done up to 128 bits.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">use sipHash128Reference for new projects</div><p>This 128-bit variant differs from the reference implementation and is weaker.
+This version exists because, when it was written, there was no official 128-bit extension for SipHash.
+New projects are advised to use <a href="#sipHash128Reference"><code>sipHash128Reference</code></a>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash128(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a 128-bit <code>SipHash</code> hash value. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(sipHash128('foo', '\x01', 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(sipHash128('foo', '', 3))────┐
+│ 9DE516A64A414D4B1B609415E4523F24 │
+└──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash128Keyed">sipHash128Keyed<a aria-label="Direct link to sipHash128Keyed" class="hash-link" href="#sipHash128Keyed" title="Direct link to sipHash128Keyed">​</a></h2>
+<p>Introduced in: v23.2.0</p>
+<p>Same as <a href="#sipHash128"><code>sipHash128</code></a> but additionally takes an explicit key argument instead of using a fixed key.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">use sipHash128ReferenceKeyed for new projects</div><p>This 128-bit variant differs from the reference implementation and it's weaker.
+This version exists because, when it was written, there was no official 128-bit extension for SipHash.
+New projects should probably use <a href="#sipHash128ReferenceKeyed"><code>sipHash128ReferenceKeyed</code></a>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash128Keyed((k0, k1), [arg1, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>(k0, k1)</code> — A tuple of two UInt64 values representing the key. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></li>
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A 128-bit <code>SipHash</code> hash value of type <a href="/docs/sql-reference/data-types/fixedstring">FixedString(16)</a>. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(sipHash128Keyed((506097522914230528, 1084818905618843912),'foo', '\x01', 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(sipHash128Keyed((506097522914230528, 1084818905618843912), 'foo', '', 3))─┐
+│ B8467F65C8B4CFD9A5F8BD733917D9BF                                              │
+└───────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash128Reference">sipHash128Reference<a aria-label="Direct link to sipHash128Reference" class="hash-link" href="#sipHash128Reference" title="Direct link to sipHash128Reference">​</a></h2>
+<p>Introduced in: v23.2.0</p>
+<p>Like <a href="/docs/sql-reference/functions/hash-functions#sipHash128"><code>sipHash128</code></a> but implements the 128-bit algorithm from the original authors of SipHash.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash128Reference(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 128-bit <code>SipHash</code> hash value of the input arguments. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(sipHash128Reference('foo', '', 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(sipHash128Reference('foo', '', 3))─┐
+│ 4D1BE1A22D7F5933C0873E1698426260       │
+└────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash128ReferenceKeyed">sipHash128ReferenceKeyed<a aria-label="Direct link to sipHash128ReferenceKeyed" class="hash-link" href="#sipHash128ReferenceKeyed" title="Direct link to sipHash128ReferenceKeyed">​</a></h2>
+<p>Introduced in: v23.2.0</p>
+<p>Same as <a href="#sipHash128Reference"><code>sipHash128Reference</code></a> but additionally takes an explicit key argument instead of using a fixed key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash128ReferenceKeyed((k0, k1), arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>(k0, k1)</code> — Tuple of two values representing the key <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></li>
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments for which to compute the hash. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 128-bit <code>SipHash</code> hash value of the input arguments. <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString(16)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(sipHash128Reference('foo', '', 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(sipHash128Reference('foo', '', 3))─┐
+│ 4D1BE1A22D7F5933C0873E1698426260       │
+└────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash64">sipHash64<a aria-label="Direct link to sipHash64" class="hash-link" href="#sipHash64" title="Direct link to sipHash64">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Produces a 64-bit <a href="https://en.wikipedia.org/wiki/SipHash" rel="noopener noreferrer" target="_blank">SipHash</a> hash value.</p>
+<p>This is a cryptographic hash function. It works at least three times faster than the <a href="#MD5"><code>MD5</code></a> hash function.</p>
+<p>The function <a href="/docs/sql-reference/functions/type-conversion-functions#reinterpretAsString">interprets</a> all the input parameters as strings and calculates the hash value for each of them.
+It then combines the hashes using the following algorithm:</p>
+<ol class="custom-ol">
+<li class="custom-li">The first and the second hash value are concatenated to an array which is hashed.</li>
+<li class="custom-li">The previously calculated hash value and the hash of the third input parameter are hashed in a similar way.</li>
+<li class="custom-li">This calculation is repeated for all remaining hash values of the original input.</li>
+</ol>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>the calculated hash values may be equal for the same input values of different argument types.
+This affects for example integer types of different size, named and unnamed <code>Tuple</code> with the same data, <code>Map</code> and the corresponding <code>Array(Tuple(key, value))</code> type with the same data.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash64(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — A variable number of input arguments. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a computed hash value of the input arguments. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sipHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS SipHash, toTypeName(SipHash) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────────SipHash─┬─type───┐
+│ 11400366955626497465 │ UInt64 │
+└──────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sipHash64Keyed">sipHash64Keyed<a aria-label="Direct link to sipHash64Keyed" class="hash-link" href="#sipHash64Keyed" title="Direct link to sipHash64Keyed">​</a></h2>
+<p>Introduced in: v23.2.0</p>
+<p>Like <a href="#sipHash64"><code>sipHash64</code></a> but additionally takes an explicit key argument instead of using a fixed key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sipHash64Keyed((k0, k1), arg1[,arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>(k0, k1)</code> — A tuple of two values representing the key. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></li>
+<li class="custom-li"><code>arg1[,arg2, ...]</code> — A variable number of input arguments. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash of the input values. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sipHash64Keyed((506097522914230528, 1084818905618843912), array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS SipHash, toTypeName(SipHash) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────SipHash─┬─type───┐
+│ 8017656310194184311 │ UInt64 │
+└─────────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHash">wordShingleMinHash<a aria-label="Direct link to wordShingleMinHash" class="hash-link" href="#wordShingleMinHash" title="Direct link to wordShingleMinHash">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words, calculates hash values for each word shingle and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case sensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHash(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHash('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────┐
+│ (16452112859864147620,5844417301642981317) │
+└────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashArg">wordShingleMinHashArg<a aria-label="Direct link to wordShingleMinHashArg" class="hash-link" href="#wordShingleMinHashArg" title="Direct link to wordShingleMinHashArg">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words each and returns the shingles with minimum and maximum word hashes, calculated by the wordShingleMinHash function with the same input.
+It is case sensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashArg(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> word shingles each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashArg('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────┐
+│ (('OLAP','database','analytical'),('online','oriented','processing')) │
+└───────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashArgCaseInsensitive">wordShingleMinHashArgCaseInsensitive<a aria-label="Direct link to wordShingleMinHashArgCaseInsensitive" class="hash-link" href="#wordShingleMinHashArgCaseInsensitive" title="Direct link to wordShingleMinHashArgCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words each and returns the shingles with minimum and maximum word hashes, calculated by the <a href="#wordShingleMinHashCaseInsensitive"><code>wordShingleMinHashCaseInsensitive</code></a> function with the same input.
+It is case insensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashArgCaseInsensitive(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> word shingles each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashArgCaseInsensitive('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────────────────────────────────┐
+│ (('queries','database','analytical'),('oriented','processing','DBMS')) │
+└────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashArgCaseInsensitiveUTF8">wordShingleMinHashArgCaseInsensitiveUTF8<a aria-label="Direct link to wordShingleMinHashArgCaseInsensitiveUTF8" class="hash-link" href="#wordShingleMinHashArgCaseInsensitiveUTF8" title="Direct link to wordShingleMinHashArgCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into parts (shingles) of <code>shinglesize</code> words each and returns the shingles with minimum and maximum word hashes, calculated by the <a href="#wordShingleMinHashCaseInsensitiveUTF8"><code>wordShingleMinHashCaseInsensitiveUTF8</code></a> function with the same input.
+It is case insensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashArgCaseInsensitiveUTF8(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> word shingles each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashArgCaseInsensitiveUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────────────────────────────────┐
+│ (('queries','database','analytical'),('oriented','processing','DBMS')) │
+└────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashArgUTF8">wordShingleMinHashArgUTF8<a aria-label="Direct link to wordShingleMinHashArgUTF8" class="hash-link" href="#wordShingleMinHashArgUTF8" title="Direct link to wordShingleMinHashArgUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into parts (shingles) of <code>shinglesize</code> words each and returns the shingles with minimum and maximum word hashes, calculated by the <a href="#wordShingleMinHashUTF8"><code>wordShingleMinHashUTF8</code></a> function with the same input.
+It is case sensitive.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashArgUTF8(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two tuples with <code>hashnum</code> word shingles each. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Tuple(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashArgUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────────────────────────────────┐
+│ (('OLAP','database','analytical'),('online','oriented','processing')) │
+└───────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashCaseInsensitive">wordShingleMinHashCaseInsensitive<a aria-label="Direct link to wordShingleMinHashCaseInsensitive" class="hash-link" href="#wordShingleMinHashCaseInsensitive" title="Direct link to wordShingleMinHashCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words, calculates hash values for each word shingle and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case insensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashCaseInsensitive(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashCaseInsensitive('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────┐
+│ (3065874883688416519,1634050779997673240) │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashCaseInsensitiveUTF8">wordShingleMinHashCaseInsensitiveUTF8<a aria-label="Direct link to wordShingleMinHashCaseInsensitiveUTF8" class="hash-link" href="#wordShingleMinHashCaseInsensitiveUTF8" title="Direct link to wordShingleMinHashCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into parts (shingles) of <code>shinglesize</code> words, calculates hash values for each word shingle and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case insensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashCaseInsensitiveUTF8(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashCaseInsensitiveUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple─────────────────────────────────────┐
+│ (3065874883688416519,1634050779997673240) │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleMinHashUTF8">wordShingleMinHashUTF8<a aria-label="Direct link to wordShingleMinHashUTF8" class="hash-link" href="#wordShingleMinHashUTF8" title="Direct link to wordShingleMinHashUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into parts (shingles) of <code>shinglesize</code> words, calculates hash values for each word shingle and returns a tuple with these hashes.
+Uses <code>hashnum</code> minimum hashes to calculate the minimum hash and <code>hashnum</code> maximum hashes to calculate the maximum hash.
+It is case sensitive.</p>
+<p>Can be used to detect semi-duplicate strings with <a href="/docs/sql-reference/functions/tuple-functions#tupleHammingDistance"><code>tupleHammingDistance</code></a>.
+For two strings, if the returned hashes are the same for both strings, then those strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleMinHashUTF8(string[, shinglesize, hashnum])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+<li class="custom-li"><code>hashnum</code> — Optional. The number of minimum and maximum hashes used to calculate the result, any number from <code>1</code> to <code>25</code>. The default value is <code>6</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with two hashes — the minimum and the maximum. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(UInt64, UInt64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleMinHashUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Tuple──────────────────────────────────────┐
+│ (16452112859864147620,5844417301642981317) │
+└────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleSimHash">wordShingleSimHash<a aria-label="Direct link to wordShingleSimHash" class="hash-link" href="#wordShingleSimHash" title="Direct link to wordShingleSimHash">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words and returns the word shingle <code>simhash</code>.
+Is is case sensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleSimHash(string[, shinglesize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleSimHash('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 2328277067 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleSimHashCaseInsensitive">wordShingleSimHashCaseInsensitive<a aria-label="Direct link to wordShingleSimHashCaseInsensitive" class="hash-link" href="#wordShingleSimHashCaseInsensitive" title="Direct link to wordShingleSimHashCaseInsensitive">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a ASCII string into parts (shingles) of <code>shinglesize</code> words and returns the word shingle <code>simhash</code>.
+It is case insensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleSimHashCaseInsensitive(string[, shinglesize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleSimHashCaseInsensitive('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 2194812424 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleSimHashCaseInsensitiveUTF8">wordShingleSimHashCaseInsensitiveUTF8<a aria-label="Direct link to wordShingleSimHashCaseInsensitiveUTF8" class="hash-link" href="#wordShingleSimHashCaseInsensitiveUTF8" title="Direct link to wordShingleSimHashCaseInsensitiveUTF8">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Splits a UTF-8 encoded string into parts (shingles) of <code>shinglesize</code> words and returns the word shingle <code>simhash</code>.
+It is case insensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming Distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleSimHashCaseInsensitiveUTF8(string[, shinglesize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleSimHashCaseInsensitiveUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 2194812424 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wordShingleSimHashUTF8">wordShingleSimHashUTF8<a aria-label="Direct link to wordShingleSimHashUTF8" class="hash-link" href="#wordShingleSimHashUTF8" title="Direct link to wordShingleSimHashUTF8">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Splits a UTF-8 string into parts (shingles) of <code>shinglesize</code> words and returns the word shingle <code>simhash</code>.
+It is case sensitive.</p>
+<p>Can be used for detection of semi-duplicate strings with <a href="/docs/sql-reference/functions/bit-functions#bitHammingDistance"><code>bitHammingDistance</code></a>.
+The smaller the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming distance</a> of the calculated <code>simhashes</code> of two strings, the more likely these strings are the same.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wordShingleSimHashUTF8(string[, shinglesize])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — String for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>shinglesize</code> — Optional. The size of a word shingle, any number from <code>1</code> to <code>25</code>. The default value is <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed hash value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wordShingleSimHashUTF8('ClickHouse® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Hash─┐
+│ 2328277067 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wyHash64">wyHash64<a aria-label="Direct link to wyHash64" class="hash-link" href="#wyHash64" title="Direct link to wyHash64">​</a></h2>
+<p>Introduced in: v22.7.0</p>
+<p>Computes a 64-bit <a href="https://github.com/wangyi-fudan/wyhash" rel="noopener noreferrer" target="_blank">wyHash64</a> hash value.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">wyHash64(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — String argument for which to compute the hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 64-bit hash value <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT wyHash64('ClickHouse') AS Hash;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">12336419557878201794
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="xxHash32">xxHash32<a aria-label="Direct link to xxHash32" class="hash-link" href="#xxHash32" title="Direct link to xxHash32">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates a <a href="http://cyan4973.github.io/xxHash/" rel="noopener noreferrer" target="_blank">xxHash</a> from a string.</p>
+<p>For the 64-bit version see <a href="#xxHash64"><code>xxHash64</code></a></p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">xxHash32(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — Input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 32-bit hash of the input string. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT xxHash32('Hello, world!');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─xxHash32('Hello, world!')─┐
+│                 834093149 │
+└───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="xxHash64">xxHash64<a aria-label="Direct link to xxHash64" class="hash-link" href="#xxHash64" title="Direct link to xxHash64">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates a <a href="http://cyan4973.github.io/xxHash/" rel="noopener noreferrer" target="_blank">xxHash</a> from a string.</p>
+<p>For the 32-bit version see <a href="#xxHash32"><code>xxHash32</code></a></p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">xxHash64(arg)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg</code> — Input string to hash. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 64-bit hash of the input string. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT xxHash64('Hello, world!');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─xxHash64('Hello, world!')─┐
+│      17691043854468224118 │
+└───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="xxh3">xxh3<a aria-label="Direct link to xxh3" class="hash-link" href="#xxh3" title="Direct link to xxh3">​</a></h2>
+<p>Introduced in: v22.12.0</p>
+<p>Computes a <a href="https://github.com/Cyan4973/xxHash" rel="noopener noreferrer" target="_blank">XXH3</a> 64-bit hash value.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">xxh3(expr)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>expr</code> — A list of expressions of any data type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 64-bit <code>xxh3</code> hash value <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT xxh3('ClickHouse')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">18009318874338624809
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="xxh3_128">xxh3_128<a aria-label="Direct link to xxh3_128" class="hash-link" href="#xxh3_128" title="Direct link to xxh3_128">​</a></h2>
+<p>Introduced in: v26.2.0</p>
+<p>Computes a <a href="https://github.com/Cyan4973/xxHash" rel="noopener noreferrer" target="_blank">XXH3</a> 128-bit hash value.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">xxh3_128(expr)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>expr</code> — A list of expressions of any data type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the computed 128-bit <code>xxh3</code> hash value <a href="/docs/sql-reference/data-types/int-uint"><code>UInt128</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(xxh3_128('ClickHouse'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3A038784C52804B4DBA43A038784C528
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/geo/svg"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">SVG</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/in-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">IN Operator</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#BLAKE3">BLAKE3</a><li><a class="table-of-contents__link toc-highlight" href="#MD4">MD4</a><li><a class="table-of-contents__link toc-highlight" href="#MD5">MD5</a><li><a class="table-of-contents__link toc-highlight" href="#RIPEMD160">RIPEMD160</a><li><a class="table-of-contents__link toc-highlight" href="#SHA1">SHA1</a><li><a class="table-of-contents__link toc-highlight" href="#SHA224">SHA224</a><li><a class="table-of-contents__link toc-highlight" href="#SHA256">SHA256</a><li><a class="table-of-contents__link toc-highlight" href="#SHA384">SHA384</a><li><a class="table-of-contents__link toc-highlight" href="#SHA512">SHA512</a><li><a class="table-of-contents__link toc-highlight" href="#SHA512_256">SHA512_256</a><li><a class="table-of-contents__link toc-highlight" href="#URLHash">URLHash</a><li><a class="table-of-contents__link toc-highlight" href="#cityHash64">cityHash64</a><li><a class="table-of-contents__link toc-highlight" href="#farmFingerprint64">farmFingerprint64</a><li><a class="table-of-contents__link toc-highlight" href="#farmHash64">farmHash64</a><li><a class="table-of-contents__link toc-highlight" href="#gccMurmurHash">gccMurmurHash</a><li><a class="table-of-contents__link toc-highlight" href="#halfMD5">halfMD5</a><li><a class="table-of-contents__link toc-highlight" href="#hiveHash">hiveHash</a><li><a class="table-of-contents__link toc-highlight" href="#icebergHash">icebergHash</a><li><a class="table-of-contents__link toc-highlight" href="#intHash32">intHash32</a><li><a class="table-of-contents__link toc-highlight" href="#intHash64">intHash64</a><li><a class="table-of-contents__link toc-highlight" href="#javaHash">javaHash</a><li><a class="table-of-contents__link toc-highlight" href="#javaHashUTF16LE">javaHashUTF16LE</a><li><a class="table-of-contents__link toc-highlight" href="#jumpConsistentHash">jumpConsistentHash</a><li><a class="table-of-contents__link toc-highlight" href="#kafkaMurmurHash">kafkaMurmurHash</a><li><a class="table-of-contents__link toc-highlight" href="#keccak256">keccak256</a><li><a class="table-of-contents__link toc-highlight" href="#kostikConsistentHash">kostikConsistentHash</a><li><a class="table-of-contents__link toc-highlight" href="#metroHash64">metroHash64</a><li><a class="table-of-contents__link toc-highlight" href="#murmurHash2_32">murmurHash2_32</a><li><a class="table-of-contents__link toc-highlight" href="#murmurHash2_64">murmurHash2_64</a><li><a class="table-of-contents__link toc-highlight" href="#murmurHash3_128">murmurHash3_128</a><li><a class="table-of-contents__link toc-highlight" href="#murmurHash3_32">murmurHash3_32</a><li><a class="table-of-contents__link toc-highlight" href="#murmurHash3_64">murmurHash3_64</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHash">ngramMinHash</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashArg">ngramMinHashArg</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashArgCaseInsensitive">ngramMinHashArgCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashArgCaseInsensitiveUTF8">ngramMinHashArgCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashArgUTF8">ngramMinHashArgUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashCaseInsensitive">ngramMinHashCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashCaseInsensitiveUTF8">ngramMinHashCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#ngramMinHashUTF8">ngramMinHashUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#ngramSimHash">ngramSimHash</a><li><a class="table-of-contents__link toc-highlight" href="#ngramSimHashCaseInsensitive">ngramSimHashCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#ngramSimHashCaseInsensitiveUTF8">ngramSimHashCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#ngramSimHashUTF8">ngramSimHashUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash128">sipHash128</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash128Keyed">sipHash128Keyed</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash128Reference">sipHash128Reference</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash128ReferenceKeyed">sipHash128ReferenceKeyed</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash64">sipHash64</a><li><a class="table-of-contents__link toc-highlight" href="#sipHash64Keyed">sipHash64Keyed</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHash">wordShingleMinHash</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashArg">wordShingleMinHashArg</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashArgCaseInsensitive">wordShingleMinHashArgCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashArgCaseInsensitiveUTF8">wordShingleMinHashArgCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashArgUTF8">wordShingleMinHashArgUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashCaseInsensitive">wordShingleMinHashCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashCaseInsensitiveUTF8">wordShingleMinHashCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleMinHashUTF8">wordShingleMinHashUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleSimHash">wordShingleSimHash</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleSimHashCaseInsensitive">wordShingleSimHashCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleSimHashCaseInsensitiveUTF8">wordShingleSimHashCaseInsensitiveUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wordShingleSimHashUTF8">wordShingleSimHashUTF8</a><li><a class="table-of-contents__link toc-highlight" href="#wyHash64">wyHash64</a><li><a class="table-of-contents__link toc-highlight" href="#xxHash32">xxHash32</a><li><a class="table-of-contents__link toc-highlight" href="#xxHash64">xxHash64</a><li><a class="table-of-contents__link toc-highlight" href="#xxh3">xxh3</a><li><a class="table-of-contents__link toc-highlight" href="#xxh3_128">xxh3_128</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

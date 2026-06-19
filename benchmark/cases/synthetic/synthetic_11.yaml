@@ -1,0 +1,20 @@
+case_id: synthetic_11
+source: synthetic
+sql: |
+  SELECT user_id, COUNT(*) FROM events
+  GROUP BY user_id
+  HAVING country = 'RU' AND COUNT(*) > 100
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: having_without_aggregate_to_where
+  detected_by_rule: R-011
+  severity: medium
+  description: Неагрегатное условие country = 'RU' стоит в HAVING вместо WHERE.
+expected_rules_to_fire:
+- R-011
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-011.
+expected_findings_count: 1
+status: validated

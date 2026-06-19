@@ -1,0 +1,41 @@
+id: D-013
+name: deeply_nested_subqueries
+tier: detector
+category: readability_and_optimization
+status: proposed
+statement: глубина вложенности AST > 3
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: low
+detection_method:
+  ast_pattern: глубина вложенности AST > 3
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"Глубина вложенности = {N}. Рассмотрите CTE (WITH ... AS)."
+  --- ## Фаза 5. Содержание Tier 2 карточек {#фаза-5} ### Ресёрч перед заполнением
+  Перед заполнением cost_model обязательно изучи: - https://clickhouse.com/docs/optimize/query-optimization
+  - https://clickhouse.com/docs/sql-reference/statements/explain - github.com/ClickHouse/ClickHouse/tree/master/src/Processors/QueryPlan
+  ### Шаблон Tier 2 карточки ```yaml id: R-1XX name: rule_name tier: 2 category: category_name
+  status: proposed statement: | Описание DDL-рекомендации. preconditions: syntactic:
+  [] semantic: [] stats_based: [] cost_model: metric: "что измеряем" formula: | Формула
+  оценки выигрыша baseline: "как считаем до" projected: "как считаем после" confidence_level:
+  high | medium | low confidence_rationale: | Почему такой уровень уверенности. ddl_template:
+  | DDL, который предлагается пользователю risks: [] opt_in: true example_scenario:
+  | Пример: данные, запрос, ожидание. references: [] ``` ### Содержание 12 Tier 2
+  карточек'
+false_positives: []

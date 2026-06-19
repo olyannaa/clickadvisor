@@ -1,0 +1,18 @@
+case_id: synthetic_14
+source: synthetic
+sql: |
+  SELECT url, COUNT(*) FROM logs GROUP BY url
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: groupby_long_string_to_hash
+  detected_by_rule: R-014
+  severity: medium
+  description: GROUP BY по сырому строковому url может требовать advisory-замены на hash key.
+expected_rules_to_fire:
+- R-014
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-014.
+expected_findings_count: 1
+status: validated

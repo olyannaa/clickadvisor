@@ -1,0 +1,36 @@
+id: R-001
+name: count_distinct_to_uniqExact
+tier: 1A
+category: aggregation_specialization
+status: proposed
+statement: 'Заменить COUNT(DISTINCT x) на uniqExact(x). Семантически эквивалентно,
+
+  но использует специализированный single-pass агрегат ClickHouse.'
+preconditions:
+  syntactic:
+  - AST содержит COUNT с модификатором DISTINCT
+  - Аргумент — единственное выражение (не tuple)
+  semantic: []
+  data: []
+proof: 'По определению uniqExact в документации ClickHouse: "Вычисляет точное
+
+  количество различных значений аргумента." Стандарт SQL определяет
+
+  COUNT(DISTINCT x) идентично. NULL-семантика совпадает: обе функции
+
+  игнорируют NULL.'
+explain_template: ClickHouse реализует COUNT(DISTINCT x) как общий distinct-агрегат, которому нужно хранить множество увиденных значений и потом вычислять его размер. uniqExact — это специальная функция ровно для этой задачи, поэтому движок может выполнять тот же смысл более прямым и дешёвым путём. Результат тот же, но внутренний план обычно проще по памяти и накладным расходам.
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT COUNT(DISTINCT user_id) FROM events
+example_after: SELECT uniqExact(user_id) FROM events
+expected_speedup:
+  estimate: 2-5×
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/reference/uniqexact
+- 'ANSI SQL:2016 §10.9 General Rules: COUNT(DISTINCT)'

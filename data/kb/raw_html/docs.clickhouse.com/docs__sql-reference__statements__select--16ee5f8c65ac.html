@@ -1,0 +1,145 @@
+<h1>SELECT Query | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">SELECT</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/index.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>SELECT Query</h1></header><p><code>SELECT</code> queries perform data retrieval. By default, the requested data is returned to the client, while in conjunction with <a href="/docs/sql-reference/statements/insert-into">INSERT INTO</a> it can be forwarded to a different table.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="wrapper_EBtA" style="height:358.15000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">[WITH expr_list(subquery)]
+SELECT [DISTINCT [ON (column1, column2, ...)]] expr_list
+[FROM [db.]table | (subquery) | table_function] [FINAL]
+[SAMPLE sample_coeff]
+[ARRAY JOIN ...]
+[GLOBAL] [ANY|ALL|ASOF] [INNER|LEFT|RIGHT|FULL|CROSS] [OUTER|SEMI|ANTI] JOIN (subquery)|table [(alias1 [, alias2 ...])] (ON &lt;expr_list&gt;)|(USING &lt;column_list&gt;)
+[PREWHERE expr]
+[WHERE expr]
+[GROUP BY expr_list] [WITH ROLLUP|WITH CUBE] [WITH TOTALS]
+[HAVING expr]
+[WINDOW window_expr_list]
+[QUALIFY expr]
+[ORDER BY expr_list] [WITH FILL] [FROM expr] [TO expr] [STEP expr] [INTERPOLATE [(expr_list)]]
+[LIMIT [offset_value, ]n BY columns]
+[LIMIT [n, ]m] [WITH TIES]
+[SETTINGS ...]
+[UNION  ...]
+[INTO OUTFILE filename [TRUNCATE] [COMPRESSION type [LEVEL level]] ]
+[FORMAT format]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>All clauses are optional, except for the required list of expressions immediately after <code>SELECT</code> which is covered in more detail <a href="#select-clause">below</a>.</p>
+<p>Specifics of each optional clause are covered in separate sections, which are listed in the same order as they are executed:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/with">WITH clause</a></li>
+<li class="custom-li"><a href="#select-clause">SELECT clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/distinct">DISTINCT clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/from">FROM clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/sample">SAMPLE clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/join">JOIN clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/prewhere">PREWHERE clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/where">WHERE clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions">WINDOW clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/group-by">GROUP BY clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/limit-by">LIMIT BY clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/having">HAVING clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/qualify">QUALIFY clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/limit">LIMIT clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/offset">OFFSET clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/union">UNION clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/intersect">INTERSECT clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/except">EXCEPT clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/into-outfile">INTO OUTFILE clause</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/select/format">FORMAT clause</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="select-clause">SELECT Clause<a aria-label="Direct link to SELECT Clause" class="hash-link" href="#select-clause" title="Direct link to SELECT Clause">​</a></h2>
+<p><a href="/docs/sql-reference/syntax#expressions">Expressions</a> specified in the <code>SELECT</code> clause are calculated after all the operations in the clauses described above are finished. These expressions work as if they apply to separate rows in the result. If expressions in the <code>SELECT</code> clause contain aggregate functions, then ClickHouse processes aggregate functions and expressions used as their arguments during the <a href="/docs/sql-reference/statements/select/group-by">GROUP BY</a> aggregation.</p>
+<p>If you want to include all columns in the result, use the asterisk (<code>*</code>) symbol. For example, <code>SELECT * FROM ...</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="dynamic-column-selection">Dynamic column selection<a aria-label="Direct link to Dynamic column selection" class="hash-link" href="#dynamic-column-selection" title="Direct link to Dynamic column selection">​</a></h3>
+<p>Dynamic column selection (also known as a COLUMNS expression) allows you to match some columns in a result with a <a href="https://en.wikipedia.org/wiki/RE2_(software)" rel="noopener noreferrer" target="_blank">re2</a> regular expression.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">COLUMNS('regexp')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For example, consider the table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE default.col_names (aa Int8, ab Int8, bc Int8) ENGINE = TinyLog
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The following query selects data from all the columns containing the <code>a</code> symbol in their name.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT COLUMNS('a') FROM col_names
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─aa─┬─ab─┐
+│  1 │  1 │
+└────┴────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The selected columns are returned not in the alphabetical order.</p>
+<p>You can use multiple <code>COLUMNS</code> expressions in a query and apply functions to them.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT COLUMNS('a'), COLUMNS('c'), toTypeName(COLUMNS('c')) FROM col_names
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─aa─┬─ab─┬─bc─┬─toTypeName(bc)─┐
+│  1 │  1 │  1 │ Int8           │
+└────┴────┴────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Each column returned by the <code>COLUMNS</code> expression is passed to the function as a separate argument. Also you can pass other arguments to the function if it supports them. Be careful when using functions. If a function does not support the number of arguments you have passed to it, ClickHouse throws an exception.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT COLUMNS('a') + COLUMNS('c') FROM col_names
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Received exception from server (version 19.14.1):
+Code: 42. DB::Exception: Received from localhost:9000. DB::Exception: Number of arguments for function plus does not match: passed 3, should be 2.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this example, <code>COLUMNS('a')</code> returns two columns: <code>aa</code> and <code>ab</code>. <code>COLUMNS('c')</code> returns the <code>bc</code> column. The <code>+</code> operator can't apply to 3 arguments, so ClickHouse throws an exception with the relevant message.</p>
+<p>Columns that matched the <code>COLUMNS</code> expression can have different data types. If <code>COLUMNS</code> does not match any columns and is the only expression in <code>SELECT</code>, ClickHouse throws an exception.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="asterisk">Asterisk<a aria-label="Direct link to Asterisk" class="hash-link" href="#asterisk" title="Direct link to Asterisk">​</a></h3>
+<p>You can put an asterisk in any part of a query instead of an expression. When the query is analyzed, the asterisk is expanded to a list of all table columns (excluding the <code>MATERIALIZED</code> and <code>ALIAS</code> columns). There are only a few cases when using an asterisk is justified:</p>
+<ul class="custom-ul">
+<li class="custom-li">When creating a table dump.</li>
+<li class="custom-li">For tables containing just a few columns, such as system tables.</li>
+<li class="custom-li">For getting information about what columns are in a table. In this case, set <code>LIMIT 1</code>. But it is better to use the <code>DESC TABLE</code> query.</li>
+<li class="custom-li">When there is strong filtration on a small number of columns using <code>PREWHERE</code>.</li>
+<li class="custom-li">In subqueries (since columns that aren't needed for the external query are excluded from subqueries).</li>
+</ul>
+<p>In all other cases, we do not recommend using the asterisk, since it only gives you the drawbacks of a columnar DBMS instead of the advantages. In other words using the asterisk is not recommended.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="extreme-values">Extreme Values<a aria-label="Direct link to Extreme Values" class="hash-link" href="#extreme-values" title="Direct link to Extreme Values">​</a></h3>
+<p>In addition to results, you can also get minimum and maximum values for the results columns. To do this, set the <strong>extremes</strong> setting to 1. Minimums and maximums are calculated for numeric types, dates, and dates with times. For other columns, the default values are output.</p>
+<p>An extra two rows are calculated – the minimums and maximums, respectively. These extra two rows are output in <code>XML</code>, <code>JSON*</code>, <code>TabSeparated*</code>, <code>CSV*</code>, <code>Vertical</code>, <code>Template</code> and <code>Pretty*</code> <a href="/docs/interfaces/formats">formats</a>, separate from the other rows. They are not output for other formats.</p>
+<p>In <code>JSON*</code> and <code>XML</code> formats, the extreme values are output in a separate 'extremes' field. In <code>TabSeparated*</code>, <code>CSV*</code> and <code>Vertical</code> formats, the row comes after the main result, and after 'totals' if present. It is preceded by an empty row (after the other data). In <code>Pretty*</code> formats, the row is output as a separate table after the main result, and after <code>totals</code> if present. In <code>Template</code> format the extreme values are output according to specified template.</p>
+<p>Extreme values are calculated for rows before <code>LIMIT</code>, but after <code>LIMIT BY</code>. However, when using <code>LIMIT offset, size</code>, the rows before <code>offset</code> are included in <code>extremes</code>. In stream requests, the result may also include a small number of rows that passed through <code>LIMIT</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notes">Notes<a aria-label="Direct link to Notes" class="hash-link" href="#notes" title="Direct link to Notes">​</a></h3>
+<p>You can use synonyms (<code>AS</code> aliases) in any part of a query.</p>
+<p>The <code>GROUP BY</code>, <code>ORDER BY</code>, and <code>LIMIT BY</code> clauses can support positional arguments. To enable this, switch on the <a href="/docs/operations/settings/settings#enable_positional_arguments">enable_positional_arguments</a> setting. Then, for example, <code>ORDER BY 1,2</code> will be sorting rows in the table on the first and then the second column.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="implementation-details">Implementation Details<a aria-label="Direct link to Implementation Details" class="hash-link" href="#implementation-details" title="Direct link to Implementation Details">​</a></h2>
+<p>If the query omits the <code>DISTINCT</code>, <code>GROUP BY</code> and <code>ORDER BY</code> clauses and the <code>IN</code> and <code>JOIN</code> subqueries, the query will be completely stream processed, using O(1) amount of RAM. Otherwise, the query might consume a lot of RAM if the appropriate restrictions are not specified:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>max_memory_usage</code></li>
+<li class="custom-li"><code>max_rows_to_group_by</code></li>
+<li class="custom-li"><code>max_rows_to_sort</code></li>
+<li class="custom-li"><code>max_rows_in_distinct</code></li>
+<li class="custom-li"><code>max_bytes_in_distinct</code></li>
+<li class="custom-li"><code>max_rows_in_set</code></li>
+<li class="custom-li"><code>max_bytes_in_set</code></li>
+<li class="custom-li"><code>max_rows_in_join</code></li>
+<li class="custom-li"><code>max_bytes_in_join</code></li>
+<li class="custom-li"><code>max_bytes_before_external_sort</code></li>
+<li class="custom-li"><code>max_bytes_ratio_before_external_sort</code></li>
+<li class="custom-li"><code>max_bytes_before_external_group_by</code></li>
+<li class="custom-li"><code>max_bytes_ratio_before_external_group_by</code></li>
+</ul>
+<p>For more information, see the section "Settings". It is possible to use external sorting (saving temporary tables to a disk) and external aggregation.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="select-modifiers">SELECT modifiers<a aria-label="Direct link to SELECT modifiers" class="hash-link" href="#select-modifiers" title="Direct link to SELECT modifiers">​</a></h2>
+<p>You can use the following modifiers in <code>SELECT</code> queries.</p>
+<table><thead><tr><th>Modifier<th>Description<tbody><tr><td><a href="/docs/sql-reference/statements/select/apply-modifier"><code>APPLY</code></a><td>Allows you to invoke some function for each row returned by an outer table expression of a query.<tr><td><a href="/docs/sql-reference/statements/select/except-modifier"><code>EXCEPT</code></a><td>Specifies the names of one or more columns to exclude from the result. All matching column names are omitted from the output.<tr><td><a href="/docs/sql-reference/statements/select/replace-modifier"><code>REPLACE</code></a><td>Specifies one or more <a href="/docs/sql-reference/syntax#expression-aliases">expression aliases</a>. Each alias must match a column name from the <code>SELECT *</code> statement. In the output column list, the column that matches the alias is replaced by the expression in that <code>REPLACE</code>. This modifier does not change the names or order of columns. However, it can change the value and the value type.</td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="modifier-combinations">Modifier Combinations<a aria-label="Direct link to Modifier Combinations" class="hash-link" href="#modifier-combinations" title="Direct link to Modifier Combinations">​</a></h3>
+<p>You can use each modifier separately or combine them.</p>
+<p><strong>Examples:</strong></p>
+<p>Using the same modifier multiple times.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT COLUMNS('[jk]') APPLY(toString) APPLY(length) APPLY(max) FROM columns_transformers;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─max(length(toString(j)))─┬─max(length(toString(k)))─┐
+│                        2 │                        3 │
+└──────────────────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Using multiple modifiers in a single query.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * REPLACE(i + 1 AS i) EXCEPT (j) APPLY(sum) from columns_transformers;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─sum(plus(i, 1))─┬─sum(k)─┐
+│             222 │    347 │
+└─────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="settings-in-select-query">SETTINGS in SELECT Query<a aria-label="Direct link to SETTINGS in SELECT Query" class="hash-link" href="#settings-in-select-query" title="Direct link to SETTINGS in SELECT Query">​</a></h2>
+<p>You can specify the necessary settings right in the <code>SELECT</code> query. The setting value is applied only to this query and is reset to default or previous value after the query is executed.</p>
+<p>Other ways to make settings see <a href="/docs/operations/settings/overview">here</a>.</p>
+<p>For boolean settings set to true, you can use a shorthand syntax by omitting the value assignment. When only the setting name is specified, it is automatically set to <code>1</code> (true).</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM some_table SETTINGS optimize_read_in_order=1, cast_keep_nullable=1;
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">List of statements</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/all"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">ALL</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#select-clause">SELECT Clause</a><ul><li><a class="table-of-contents__link toc-highlight" href="#dynamic-column-selection">Dynamic column selection</a><li><a class="table-of-contents__link toc-highlight" href="#asterisk">Asterisk</a><li><a class="table-of-contents__link toc-highlight" href="#extreme-values">Extreme Values</a><li><a class="table-of-contents__link toc-highlight" href="#notes">Notes</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#implementation-details">Implementation Details</a><li><a class="table-of-contents__link toc-highlight" href="#select-modifiers">SELECT modifiers</a><ul><li><a class="table-of-contents__link toc-highlight" href="#modifier-combinations">Modifier Combinations</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#settings-in-select-query">SETTINGS in SELECT Query</a></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

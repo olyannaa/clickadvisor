@@ -1,0 +1,58 @@
+# HAVING Clause \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- [SELECT](/docs/sql-reference/statements/select)- HAVING
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/having.md)# HAVING Clause
+
+Allows filtering the aggregation results produced by [GROUP BY](/docs/sql-reference/statements/select/group-by). It is similar to the [WHERE](/docs/sql-reference/statements/select/where) clause, but the difference is that `WHERE` is performed before aggregation, while `HAVING` is performed after it.
+
+
+It is possible to reference aggregation results from `SELECT` clause in `HAVING` clause by their alias. Alternatively, `HAVING` clause can filter on results of additional aggregates that are not returned in query results.
+
+
+## Example[​](#example "Direct link to Example")
+
+
+If you have a `sales` table as follows:
+
+
+
+```
+CREATE TABLE sales
+(
+    region String,
+    salesperson String,
+    amount Float64
+)
+ORDER BY (region, salesperson);
+
+```
+
+You can query it like so:
+
+
+
+```
+SELECT
+    region,
+    salesperson,
+    sum(amount) AS total_sales
+FROM sales
+GROUP BY
+    region,
+    salesperson
+HAVING total_sales > 10000
+ORDER BY total_sales DESC;
+
+```
+
+This will list sales people with greater than 10,000 in total sales in their region.
+
+
+## Limitations[​](#limitations "Direct link to Limitations")
+
+
+`HAVING` can't be used if aggregation is not performed. Use `WHERE` instead.
+
+[PreviousGROUP BY](/docs/sql-reference/statements/select/group-by)[NextINTERSECT](/docs/sql-reference/statements/select/intersect)- [Example](#example)- [Limitations](#limitations)
+Was this page helpful?

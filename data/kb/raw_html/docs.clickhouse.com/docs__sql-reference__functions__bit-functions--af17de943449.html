@@ -1,0 +1,444 @@
+<h1>Bit Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Bit</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/bit-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Bit Functions</h1></header><p>Bit functions work for any pair of types from <code>UInt8</code>, <code>UInt16</code>, <code>UInt32</code>, <code>UInt64</code>, <code>Int8</code>, <code>Int16</code>, <code>Int32</code>, <code>Int64</code>, <code>Float32</code>, or <code>Float64</code>. Some functions support <code>String</code> and <code>FixedString</code> types.</p>
+<p>The result type is an integer with bits equal to the maximum bits of its arguments. If at least one of the arguments is signed, the result is a signed number. If an argument is a floating-point number, it is cast to Int64.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitAnd">bitAnd<a aria-label="Direct link to bitAnd" class="hash-link" href="#bitAnd" title="Direct link to bitAnd">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs bitwise AND operation between two values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitAnd(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — First value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>b</code> — Second value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of bitwise operation <code>a AND b</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE bits
+(
+    `a` UInt8,
+    `b` UInt8
+)
+ENGINE = Memory;
+
+INSERT INTO bits VALUES (0, 0), (0, 1), (1, 0), (1, 1);
+
+SELECT
+    a,
+    b,
+    bitAnd(a, b)
+FROM bits
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬─b─┬─bitAnd(a, b)─┐
+│ 0 │ 0 │            0 │
+│ 0 │ 1 │            0 │
+│ 1 │ 0 │            0 │
+│ 1 │ 1 │            1 │
+└───┴───┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitCount">bitCount<a aria-label="Direct link to bitCount" class="hash-link" href="#bitCount" title="Direct link to bitCount">​</a></h2>
+<p>Introduced in: v20.3.0</p>
+<p>Calculates the number of bits set to one in the binary representation of a number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitCount(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — An integer or float value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of bits set to one in <code>x</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The function does not convert the input value to a larger type (<a href="https://en.wikipedia.org/wiki/Sign_extension" rel="noopener noreferrer" target="_blank">sign extension</a>).
+For example: <code>bitCount(toUInt8(-1)) = 8</code>.</p></div></div>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bin(333), bitCount(333);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(333)─────────┬─bitCount(333)─┐
+│ 0000000101001101 │             5 │
+└──────────────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitHammingDistance">bitHammingDistance<a aria-label="Direct link to bitHammingDistance" class="hash-link" href="#bitHammingDistance" title="Direct link to bitHammingDistance">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Returns the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming Distance</a> between the bit representations of two numbers.
+Can be used with <a href="/docs/sql-reference/functions/hash-functions#ngramSimHash"><code>SimHash</code></a> functions for detection of semi-duplicate strings.
+The smaller the distance, the more similar the strings are.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitHammingDistance(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First number for Hamming distance calculation. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>y</code> — Second number for Hamming distance calculation. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the hamming distance between <code>x</code> and <code>y</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitHammingDistance(111, 121);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bitHammingDistance(111, 121)─┐
+│                            3 │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitNot">bitNot<a aria-label="Direct link to bitNot" class="hash-link" href="#bitNot" title="Direct link to bitNot">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs the bitwise NOT operation.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitNot(a)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — Value for which to apply bitwise NOT operation. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of <code>~a</code> i.e <code>a</code> with bits flipped.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    CAST('5', 'UInt8') AS original,
+    bin(original) AS original_binary,
+    bitNot(original) AS result,
+    bin(bitNot(original)) AS result_binary;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─original─┬─original_binary─┬─result─┬─result_binary─┐
+│        5 │ 00000101        │    250 │ 11111010      │
+└──────────┴─────────────────┴────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitOr">bitOr<a aria-label="Direct link to bitOr" class="hash-link" href="#bitOr" title="Direct link to bitOr">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs bitwise OR operation between two values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitOr(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — First value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>b</code> — Second value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of bitwise operation <code>a OR b</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE bits
+(
+    `a` UInt8,
+    `b` UInt8
+)
+ENGINE = Memory;
+
+INSERT INTO bits VALUES (0, 0), (0, 1), (1, 0), (1, 1);
+
+SELECT
+    a,
+    b,
+    bitOr(a, b)
+FROM bits;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬─b─┬─bitOr(a, b)─┐
+│ 0 │ 0 │           0 │
+│ 0 │ 1 │           1 │
+│ 1 │ 0 │           1 │
+│ 1 │ 1 │           1 │
+└───┴───┴─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitRotateLeft">bitRotateLeft<a aria-label="Direct link to bitRotateLeft" class="hash-link" href="#bitRotateLeft" title="Direct link to bitRotateLeft">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Rotate bits left by a certain number of positions. Bits that fall off wrap around to the right.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitRotateLeft(a, N)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — A value to rotate. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>N</code> — The number of positions to rotate left. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the rotated value with type equal to that of <code>a</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 99 AS a, bin(a), bitRotateLeft(a, 2) AS a_rotated, bin(a_rotated);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──a─┬─bin(a)───┬─a_rotated─┬─bin(a_rotated)─┐
+│ 99 │ 01100011 │       141 │ 10001101       │
+└────┴──────────┴───────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitRotateRight">bitRotateRight<a aria-label="Direct link to bitRotateRight" class="hash-link" href="#bitRotateRight" title="Direct link to bitRotateRight">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Rotate bits right by a certain number of positions. Bits that fall off wrap around to the left.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitRotateRight(a, N)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — A value to rotate. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>N</code> — The number of positions to rotate right. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the rotated value with type equal to that of <code>a</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 99 AS a, bin(a), bitRotateRight(a, 2) AS a_rotated, bin(a_rotated);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──a─┬─bin(a)───┬─a_rotated─┬─bin(a_rotated)─┐
+│ 99 │ 01100011 │       216 │ 11011000       │
+└────┴──────────┴───────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitShiftLeft">bitShiftLeft<a aria-label="Direct link to bitShiftLeft" class="hash-link" href="#bitShiftLeft" title="Direct link to bitShiftLeft">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Shifts the binary representation of a value to the left by a specified number of bit positions.</p>
+<p>A <code>FixedString</code> or a <code>String</code> is treated as a single multibyte value.</p>
+<p>Bits of a <code>FixedString</code> value are lost as they are shifted out.
+On the contrary, a <code>String</code> value is extended with additional bytes, so no bits are lost.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitShiftLeft(a, N)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — A value to shift. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>N</code> — The number of positions to shift. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the shifted value with type equal to that of <code>a</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example with binary encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 99 AS a, bin(a), bitShiftLeft(a, 2) AS a_shifted, bin(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──a─┬─bin(99)──┬─a_shifted─┬─bin(bitShiftLeft(99, 2))─┐
+│ 99 │ 01100011 │       140 │ 10001100                 │
+└────┴──────────┴───────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example with hexadecimal encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 'abc' AS a, hex(a), bitShiftLeft(a, 4) AS a_shifted, hex(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a───┬─hex('abc')─┬─a_shifted─┬─hex(bitShiftLeft('abc', 4))─┐
+│ abc │ 616263     │ &amp;0        │ 06162630                    │
+└─────┴────────────┴───────────┴─────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example with Fixed String encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toFixedString('abc', 3) AS a, hex(a), bitShiftLeft(a, 4) AS a_shifted, hex(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a───┬─hex(toFixedString('abc', 3))─┬─a_shifted─┬─hex(bitShiftLeft(toFixedString('abc', 3), 4))─┐
+│ abc │ 616263                       │ &amp;0        │ 162630                                        │
+└─────┴──────────────────────────────┴───────────┴───────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitShiftRight">bitShiftRight<a aria-label="Direct link to bitShiftRight" class="hash-link" href="#bitShiftRight" title="Direct link to bitShiftRight">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Shifts the binary representation of a value to the right by a specified number of bit positions.</p>
+<p>A <code>FixedString</code> or a <code>String</code> is treated as a single multibyte value.</p>
+<p>Bits of a <code>FixedString</code> value are lost as they are shifted out.
+On the contrary, a <code>String</code> value is extended with additional bytes, so no bits are lost.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitShiftRight(a, N)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — A value to shift. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>N</code> — The number of positions to shift. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the shifted value with type equal to that of <code>a</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example with binary encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 101 AS a, bin(a), bitShiftRight(a, 2) AS a_shifted, bin(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───a─┬─bin(101)─┬─a_shifted─┬─bin(bitShiftRight(101, 2))─┐
+│ 101 │ 01100101 │        25 │ 00011001                   │
+└─────┴──────────┴───────────┴────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example with hexadecimal encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 'abc' AS a, hex(a), bitShiftLeft(a, 4) AS a_shifted, hex(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a───┬─hex('abc')─┬─a_shifted─┬─hex(bitShiftRight('abc', 12))─┐
+│ abc │ 616263     │           │ 0616                          │
+└─────┴────────────┴───────────┴───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example with Fixed String encoding</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toFixedString('abc', 3) AS a, hex(a), bitShiftRight(a, 12) AS a_shifted, hex(a_shifted);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a───┬─hex(toFixedString('abc', 3))─┬─a_shifted─┬─hex(bitShiftRight(toFixedString('abc', 3), 12))─┐
+│ abc │ 616263                       │           │ 000616                                          │
+└─────┴──────────────────────────────┴───────────┴─────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitSlice">bitSlice<a aria-label="Direct link to bitSlice" class="hash-link" href="#bitSlice" title="Direct link to bitSlice">​</a></h2>
+<p>Introduced in: v22.2.0</p>
+<p>Returns a substring starting with the bit from the 'offset' index that is 'length' bits long.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitSlice(s, offset[, length])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><code>s</code> — The String or Fixed String to slice. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></p>
+</li>
+<li class="custom-li">
+<p><code>offset</code> —
+Returns the starting bit position (1-based indexing).</p>
+</li>
+<li class="custom-li">
+<p>Positive values: count from the beginning of the string.</p>
+</li>
+<li class="custom-li">
+<p>Negative values: count from the end of the string.</p>
+<p><a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+</li>
+<li class="custom-li">
+<p><code>length</code> —
+Optional. The number of bits to extract.</p>
+</li>
+<li class="custom-li">
+<p>Positive values: extract <code>length</code> bits.</p>
+</li>
+<li class="custom-li">
+<p>Negative values: extract from the offset to <code>(string_length - |length|)</code>.</p>
+</li>
+<li class="custom-li">
+<p>Omitted: extract from offset to end of string.</p>
+</li>
+<li class="custom-li">
+<p>If length is not a multiple of 8, the result is padded with zeros on the right.
+<a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string containing the extracted bits, represented as a binary sequence. The result is always padded to byte boundaries (multiples of 8 bits) <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bin('Hello'), bin(bitSlice('Hello', 1, 8));
+SELECT bin('Hello'), bin(bitSlice('Hello', 1, 2));
+SELECT bin('Hello'), bin(bitSlice('Hello', 1, 9));
+SELECT bin('Hello'), bin(bitSlice('Hello', -4, 8));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin('Hello')─────────────────────────────┬─bin(bitSlice('Hello', 1, 8))─┐
+│ 0100100001100101011011000110110001101111 │ 01001000                     │
+└──────────────────────────────────────────┴──────────────────────────────┘
+┌─bin('Hello')─────────────────────────────┬─bin(bitSlice('Hello', 1, 2))─┐
+│ 0100100001100101011011000110110001101111 │ 01000000                     │
+└──────────────────────────────────────────┴──────────────────────────────┘
+┌─bin('Hello')─────────────────────────────┬─bin(bitSlice('Hello', 1, 9))─┐
+│ 0100100001100101011011000110110001101111 │ 0100100000000000             │
+└──────────────────────────────────────────┴──────────────────────────────┘
+┌─bin('Hello')─────────────────────────────┬─bin(bitSlice('Hello', -4, 8))─┐
+│ 0100100001100101011011000110110001101111 │ 11110000                      │
+└──────────────────────────────────────────┴───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitTest">bitTest<a aria-label="Direct link to bitTest" class="hash-link" href="#bitTest" title="Direct link to bitTest">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Takes any number and converts it into <a href="https://en.wikipedia.org/wiki/Binary_number" rel="noopener noreferrer" target="_blank">binary form</a>, then returns the value of the bit at a specified position. Counting is done right-to-left, starting at 0.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitTest(a, i)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — Number to convert. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>i</code> — Position of the bit to return. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value of the bit at position <code>i</code> in the binary representation of <code>a</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bin(2), bitTest(2, 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(2)───┬─bitTest(2, 1)─┐
+│ 00000010 │             1 │
+└──────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitTestAll">bitTestAll<a aria-label="Direct link to bitTestAll" class="hash-link" href="#bitTestAll" title="Direct link to bitTestAll">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns result of the <a href="https://en.wikipedia.org/wiki/Logical_conjunction" rel="noopener noreferrer" target="_blank">logical conjunction</a> (AND operator) of all bits at the given positions.
+Counts right-to-left, starting at 0.</p>
+<p>The logical AND between two bits is true if and only if both input bits are true.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitTestAll(a, index1[, index2, ... , indexN])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — An integer value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>index1, ...</code> — One or multiple positions of bits. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of the logical conjunction <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitTestAll(43, 0, 1, 3, 5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(43)──┬─bitTestAll(43, 0, 1, 3, 5)─┐
+│ 00101011 │                          1 │
+└──────────┴────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example 2</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitTestAll(43, 0, 1, 3, 5, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(43)──┬─bitTestAll(4⋯1, 3, 5, 2)─┐
+│ 00101011 │                        0 │
+└──────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitTestAny">bitTestAny<a aria-label="Direct link to bitTestAny" class="hash-link" href="#bitTestAny" title="Direct link to bitTestAny">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns result of the <a href="https://en.wikipedia.org/wiki/Logical_disjunction" rel="noopener noreferrer" target="_blank">logical disjunction</a> (OR operator) of all bits at the given positions in a number.
+Counts right-to-left, starting at 0.</p>
+<p>The logical OR between two bits is true if at least one of the input bits is true.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitTestAny(a, index1[, index2, ... , indexN])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — An integer value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>index1, ...</code> — One or multiple positions of bits. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of the logical disjunction <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitTestAny(43, 0, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(43)──┬─bitTestAny(43, 0, 2)─┐
+│ 00101011 │                    1 │
+└──────────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Usage example 2</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bitTestAny(43, 4, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─bin(43)──┬─bitTestAny(43, 4, 2)─┐
+│ 00101011 │                    0 │
+└──────────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="bitXor">bitXor<a aria-label="Direct link to bitXor" class="hash-link" href="#bitXor" title="Direct link to bitXor">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs bitwise exclusive or (XOR) operation between two values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">bitXor(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — First value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>b</code> — Second value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of bitwise operation <code>a XOR b</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE bits
+(
+    `a` UInt8,
+    `b` UInt8
+)
+ENGINE = Memory;
+
+INSERT INTO bits VALUES (0, 0), (0, 1), (1, 0), (1, 1);
+
+SELECT
+    a,
+    b,
+    bitXor(a, b)
+FROM bits;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬─b─┬─bitXor(a, b)─┐
+│ 0 │ 0 │            0 │
+│ 0 │ 1 │            1 │
+│ 1 │ 0 │            1 │
+│ 1 │ 1 │            0 │
+└───┴───┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/array-join"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">arrayJoin</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/bitmap-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Bitmap</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#bitAnd">bitAnd</a><li><a class="table-of-contents__link toc-highlight" href="#bitCount">bitCount</a><li><a class="table-of-contents__link toc-highlight" href="#bitHammingDistance">bitHammingDistance</a><li><a class="table-of-contents__link toc-highlight" href="#bitNot">bitNot</a><li><a class="table-of-contents__link toc-highlight" href="#bitOr">bitOr</a><li><a class="table-of-contents__link toc-highlight" href="#bitRotateLeft">bitRotateLeft</a><li><a class="table-of-contents__link toc-highlight" href="#bitRotateRight">bitRotateRight</a><li><a class="table-of-contents__link toc-highlight" href="#bitShiftLeft">bitShiftLeft</a><li><a class="table-of-contents__link toc-highlight" href="#bitShiftRight">bitShiftRight</a><li><a class="table-of-contents__link toc-highlight" href="#bitSlice">bitSlice</a><li><a class="table-of-contents__link toc-highlight" href="#bitTest">bitTest</a><li><a class="table-of-contents__link toc-highlight" href="#bitTestAll">bitTestAll</a><li><a class="table-of-contents__link toc-highlight" href="#bitTestAny">bitTestAny</a><li><a class="table-of-contents__link toc-highlight" href="#bitXor">bitXor</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

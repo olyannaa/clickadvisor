@@ -1,0 +1,427 @@
+<h1>CREATE VIEW | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/create" itemprop="item"><span itemprop="name">CREATE</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">VIEW</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/create/view.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>CREATE VIEW</h1></header>
+<p>Creates a new view. Views can be <a href="#normal-view">normal</a>, <a href="#materialized-view">materialized</a>, <a href="#refreshable-materialized-view">refreshable materialized</a>, and <a href="/docs/sql-reference/statements/create/view#window-view">window</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="normal-view">Normal View<a aria-label="Direct link to Normal View" class="hash-link" href="#normal-view" title="Direct link to Normal View">​</a></h2>
+<p>Syntax:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE [OR REPLACE] VIEW [IF NOT EXISTS] [db.]table_name [(alias1 [, alias2 ...])] [ON CLUSTER cluster_name]
+[DEFINER = { user | CURRENT_USER }] [SQL SECURITY { DEFINER | INVOKER | NONE }]
+AS SELECT ...
+[COMMENT 'comment']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Normal views do not store any data. They just perform a read from another table on each access. In other words, a normal view is nothing more than a saved query. When reading from a view, this saved query is used as a subquery in the <a href="/docs/sql-reference/statements/select/from">FROM</a> clause.</p>
+<p>As an example, assume you've created a view:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE VIEW view AS SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>and written a query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT a, b, c FROM view
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query is fully equivalent to using the subquery:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT a, b, c FROM (SELECT ...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="parameterized-view">Parameterized View<a aria-label="Direct link to Parameterized View" class="hash-link" href="#parameterized-view" title="Direct link to Parameterized View">​</a></h2>
+<p>Parameterized views are similar to normal views, but can be created with parameters which are not resolved immediately. These views can be used with table functions, which specify the name of the view as function name and the parameter values as its arguments.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE VIEW view AS SELECT * FROM TABLE WHERE Column1={column1:datatype1} and Column2={column2:datatype2} ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The above creates a view for table which can be used as table function by substituting parameters as shown below.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM view(column1=value1, column2=value2 ...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-view">Materialized View<a aria-label="Direct link to Materialized View" class="hash-link" href="#materialized-view" title="Direct link to Materialized View">​</a></h2>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE MATERIALIZED VIEW [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster_name] [TO[db.]name [(columns)]] [ENGINE = engine] [POPULATE]
+[REFRESH ...]
+[DEFINER = { user | CURRENT_USER }] [SQL SECURITY { DEFINER | NONE }]
+AS SELECT ...
+[COMMENT 'comment']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE MATERIALIZED VIEW [db.]table_name [ON CLUSTER cluster_name] [TO[db.]name [(columns)]] [ENGINE = engine] [POPULATE]
+[REFRESH ...]
+[DEFINER = { user | CURRENT_USER }] [SQL SECURITY { DEFINER | NONE }]
+AS SELECT ...
+[COMMENT 'comment']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>OR REPLACE</code> and <code>IF NOT EXISTS</code> are mutually exclusive: combining them is a syntax error.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="create-or-replace-materialized-view">CREATE OR REPLACE MATERIALIZED VIEW<a aria-label="Direct link to CREATE OR REPLACE MATERIALIZED VIEW" class="hash-link" href="#create-or-replace-materialized-view" title="Direct link to CREATE OR REPLACE MATERIALIZED VIEW">​</a></h3>
+<p><code>CREATE OR REPLACE MATERIALIZED VIEW</code> atomically replaces an existing materialized view and its inner storage table (if any). The operation requires an <code>Atomic</code> or <code>Replicated</code> database engine.</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE MATERIALIZED VIEW [db.]name [ON CLUSTER cluster]
+[TO [db.]target_table]
+[ENGINE = engine]
+[POPULATE]
+[REFRESH ...]
+AS SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Key behaviors:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Without <code>TO</code> clause</strong>: the old inner table is dropped and a new one is created. Existing data in the inner table is lost unless <code>POPULATE</code> is specified.</li>
+<li class="custom-li"><strong>With <code>TO</code> clause</strong>: only the view definition is replaced; the target table and its data are unaffected.</li>
+<li class="custom-li">Compatible with <code>REFRESH</code>, <code>ON CLUSTER</code>, and all engine options. <code>POPULATE</code> is supported on <code>Atomic</code> databases only — it is rejected on <code>Replicated</code> databases (see the <code>POPULATE</code> note below).</li>
+<li class="custom-li">Requires <code>CREATE VIEW</code> and <code>DROP VIEW</code> privileges.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p><code>CREATE OR REPLACE MATERIALIZED VIEW</code> is only supported with <code>Atomic</code> or <code>Replicated</code> database engines. It is not supported with the <code>Ordinary</code> database engine.</p></div></div>
+<p><strong>Examples:</strong></p>
+<div class="wrapper_EBtA" style="height:358.15000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a materialized view with an inner table
+CREATE OR REPLACE MATERIALIZED VIEW mv
+    ENGINE = MergeTree ORDER BY x
+    AS SELECT x, sum(y) AS total FROM src GROUP BY x;
+
+-- Replace with a new definition (old inner table data is lost)
+CREATE OR REPLACE MATERIALIZED VIEW mv
+    ENGINE = MergeTree ORDER BY x
+    AS SELECT x, count() AS cnt FROM src GROUP BY x;
+
+-- Replace with POPULATE to backfill from existing source data
+CREATE OR REPLACE MATERIALIZED VIEW mv
+    ENGINE = MergeTree ORDER BY x
+    POPULATE
+    AS SELECT x FROM src;
+
+-- Replace an inner-table MV with a TO-table MV (target data is preserved)
+CREATE OR REPLACE MATERIALIZED VIEW mv TO target
+    AS SELECT x FROM src;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>Here is a step-by-step guide on using <a href="/docs/guides/developer/cascading-materialized-views">Materialized views</a>.</p></div></div>
+<p>Materialized views store data transformed by the corresponding <a href="/docs/sql-reference/statements/select">SELECT</a> query.</p>
+<p>When creating a materialized view without <code>TO [db].[table]</code>, you must specify <code>ENGINE</code> – the table engine for storing data.</p>
+<p>When creating a materialized view with <code>TO [db].[table]</code>, you can't also use <code>POPULATE</code>.</p>
+<p>A materialized view is implemented as follows: when inserting data to the table specified in <code>SELECT</code>, part of the inserted data is converted by this <code>SELECT</code> query, and the result is inserted in the view.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Materialized views in ClickHouse use <strong>column names</strong> instead of column order during insertion into destination table. If some column names are not present in the <code>SELECT</code> query result, ClickHouse uses a default value, even if the column is not <a href="/docs/sql-reference/data-types/nullable">Nullable</a>. A safe practice would be to add aliases for every column when using Materialized views.<p>Materialized views in ClickHouse are implemented more like insert triggers. If there's some aggregation in the view query, it's applied only to the batch of freshly inserted data. Any changes to existing data of source table (like update, delete, drop partition, etc.) does not change the materialized view.<p>Materialized views in ClickHouse do not have deterministic behaviour in case of errors. This means that blocks that had been already written will be preserved in the destination table, but all blocks after error will not.<p>By default if pushing to one of views fails, then the INSERT query will fail too, and some blocks may not be written to the destination table. This can be changed using <code>materialized_views_ignore_errors</code> setting (you should set it for <code>INSERT</code> query), if you will set <code>materialized_views_ignore_errors=true</code>, then any errors while pushing to views will be ignored and all blocks will be written to the destination table.<p>Also note, that <code>materialized_views_ignore_errors</code> set to <code>true</code> by default for <code>system.*_log</code> tables.</p></p></p></p></p></div></div>
+<p>If you specify <code>POPULATE</code>, the existing table data is inserted into the view when creating it, as if making a <code>CREATE TABLE ... AS SELECT ...</code> . Otherwise, the query contains only the data inserted in the table after creating the view. We <strong>do not recommend</strong> using <code>POPULATE</code>, since data inserted in the table during the view creation will not be inserted in it.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Given that <code>POPULATE</code> works like <code>CREATE TABLE ... AS SELECT ...</code> it has limitations:<ul class="custom-ul">
+<li class="custom-li">It is not supported with Replicated database</li>
+<li class="custom-li">It is not supported in ClickHouse cloud</li>
+</ul><p>Instead a separate <code>INSERT ... SELECT</code> can be used.</p></p></div></div>
+<p>A <code>SELECT</code> query can contain <code>DISTINCT</code>, <code>GROUP BY</code>, <code>ORDER BY</code>, <code>LIMIT</code>. Note that the corresponding conversions are performed independently on each block of inserted data. For example, if <code>GROUP BY</code> is set, data is aggregated during insertion, but only within a single packet of inserted data. The data won't be further aggregated. The exception is when using an <code>ENGINE</code> that independently performs data aggregation, such as <code>SummingMergeTree</code>.</p>
+<p>If the materialized view uses the construction <code>TO [db.]name</code>, you can <code>DETACH</code> the view, run <code>ALTER</code> for the target table, and then <code>ATTACH</code> the previously detached (<code>DETACH</code>) view.</p>
+<p>Note that materialized view is influenced by <a href="/docs/operations/settings/settings#optimize_on_insert">optimize_on_insert</a> setting. The data is merged before the insertion into a view.</p>
+<p>Views look the same as normal tables. For example, they are listed in the result of the <code>SHOW TABLES</code> query.</p>
+<p>To delete a view, use <a href="/docs/sql-reference/statements/drop#drop-view">DROP VIEW</a>. Although <code>DROP TABLE</code> works for VIEWs as well.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sql_security">SQL security<a aria-label="Direct link to SQL security" class="hash-link" href="#sql_security" title="Direct link to SQL security">​</a></h2>
+<p><code>DEFINER</code> and <code>SQL SECURITY</code> allow you to specify which ClickHouse user to use when executing the view's underlying query.
+<code>SQL SECURITY</code> has three legal values: <code>DEFINER</code>, <code>INVOKER</code>, or <code>NONE</code>. You can specify any existing user or <code>CURRENT_USER</code> in the <code>DEFINER</code> clause.</p>
+<p>The following table will explain which rights are required for which user in order to select from view.
+Note that regardless of the SQL security option, in every case it is still required to have <code>GRANT SELECT ON &lt;view&gt;</code> in order to read from it.</p>
+<table><thead><tr><th>SQL security option<th>View<th>Materialized View<tbody><tr><td><code>DEFINER alice</code><td><code>alice</code> must have a <code>SELECT</code> grant for the view's source table.<td><code>alice</code> must have a <code>SELECT</code> grant for the view's source table and an <code>INSERT</code> grant for the view's target table.<tr><td><code>INVOKER</code><td>User must have a <code>SELECT</code> grant for the view's source table.<td><code>SQL SECURITY INVOKER</code> can't be specified for materialized views.<tr><td><code>NONE</code><td>-<td>-</td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p><code>SQL SECURITY NONE</code> is a deprecated option. Any user with the rights to create views with <code>SQL SECURITY NONE</code> will be able to execute any arbitrary query.
+Thus, it is required to have <code>GRANT ALLOW SQL SECURITY NONE TO &lt;user&gt;</code> in order to create a view with this option.</p></div></div>
+<p>If <code>DEFINER</code>/<code>SQL SECURITY</code> aren't specified, the default values are used:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>SQL SECURITY</code>: <code>INVOKER</code> for normal views and <code>DEFINER</code> for materialized views (<a href="/docs/operations/settings/settings#default_normal_view_sql_security">configurable by settings</a>)</li>
+<li class="custom-li"><code>DEFINER</code>: <code>CURRENT_USER</code> (<a href="/docs/operations/settings/settings#default_view_definer">configurable by settings</a>)</li>
+</ul>
+<p>If a view is attached without <code>DEFINER</code>/<code>SQL SECURITY</code> specified, the default value is <code>SQL SECURITY NONE</code> for the materialized view and <code>SQL SECURITY INVOKER</code> for the normal view.</p>
+<p>To change SQL security for an existing view, use</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE MODIFY SQL SECURITY { DEFINER | INVOKER | NONE } [DEFINER = { user | CURRENT_USER }]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h3>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE VIEW test_view
+DEFINER = alice SQL SECURITY DEFINER
+AS SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE VIEW test_view
+SQL SECURITY INVOKER
+AS SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="live-view">Live View<a aria-label="Direct link to Live View" class="hash-link" href="#live-view" title="Direct link to Live View">​</a></h2>
+<div class="deprecatedBadge_v3qQ"><div class="deprecatedIcon_IaWu" style="margin-right:8px;margin-top:4px"><svg fill="none" height="10" viewbox="0 0 14 10" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M13 0H1C0.734784 0 0.48043 0.105357 0.292893 0.292893C0.105357 0.48043 0 0.734784 0 1V2.5C0 2.76522 0.105357 3.01957 0.292893 3.20711C0.48043 3.39464 0.734784 3.5 1 3.5V9C1 9.26522 1.10536 9.51957 1.29289 9.70711C1.48043 9.89464 1.73478 10 2 10H12C12.2652 10 12.5196 9.89464 12.7071 9.70711C12.8946 9.51957 13 9.26522 13 9V3.5C13.2652 3.5 13.5196 3.39464 13.7071 3.20711C13.8946 3.01957 14 2.76522 14 2.5V1C14 0.734784 13.8946 0.48043 13.7071 0.292893C13.5196 0.105357 13.2652 0 13 0ZM12 9H2V3.5H12V9ZM13 2.5H1V1H13V2.5ZM5 5.5C5 5.36739 5.05268 5.24021 5.14645 5.14645C5.24021 5.05268 5.36739 5 5.5 5H8.5C8.63261 5 8.75979 5.05268 8.85355 5.14645C8.94732 5.24021 9 5.36739 9 5.5C9 5.63261 8.94732 5.75979 8.85355 5.85355C8.75979 5.94732 8.63261 6 8.5 6H5.5C5.36739 6 5.24021 5.94732 5.14645 5.85355C5.05268 5.75979 5 5.63261 5 5.5Z" fill="#53575F"></path></svg></div>Deprecated feature</div>
+<p>This feature is deprecated and will be removed in the future.</p>
+<p>For your convenience, the old documentation is located <a href="https://pastila.nl/?00f32652/fdf07272a7b54bda7e13b919264e449f.md" rel="noopener noreferrer" target="_blank">here</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="refreshable-materialized-view">Refreshable Materialized View<a aria-label="Direct link to Refreshable Materialized View" class="hash-link" href="#refreshable-materialized-view" title="Direct link to Refreshable Materialized View">​</a></h2>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE MATERIALIZED VIEW [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+REFRESH EVERY|AFTER interval [OFFSET interval]
+[RANDOMIZE FOR interval]
+[DEPENDS ON [db.]name [, [db.]name [, ...]]]
+[SETTINGS name = value [, name = value [, ...]]]
+[APPEND]
+[TO[db.]name] [(columns)] [ENGINE = engine]
+[EMPTY]
+[DEFINER = { user | CURRENT_USER }] [SQL SECURITY { DEFINER | NONE }]
+AS SELECT ...
+[COMMENT 'comment']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>where <code>interval</code> is a sequence of simple intervals:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">number SECOND|MINUTE|HOUR|DAY|WEEK|MONTH|YEAR
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Periodically runs the corresponding query and stores its result into a table.</p>
+<ul class="custom-ul">
+<li class="custom-li">If <code>APPEND</code> is specified, each refresh inserts rows into the table without deleting existing rows. The insert is not atomic, just like a regular <code>INSERT INTO ... SELECT</code> query.</li>
+<li class="custom-li">Otherwise, each refresh atomically replaces the table's previous contents.</li>
+</ul>
+<p>Differences from regular non-refreshable materialized views:</p>
+<ul class="custom-ul">
+<li class="custom-li">No insert trigger. When new data is inserted into the table specified in <code>SELECT</code>, it's <em>not</em> automatically pushed to the refreshable materialized view. Instead, data insertion only takes place during the periodic or manual refresh runs.</li>
+<li class="custom-li">No restrictions on the <code>SELECT</code> query. Table functions (e.g. <code>url()</code>), views, UNION, JOIN, are all allowed.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The settings in the <code>REFRESH ... SETTINGS</code> part of the query are refresh settings (e.g. <code>refresh_retries</code>), distinct from regular settings (e.g. <code>max_threads</code>). Regular settings can be specified using <code>SETTINGS</code> at the end of the query.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="refresh-schedule">Refresh Schedule<a aria-label="Direct link to Refresh Schedule" class="hash-link" href="#refresh-schedule" title="Direct link to Refresh Schedule">​</a></h3>
+<p>Example refresh schedules:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">REFRESH EVERY 1 DAY -- every day, at midnight (UTC)
+REFRESH EVERY 1 MONTH -- on 1st day of every month, at midnight
+REFRESH EVERY 1 MONTH OFFSET 5 DAY 2 HOUR -- on 6th day of every month, at 2:00 am
+REFRESH EVERY 2 WEEK OFFSET 5 DAY 15 HOUR 10 MINUTE -- every other Saturday, at 3:10 pm
+REFRESH EVERY 30 MINUTE -- at 00:00, 00:30, 01:00, 01:30, etc
+REFRESH AFTER 30 MINUTE -- 30 minutes after the previous refresh completes, no alignment with time of day
+-- REFRESH AFTER 1 HOUR OFFSET 1 MINUTE -- syntax error, OFFSET is not allowed with AFTER
+REFRESH EVERY 1 WEEK 2 DAYS -- every 9 days, not on any particular day of the week or month;
+                            -- specifically, when day number (since 1969-12-29) is divisible by 9
+REFRESH EVERY 5 MONTHS -- every 5 months, different months each year (as 12 is not divisible by 5);
+                       -- specifically, when month number (since 1970-01) is divisible by 5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>RANDOMIZE FOR</code> randomly adjusts the time of each refresh, e.g.:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">REFRESH EVERY 1 DAY OFFSET 2 HOUR RANDOMIZE FOR 1 HOUR -- every day at random time between 01:30 and 02:30
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>At most one refresh may be running at a time, for a given view. E.g. if a view with <code>REFRESH EVERY 1 MINUTE</code> takes 2 minutes to refresh, it'll just be refreshing every 2 minutes. If it then becomes faster and starts refreshing in 10 seconds, it'll go back to refreshing every minute. (In particular, it won't refresh every 10 seconds to catch up with a backlog of missed refreshes - there's no such backlog.)</p>
+<p>Additionally, a refresh is started immediately after the materialized view is created, unless <code>EMPTY</code> is specified in the <code>CREATE</code> query. If <code>EMPTY</code> is specified, the first refresh happens according to schedule.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="in-replicated-db">In Replicated DB<a aria-label="Direct link to In Replicated DB" class="hash-link" href="#in-replicated-db" title="Direct link to In Replicated DB">​</a></h3>
+<p>If the refreshable materialized view is in a <a href="/docs/engines/database-engines/replicated">Replicated database</a>, the replicas coordinate with each other such that only one replica performs the refresh at each scheduled time. <a href="/docs/engines/table-engines/mergetree-family/replication">ReplicatedMergeTree</a> table engine is required, so that all replicas see the data produced by the refresh.</p>
+<p>In <code>APPEND</code> mode, coordination can be disabled using <code>SETTINGS all_replicas = 1</code>. This makes replicas do refreshes independently of each other. In this case ReplicatedMergeTree is not required.</p>
+<p>In non-<code>APPEND</code> mode, only coordinated refreshing is supported. For uncoordinated, use <code>Atomic</code> database and <code>CREATE ... ON CLUSTER</code> query to create refreshable materialized views on all replicas.</p>
+<p>The coordination is done through Keeper. The znode path is determined by <a href="/docs/operations/server-configuration-parameters/settings#default_replica_path">default_replica_path</a> server setting.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="refresh-dependencies">Refresh Dependencies<a aria-label="Direct link to Refresh Dependencies" class="hash-link" href="#refresh-dependencies" title="Direct link to Refresh Dependencies">​</a></h3>
+<p><code>DEPENDS ON</code> synchronizes refreshes of different tables. By way of example, suppose there's a chain of two refreshable materialized views:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE MATERIALIZED VIEW source REFRESH EVERY 1 DAY AS SELECT * FROM url(...)
+CREATE MATERIALIZED VIEW destination REFRESH EVERY 1 DAY AS SELECT ... FROM source
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Without <code>DEPENDS ON</code>, both views will start a refresh at midnight, and <code>destination</code> typically will see yesterday's data in <code>source</code>. If we add dependency:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE MATERIALIZED VIEW destination REFRESH EVERY 1 DAY DEPENDS ON source AS SELECT ... FROM source
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>then <code>destination</code>'s refresh will start only after <code>source</code>'s refresh finished for that day, so <code>destination</code> will be based on fresh data.</p>
+<p>Alternatively, the same result can be achieved with:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE MATERIALIZED VIEW destination REFRESH AFTER 1 HOUR DEPENDS ON source AS SELECT ... FROM source
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>where <code>1 HOUR</code> can be any duration less than <code>source</code>'s refresh period. The dependent table won't be refreshed more frequently than any of its dependencies. This is a valid way to set up a chain of refreshable views without specifying the real refresh period more than once.</p>
+<p>A few more examples:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>REFRESH EVERY 1 DAY OFFSET 10 MINUTE</code> (<code>destination</code>) depends on <code>REFRESH EVERY 1 DAY</code> (<code>source</code>)<br/>
+If <code>source</code> refresh takes more than 10 minutes, <code>destination</code> will wait for it.</li>
+<li class="custom-li"><code>REFRESH EVERY 1 DAY OFFSET 1 HOUR</code> depends on <code>REFRESH EVERY 1 DAY OFFSET 23 HOUR</code><br/>
+Similar to the above, even though the corresponding refreshes happen on different calendar days.
+<code>destination</code>'s refresh on day <code>X+1</code> will wait for <code>source</code>'s refresh on day <code>X</code> (if it takes more than 2 hours).</li>
+<li class="custom-li"><code>REFRESH EVERY 2 HOUR</code> depends on <code>REFRESH EVERY 1 HOUR</code><br/>
+The <code>2 HOUR</code> refresh happens after the <code>1 HOUR</code> refresh for every other hour, e.g. after the midnight
+refresh, then after the 2am refresh, etc.</li>
+<li class="custom-li"><code>REFRESH EVERY 1 MINUTE</code> depends on <code>REFRESH EVERY 2 HOUR</code><br/>
+<code>destination</code> is refreshed once after every <code>source</code> refresh, i.e. every 2 hours. The <code>1 MINUTE</code> is effectively ignored.</li>
+<li class="custom-li"><code>REFRESH AFTER 1 HOUR</code> depends on <code>REFRESH AFTER 1 HOUR</code><br/>
+Currently this is not recommended.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p><code>DEPENDS ON</code> only works between refreshable materialized views. Listing a regular table in the <code>DEPENDS ON</code> list will prevent the view from ever refreshing (dependencies can be removed with <code>ALTER</code>, see <a href="#changing-refresh-parameters">Changing Refresh Parameters</a>).</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="refresh-settings">Refresh Settings<a aria-label="Direct link to Refresh Settings" class="hash-link" href="#refresh-settings" title="Direct link to Refresh Settings">​</a></h3>
+<p>Available refresh settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>refresh_retries</code> - How many times to retry if refresh query fails with an exception. If all retries fail, skip to the next scheduled refresh time. 0 means no retries, -1 means infinite retries. Default: 2.</li>
+<li class="custom-li"><code>refresh_retry_initial_backoff_ms</code> - Delay before the first retry, if <code>refresh_retries</code> is not zero. Each subsequent retry doubles the delay, up to <code>refresh_retry_max_backoff_ms</code>. Default: 100 ms.</li>
+<li class="custom-li"><code>refresh_retry_max_backoff_ms</code> - Limit on the exponential growth of delay between refresh attempts. Default: 60000 ms (1 minute).</li>
+<li class="custom-li"><code>all_replicas</code> - In a <a href="/docs/engines/database-engines/replicated">Replicated database</a> with <code>APPEND</code>, controls whether all replicas refresh independently or only one replica refreshes at each scheduled time. Cannot be changed after the view is created. Default: <code>false</code>.</li>
+<li class="custom-li"><code>prefer_dependency_replica</code> - When the view has <code>DEPENDS ON</code>, the replica that ran the parent refresh gets priority for running the dependent refresh; other replicas delay their attempt by <code>prefer_dependency_replica_delay_ms</code>. Useful with <code>SharedMergeTree</code> to avoid replication lag causing missing data in dependent refresh chains. Default: <code>false</code>.</li>
+<li class="custom-li"><code>prefer_dependency_replica_delay_ms</code> - How long non-preferred replicas wait before attempting to run a dependent refresh when <code>prefer_dependency_replica</code> is enabled. Default: 2000 ms.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="changing-refresh-parameters">Changing Refresh Parameters<a aria-label="Direct link to Changing Refresh Parameters" class="hash-link" href="#changing-refresh-parameters" title="Direct link to Changing Refresh Parameters">​</a></h3>
+<p>Refresh parameters of an existing refreshable materialized view are changed with <a href="/docs/sql-reference/statements/alter/view#alter-table--modify-refresh-statement"><code>ALTER TABLE ... MODIFY REFRESH</code></a>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]name MODIFY REFRESH EVERY|AFTER ... [RANDOMIZE FOR ...] [DEPENDS ON ...] [SETTINGS ...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The schedule (<code>EVERY</code> or <code>AFTER</code>) is mandatory: the statement always replaces <em>all</em> refresh parameters — schedule, <code>RANDOMIZE FOR</code>, <code>DEPENDS ON</code>, and refresh settings — with what is specified. Anything omitted is reset to its default (settings) or removed (dependencies, randomization).</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><ul class="custom-ul">
+<li class="custom-li">
+<p>To change only refresh settings (e.g. <code>refresh_retries</code>), repeat the existing schedule:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE rmv MODIFY REFRESH EVERY 1 HOUR SETTINGS refresh_retries = 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+<li class="custom-li">
+<p><code>ALTER TABLE ... MODIFY SETTING refresh_retries = ...</code> is not supported on materialized views; you must go through <code>MODIFY REFRESH</code>.</p>
+</li>
+<li class="custom-li">
+<p>Adding or removing <code>APPEND</code> is not supported.</p>
+</li>
+<li class="custom-li">
+<p>The <code>all_replicas</code> setting cannot be changed after creation.</p>
+</li>
+</ul></div></div>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Change the schedule, drop existing settings and dependencies.
+ALTER TABLE rmv MODIFY REFRESH EVERY 30 MINUTE;
+
+-- Change the schedule and tune retry behavior.
+ALTER TABLE rmv MODIFY REFRESH EVERY 30 MINUTE
+SETTINGS refresh_retries = 5,
+         refresh_retry_initial_backoff_ms = 500,
+         refresh_retry_max_backoff_ms = 60000;
+
+-- Keep the dependency while changing the period.
+ALTER TABLE rmv MODIFY REFRESH EVERY 6 HOUR DEPENDS ON other_rmv;
+
+-- Drop the dependency by omitting `DEPENDS ON`.
+ALTER TABLE rmv MODIFY REFRESH EVERY 6 HOUR;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="other-operations">Other operations<a aria-label="Direct link to Other operations" class="hash-link" href="#other-operations" title="Direct link to Other operations">​</a></h3>
+<p>The status of all refreshable materialized views is available in table <a href="/docs/operations/system-tables/view_refreshes"><code>system.view_refreshes</code></a>. In particular, it contains refresh progress (if running), last and next refresh time, exception message if a refresh failed.</p>
+<p>To manually stop, start, trigger, or cancel refreshes, use <a href="/docs/sql-reference/statements/system#managing-refreshable-materialized-views"><code>SYSTEM STOP|START|REFRESH|WAIT|CANCEL VIEW</code></a>.</p>
+<p>To wait for a refresh to complete, use <a href="/docs/sql-reference/statements/system#wait-view"><code>SYSTEM WAIT VIEW</code></a>. In particular, useful for waiting for initial refresh after creating a view.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Fun fact: the refresh query is allowed to read from the view that's being refreshed, seeing pre-refresh version of the data. This means you can implement Conway's game of life: <a href="https://pastila.nl/?00021a4b/d6156ff819c83d490ad2dcec05676865#O0LGWTO7maUQIA4AcGUtlA==" rel="noopener noreferrer" target="_blank">https://pastila.nl/?00021a4b/d6156ff819c83d490ad2dcec05676865#O0LGWTO7maUQIA4AcGUtlA==</a></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="window-view">Window View<a aria-label="Direct link to Window View" class="hash-link" href="#window-view" title="Direct link to Window View">​</a></h2>
+<div class="experimentalBadge_YmgE"><div class="experimentalIcon_rfgE" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 2H10.5" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M9.50015 2V6.19625L13.4283 12.7425C13.4738 12.8183 13.4985 12.9049 13.4996 12.9934C13.5008 13.0818 13.4785 13.169 13.435 13.246C13.3914 13.323 13.3283 13.3871 13.2519 13.4317C13.1755 13.4764 13.0886 13.4999 13.0002 13.5H3.00015C2.91164 13.5 2.8247 13.4766 2.74822 13.432C2.67174 13.3874 2.60847 13.3233 2.56487 13.2463C2.52126 13.1693 2.49889 13.082 2.50004 12.9935C2.50119 12.905 2.52582 12.8184 2.5714 12.7425L6.50015 6.19625V2" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M4.47656 9.56754C5.30344 9.41254 6.47656 9.47942 7.99969 10.25C10.0153 11.2707 11.4216 11.0569 12.2184 10.7282" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path></svg></div>Experimental feature. <u><a href="/docs/beta-and-experimental-features#experimental-features">Learn more.</a></u></div>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<div class="theme-admonition theme-admonition-info alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>This is an experimental feature that may change in backwards-incompatible ways in the future releases. Enable usage of window views and <code>WATCH</code> query using <a href="/docs/operations/settings/settings#allow_experimental_window_view">allow_experimental_window_view</a> setting. Input the command <code>set allow_experimental_window_view = 1</code>.</p></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW [IF NOT EXISTS] [db.]table_name [TO [db.]table_name] [INNER ENGINE engine] [ENGINE engine] [WATERMARK strategy] [ALLOWED_LATENESS interval_function] [POPULATE]
+AS SELECT ...
+GROUP BY time_window_function
+[COMMENT 'comment']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Window view can aggregate data by time window and output the results when the window is ready to fire. It stores the partial aggregation results in an inner(or specified) table to reduce latency and can push the processing result to a specified table or push notifications using the WATCH query.</p>
+<p>Creating a window view is similar to creating <code>MATERIALIZED VIEW</code>. Window view needs an inner storage engine to store intermediate data. The inner storage can be specified by using <code>INNER ENGINE</code> clause, the window view will use <code>AggregatingMergeTree</code> as the default inner engine.</p>
+<p>When creating a window view without <code>TO [db].[table]</code>, you must specify <code>ENGINE</code> – the table engine for storing data.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="time-window-functions">Time Window Functions<a aria-label="Direct link to Time Window Functions" class="hash-link" href="#time-window-functions" title="Direct link to Time Window Functions">​</a></h3>
+<p><a href="/docs/sql-reference/functions/time-window-functions">Time window functions</a> are used to get the lower and upper window bound of records. The window view needs to be used with a time window function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="time-attributes">TIME ATTRIBUTES<a aria-label="Direct link to TIME ATTRIBUTES" class="hash-link" href="#time-attributes" title="Direct link to TIME ATTRIBUTES">​</a></h3>
+<p>Window view supports <strong>processing time</strong> and <strong>event time</strong> process.</p>
+<p><strong>Processing time</strong> allows window view to produce results based on the local machine's time and is used by default. It is the most straightforward notion of time but does not provide determinism. The processing time attribute can be defined by setting the <code>time_attr</code> of the time window function to a table column or using the function <code>now()</code>. The following query creates a window view with processing time.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW wv AS SELECT count(number), tumbleStart(w_id) as w_start from date GROUP BY tumble(now(), INTERVAL '5' SECOND) as w_id
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Event time</strong> is the time that each individual event occurred on its producing device. This time is typically embedded within the records when it is generated. Event time processing allows for consistent results even in case of out-of-order events or late events. Window view supports event time processing by using <code>WATERMARK</code> syntax.</p>
+<p>Window view provides three watermark strategies:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>STRICTLY_ASCENDING</code>: Emits a watermark of the maximum observed timestamp so far. Rows that have a timestamp smaller to the max timestamp are not late.</li>
+<li class="custom-li"><code>ASCENDING</code>: Emits a watermark of the maximum observed timestamp so far minus 1. Rows that have a timestamp equal and smaller to the max timestamp are not late.</li>
+<li class="custom-li"><code>BOUNDED</code>: WATERMARK=INTERVAL. Emits watermarks, which are the maximum observed timestamp minus the specified delay.</li>
+</ul>
+<p>The following queries are examples of creating a window view with <code>WATERMARK</code>:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW wv WATERMARK=STRICTLY_ASCENDING AS SELECT count(number) FROM date GROUP BY tumble(timestamp, INTERVAL '5' SECOND);
+CREATE WINDOW VIEW wv WATERMARK=ASCENDING AS SELECT count(number) FROM date GROUP BY tumble(timestamp, INTERVAL '5' SECOND);
+CREATE WINDOW VIEW wv WATERMARK=INTERVAL '3' SECOND AS SELECT count(number) FROM date GROUP BY tumble(timestamp, INTERVAL '5' SECOND);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>By default, the window will be fired when the watermark comes, and elements that arrived behind the watermark will be dropped. Window view supports late event processing by setting <code>ALLOWED_LATENESS=INTERVAL</code>. An example of lateness handling is:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW test.wv TO test.dst WATERMARK=ASCENDING ALLOWED_LATENESS=INTERVAL '2' SECOND AS SELECT count(a) AS count, tumbleEnd(wid) AS w_end FROM test.mt GROUP BY tumble(timestamp, INTERVAL '5' SECOND) AS wid;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that elements emitted by a late firing should be treated as updated results of a previous computation. Instead of firing at the end of windows, the window view will fire immediately when the late event arrives. Thus, it will result in multiple outputs for the same window. Users need to take these duplicated results into account or deduplicate them.</p>
+<p>You can modify <code>SELECT</code> query that was specified in the window view by using <code>ALTER TABLE ... MODIFY QUERY</code> statement. The data structure resulting in a new <code>SELECT</code> query should be the same as the original <code>SELECT</code> query when with or without <code>TO [db.]name</code> clause. Note that the data in the current window will be lost because the intermediate state cannot be reused.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="monitoring-new-windows">Monitoring New Windows<a aria-label="Direct link to Monitoring New Windows" class="hash-link" href="#monitoring-new-windows" title="Direct link to Monitoring New Windows">​</a></h3>
+<p>Window view supports the <a href="/docs/sql-reference/statements/watch">WATCH</a> query to monitoring changes, or use <code>TO</code> syntax to output the results to a table.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WATCH [db.]window_view
+[EVENTS]
+[LIMIT n]
+[FORMAT format]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>A <code>LIMIT</code> can be specified to set the number of updates to receive before terminating the query. The <code>EVENTS</code> clause can be used to obtain a short form of the <code>WATCH</code> query where instead of the query result you will just get the latest query watermark.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="settings-1">Settings<a aria-label="Direct link to Settings" class="hash-link" href="#settings-1" title="Direct link to Settings">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><code>window_view_clean_interval</code>: The clean interval of window view in seconds to free outdated data. The system will retain the windows that have not been fully triggered according to the system time or <code>WATERMARK</code> configuration, and the other data will be deleted.</li>
+<li class="custom-li"><code>window_view_heartbeat_interval</code>: The heartbeat interval in seconds to indicate the watch query is alive.</li>
+<li class="custom-li"><code>wait_for_window_view_fire_signal_timeout</code>: Timeout for waiting for window view fire signal in event time processing.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example">Example<a aria-label="Direct link to Example" class="hash-link" href="#example" title="Direct link to Example">​</a></h3>
+<p>Suppose we need to count the number of click logs per 10 seconds in a log table called <code>data</code>, and its table structure is:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE data ( `id` UInt64, `timestamp` DateTime) ENGINE = Memory;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>First, we create a window view with tumble window of 10 seconds interval:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW wv as select count(id), tumbleStart(w_id) as window_start from data group by tumble(timestamp, INTERVAL '10' SECOND) as w_id
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Then, we use the <code>WATCH</code> query to get the results.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WATCH wv
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>When logs are inserted into table <code>data</code>,</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO data VALUES(1,now())
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>WATCH</code> query should print the results as follows:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count(id)─┬────────window_start─┐
+│         1 │ 2020-01-14 16:56:40 │
+└───────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Alternatively, we can attach the output to another table using <code>TO</code> syntax.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE WINDOW VIEW wv TO dst AS SELECT count(id), tumbleStart(w_id) as window_start FROM data GROUP BY tumble(timestamp, INTERVAL '10' SECOND) as w_id
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Additional examples can be found among stateful tests of ClickHouse (they are named <code>*window_view*</code> there).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="window-view-usage">Window View Usage<a aria-label="Direct link to Window View Usage" class="hash-link" href="#window-view-usage" title="Direct link to Window View Usage">​</a></h3>
+<p>The window view is useful in the following scenarios:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Monitoring</strong>: Aggregate and calculate the metrics logs by time, and output the results to a target table. The dashboard can use the target table as a source table.</li>
+<li class="custom-li"><strong>Analyzing</strong>: Automatically aggregate and preprocess data in the time window. This can be useful when analyzing a large number of logs. The preprocessing eliminates repeated calculations in multiple queries and reduces query latency.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related Content<a aria-label="Direct link to Related Content" class="hash-link" href="#related-content" title="Direct link to Related Content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/working-with-time-series-data-and-functions-ClickHouse" rel="noopener noreferrer" target="_blank">Working with time series data in ClickHouse</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/storing-traces-and-spans-open-telemetry-in-clickhouse" rel="noopener noreferrer" target="_blank">Building an Observability Solution with ClickHouse - Part 2 - Traces</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views">Temporary Views<a aria-label="Direct link to Temporary Views" class="hash-link" href="#temporary-views" title="Direct link to Temporary Views">​</a></h2>
+<p>ClickHouse supports <strong>temporary views</strong> with the following characteristics (matching temporary tables where applicable):</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><strong>Session-lifetime</strong>
+A temporary view exists only for the duration of the current session. It is dropped automatically when the session ends.</p>
+</li>
+<li class="custom-li">
+<p><strong>No database</strong>
+You <strong>cannot</strong> qualify a temporary view with a database name. It lives outside databases (session namespace).</p>
+</li>
+<li class="custom-li">
+<p><strong>Not replicated / no ON CLUSTER</strong>
+Temporary objects are local to the session and <strong>cannot</strong> be created with <code>ON CLUSTER</code>.</p>
+</li>
+<li class="custom-li">
+<p><strong>Name resolution</strong>
+If a temporary object (table or view) has the same name as a persistent object and a query references the name <strong>without</strong> a database, the <strong>temporary</strong> object is used.</p>
+</li>
+<li class="custom-li">
+<p><strong>Logical object (no storage)</strong>
+A temporary view stores only its <code>SELECT</code> text (uses the <code>View</code> storage internally). It does not persist data and cannot accept <code>INSERT</code>.</p>
+</li>
+<li class="custom-li">
+<p><strong>Engine clause</strong>
+You do <strong>not</strong> need to specify <code>ENGINE</code>; if provided as <code>ENGINE = View</code>, it’s ignored/treated as the same logical view.</p>
+</li>
+<li class="custom-li">
+<p><strong>Security / privileges</strong>
+Creating a temporary view requires the privilege <code>CREATE TEMPORARY VIEW</code> which is implicitly granted by <code>CREATE VIEW</code>.</p>
+</li>
+<li class="custom-li">
+<p><strong>SHOW CREATE</strong>
+Use <code>SHOW CREATE TEMPORARY VIEW view_name;</code> to print the DDL of a temporary view.</p>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views-syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#temporary-views-syntax" title="Direct link to Syntax">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TEMPORARY VIEW [IF NOT EXISTS] view_name AS &lt;select_query&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>OR REPLACE</code> is <strong>not</strong> supported for temporary views (to match temporary tables). If you need to “replace” a temporary view, drop it and create it again.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views-examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#temporary-views-examples" title="Direct link to Examples">​</a></h3>
+<p>Create a temporary source table and a temporary view on top:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TEMPORARY TABLE t_src (id UInt32, val String);
+INSERT INTO t_src VALUES (1, 'a'), (2, 'b');
+
+CREATE TEMPORARY VIEW tview AS
+SELECT id, upper(val) AS u
+FROM t_src
+WHERE id &lt;= 2;
+
+SELECT * FROM tview ORDER BY id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Show its DDL:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHOW CREATE TEMPORARY VIEW tview;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Drop it:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">DROP TEMPORARY VIEW IF EXISTS tview;  -- temporary views are dropped with TEMPORARY TABLE syntax
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views-limitations">Disallowed / limitations<a aria-label="Direct link to Disallowed / limitations" class="hash-link" href="#temporary-views-limitations" title="Direct link to Disallowed / limitations">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><code>CREATE OR REPLACE TEMPORARY VIEW ...</code> → <strong>not allowed</strong> (use <code>DROP</code> + <code>CREATE</code>).</li>
+<li class="custom-li"><code>CREATE TEMPORARY MATERIALIZED VIEW ...</code> / <code>WINDOW VIEW</code> → <strong>not allowed</strong>.</li>
+<li class="custom-li"><code>CREATE TEMPORARY VIEW db.view AS ...</code> → <strong>not allowed</strong> (no database qualifier).</li>
+<li class="custom-li"><code>CREATE TEMPORARY VIEW view ON CLUSTER 'name' AS ...</code> → <strong>not allowed</strong> (temporary objects are session-local).</li>
+<li class="custom-li"><code>POPULATE</code>, <code>REFRESH</code>, <code>TO [db.table]</code>, inner engines, and all MV-specific clauses → <strong>not applicable</strong> to temporary views.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views-distributed-notes">Notes on distributed queries<a aria-label="Direct link to Notes on distributed queries" class="hash-link" href="#temporary-views-distributed-notes" title="Direct link to Notes on distributed queries">​</a></h3>
+<p>A temporary <strong>view</strong> is just a definition; there’s no data to pass around. If your temporary view references temporary <strong>tables</strong> (e.g., <code>Memory</code>), their data can be shipped to remote servers during distributed query execution the same way temporary tables work.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-views-distributed-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#temporary-views-distributed-example" title="Direct link to Example">​</a></h4>
+<div class="wrapper_EBtA" style="height:301.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- A session-scoped, in-memory table
+CREATE TEMPORARY TABLE temp_ids (id UInt64) ENGINE = Memory;
+
+INSERT INTO temp_ids VALUES (1), (5), (42);
+
+-- A session-scoped view over the temp table (purely logical)
+CREATE TEMPORARY VIEW v_ids AS
+SELECT id FROM temp_ids;
+
+-- Replace 'test' with your cluster name.
+-- GLOBAL JOIN forces ClickHouse to *ship* the small join-side (temp_ids via v_ids)
+-- to every remote server that executes the left side.
+SELECT count()
+FROM cluster('test', system.numbers) AS n
+GLOBAL ANY INNER JOIN v_ids USING (id)
+WHERE n.number &lt; 100;
+
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/table"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">TABLE</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/function"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">FUNCTION</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#normal-view">Normal View</a><li><a class="table-of-contents__link toc-highlight" href="#parameterized-view">Parameterized View</a><li><a class="table-of-contents__link toc-highlight" href="#materialized-view">Materialized View</a><ul><li><a class="table-of-contents__link toc-highlight" href="#create-or-replace-materialized-view">CREATE OR REPLACE MATERIALIZED VIEW</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#sql_security">SQL security</a><ul><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#live-view">Live View</a><li><a class="table-of-contents__link toc-highlight" href="#refreshable-materialized-view">Refreshable Materialized View</a><ul><li><a class="table-of-contents__link toc-highlight" href="#refresh-schedule">Refresh Schedule</a><li><a class="table-of-contents__link toc-highlight" href="#in-replicated-db">In Replicated DB</a><li><a class="table-of-contents__link toc-highlight" href="#refresh-dependencies">Refresh Dependencies</a><li><a class="table-of-contents__link toc-highlight" href="#refresh-settings">Refresh Settings</a><li><a class="table-of-contents__link toc-highlight" href="#changing-refresh-parameters">Changing Refresh Parameters</a><li><a class="table-of-contents__link toc-highlight" href="#other-operations">Other operations</a></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#window-view">Window View</a><ul><li><a class="table-of-contents__link toc-highlight" href="#time-window-functions">Time Window Functions</a><li><a class="table-of-contents__link toc-highlight" href="#time-attributes">TIME ATTRIBUTES</a><li><a class="table-of-contents__link toc-highlight" href="#monitoring-new-windows">Monitoring New Windows</a><li><a class="table-of-contents__link toc-highlight" href="#settings-1">Settings</a><li><a class="table-of-contents__link toc-highlight" href="#example">Example</a><li><a class="table-of-contents__link toc-highlight" href="#window-view-usage">Window View Usage</a></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related Content</a><li><a class="table-of-contents__link toc-highlight" href="#temporary-views">Temporary Views</a><ul><li><a class="table-of-contents__link toc-highlight" href="#temporary-views-syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#temporary-views-examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#temporary-views-limitations">Disallowed / limitations</a><li><a class="table-of-contents__link toc-highlight" href="#temporary-views-distributed-notes">Notes on distributed queries</a></li></li></li></li></ul></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

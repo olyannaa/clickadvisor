@@ -1,0 +1,76 @@
+# stddevSamp \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- stddevSamp
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/stddevSamp.md)# stddevSamp
+
+## stddevSamp[​](#stddevSamp "Direct link to stddevSamp")
+
+
+Introduced in: v1\.1\.0
+
+
+Returns the sample standard deviation of a numeric data sequence.
+The result is equal to the square root of [`varSamp`](/docs/sql-reference/aggregate-functions/reference/varSamp).
+
+
+NoteThis function uses a numerically unstable algorithm.
+If you need [numerical stability](https://en.wikipedia.org/wiki/Numerical_stability) in calculations, use the [`stddevSampStable`](/docs/sql-reference/aggregate-functions/reference/stddevsampstable) function. It works slower but provides a lower computational error.
+
+
+**Syntax**
+
+
+
+```
+stddevSamp(x)
+
+```
+
+**Aliases**: `STDDEV_SAMP`, `STDDEV`
+
+
+**Arguments**
+
+
+- `x` — Values for which to find the square root of sample variance. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the square root of sample variance of `x`. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Computing sample standard deviation**
+
+
+
+```
+DROP TABLE IF EXISTS test_data;
+CREATE TABLE test_data
+(
+    population UInt8,
+)
+ENGINE = Log;
+
+INSERT INTO test_data VALUES (3),(3),(3),(4),(4),(5),(5),(7),(11),(15);
+
+SELECT
+    stddevSamp(population)
+FROM test_data;
+
+```
+
+
+```
+┌─stddevSamp(population)─┐
+│                      4 │
+└────────────────────────┘
+
+```
+[PreviousstddevPopStable](/docs/sql-reference/aggregate-functions/reference/stddevpopstable)[NextstddevSampStable](/docs/sql-reference/aggregate-functions/reference/stddevsampstable)- [stddevSamp](#stddevSamp)
+Was this page helpful?

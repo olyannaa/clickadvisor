@@ -1,0 +1,24 @@
+case_id: tpch_q17
+source: tpch
+sql: "SELECT\n    sum(l_extendedprice) / 7.0 AS avg_yearly\nFROM\n    lineitem,\n    part\nWHERE\n    p_partkey = l_partkey\n    AND p_brand = 'Brand#23'\n    AND p_container = 'MED BOX'\n    AND l_quantity < (\n        SELECT\n            0.2 * avg(l_quantity)\n        FROM\n            lineitem\n        WHERE\n            l_partkey = p_partkey\n    );"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM lineitem, part — implicit JOIN
+- issue_id: I-2
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Коррелированный подзапрос в WHERE
+expected_rules_to_fire:
+- D-002
+- D-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q17: Small-Quantity-Order Revenue.'
+expected_findings_count: 2
+status: reviewed

@@ -1,0 +1,544 @@
+<h1>Modeling Machine Learning Data in OLAP databases</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">Modeling Machine Learning Data in OLAP databases</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="Dale McDirmid" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/dale-mcdiarmid">Dale McDiarmid</a></div><div class="text-sm text-neutral-300">Aug 8, 2024 · 32 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p>In this article, we explore the world of MLOps and how data in OLAP databases can be modeled and transformed to allow it to act as an efficient feature store for training ML models. While the lessons shared are applicable to a range of OLAP systems, we will use ClickHouse as an example to demonstrate these techniques - for no reason other than we know it well!</p>
+<p>The approaches discussed in this blog are used by <a href="https://clickhouse.com/blog/transforming-ad-tech-how-cognitiv-uses-clickhouse-to-build-better-machine-learning-models">existing ClickHouse users</a>, who we thank for sharing their techniques, as well as out of the box feature stores.</p>
+<p>We focus on using an ClickHouse as a data source, offline store, and transformation engine. These components of a feature store are fundamental to delivering data efficiently and correctly to model training. While most out-of-the-box feature stores provide abstractions, we peel back the layers and describe how data can be modeled efficiently to build and serve features. For users looking to build their own feature store, or just curious as to the techniques existing stores use, read on.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="why-clickhouse" level="2">Why ClickHouse?<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#why-clickhouse">#</a></span></h2>
+<p>We have explored what a feature store is <a href="https://clickhouse.com/blog/powering-featurestores-with-clickhouse">in previous blog posts</a> and recommend users are familiar with the concept before diving into this one. In its simplest form, a feature store is a centralized repository for storing and managing data that will be used to train ML models, aiming to improve collaboration and reusability and reduce model iteration time.</p>
+<p>As a real-time data warehouse, ClickHouse can fulfill two primary components of a feature store beyond simply providing a datasource.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="feature_store_clickhouse.png" loading="lazy" src="/uploads/feature_store_clickhouse_baabeb2e00.png"/></span>
+<ol>
+<li><strong>Transformation Engine</strong>: ClickHouse utilizes SQL for declaring data transformations, optimized by its analytical and statistical functions. It supports querying data from various sources, such as Parquet, Postgres, and MySQL, and performs aggregations over petabytes of data. Materialized views allow data transformations at insert time. Additionally, ClickHouse can be used in Python via chDB for transforming large data frames.</li>
+<li><strong>Offline Store</strong>: ClickHouse can persist query results through <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code> statements, automatically generating table schemas. It supports efficient data iteration and scaling, with features often represented in tables with timestamps for point-in-time queries. ClickHouse’s sparse indices and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ASOF LEFT JOIN</code> clause facilitate fast filtering and feature selection, optimizing data preparation for training pipelines. This work is parallelized and executed across a cluster, enabling the offline store to scale to petabytes while keeping the feature store lightweight.</li>
+</ol>
+<p>In this post, we show how data can be modeled and managed in ClickHouse to perform these roles.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="high-level-steps" level="2">High-level steps<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#high-level-steps">#</a></span></h2>
+<p>When using ClickHouse as the basis for your offline feature store, we think of the steps to train a model as consisting of the following:</p>
+<ol>
+<li>
+<p><strong>Exploration</strong> - Familiarize yourself with source data in ClickHouse with SQL queries.</p>
+</li>
+<li>
+<p><strong>Identify the data subset and features</strong> - Identify the possible features, their respective entities, and the subset of data needed to produce them. We refer to the subset from this step as the "feature subset."</p>
+</li>
+<li>
+<p><strong>Creating Features</strong> - Create the SQL queries required to generate the features.</p>
+</li>
+<li>
+<p><strong>Generating model data</strong> - Combine the features appropriately to produce a set of feature vectors, usually achieved using an ASOF JOIN on a common key and timestamp proximity.</p>
+</li>
+<li>
+<p><strong>Generating test and training sets</strong> - Split the "feature subset" into a test and training set (and possibly validation).</p>
+</li>
+<li>
+<p><strong>Train model</strong> - Train model(s) using the training data, possibly with different algorithms.</p>
+</li>
+<li>
+<p><strong>Model selection &amp; tuning</strong> - Evaluate models against the validation set, choose the best model, and fine-tune hyperparameters.</p>
+</li>
+<li>
+<p><strong>Model evaluation</strong> - Evaluate the final model against the test set. If performance is sufficient, stop; otherwise, return to 2.</p>
+</li>
+</ol>
+<p>We concern ourselves with steps (1) to (5) as these are ClickHouse-specific. One of the key properties of the above process is that it is highly iterative. Steps (3) and (4) could be loosely referred to as "Feature engineering" and something that typically consumes more time than choosing the model and refining the hyperparameters. Optimizing this process and ensuring ClickHouse is used as efficiently as possible can, therefore, deliver significant time and cost savings.</p>
+<p>We explore each of these steps below and propose a flexible approach that optimally leverages ClickHouse features, allowing users to iterate efficiently.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="dataset--example" level="2">Dataset &amp; Example<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#dataset--example">#</a></span></h2>
+<p>For our example, we use the following web analytics dataset, described <a href="https://clickhouse.com/docs/en/getting-started/example-datasets/metrica">here</a>. This dataset consists of 100m rows, with an event representing a request to a specific URL. The ability to train machine learning models on web analytics data in ClickHouse is a common use case we see amongst users<sub><a href="https://clickhouse.com/blog/transforming-ad-tech-how-cognitiv-uses-clickhouse-to-build-better-machine-learning-models">[1]</a><a href="https://clickhouse.com/blog/adgreetz-processes-millions-of-daily-ad-impressions">[2]</a></sub>.</p>
+<p>Due to its size, the following table has been truncated to columns we will use. See <a href="https://pastila.nl/?00acf5da/2295705307eb4090c33cb5f0f5b8d472#kSJRFJM6RcULiQUo90npfA==">here</a> for the full schema.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> default.web_events
+(
+   `EventTime` DateTime,
+   `UserID` UInt64,
+   `URL` String,
+   `UserAgent` UInt8,
+   `RefererCategoryID` UInt16,
+   `URLCategoryID` UInt16,
+   `FetchTiming` UInt32,
+   `ClientIP` UInt32,
+   `IsNotBounce` UInt8,
+   <span class="hljs-comment">-- many more columns...</span>
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> toYYYYMM(EventDate)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (CounterID, EventDate, intHash32(UserID))
+</code></pre>
+<p>To illustrate the modeling steps, let's suppose we wish to use this dataset to build a model that predicts whether a user will bounce when a request arrives. If we consider the above source data, this is denoted by the column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">IsNotBounce.</code> This represents our target class or label.</p>
+<blockquote style="font-size:14px">
+<p>We aren't going to actually build this model and provide the Python code, rather focusing on the data modeling process. For this reason, our choice of features is illustrative only.</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="step-1---exploration" level="2">Step 1 - Exploration<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#step-1---exploration">#</a></span></h2>
+<p>Exploring and understanding the source data requires users to become familiar with ClickHouse SQL. We recommend users familiarize themselves with ClickHouse's wide range of <a href="https://clickhouse.com/docs/en/sql-reference/functions">analytical functions</a> during this step. Once familiar with the data, we can begin identifying the features for our model and the subset of the data required to produce them.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="step-2---features-and-subsets" level="2">Step 2 - Features and subsets<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#step-2---features-and-subsets">#</a></span></h2>
+<p>To predict whether a visit will bounce, our model will require a training set where each data point contains appropriate features assembled into a feature vector. Typically, these features will be based on a subset of the data.</p>
+<p>We've explored the concept of features and feature vectors in other blogs and how they loosely correlate to a column and row of a <strong>result set</strong>, respectively. Importantly, they need to be available at training and request time.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="features.png" loading="lazy" src="/uploads/features_7d40dbf1cd.png"/></span>
+<blockquote style="font-size:14px">
+<p>Note we emphasized "result set" above. A feature vector is rarely just a row from a table with the features of a subset of the columns. Often, a complex query must be issued to compute the feature from an aggregation or transformation.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="identifying-features" level="3">Identifying features<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#identifying-features">#</a></span></h3>
+<p>Before identifying features, we should be aware of two of the key properties that will influence our modeling process:</p>
+<ul>
+<li>
+<p><strong>Association with entities</strong> - Features are typically associated with an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">entity</code> with which they are associated or "keyed". For our problem, the features we think might be useful in making a prediction might be a mixture of user or domain-based. A user-based feature would be request-specific, e.g., the user's age, client IP, or user agent. A domain feature would be associated with the page visited e.g. <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">number of visits per year</code>.</p>
+<p>Associating features with an instance of an entity requires the entity to have a key or identifier. In our case we need an identifier for the user and a domain value. These are available from the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">URL</code> columns, respectively. The domain can be extracted from the URL using the domain function in ClickHouse, i.e., <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">domain(URL)</code>.</p>
+</li>
+<li>
+<p><strong>Dynamic &amp; complex</strong> - While certain features remain relatively static, e.g., the user's age, others, such as the client IP, will exhibit changes over time. In such cases, we need to access the feature’s value as it existed at a specific timestamp. This is key for creating point-in-time correct training sets.</p>
+<p>While some features will likely be simple, e.g., whether the device is mobile or the client IP, other more complicated features require aggregate statistics, which change over time - and this is where ClickHouse excels!</p>
+</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="example-features" level="3">Example features<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#example-features">#</a></span></h3>
+<p>For example, suppose we consider the following features to be useful in predicting whether a website visit will bounce. All of our features are associated with a timestamp as they are dynamic and change over time.</p>
+<ul>
+<li><strong>User-agent of the visit</strong> -  Associated with the user entity and available in the column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserAgent</code>.</li>
+<li><strong>Category of the referrer</strong> - (e.g., search engine, social media, direct). A user feature available through the column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">RefererCategoryID</code>.</li>
+<li><strong>Number of domains visited per hour</strong> - at the time the user made the request. Requires a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code> to compute this user feature.</li>
+<li><strong>Number of unique IPs visiting the domain per hour</strong> - Domain feature requiring a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code>.</li>
+<li><strong>Category of the page</strong> - User feature available through the column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">URLCategoryID</code>.</li>
+<li><strong>Average request time for the domain per hour</strong> - Requires a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code> to compute this from the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FetchTiming</code> column.</li>
+</ul>
+<blockquote style="font-size:14px">
+<p>These features might not be ideal and illustrative only. Linking many of these features to the user entity is somewhat simplistic. For instance, some features would be more accurately associated with the request or session entity.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="feature-subsets" level="3">Feature subsets<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#feature-subsets">#</a></span></h3>
+<p>Once we have an idea of the features we will use, we can identify the required subset of the data needed to build them. This step is optional as sometimes users wish to use the whole data, or the data isn't large and complex enough to warrant this step.</p>
+<p>When applied, we often see users creating tables for their model data - we refer to these as the "feature subset". These consist of:</p>
+<ul>
+<li>The entity values for each feature vector.</li>
+<li>A timestamp of the event if it exists.</li>
+<li>Class label.</li>
+<li>The columns needed to produce the planned features. Users may wish to add other columns that they consider useful in future iterations.</li>
+</ul>
+<p>This approach provides several advantages:</p>
+<ul>
+<li>
+<p>Allows the data to be ordered and optimized for future accesses. Typically, the model data will be read and filtered differently than the source data. These tables can also generate features faster than the source data when producing a final training set.</p>
+</li>
+<li>
+<p>A subset or transformed set of data may be required for the model. Identifying, filtering, and transforming this subset may be an expensive query. By inserting the data into an intermediate model table, this query only has to be executed once. Subsequent feature generation and model training runs can thus obtain the data efficiently from this table.</p>
+<p>We can use this step to de-duplicate any data. While the raw data might not contain duplicates, the resulting subset may if we extract a subset of the columns for features.</p>
+</li>
+</ul>
+<p>Suppose for our model we create an intermediate table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code>. This table needs the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code>, the label <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">IsNotBounce</code>, and the entity keys <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code>. Additionally, we include the simple feature columns <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserAgent</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">RefererCategoryID</code> , and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">URLCategoryID</code>, as well as those needed to produce our aggregate features - <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FetchTiming</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ClientIP</code>.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> predict_bounce_subset
+(
+  EventTime DateTime64,
+  UserID UInt64,
+  Domain String,
+  UserAgent UInt8,
+  RefererCategoryID UInt16,
+  URLCategoryID UInt16,
+  FetchTiming UInt32,
+  ClientIP UInt32,
+  IsNotBounce UInt8
+)
+ENGINE <span class="hljs-operator">=</span> ReplacingMergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (EventTime, Domain, UserID, UserAgent, RefererCategoryID, URLCategoryID, FetchTiming, ClientIP, IsNotBounce)
+<span class="hljs-keyword">PRIMARY</span> KEY (EventTime, Domain, UserID)
+</code></pre>
+<p>We use a <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replacingmergetree">ReplacingMergeTree</a> as our table engine. This engine de-duplicates rows that have the same values in the ordering key columns. This is performed <a href="">asynchronously in the background at merge tree</a>, although we can ensure we don't receive duplicates at query time using the <a href="https://clickhouse.com/docs/en/sql-reference/statements/select/from#final-modifier"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FINAL</code> modifier</a>. This approach to deduplication tends to be more resource efficient than the alternative in this scenario - using a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code> of the columns we wish to de-duplicate data by at insert time below. Above, we assume all columns should be used to identify unique rows. It is possible to have events with the same <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code>, e.g. multiple requests made when visiting a domain with different <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FetchTiming</code> values.</p>
+<p>Further details on the <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replacingmergetree">ReplacingMergeTree</a> can be found here.</p>
+<blockquote style="font-size:14px">
+<p>As an optimization, we only load a subset of the ordering keys into the primary key (held in memory) via the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">PRIMARY KEY</code> clause. By default, all columns in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code> are loaded. In this case, we will likely only want to query by the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code>, and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code>.</p>
+</blockquote>
+<p>Suppose we wish to only train our bounce prediction model on events not associated with bots - identified by <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Robotness=0</code>. We also will require a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code> value.</p>
+<p>We can populate our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code> table using an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code>, reading the rows from <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">web_events</code> and applying filters that reduce our data size to 42m rows.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> predict_bounce_subset <span class="hljs-keyword">SELECT</span>
+	EventTime,
+	UserID,
+	domain(URL) <span class="hljs-keyword">AS</span> Domain,
+	UserAgent,
+	RefererCategoryID,
+	URLCategoryID,
+	FetchTiming,
+	ClientIP,
+	IsNotBounce
+<span class="hljs-keyword">FROM</span> web_events
+<span class="hljs-keyword">WHERE</span> Robotness <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> Domain <span class="hljs-operator">!=</span> <span class="hljs-string">''</span> <span class="hljs-keyword">AND</span> UserID <span class="hljs-operator">!=</span> <span class="hljs-number">0</span>
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">7.886</span> sec. Processed <span class="hljs-number">99.98</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">12.62</span> GB (<span class="hljs-number">12.68</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">1.60</span> GB<span class="hljs-operator">/</span>s.)
+
+<span class="hljs-keyword">SELECT</span> formatReadableQuantity(<span class="hljs-built_in">count</span>()) <span class="hljs-keyword">AS</span> count
+<span class="hljs-keyword">FROM</span> predict_bounce_subset <span class="hljs-keyword">FINAL</span>
+
+┌─count─────────┐
+│ <span class="hljs-number">42.89</span> million │
+└───────────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.003</span> sec.
+</code></pre>
+<blockquote style="font-size:14px">
+<p>Note the use of the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FINAL</code> clause above to ensure we only count unique rows.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="updating-feature-subsets" level="3">Updating feature subsets<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#updating-feature-subsets">#</a></span></h3>
+<p>While some subsets of data are static, others will be subject to change as new events arrive in the source table. Often, users, therefore, need to keep subsets up-to-date. While this can be achieved with scheduled queries that rebuild the tables (e.g., using dbt), ClickHouse (incremental) Materialized views can be used to maintain these.</p>
+<p>Materialized views allow users to shift the cost of computation from query time to insert time. A ClickHouse materialized view is just a trigger that runs a query on blocks of data as they are inserted into a table e.g., the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">web_events</code> table. The results of this query are then inserted into a second "target" table - the subset table in our case. Should more rows be inserted, results will again be sent to the target table. This merged result is the equivalent of running the query over all of the original data.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="feature_store_mv.png" loading="lazy" src="/uploads/feature_store_mv_7b51b97cf9.png"/></span>
+<p>A materialized which maintains our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code> is shown below:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> MATERIALIZED <span class="hljs-keyword">VIEW</span> predict_bounce_subset_mv <span class="hljs-keyword">TO</span> predict_bounce_subset <span class="hljs-keyword">AS</span>
+<span class="hljs-keyword">SELECT</span>
+   EventTime,
+   UserID,
+   domain(URL) <span class="hljs-keyword">AS</span> Domain,
+   UserAgent,
+   RefererCategoryID,
+   URLCategoryID,
+   FetchTiming,
+   ClientIP,
+   IsNotBounce
+<span class="hljs-keyword">FROM</span> web_events
+<span class="hljs-keyword">WHERE</span> Robotness <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> Domain <span class="hljs-operator">!=</span> <span class="hljs-string">''</span> <span class="hljs-keyword">AND</span> UserID <span class="hljs-operator">!=</span> <span class="hljs-number">0</span>
+</code></pre>
+<p>This is a simple example, and we recommend that users learn more about the power of materialized views <a href="https://clickhouse.com/docs/en/materialized-view">here</a>. For the subsequent steps, we assume we will use the model table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code>.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="step-3---creating-features" level="2">Step 3 - Creating Features<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#step-3---creating-features">#</a></span></h2>
+<p>For model training, we'll need to assemble our planned features into a set of feature vectors with the label <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">IsNotBounce</code> i.e.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="feature.png" loading="lazy" src="/uploads/feature_9c3c5fe592.png"/></span>
+<p>Note how we assemble our feature vector from features from multiple entities. In many cases we are looking for the feature value at the closest point in time from another entity.</p>
+<p>An experienced SQL developer familiar with ClickHouse could probably formulate a query that produced the above feature vector. While possible, this will invariably not only be a complex and computationally expensive query - especially over larger datasets of billions of rows.</p>
+<p>Furthermore as noted, our feature vectors are dynamic and potentially consist of any number of combinations of different features during different training iterations. Additionally, ideally different engineers and data scientists would be using the same definition of a feature as well as writing the queries as optimally as possible.</p>
+<p>Given the above demands, it makes sense to materialize our features into tables writing the results of the query into a table using <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code>. This effectively means we perform the feature generation once, writing the results to a table from which they can be efficiently read and reused when iterating. This also allows us to declare the feature query once, optimally, and share the results with other engineers and scientists.</p>
+<blockquote style="font-size:14px">
+<p>For now, we omit how users might wish to declare, version control, and share their feature definitions. SQL is, after all, code. There are several solutions to this problem, some of which solve different challenges - see "Build or Adopt".</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="feature-tables" level="3">Feature tables<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#feature-tables">#</a></span></h3>
+<p>A feature table contains instances of a feature associated with an entity and, optionally, a timestamp. We have seen our users employ two table models for features - either creating a table <strong>per feature</strong> or <strong>per entity</strong>. Each approach has its respective pros and cons we explore below. Both of these allow re-usability of the features though, with the advantage they ensure the data is compressed well.</p>
+<blockquote style="font-size:14px">
+<p>You don't need to create a feature table for every feature. Some can be consumed from the model table as-is, in cases where they are represented by a column value.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="feature-tables-per-feature" level="3">Feature tables (per feature)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#feature-tables-per-feature">#</a></span></h3>
+<p>With a table per feature, the table name denotes the feature itself. The primary advantage of this approach is it potentially simplifies later joins. Additionally, it means users can use materialized views to maintain these tables as the source data changes - see "Updating".</p>
+<p>The disadvantage of this approach is it doesn't scale as well as the "per event". Users with thousands of features will have thousands of tables. While possibly manageable, creating materialized views to maintain each of these is not viable.</p>
+<p>As an example, consider the table responsible for storing the domain feature "number of unique IPs for each domain".</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> number_unique_ips_per_hour
+(
+  Domain String,
+  EventTime DateTime64,
+  <span class="hljs-keyword">Value</span> Int64
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (Domain, EventTime)
+</code></pre>
+<p>We have chosen the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code> key to optimize both <a href="https://clickhouse.com/docs/en/data-modeling/schema-design#choosing-an-ordering-key">compression and future reads</a>. We can populate our feature table using a simple <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code> with an aggregation to compute our feature.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> number_unique_ips_per_hour <span class="hljs-keyword">SELECT</span>
+   Domain,
+   toStartOfHour(EventTime) <span class="hljs-keyword">AS</span> EventTime,
+   uniqExact(ClientIP) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">Value</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_subset <span class="hljs-keyword">FINAL</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   Domain,
+   EventTime
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.777</span> sec. Processed <span class="hljs-number">43.80</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">1.49</span> GB (<span class="hljs-number">56.39</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">1.92</span> GB<span class="hljs-operator">/</span>s.)
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">count</span>()
+<span class="hljs-keyword">FROM</span> number_unique_ips_per_hour
+
+┌─<span class="hljs-built_in">count</span>()─┐
+│  <span class="hljs-number">613382</span> │
+└─────────┘
+</code></pre>
+<p>We choose to use <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Value</code> as the column name for entity and feature value. This makes our future queries a little simpler. Users may wish to use a generic table structure for all features, with an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Entity</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Value</code> column.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-operator">&lt;</span>feature_name<span class="hljs-operator">&gt;</span>
+(
+  Entity Variant(UInt64, Int64, String),
+  EventTime DateTime64,
+  <span class="hljs-keyword">Value</span> Variant(UInt64, Int64, Float64)
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (Entity, EventTime)
+</code></pre>
+<p>This requires the use of the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Variant</code> type. This type allows a column to support a union of other data types e.g. <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Variant(String, Float64, Int64)</code> means that each row of this type has a value of either type <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">String</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float64</code> <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Int64</code> or none of them (NULL value).</p>
+<p>This feature is currently experimental and optional for the above approach but required for the "Per entity" approach described below.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="feature-tables-per-entity" level="3">Feature tables (per entity)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#feature-tables-per-entity">#</a></span></h3>
+<p>In a per entity approach we use the same table for all features which are associated with the same entity. In this case, we use a column, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FeatureId</code> below, to denote the name of the feature.</p>
+<p>The advantage of this approach is its scalability. A single table can easily hold thousands of features.</p>
+<p>The principal disadvantage is that currently materialized views are not supported by this approach.</p>
+<p>Note we are forced to use the new <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Variant</code> type in the below example for the domain features. While this table supports <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UInt64</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Int64</code>, and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float64</code> feature values, it could potentially support more.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">-- domain Features</span>
+<span class="hljs-keyword">SET</span> allow_experimental_variant_type<span class="hljs-operator">=</span><span class="hljs-number">1</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> domain_features
+(
+  Domain String,
+  FeatureId String,
+  EventTime DateTime,
+  <span class="hljs-keyword">Value</span> Variant(UInt64, Int64, Float64)
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (FeatureId, Domain, EventTime)
+</code></pre>
+<p>This table's <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code> is optimized for filtering by a specific <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FeatureId</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain</code> - the typical access pattern we will see later.</p>
+<p>To populate our "number of unique IPs for each domain" feature into this table, we need a similar query to that used earlier:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> domain_features <span class="hljs-keyword">SELECT</span>
+   Domain,
+   <span class="hljs-string">'number_unique_ips_per_hour'</span> <span class="hljs-keyword">AS</span> FeatureId,
+   toStartOfHour(EventTime) <span class="hljs-keyword">AS</span> EventTime,
+   uniqExact(ClientIP) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">Value</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_subset <span class="hljs-keyword">FINAL</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   Domain,
+   EventTime
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.573</span> sec. Processed <span class="hljs-number">43.80</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">1.49</span> GB (<span class="hljs-number">76.40</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">2.60</span> GB<span class="hljs-operator">/</span>s.)
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">count</span>()
+<span class="hljs-keyword">FROM</span> domain_features
+
+┌─<span class="hljs-built_in">count</span>()─┐
+│  <span class="hljs-number">613382</span> │
+└─────────┘
+</code></pre>
+<blockquote style="font-size:14px">
+<p>Users new to ClickHouse may wonder if the "per feature" approach allows faster retrieval of features than the "per entity" approach. Due to the use of ordering keys and ClickHouse sparse indices, there should be no difference here.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="updating-feature-tables" level="3">Updating feature tables<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#updating-feature-tables">#</a></span></h3>
+<p>While some features are static, we often want to ensure they are updated as the source data or subsets change. As described for "Updating subsets", we can achieve this with Materialized views.</p>
+<p>In the case of feature tables, our materialized views are typically more complex as the results are often the results of aggregation and not just simple transformations and filtering. As a result, the query executed by the materialized view will produce partial aggregation states. These partial aggregation states represent the intermediate state of the aggregation, which the target feature table can merge together. This requires our feature table to use the <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/aggregatingmergetree">AggregatingMergeTree</a> with appropriate <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">AggregateFunction</code> types.</p>
+<p>We provide an example below for a "per feature" table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">number_unique_ips_per_hour.</code></p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> number_unique_ips_per_hour
+(
+  Entity String,
+  EventTime DateTime64,
+  <span class="hljs-comment">-- the AggregateFunction merges states produced by the view</span>
+  <span class="hljs-keyword">Value</span> AggregateFunction(uniqExact, UInt32)
+)
+ENGINE <span class="hljs-operator">=</span> AggregatingMergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (Entity, EventTime)
+
+<span class="hljs-keyword">CREATE</span> MATERIALIZED <span class="hljs-keyword">VIEW</span> number_unique_ips_per_hour_mv <span class="hljs-keyword">TO</span> number_unique_ips_per_hour <span class="hljs-keyword">AS</span>
+<span class="hljs-keyword">SELECT</span>
+   domain(URL) <span class="hljs-keyword">AS</span> Entity,
+   toStartOfHour(EventTime) <span class="hljs-keyword">AS</span> EventTime,
+   <span class="hljs-comment">-- our view uses the -State suffix to generate intermediate states</span>
+   uniqExactState(ClientIP) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">Value</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_subset
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   Entity,
+   EventTime
+</code></pre>
+<p>As new rows are inserted into the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code> table, our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">number_unique_ips_per_hour</code> feature table will be updated.</p>
+<p>When querying <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">number_unique_ips_per_hour</code>, we must either use the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FINAL</code> clause or <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY Entity, EventTime</code> to ensure aggregation states are merged along with the <a href="https://clickhouse.com/docs/en/sql-reference/aggregate-functions/combinators#-merge"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">-Merge</code></a> variant of the aggregation function (in this case, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">uniqExact</code>). As shown this below, this alters the query used to fetch entities - see <a href="https://clickhouse.com/docs/en/materialized-view#a-more-complex-example">here</a> for further details.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">-- Select entities for a single domain</span>
+<span class="hljs-keyword">SELECT</span>
+   EventTime,
+   Entity,
+   uniqExactMerge(<span class="hljs-keyword">Value</span>) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">Value</span>
+<span class="hljs-keyword">FROM</span> number_unique_ips_per_hour
+<span class="hljs-keyword">WHERE</span> Entity <span class="hljs-operator">=</span> <span class="hljs-string">'smeshariki.ru'</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   Entity,
+   EventTime
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> EventTime <span class="hljs-keyword">DESC</span> LIMIT <span class="hljs-number">5</span>
+
+┌───────────────EventTime─┬─Entity────────┬─<span class="hljs-keyword">Value</span>─┐
+│ <span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-31</span> <span class="hljs-number">23</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000</span> │ smeshariki.ru │  <span class="hljs-number">3810</span> │
+│ <span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-31</span> <span class="hljs-number">22</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000</span> │ smeshariki.ru │  <span class="hljs-number">3895</span> │
+│ <span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-31</span> <span class="hljs-number">21</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000</span> │ smeshariki.ru │  <span class="hljs-number">4053</span> │
+│ <span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-31</span> <span class="hljs-number">20</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000</span> │ smeshariki.ru │  <span class="hljs-number">3893</span> │
+│ <span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-31</span> <span class="hljs-number">19</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000</span> │ smeshariki.ru │  <span class="hljs-number">3926</span> │
+└─────────────────────────┴───────────────┴───────┘
+
+<span class="hljs-number">5</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.491</span> sec. Processed <span class="hljs-number">8.19</span> thousand <span class="hljs-keyword">rows</span>, <span class="hljs-number">1.28</span> MB (<span class="hljs-number">16.67</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">2.61</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">235.93</span> MiB.
+</code></pre>
+<p>While a little more complex, intermediate aggregation states allow us to use the above table to generate features for different times. For example, we could compute the number of unique IPs per domain per day from the above table using <a href="https://pastila.nl/?021fe212/fe019875509a4475994130627bae9798#rIizu/2ZAJI1h66cUUX/bQ==">this query</a>, something we couldn't do with our original feature table.</p>
+<p>Users may notice that our subset table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code> is being updated with a materialized view already, which in turn has Materialized views attached to it. As shown below, this means our Materialized views are effectively "chained". For more examples of chaining Materialized views, see <a href="https://clickhouse.com/blog/chaining-materialized-views">here</a>.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="chained_mvs.png" loading="lazy" src="/uploads/chained_mvs_4878676d59.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="updating-per-entity-feature-tables" level="3">Updating per entity feature tables<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#updating-per-entity-feature-tables">#</a></span></h3>
+<p>The above "per feature" approach to modeling means a materialized view per feature table (a materialized view can send results to only one table). In larger use cases, this becomes a constraint on scaling - materialized views incur an insert time overhead, and we don't recommend more than 10 on a single table.</p>
+<p>A "per entity" feature table model reduces the number of feature tables. In order to encapsulate multiple queries for different features would require us to use Variant type with <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">AggregateFunction</code> types. This is currently not supported.</p>
+<p>As an alternative, users can use Refreshable Materialized Views (currently experimental). Unlike ClickHouse's incremental materialized views, these views periodically execute the view query over the entire dataset, storing the results in a target table whose contents are atomically replaced.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="refreshable_views.png" loading="lazy" src="/uploads/refreshable_views_1640f82594.png"/></span>
+<p>Users can use this capability to periodically update feature tables on a schedule. We provide an example of this below, where the "number of unique IPs for each domain" is updated every 10 minutes.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">--enable experimental feature</span>
+<span class="hljs-keyword">SET</span> allow_experimental_refreshable_materialized_view <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+
+<span class="hljs-keyword">CREATE</span> MATERIALIZED <span class="hljs-keyword">VIEW</span> domain_features_mv REFRESH <span class="hljs-keyword">EVERY</span> <span class="hljs-number">10</span> MINUTES <span class="hljs-keyword">TO</span> domain_features <span class="hljs-keyword">AS</span>
+<span class="hljs-keyword">SELECT</span>
+   Domain,
+   <span class="hljs-string">'number_unique_ips_per_hour'</span> <span class="hljs-keyword">AS</span> FeatureId,
+   toStartOfHour(EventTime) <span class="hljs-keyword">AS</span> EventTime,
+   uniqExact(ClientIP) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">Value</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_subset
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   Domain,
+   EventTime
+</code></pre>
+<p>Further details on Refreshable Materialized views can be found <a href="https://clickhouse.com/docs/en/materialized-view/refreshable-materialized-view">here</a>.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="step-4---generating-model-data" level="2">Step 4 - Generating model data<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#step-4---generating-model-data">#</a></span></h2>
+<p>With our features created, we can begin the process of combining these into our model data - which will form the basis of our training, validation and test set.</p>
+<p>The rows in this table will form the basis of our model, with each row corresponding to a feature vector. To generate this, we need to join our features. Some of these features will come from feature tables, others directly from our "features subset" table i.e. <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code> above.</p>
+<p>As the feature subset table contains our events with the label, timestamp, and entity keys, it makes sense for this to form the base table of the join (left-hand side). This is also likely to be the largest table, making it a sensible <a href="https://clickhouse.com/docs/en/guides/joining-tables#optimizing-join-performance">choice for the left-hand side of the join</a>.</p>
+<p>Features will be joined to this table based on two criteria:</p>
+<ul>
+<li>the closest timestamp (<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code>) for each feature to the row in the feature subset table (<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_subset</code>).</li>
+<li>the corresponding entity column for the feature table, e.g., <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">UserID</code> or <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Domain.</code></li>
+</ul>
+<p><strong>To join based on this equi join AND the closest time requires an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ASOF JOIN</code>.</strong></p>
+<p>We will send the results of this join to a table, using an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO</code>, which we refer to as the "model table". This will be used to produce future training, validation and test sets.</p>
+<p>Before exploring the join, we declare our "model table" <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce</code>.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> predict_bounce_model (
+   <span class="hljs-type">Row</span> UInt64,
+   EventTime DateTime64,
+   UserID UInt64,
+   Domain String,
+   UserAgent UInt8,
+   RefererCategoryID UInt16,
+   URLCategoryID UInt16,
+   DomainsVisitedPerHour UInt32 COMMENT <span class="hljs-string">'Number of domains visited in last hour by the user'</span>,
+   UniqueIPsPerHour UInt32 COMMENT <span class="hljs-string">'Number of unique ips visiting the domain per hour'</span>,
+   AverageRequestTime Float32 COMMENT <span class="hljs-string">'Average request time for the domain per hour'</span>,
+   IsNotBounce UInt8,
+) ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (<span class="hljs-type">Row</span>, EventTime)
+</code></pre>
+<p>The <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Row</code> column here will contain a unique entry for each row in the dataset. We make this part of our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code> and exploit it later to produce training and test sets efficiently.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="joining-and-aligning-features" level="3">Joining and aligning features<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#joining-and-aligning-features">#</a></span></h3>
+<p>To join and align features based on the entity key and timestamp, we can use the ASOF. How we construct our JOIN depends on several factors whether we are using "per feature" or "per entity" feature tables.</p>
+<p>Let's assume we are using "per feature" tables and have the following available:</p>
+<ul>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">number_unique_ips_per_hour</code> - containing the number of unique ips visiting <strong>each domain</strong> per hour. Example above.</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">domains_visited_per_hour</code> - Number of domains visited in last hour by <strong>each user</strong>. Generated using the queries <a href="https://pastila.nl/?02af4d88/82927122387952892b23b7e8e90738bd#tsngZtbhHCxFhr5mVuB07w==">here</a>.</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">average_request_time</code> - Average request time for <strong>each domain</strong> per hour. Generated using the queries <a href="https://pastila.nl/?07708678/211b6c5f5d81b9818496b91efaaa78f7#SX1/LZuj+7fsAYPSsvu4qQ==">here</a>.</li>
+</ul>
+<p>Our JOIN here is quite straightforward:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> predict_bounce_model <span class="hljs-keyword">SELECT</span>
+   rand() <span class="hljs-keyword">AS</span> <span class="hljs-type">Row</span>,
+   mt.EventTime <span class="hljs-keyword">AS</span> EventTime,
+   mt.UserID <span class="hljs-keyword">AS</span> UserID,
+   mt.Domain <span class="hljs-keyword">AS</span> Domain,
+   mt.UserAgent,
+   mt.RefererCategoryID,
+   mt.URLCategoryID,
+   dv.Value <span class="hljs-keyword">AS</span> DomainsVisitedPerHour,
+   uips.Value <span class="hljs-keyword">AS</span> UniqueIPsPerHour,
+   art.Value <span class="hljs-keyword">AS</span> AverageRequestTime,
+   mt.IsNotBounce
+<span class="hljs-keyword">FROM</span> predict_bounce_subset <span class="hljs-keyword">AS</span> mt <span class="hljs-keyword">FINAL</span>
+ASOF <span class="hljs-keyword">JOIN</span> domains_visited_per_hour <span class="hljs-keyword">AS</span> dv <span class="hljs-keyword">ON</span> (mt.UserID <span class="hljs-operator">=</span> dv.UserID) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> dv.EventTime)
+ASOF <span class="hljs-keyword">JOIN</span> number_unique_ips_per_hour <span class="hljs-keyword">AS</span> uips <span class="hljs-keyword">ON</span> (mt.Domain <span class="hljs-operator">=</span> uips.Domain) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> uips.EventTime)
+ASOF <span class="hljs-keyword">JOIN</span> average_request_time <span class="hljs-keyword">AS</span> art <span class="hljs-keyword">ON</span> (mt.Domain <span class="hljs-operator">=</span> art.Domain) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> art.EventTime)
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">13.440</span> sec. Processed <span class="hljs-number">89.38</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">3.10</span> GB (<span class="hljs-number">6.65</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">230.36</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">2.94</span> GiB.
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> predict_bounce_model LIMIT <span class="hljs-number">1</span> FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+<span class="hljs-type">Row</span>:               	<span class="hljs-number">57</span>
+EventTime:         	<span class="hljs-number">2013</span><span class="hljs-number">-07</span><span class="hljs-number">-10</span> <span class="hljs-number">06</span>:<span class="hljs-number">11</span>:<span class="hljs-number">39.000</span>
+UserID:            	<span class="hljs-number">1993141920794806602</span>
+Domain:            	smeshariki.ru
+UserAgent:         	<span class="hljs-number">7</span>
+RefererCategoryID: 	<span class="hljs-number">16000</span>
+URLCategoryID:     	<span class="hljs-number">9911</span>
+DomainsVisitedPerHour: <span class="hljs-number">1</span>
+UniqueIPsPerHour:  	<span class="hljs-number">16479</span>
+AverageRequestTime:	<span class="hljs-number">182.69382</span>
+IsNotBounce:       	<span class="hljs-number">0</span>
+</code></pre>
+<p>While similar, this join becomes a little more complex (and costly) if using "per entity" feature tables. Assuming we have the feature tables <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">domain_features</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">user_features</code> populated with <a href="https://pastila.nl/?00226ff6/666bf2f425b877ae8cdf08bf2dfa3ee5#0q0sxENDDPzchVE7DZZJRA==">these queries</a>.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> predict_bounce_model <span class="hljs-keyword">SELECT</span>
+   rand() <span class="hljs-keyword">AS</span> <span class="hljs-type">Row</span>,
+   mt.EventTime <span class="hljs-keyword">AS</span> EventTime,
+   mt.UserID <span class="hljs-keyword">AS</span> UserID,
+   mt.Domain <span class="hljs-keyword">AS</span> Domain,
+   mt.UserAgent,
+   mt.RefererCategoryID,
+   mt.URLCategoryID,
+   DomainsVisitedPerHour,
+   UniqueIPsPerHour,
+   AverageRequestTime,
+   mt.IsNotBounce
+<span class="hljs-keyword">FROM</span> predict_bounce_subset <span class="hljs-keyword">AS</span> mt <span class="hljs-keyword">FINAL</span>
+ASOF <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> (
+   <span class="hljs-keyword">SELECT</span> Domain, EventTime, Value.UInt64 <span class="hljs-keyword">AS</span> UniqueIPsPerHour
+   <span class="hljs-keyword">FROM</span> domain_features
+   <span class="hljs-keyword">WHERE</span> FeatureId <span class="hljs-operator">=</span> <span class="hljs-string">'number_unique_ips_per_hour'</span>
+) <span class="hljs-keyword">AS</span> df <span class="hljs-keyword">ON</span> (mt.Domain <span class="hljs-operator">=</span> df.Domain) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> df.EventTime)
+ASOF <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> (
+   <span class="hljs-keyword">SELECT</span> Domain, EventTime, Value.Float64 <span class="hljs-keyword">AS</span> AverageRequestTime
+   <span class="hljs-keyword">FROM</span> domain_features
+   <span class="hljs-keyword">WHERE</span> FeatureId <span class="hljs-operator">=</span> <span class="hljs-string">'average_request_time'</span>
+) <span class="hljs-keyword">AS</span> art <span class="hljs-keyword">ON</span> (mt.Domain <span class="hljs-operator">=</span> art.Domain) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> art.EventTime)
+ASOF <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> (
+   <span class="hljs-keyword">SELECT</span> UserID, EventTime, Value.UInt64 <span class="hljs-keyword">AS</span> DomainsVisitedPerHour
+   <span class="hljs-keyword">FROM</span> user_features
+   <span class="hljs-keyword">WHERE</span> FeatureId <span class="hljs-operator">=</span> <span class="hljs-string">'domains_visited_per_hour'</span>
+) <span class="hljs-keyword">AS</span> dv <span class="hljs-keyword">ON</span> (mt.UserID <span class="hljs-operator">=</span> dv.UserID) <span class="hljs-keyword">AND</span> (mt.EventTime <span class="hljs-operator">&gt;=</span> dv.EventTime)
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">12.528</span> sec. Processed <span class="hljs-number">58.65</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">3.08</span> GB (<span class="hljs-number">4.68</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">245.66</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">3.16</span> GiB.
+</code></pre>
+<blockquote style="font-size:14px">
+<p>The above joins use a hash join. 24.7 added support for the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">full_sorting_merge</code> algorithm for <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ASOF JOIN</code>. This algorithm can exploit the sort order of the tables being joined, thus avoiding a sorting phase prior to joining. The joined tables can be filtered by each other's join keys prior to any sort and merge operations in order to minimize the amount of processed data. This will allow the above queries to be as fast while consuming fewer resources.</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="step-5---generating-test-and-training-sets" level="2">Step 5 - Generating test and training sets<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#step-5---generating-test-and-training-sets">#</a></span></h2>
+<p>With model data generated, we can produce training, validation, and test sets as required. Each of these will consist of different percentages of the data e.g. 80, 10, 10. Across query executions these need to be consistent results - we can't allow test data to seep into training and vise versa. Furthermore, the result sets need to be stable - some algorithms can be influenced by the order in which the data is delivered, delivering different results.</p>
+<p>To achieve consistency and stability of results while also ensuring queries return rows quickly, we can exploit the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Row</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code> columns.</p>
+<p>Suppose we wish to obtain 80% of the data for our training in order of <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EventTime</code>. This can be obtained from our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">predict_bounce_model</code> table with a simple query that performs a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">mod 100</code> on the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Row</code> column:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">EXCEPT</span> <span class="hljs-type">Row</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_model
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-type">Row</span> <span class="hljs-operator">%</span> <span class="hljs-number">100</span>) <span class="hljs-operator">&lt;</span> <span class="hljs-number">80</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> EventTime, <span class="hljs-type">Row</span> <span class="hljs-keyword">ASC</span>
+</code></pre>
+<p>We can confirm these rows deliver stable results with a few simple queries:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+   groupBitXor(sub) <span class="hljs-keyword">AS</span> hash,
+   <span class="hljs-built_in">count</span>() <span class="hljs-keyword">AS</span> count
+<span class="hljs-keyword">FROM</span>
+(
+   <span class="hljs-keyword">SELECT</span> sipHash64(concat(<span class="hljs-operator">*</span>)) <span class="hljs-keyword">AS</span> sub
+   <span class="hljs-keyword">FROM</span> predict_bounce_model
+   <span class="hljs-keyword">WHERE</span> (<span class="hljs-type">Row</span> <span class="hljs-operator">%</span> <span class="hljs-number">100</span>) <span class="hljs-operator">&lt;</span> <span class="hljs-number">80</span>
+   <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span>
+       EventTime <span class="hljs-keyword">ASC</span>,
+       <span class="hljs-type">Row</span> <span class="hljs-keyword">ASC</span>
+)
+
+┌─────────────────hash─┬────count─┐
+│ <span class="hljs-number">14452214628073740040</span> │ <span class="hljs-number">34315802</span> │
+└──────────────────────┴──────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">8.346</span> sec. Processed <span class="hljs-number">42.89</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">2.74</span> GB (<span class="hljs-number">5.14</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">328.29</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">10.29</span> GiB.
+
+<span class="hljs-comment">--repeat query, omitted for brevity</span>
+
+┌─────────────────hash─┬────count─┐
+│ <span class="hljs-number">14452214628073740040</span> │ <span class="hljs-number">34315802</span> │
+└──────────────────────┴──────────┘
+</code></pre>
+<p>Similarly, a training set and validation set could be obtained with the following, each constituting 10% of the data:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">-- validation</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">EXCEPT</span> <span class="hljs-type">Row</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_model
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-type">Row</span> <span class="hljs-operator">%</span> <span class="hljs-number">100</span>) <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">80</span> <span class="hljs-keyword">AND</span> <span class="hljs-number">89</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> EventTime, <span class="hljs-type">Row</span> <span class="hljs-keyword">ASC</span>
+<span class="hljs-comment">-- test</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">EXCEPT</span> <span class="hljs-type">Row</span>
+<span class="hljs-keyword">FROM</span> predict_bounce_model
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-type">Row</span> <span class="hljs-operator">%</span> <span class="hljs-number">100</span>) <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">90</span> <span class="hljs-keyword">AND</span> <span class="hljs-number">100</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> EventTime, <span class="hljs-type">Row</span> <span class="hljs-keyword">ASC</span>
+</code></pre>
+<p>The exact approach here users use may depend on how they want to separate their training and test set. For our model, it may be better to use all data before a fixed point in time for training, with the test set using all rows after this. Above, our training and test sample data contain data from the full period. This may cause leakage of some information between the two sets e.g. events from the same page visit. We overlook this for the purposes of an example. We recommend adjusting the ordering key on your model table based on how you intend to consume rows - see <a href="https://clickhouse.com/docs/en/data-modeling/schema-design#choosing-an-ordering-key">here</a> for recommendations on selecting an ordering key.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="build-vs-adopt" level="2">Build vs Adopt<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#build-vs-adopt">#</a></span></h2>
+<p>The process described involves multiple queries and complex procedures. When building an offline feature store with ClickHouse, users typically take one of the following approaches:</p>
+<ol>
+<li>
+<p><strong>Build Their Own Feature Store</strong>: This is the most advanced and complex approach, allowing users to optimize processes and schemas for their specific data. It's often adopted by companies where the feature store is crucial to their business and involves large data volumes, such as in ad-tech.</p>
+</li>
+<li>
+<p><strong>Dbt + Airflow</strong>: Dbt is popular for managing data transformations and handling complex queries and data modeling. When combined with Airflow, a powerful workflow orchestration tool, users can automate and schedule the above processes. This approach offers modular and maintainable workflows, balancing custom solutions with existing tools to handle large data volumes and complex queries without a fully custom-built feature store or the workflows imposed by an existing solution.</p>
+</li>
+<li>
+<p><strong>Adopt a Feature Store with ClickHouse</strong>: Feature stores like Featureform integrate ClickHouse for data storage, transformation, and serving offline features. These stores manage processes, version features, and enforce governance and compliance rules, reducing data engineering complexity for data scientists. Adopting these technologies depends on how well the abstractions and workflows fit the use case.</p>
+</li>
+</ol>
+<span class="relative mb-9 flex w-full justify-center"><img alt="featureform.png" loading="lazy" src="/uploads/featureform_cf5b1cb84f.png"/></span>
+<em>Credit: Featureform Feature Store</em>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouse-at-inference-time" level="2">ClickHouse at inference time<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#clickhouse-at-inference-time">#</a></span></h2>
+<p>This blog post discusses using ClickHouse as an offline store for generating features for model training. Once trained, a model can be deployed for predictions, requiring real-time data like user ID and domain. Precomputed features, such as "domains visited in the last hour," are necessary for predictions but are too costly to compute during inference. These features need to be served based on the most recent data version, especially for real-time predictions.</p>
+<p>ClickHouse, as a real-time analytics database, can handle highly concurrent queries with low latency and high write workloads, thanks to its log-structured merge tree. This makes it suitable for serving features in an online store. Features from the offline store can be materialized to new tables in the same ClickHouse cluster or a different instance using existing capabilities. Further details on this process will be covered in a later post.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="conclusion" level="2">Conclusion<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/modeling-machine-learning-data-in-clickhouse#conclusion">#</a></span></h2>
+<p>This blog has outlined common data modeling approaches for using ClickHouse as an offline feature store and transformation engine. While not exhaustive, these approaches provide a starting point and align with techniques used in feature stores like Featureform, which integrates with ClickHouse. We welcome contributions and ideas for improvement. If you're using ClickHouse as a feature store, let us know!</p>
+<p>Learn how to model machine learning data in ClickHouse to accelerate your pipelines and enable the fast building of features over potentially billions of rows.</p></div></div><div class="rich_content rich-text-content mt-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-footer&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. At the end of your 30-day trial, continue with a pay-as-you-go plan, or <a href="/company/contact?loc=blog-cta-footer">contact us</a> to learn more about our volume-based discounts. Visit our <a href="/pricing?loc=blog-cta-header">pricing page</a> for details.</p></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

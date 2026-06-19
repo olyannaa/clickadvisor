@@ -1,0 +1,78 @@
+# EXISTS \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Operators](/docs/sql-reference/operators)- EXISTS
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/operators/exists.md)# EXISTS
+
+The `EXISTS` operator checks how many records are in the result of a subquery. If it is empty, then the operator returns `0`. Otherwise, it returns `1`.
+
+
+`EXISTS` can also be used in a [WHERE](/docs/sql-reference/statements/select/where) clause.
+
+
+TipReferences to main query tables and columns are not supported in a subquery.
+
+
+**Syntax**
+
+
+
+```
+EXISTS(subquery)
+
+```
+
+**Example**
+
+
+Query checking existence of values in a subquery:
+
+
+
+```
+SELECT EXISTS(SELECT * FROM numbers(10) WHERE number > 8), EXISTS(SELECT * FROM numbers(10) WHERE number > 11)
+
+```
+
+
+```
+┌─in(1, _subquery1)─┬─in(1, _subquery2)─┐
+│                 1 │                 0 │
+└───────────────────┴───────────────────┘
+
+```
+
+Query with a subquery returning several rows:
+
+
+
+```
+SELECT count() FROM numbers(10) WHERE EXISTS(SELECT number FROM numbers(10) WHERE number > 8);
+
+```
+
+
+```
+┌─count()─┐
+│      10 │
+└─────────┘
+
+```
+
+Query with a subquery that returns an empty result:
+
+
+
+```
+SELECT count() FROM numbers(10) WHERE EXISTS(SELECT number FROM numbers(10) WHERE number > 11);
+
+```
+
+
+```
+┌─count()─┐
+│       0 │
+└─────────┘
+
+```
+[PreviousDistributed DDL](/docs/sql-reference/other/distributed-ddl)[NextIN Operators](/docs/sql-reference/operators/in)Was this page helpful?

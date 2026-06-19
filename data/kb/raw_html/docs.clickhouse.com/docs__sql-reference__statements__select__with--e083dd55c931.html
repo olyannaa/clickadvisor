@@ -1,0 +1,378 @@
+<h1>WITH Clause | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/select" itemprop="item"><span itemprop="name">SELECT</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">WITH</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/with.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>WITH Clause</h1></header><p>ClickHouse supports Common Table Expressions (<a href="https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL" rel="noopener noreferrer" target="_blank">CTE</a>), Common Scalar Expressions and Recursive Queries.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="common-table-expressions">Common Table Expressions<a aria-label="Direct link to Common Table Expressions" class="hash-link" href="#common-table-expressions" title="Direct link to Common Table Expressions">​</a></h2>
+<p>Common Table Expressions represent named subqueries.
+They can be referenced by name anywhere in a <code>SELECT</code> query where a table expression is allowed.
+Named subqueries can be referenced by name in the scope of the current query or in the scopes of child subqueries.</p>
+<p>Every reference to a Common Table Expression in <code>SELECT</code> queries is always replaced by the subquery from it's definition if the CTE is not explicitly defined as materialized (see <a href="#materialized-common-table-expressions">Materialized Common Table Expressions</a>).
+Recursion is prevented by hiding the current CTE from the identifier resolution process.</p>
+<p>Please note that CTEs do not guarantee the same results in all places they are called because the query will be re-executed for each use case.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="common-table-expressions-syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#common-table-expressions-syntax" title="Direct link to Syntax">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH &lt;identifier&gt; AS [MATERIALIZED] &lt;subquery expression&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="common-table-expressions-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#common-table-expressions-example" title="Direct link to Example">​</a></h3>
+<p>An example of when a subquery is re-executed:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH cte_numbers AS
+(
+    SELECT
+        num
+    FROM generateRandom('num UInt64', NULL)
+    LIMIT 1000000
+)
+SELECT
+    count()
+FROM cte_numbers
+WHERE num IN (SELECT num FROM cte_numbers)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If CTEs were to pass exactly the results and not just a piece of code, you would always see <code>1000000</code></p>
+<p>However, due to the fact that we are referring <code>cte_numbers</code> twice, random numbers are generated each time and, accordingly, we see different random results, <code>280501, 392454, 261636, 196227</code> and so on...</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-common-table-expressions">Materialized Common Table Expressions<a aria-label="Direct link to Materialized Common Table Expressions" class="hash-link" href="#materialized-common-table-expressions" title="Direct link to Materialized Common Table Expressions">​</a></h2>
+<p>By default, ClickHouse inlines the subquery of a CTE at each point of reference, re-executing it every time.
+Adding the <code>MATERIALIZED</code> keyword instructs ClickHouse to execute the CTE subquery <strong>exactly once</strong>, store the results in a temporary table, and serve all references from that table.
+This is especially useful when the same CTE is referenced multiple times in a query (e.g., in self-joins or multiple <code>IN</code> subqueries), because the underlying computation only happens once.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Materialized CTEs are an <strong>experimental</strong> feature.
+They require the <a href="/docs/operations/analyzer">analyzer</a> and the setting <code>enable_materialized_cte</code> to be enabled.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-common-table-expressions-syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#materialized-common-table-expressions-syntax" title="Direct link to Syntax">​</a></h3>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH &lt;identifier&gt; AS MATERIALIZED (&lt;subquery&gt;)
+SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-cte-when-to-use">When to use<a aria-label="Direct link to When to use" class="hash-link" href="#materialized-cte-when-to-use" title="Direct link to When to use">​</a></h3>
+<p>Materialized CTEs are most beneficial when:</p>
+<ul class="custom-ul">
+<li class="custom-li">The same CTE is referenced <strong>more than once</strong> in a query.
+Without <code>MATERIALIZED</code>, each reference re-executes the subquery independently.</li>
+<li class="custom-li">The CTE contains <strong>non-deterministic</strong> functions like <code>generateRandom</code>.
+Materializing ensures all references see the same data.</li>
+<li class="custom-li">The CTE involves <strong>expensive computations</strong> (aggregations, joins, large scans) that should not be repeated.</li>
+</ul>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>If a materialized CTE is only referenced once, ClickHouse automatically inlines it back into a regular subquery to avoid unnecessary overhead.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-common-table-expressions-examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#materialized-common-table-expressions-examples" title="Direct link to Examples">​</a></h3>
+<p><strong>Example 1:</strong> Self-join on a materialized CTE</p>
+<p>Without <code>MATERIALIZED</code>, both sides of the join would execute the subquery independently.
+With <code>MATERIALIZED</code>, the table is scanned once and both join sides read from the same temporary table.</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_materialized_cte = 1;
+
+CREATE TABLE users (uid Int16, name String, age Int16) ENGINE = Memory;
+INSERT INTO users VALUES (1231, 'John', 33), (6666, 'Ksenia', 48), (8888, 'Alice', 50);
+
+WITH
+    a AS MATERIALIZED (SELECT * FROM users WHERE name = 'Alice')
+SELECT count() FROM a AS l JOIN a AS r ON l.uid = r.uid;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─count()─┐
+│       1 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 2:</strong> Deterministic results with non-deterministic functions</p>
+<p>Regular CTEs with <code>generateRandom</code> produce different results at each reference point.
+Materializing the CTE ensures consistency:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_materialized_cte = 1;
+
+WITH cte_numbers AS MATERIALIZED
+(
+    SELECT num
+    FROM generateRandom('num UInt64', NULL)
+    LIMIT 1000000
+)
+SELECT count()
+FROM cte_numbers
+WHERE num IN (SELECT num FROM cte_numbers);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Because both references read from the same materialized data, the result is always <code>1000000</code>.</p>
+<p><strong>Example 3:</strong> Chaining materialized CTEs</p>
+<p>Materialized CTEs can reference other materialized CTEs.
+ClickHouse resolves dependencies and materializes them in the correct order:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_materialized_cte = 1;
+
+WITH
+    a AS MATERIALIZED (SELECT uid, name FROM users),
+    b AS MATERIALIZED (SELECT uid FROM a)
+SELECT count() FROM b AS l LEFT SEMI JOIN b AS r ON l.uid = r.uid;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─count()─┐
+│       3 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The order of CTE definitions does not matter — forward references are allowed:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_materialized_cte = 1;
+
+WITH
+    b AS MATERIALIZED (SELECT uid FROM a),
+    a AS MATERIALIZED (SELECT uid FROM users)
+SELECT count() FROM b AS l LEFT SEMI JOIN b AS r ON l.uid = r.uid;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─count()─┐
+│       3 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialized-cte-restrictions">Restrictions<a aria-label="Direct link to Restrictions" class="hash-link" href="#materialized-cte-restrictions" title="Direct link to Restrictions">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Experimental setting required</strong>: The setting <code>enable_materialized_cte</code> must be enabled.</li>
+<li class="custom-li"><strong>Analyzer required</strong>: Materialized CTEs only work with the <a href="/docs/operations/analyzer">analyzer</a> enabled (<code>enable_analyzer = 1</code>).</li>
+<li class="custom-li"><strong>Not supported with <code>RECURSIVE</code></strong>: Combining <code>MATERIALIZED</code> and <code>RECURSIVE</code> keywords is not allowed and results in an <code>UNSUPPORTED_METHOD</code> exception.</li>
+<li class="custom-li"><strong>Correlated CTEs are forbidden</strong>: A materialized CTE cannot reference columns from outer query scopes.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="common-scalar-expressions">Common Scalar Expressions<a aria-label="Direct link to Common Scalar Expressions" class="hash-link" href="#common-scalar-expressions" title="Direct link to Common Scalar Expressions">​</a></h2>
+<p>ClickHouse allows you to declare aliases to arbitrary scalar expressions in the <code>WITH</code> clause.
+Common scalar expressions can be referenced in any place in the query.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If a common scalar expression references something other than a constant literal, the expression may lead to the presence of <a href="https://en.wikipedia.org/wiki/Free_variables_and_bound_variables" rel="noopener noreferrer" target="_blank">free variables</a>.
+ClickHouse resolves any identifier in the closest scope possible, meaning that free variables can reference unexpected entities in case of name clashes or may lead to a correlated subquery.
+It is recommended to define CSE as a <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda">lambda function</a> (possible only with the <a href="/docs/operations/analyzer">analyzer</a> enabled) binding all the used identifiers to achieve a more predictable behavior of expression identifiers resolution.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="common-scalar-expressions-syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#common-scalar-expressions-syntax" title="Direct link to Syntax">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH &lt;expression&gt; AS &lt;identifier&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="common-scalar-expressions-examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#common-scalar-expressions-examples" title="Direct link to Examples">​</a></h3>
+<p><strong>Example 1:</strong> Using constant expression as "variable"</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH '2019-08-01 15:23:00' AS ts_upper_bound
+SELECT *
+FROM hits
+WHERE
+    EventDate = toDate(ts_upper_bound) AND
+    EventTime &lt;= ts_upper_bound;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 2:</strong> Using higher-order functions to bound the identifiers</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH
+    '.txt' as extension,
+    (id, extension) -&gt; concat(lower(id), extension) AS gen_name
+SELECT gen_name('test', '.sql') as file_name;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─file_name─┐
+1. │ test.sql  │
+   └───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 3:</strong> Using higher-order functions with free variables</p>
+<p>The following example queries show that unbound identifiers resolve into an entity in the closest scope.
+Here, <code>extension</code> is not bound in the <code>gen_name</code> lambda function body.
+Although <code>extension</code> is defined to <code>'.txt'</code> as a common scalar expression in the scope of <code>generated_names</code> definition and usage, it is resolved into a column of the table <code>extension_list</code>, because it is available in the <code>generated_names</code> subquery.</p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE extension_list
+(
+    extension String
+)
+ORDER BY extension
+AS SELECT '.sql';
+
+WITH
+    '.txt' as extension,
+    generated_names as (
+        WITH
+            (id) -&gt; concat(lower(id), extension) AS gen_name
+        SELECT gen_name('test') as file_name FROM extension_list
+    )
+SELECT file_name FROM generated_names;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─file_name─┐
+1. │ test.sql  │
+   └───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 4:</strong> Evicting a sum(bytes) expression result from the SELECT clause column list</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH sum(bytes) AS s
+SELECT
+    formatReadableSize(s),
+    table
+FROM system.parts
+GROUP BY table
+ORDER BY s;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 5:</strong> Using results of a scalar subquery</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">/* this example would return TOP 10 of most huge tables */
+WITH
+    (
+        SELECT sum(bytes)
+        FROM system.parts
+        WHERE active
+    ) AS total_disk_usage
+SELECT
+    (sum(bytes) / total_disk_usage) * 100 AS table_disk_usage,
+    table
+FROM system.parts
+GROUP BY table
+ORDER BY table_disk_usage DESC
+LIMIT 10;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 6:</strong> Reusing expression in a subquery</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH test1 AS (SELECT i + 1, j + 1 FROM test1)
+SELECT * FROM test1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recursive-queries">Recursive Queries<a aria-label="Direct link to Recursive Queries" class="hash-link" href="#recursive-queries" title="Direct link to Recursive Queries">​</a></h2>
+<p>The optional <code>RECURSIVE</code> modifier allows for a WITH query to refer to its own output. Example:</p>
+<p><strong>Example:</strong> Sum integers from 1 through 100</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE test_table AS (
+    SELECT 1 AS number
+UNION ALL
+    SELECT number + 1 FROM test_table WHERE number &lt; 100
+)
+SELECT sum(number) FROM test_table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─sum(number)─┐
+│        5050 │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Recursive CTEs rely on the <a href="/docs/operations/analyzer">query analyzer</a> introduced in version <strong><code>24.3</code></strong>. If you're using version <strong><code>24.3+</code></strong> and encounter a <strong><code>(UNKNOWN_TABLE)</code></strong> or <strong><code>(UNSUPPORTED_METHOD)</code></strong> exception, it suggests that the analyzer is disabled on your instance, role, or profile. To activate the analyzer, enable the setting <strong><code>allow_experimental_analyzer</code></strong> or update the <strong><code>compatibility</code></strong> setting to a more recent version.
+Starting from version <code>24.8</code> the analyzer has been fully promoted to production, and the setting <code>allow_experimental_analyzer</code> has been renamed to <code>enable_analyzer</code>.</p></div></div>
+<p>The general form of a recursive <code>WITH</code> query is always a non-recursive term, then <code>UNION ALL</code>, then a recursive term, where only the recursive term can contain a reference to the query's own output. Recursive CTE query is executed as follows:</p>
+<ol class="custom-ol">
+<li class="custom-li">Evaluate the non-recursive term. Place result of non-recursive term query in a temporary working table.</li>
+<li class="custom-li">As long as the working table is not empty, repeat these steps:<!-- -->
+<ol class="custom-ol">
+<li class="custom-li">Evaluate the recursive term, substituting the current contents of the working table for the recursive self-reference. Place result of recursive term query in a temporary intermediate table.</li>
+<li class="custom-li">Replace the contents of the working table with the contents of the intermediate table, then empty the intermediate table.</li>
+</ol>
+</li>
+</ol>
+<p>Recursive queries are typically used to work with hierarchical or tree-structured data. For example, we can write a query that performs tree traversal:</p>
+<p><strong>Example:</strong> Tree traversal</p>
+<p>First let's create tree table:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">DROP TABLE IF EXISTS tree;
+CREATE TABLE tree
+(
+    id UInt64,
+    parent_id Nullable(UInt64),
+    data String
+) ENGINE = MergeTree ORDER BY id;
+
+INSERT INTO tree VALUES (0, NULL, 'ROOT'), (1, 0, 'Child_1'), (2, 0, 'Child_2'), (3, 1, 'Child_1_1');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can traverse those tree with such query:</p>
+<p><strong>Example:</strong> Tree traversal</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE search_tree AS (
+    SELECT id, parent_id, data
+    FROM tree t
+    WHERE t.id = 0
+UNION ALL
+    SELECT t.id, t.parent_id, t.data
+    FROM tree t, search_tree st
+    WHERE t.parent_id = st.id
+)
+SELECT * FROM search_tree;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─id─┬─parent_id─┬─data──────┐
+│  0 │      ᴺᵁᴸᴸ │ ROOT      │
+│  1 │         0 │ Child_1   │
+│  2 │         0 │ Child_2   │
+│  3 │         1 │ Child_1_1 │
+└────┴───────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="search-order">Search order<a aria-label="Direct link to Search order" class="hash-link" href="#search-order" title="Direct link to Search order">​</a></h3>
+<p>To create a depth-first order, we compute for each result row an array of rows that we have already visited:</p>
+<p><strong>Example:</strong> Tree traversal depth-first order</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE search_tree AS (
+    SELECT id, parent_id, data, [t.id] AS path
+    FROM tree t
+    WHERE t.id = 0
+UNION ALL
+    SELECT t.id, t.parent_id, t.data, arrayConcat(path, [t.id])
+    FROM tree t, search_tree st
+    WHERE t.parent_id = st.id
+)
+SELECT * FROM search_tree ORDER BY path;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─id─┬─parent_id─┬─data──────┬─path────┐
+│  0 │      ᴺᵁᴸᴸ │ ROOT      │ [0]     │
+│  1 │         0 │ Child_1   │ [0,1]   │
+│  3 │         1 │ Child_1_1 │ [0,1,3] │
+│  2 │         0 │ Child_2   │ [0,2]   │
+└────┴───────────┴───────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To create a breadth-first order, standard approach is to add column that tracks the depth of the search:</p>
+<p><strong>Example:</strong> Tree traversal breadth-first order</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE search_tree AS (
+    SELECT id, parent_id, data, [t.id] AS path, toUInt64(0) AS depth
+    FROM tree t
+    WHERE t.id = 0
+UNION ALL
+    SELECT t.id, t.parent_id, t.data, arrayConcat(path, [t.id]), depth + 1
+    FROM tree t, search_tree st
+    WHERE t.parent_id = st.id
+)
+SELECT * FROM search_tree ORDER BY depth;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─id─┬─link─┬─data──────┬─path────┬─depth─┐
+│  0 │ ᴺᵁᴸᴸ │ ROOT      │ [0]     │     0 │
+│  1 │    0 │ Child_1   │ [0,1]   │     1 │
+│  2 │    0 │ Child_2   │ [0,2]   │     1 │
+│  3 │    1 │ Child_1_1 │ [0,1,3] │     2 │
+└────┴──────┴───────────┴─────────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="cycle-detection">Cycle detection<a aria-label="Direct link to Cycle detection" class="hash-link" href="#cycle-detection" title="Direct link to Cycle detection">​</a></h3>
+<p>First let's create graph table:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">DROP TABLE IF EXISTS graph;
+CREATE TABLE graph
+(
+    from UInt64,
+    to UInt64,
+    label String
+) ENGINE = MergeTree ORDER BY (from, to);
+
+INSERT INTO graph VALUES (1, 2, '1 -&gt; 2'), (1, 3, '1 -&gt; 3'), (2, 3, '2 -&gt; 3'), (1, 4, '1 -&gt; 4'), (4, 5, '4 -&gt; 5');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can traverse that graph with such query:</p>
+<p><strong>Example:</strong> Graph traversal without cycle detection</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE search_graph AS (
+    SELECT from, to, label FROM graph g
+    UNION ALL
+    SELECT g.from, g.to, g.label
+    FROM graph g, search_graph sg
+    WHERE g.from = sg.to
+)
+SELECT DISTINCT * FROM search_graph ORDER BY from;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─from─┬─to─┬─label──┐
+│    1 │  4 │ 1 -&gt; 4 │
+│    1 │  2 │ 1 -&gt; 2 │
+│    1 │  3 │ 1 -&gt; 3 │
+│    2 │  3 │ 2 -&gt; 3 │
+│    4 │  5 │ 4 -&gt; 5 │
+└──────┴────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>But if we add cycle in that graph, previous query will fail with <code>Maximum recursive CTE evaluation depth</code> error:</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO graph VALUES (5, 1, '5 -&gt; 1');
+
+WITH RECURSIVE search_graph AS (
+    SELECT from, to, label FROM graph g
+UNION ALL
+    SELECT g.from, g.to, g.label
+    FROM graph g, search_graph sg
+    WHERE g.from = sg.to
+)
+SELECT DISTINCT * FROM search_graph ORDER BY from;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Code: 306. DB::Exception: Received from localhost:9000. DB::Exception: Maximum recursive CTE evaluation depth (1000) exceeded, during evaluation of search_graph AS (SELECT from, to, label FROM graph AS g UNION ALL SELECT g.from, g.to, g.label FROM graph AS g, search_graph AS sg WHERE g.from = sg.to). Consider raising max_recursive_cte_evaluation_depth setting.: While executing RecursiveCTESource. (TOO_DEEP_RECURSION)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The standard method for handling cycles is to compute an array of the already visited nodes:</p>
+<p><strong>Example:</strong> Graph traversal with cycle detection</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE search_graph AS (
+    SELECT from, to, label, false AS is_cycle, [tuple(g.from, g.to)] AS path FROM graph g
+UNION ALL
+    SELECT g.from, g.to, g.label, has(path, tuple(g.from, g.to)), arrayConcat(sg.path, [tuple(g.from, g.to)])
+    FROM graph g, search_graph sg
+    WHERE g.from = sg.to AND NOT is_cycle
+)
+SELECT * FROM search_graph WHERE is_cycle ORDER BY from;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─from─┬─to─┬─label──┬─is_cycle─┬─path──────────────────────┐
+│    1 │  4 │ 1 -&gt; 4 │ true     │ [(1,4),(4,5),(5,1),(1,4)] │
+│    4 │  5 │ 4 -&gt; 5 │ true     │ [(4,5),(5,1),(1,4),(4,5)] │
+│    5 │  1 │ 5 -&gt; 1 │ true     │ [(5,1),(1,4),(4,5),(5,1)] │
+└──────┴────┴────────┴──────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="infinite-queries">Infinite queries<a aria-label="Direct link to Infinite queries" class="hash-link" href="#infinite-queries" title="Direct link to Infinite queries">​</a></h3>
+<p>It is also possible to use infinite recursive CTE queries if <code>LIMIT</code> is used in outer query:</p>
+<p><strong>Example:</strong> Infinite recursive CTE query</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH RECURSIVE test_table AS (
+    SELECT 1 AS number
+UNION ALL
+    SELECT number + 1 FROM test_table
+)
+SELECT sum(number) FROM (SELECT number FROM test_table LIMIT 100);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─sum(number)─┐
+│        5050 │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="trailing-comma">Trailing Comma<a aria-label="Direct link to Trailing Comma" class="hash-link" href="#trailing-comma" title="Direct link to Trailing Comma">​</a></h2>
+<p>A comma is allowed after the last element in the <code>WITH</code> clause:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH
+    (SELECT sum(number) FROM numbers(10)) AS total,
+    total * 2 AS doubled,
+SELECT total, doubled;
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/where"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">WHERE</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/insert-into"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">INSERT INTO</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#common-table-expressions">Common Table Expressions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#common-table-expressions-syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#common-table-expressions-example">Example</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#materialized-common-table-expressions">Materialized Common Table Expressions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#materialized-common-table-expressions-syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#materialized-cte-when-to-use">When to use</a><li><a class="table-of-contents__link toc-highlight" href="#materialized-common-table-expressions-examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#materialized-cte-restrictions">Restrictions</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#common-scalar-expressions">Common Scalar Expressions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#common-scalar-expressions-syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#common-scalar-expressions-examples">Examples</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#recursive-queries">Recursive Queries</a><ul><li><a class="table-of-contents__link toc-highlight" href="#search-order">Search order</a><li><a class="table-of-contents__link toc-highlight" href="#cycle-detection">Cycle detection</a><li><a class="table-of-contents__link toc-highlight" href="#infinite-queries">Infinite queries</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#trailing-comma">Trailing Comma</a></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

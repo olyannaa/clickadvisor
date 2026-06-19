@@ -1,0 +1,168 @@
+<h1>Data skipping index examples | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/operations/overview" itemprop="item"><span itemprop="name">Performance and optimizations</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/optimize/skipping-indexes" itemprop="item"><span itemprop="name">Data skipping indexes</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Data skipping indexes - examples</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/guides/best-practices/skipping-indexes-examples.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Data skipping index examples</h1></header><p>This page consolidates ClickHouse data skipping index examples, showing how to declare each type, when to use them, and how to verify they're applied. All features work with <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree-family tables</a>.</p>
+<p><strong>Index syntax:</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INDEX name expr TYPE type(...) [GRANULARITY N]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse supports six skip index types:</p>
+<table><thead><tr><th>Index Type<th>Description<tbody><tr><td><strong>minmax</strong><td>Tracks minimum and maximum values in each granule<tr><td><strong>set(N)</strong><td>Stores up to N distinct values per granule<tr><td><strong>text</strong><td>Inverted index over tokenized string data for full text search<tr><td><strong>bloom_filter([false_positive_rate])</strong><td>Probabilistic filter for existence checks<tr><td><strong>ngrambf_v1</strong><td>N-gram bloom filter for substring searches<tr><td><strong>tokenbf_v1</strong><td>Token-based bloom filter for full-text searches</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>Each section provides examples with sample data and demonstrates how to verify index usage in query execution.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="minmax-index">MinMax index<a aria-label="Direct link to MinMax index" class="hash-link" href="#minmax-index" title="Direct link to MinMax index">​</a></h2>
+<p>The<code>minmax</code> index is best for range predicates on loosely sorted data or columns correlated with <code>ORDER BY</code>.</p>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Define in CREATE TABLE
+CREATE TABLE events
+(
+  ts DateTime,
+  user_id UInt64,
+  value UInt32,
+  INDEX ts_minmax ts TYPE minmax GRANULARITY 1
+)
+ENGINE=MergeTree
+ORDER BY ts;
+
+-- Or add later and materialize
+ALTER TABLE events ADD INDEX ts_minmax ts TYPE minmax GRANULARITY 1;
+ALTER TABLE events MATERIALIZE INDEX ts_minmax;
+
+-- Query that benefits from the index
+SELECT count() FROM events WHERE ts &gt;= now() - 3600;
+
+-- Verify usage
+EXPLAIN indexes = 1
+SELECT count() FROM events WHERE ts &gt;= now() - 3600;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See a <a href="/docs/best-practices/use-data-skipping-indices-where-appropriate#example">worked example</a> with <code>EXPLAIN</code> and pruning.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="set-index">Set index<a aria-label="Direct link to Set index" class="hash-link" href="#set-index" title="Direct link to Set index">​</a></h2>
+<p>Use the <code>set</code> index when local (per-block) cardinality is low; not helpful if each block has many distinct values.</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE events ADD INDEX user_set user_id TYPE set(100) GRANULARITY 1;
+ALTER TABLE events MATERIALIZE INDEX user_set;
+
+SELECT * FROM events WHERE user_id IN (101, 202);
+
+EXPLAIN indexes = 1
+SELECT * FROM events WHERE user_id IN (101, 202);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>A creation/materialization workflow and the before/after effect are shown in the <a href="/docs/optimize/skipping-indexes#basic-operation">basic operation guide</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="textindex-for-full-text-search">Text index (text) for full text search<a aria-label="Direct link to Text index (text) for full text search" class="hash-link" href="#textindex-for-full-text-search" title="Direct link to Text index (text) for full text search">​</a></h2>
+<p><code>text</code> is an inverted index over tokenized text data.
+Designed specifically for full-text search workloads, enabling efficient and deterministic token and term lookup.
+Recommended for natural language or large-scale text search use cases.</p>
+<p>Just see <a href="/docs/engines/table-engines/mergetree-family/textindexes">Full-text Search with Text Indexes</a> for more details and examples.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE logs ADD INDEX msg_text msg TYPE text(tokenizer = splitByNonAlpha);
+ALTER TABLE logs MATERIALIZE INDEX msg_text;
+
+SELECT count() FROM logs WHERE hasAllTokens(msg, 'exception');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See a more complete observability example <a href="/docs/use-cases/observability/schema-design#text-index-for-full-text-search">here</a> documentation.</p>
+<p>The text index is totally deterministic and fully tunable in terms of tokenization and text processing at a cost of some more storage consumption compared with bloom filter–based indexes,</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="generic-bloom-filter-scalar">Generic Bloom filter (scalar)<a aria-label="Direct link to Generic Bloom filter (scalar)" class="hash-link" href="#generic-bloom-filter-scalar" title="Direct link to Generic Bloom filter (scalar)">​</a></h2>
+<p>The <code>bloom_filter</code> index is good for "needle in a haystack" equality/IN membership. It accepts an optional parameter which is the false-positive rate (default 0.025).</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE events ADD INDEX value_bf value TYPE bloom_filter(0.01) GRANULARITY 3;
+ALTER TABLE events MATERIALIZE INDEX value_bf;
+
+SELECT * FROM events WHERE value IN (7, 42, 99);
+
+EXPLAIN indexes = 1
+SELECT * FROM events WHERE value IN (7, 42, 99);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="n-gram-bloom-filter-ngrambf-v1-for-substring-search">N-gram Bloom filter (ngrambf_v1) for substring search <em>(Deprecated)</em><a aria-label="Direct link to n-gram-bloom-filter-ngrambf-v1-for-substring-search" class="hash-link" href="#n-gram-bloom-filter-ngrambf-v1-for-substring-search" title="Direct link to n-gram-bloom-filter-ngrambf-v1-for-substring-search">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The usage of <code>ngrambf_v1</code> indexes for full-text search is deprecated in ClickHouse versions <code>&gt;= 26.2</code> in favor of <code>text</code> indexes (see <a href="/docs/engines/table-engines/mergetree-family/textindexes">here</a> for further details).</p></div></div>
+<p>The <code>ngrambf_v1</code> index splits strings into n-grams. It works well for <code>LIKE '%...%'</code> queries. It supports String/FixedString/Map (via mapKeys/mapValues), as well as tunable size, hash count, and seed. See the documentation for <a href="/docs/engines/table-engines/mergetree-family/mergetree#n-gram-bloom-filter">N-gram bloom filter</a> for further details.</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create index for substring search
+ALTER TABLE logs ADD INDEX msg_ngram msg TYPE ngrambf_v1(3, 10000, 3, 7) GRANULARITY 1;
+ALTER TABLE logs MATERIALIZE INDEX msg_ngram;
+
+-- Substring search
+SELECT count() FROM logs WHERE msg LIKE '%timeout%';
+
+EXPLAIN indexes = 1
+SELECT count() FROM logs WHERE msg LIKE '%timeout%';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><a href="/docs/use-cases/observability/schema-design#text-index-for-full-text-search">This guide</a> shows practical examples and when to use token vs ngram.</p>
+<p><strong>Parameter optimization helpers:</strong></p>
+<p>The four ngrambf_v1 parameters (n-gram size, bitmap size, hash functions, seed) significantly impact performance and memory usage. Use these functions to calculate optimal bitmap size and hash function count based on your expected n-gram volume and desired false positive rate:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION bfEstimateFunctions AS
+(total_grams, bits) -&gt; round((bits / total_grams) * log(2));
+
+CREATE FUNCTION bfEstimateBmSize AS
+(total_grams, p_false) -&gt; ceil((total_grams * log(p_false)) / log(1 / pow(2, log(2))));
+
+-- Example sizing for 4300 ngrams, p_false = 0.0001
+SELECT bfEstimateBmSize(4300, 0.0001) / 8 AS size_bytes;  -- ~10304
+SELECT bfEstimateFunctions(4300, bfEstimateBmSize(4300, 0.0001)) AS k; -- ~13
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See <a href="/docs/engines/table-engines/mergetree-family/mergetree#n-gram-bloom-filter">parameter docs</a> for complete tuning guidance.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="token-bloom-filter-tokenbf-v1-for-word-based-search">Token Bloom filter (tokenbf_v1) for word-based search <em>(Deprecated)</em><a aria-label="Direct link to token-bloom-filter-tokenbf-v1-for-word-based-search" class="hash-link" href="#token-bloom-filter-tokenbf-v1-for-word-based-search" title="Direct link to token-bloom-filter-tokenbf-v1-for-word-based-search">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The usage of <code>tokenbf_v1</code> indexes for full-text search is deprecated in ClickHouse versions <code>&gt;= 26.2</code> in favor of <code>text</code> indexes (see <a href="/docs/engines/table-engines/mergetree-family/textindexes">here</a> for further details).</p></div></div>
+<p><code>tokenbf_v1</code> indexes tokens separated by non-alphanumeric characters. You should use it with <a href="/docs/sql-reference/functions/string-search-functions#hasToken"><code>hasToken</code></a>, <code>LIKE</code> word patterns or equals/IN. It supports <code>String</code>/<code>FixedString</code>/<code>Map</code> types.</p>
+<p>See <a href="/docs/engines/table-engines/mergetree-family/mergetree#token-bloom-filter">Token bloom filter</a> and <a href="/docs/optimize/skipping-indexes#skip-index-types">Bloom filter types</a> pages for more details.</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE logs ADD INDEX msg_token lower(msg) TYPE tokenbf_v1(10000, 7, 7) GRANULARITY 1;
+ALTER TABLE logs MATERIALIZE INDEX msg_token;
+
+-- Word search (case-insensitive via lower)
+SELECT count() FROM logs WHERE hasToken(lower(msg), 'exception');
+
+EXPLAIN indexes = 1
+SELECT count() FROM logs WHERE hasToken(lower(msg), 'exception');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See observability examples and guidance on token vs ngram <a href="/docs/use-cases/observability/schema-design#text-index-for-full-text-search">here</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="add-indexes-during-create-table-multiple-examples">Add indexes during CREATE TABLE (multiple examples)<a aria-label="Direct link to Add indexes during CREATE TABLE (multiple examples)" class="hash-link" href="#add-indexes-during-create-table-multiple-examples" title="Direct link to Add indexes during CREATE TABLE (multiple examples)">​</a></h2>
+<p>Skipping indexes also support composite expressions and <code>Map</code>/<code>Tuple</code>/<code>Nested</code> types. This is demonstrated in the example below:</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t
+(
+  u64 UInt64,
+  s String,
+  m Map(String, String),
+
+  INDEX idx_bf u64 TYPE bloom_filter(0.01) GRANULARITY 3,
+  INDEX idx_minmax u64 TYPE minmax GRANULARITY 1,
+  INDEX idx_set u64 * length(s) TYPE set(1000) GRANULARITY 4,
+  INDEX idx_ngram s TYPE ngrambf_v1(3, 10000, 3, 7) GRANULARITY 1,
+  INDEX idx_token mapKeys(m) TYPE tokenbf_v1(10000, 7, 7) GRANULARITY 1
+)
+ENGINE = MergeTree
+ORDER BY u64;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="materializing-on-existing-data-and-verifying">Materializing on existing data and verifying<a aria-label="Direct link to Materializing on existing data and verifying" class="hash-link" href="#materializing-on-existing-data-and-verifying" title="Direct link to Materializing on existing data and verifying">​</a></h2>
+<p>You can add an index to existing data parts using <code>MATERIALIZE</code>, and inspect pruning with <code>EXPLAIN</code> or trace logs, as shown below:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE t MATERIALIZE INDEX idx_bf;
+
+EXPLAIN indexes = 1
+SELECT count() FROM t WHERE u64 IN (123, 456);
+
+-- Optional: detailed pruning info
+SET send_logs_level = 'trace';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This <a href="/docs/best-practices/use-data-skipping-indices-where-appropriate#example">worked minmax example</a> demonstrates EXPLAIN output structure and pruning counts.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="when-use-and-when-to-avoid">When to use and when to avoid skipping indexes<a aria-label="Direct link to When to use and when to avoid skipping indexes" class="hash-link" href="#when-use-and-when-to-avoid" title="Direct link to When to use and when to avoid skipping indexes">​</a></h2>
+<p><strong>Use skip indexes when:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Filter values are sparse within data blocks</li>
+<li class="custom-li">Strong correlation exists with <code>ORDER BY</code> columns or data ingestion patterns group similar values together</li>
+<li class="custom-li">Performing text searches on large log datasets (<code>ngrambf_v1</code>/<code>tokenbf_v1</code> types)</li>
+</ul>
+<p><strong>Avoid skip indexes when:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Most blocks likely contain at least one matching value (blocks will be read regardless)</li>
+<li class="custom-li">Filtering on high-cardinality columns with no correlation to data ordering</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Important considerations</div><p>If a value appears even once in a data block, ClickHouse must read the entire block. Test indexes with realistic datasets and adjust granularity and type-specific parameters based on actual performance measurements.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="temporarily-ignore-or-force-indexes">Temporarily ignore or force indexes<a aria-label="Direct link to Temporarily ignore or force indexes" class="hash-link" href="#temporarily-ignore-or-force-indexes" title="Direct link to Temporarily ignore or force indexes">​</a></h2>
+<p>Disable specific indexes by name for individual queries during testing and troubleshooting. Settings also exist to force index usage when needed. See <a href="/docs/operations/settings/settings#ignore_data_skipping_indices"><code>ignore_data_skipping_indices</code></a>.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Ignore an index by name
+SELECT * FROM logs
+WHERE hasToken(lower(msg), 'exception')
+SETTINGS ignore_data_skipping_indices = 'msg_token';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="notes-and-caveats">Notes and caveats<a aria-label="Direct link to Notes and caveats" class="hash-link" href="#notes-and-caveats" title="Direct link to Notes and caveats">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Skipping indexes are only supported on <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree-family tables</a>; pruning happens at the granule/block level.</li>
+<li class="custom-li">Bloom-filter-based indexes are probabilistic (false positives cause extra reads but won't skip valid data).</li>
+<li class="custom-li">Bloom filters and other skip indexes should be validated with <code>EXPLAIN</code> and tracing; adjust granularity to balance pruning vs. index size.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-docs">Related docs<a aria-label="Direct link to Related docs" class="hash-link" href="#related-docs" title="Direct link to Related docs">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/optimize/skipping-indexes">Data skipping index guide</a></li>
+<li class="custom-li"><a href="/docs/best-practices/use-data-skipping-indices-where-appropriate">Best practices guide</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/alter/skipping-index">Manipulating data skipping indices</a></li>
+<li class="custom-li"><a href="/docs/operations/system-tables/data_skipping_indices">System table information</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/optimize/skipping-indexes"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Data skipping indexes</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/optimize/prewhere"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">PREWHERE optimization</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#minmax-index">MinMax index</a><li><a class="table-of-contents__link toc-highlight" href="#set-index">Set index</a><li><a class="table-of-contents__link toc-highlight" href="#textindex-for-full-text-search">Text index (text) for full text search</a><li><a class="table-of-contents__link toc-highlight" href="#generic-bloom-filter-scalar">Generic Bloom filter (scalar)</a><li><a class="table-of-contents__link toc-highlight" href="#n-gram-bloom-filter-ngrambf-v1-for-substring-search">N-gram Bloom filter (ngrambf_v1) for substring search <em>(Deprecated)</em></a><li><a class="table-of-contents__link toc-highlight" href="#token-bloom-filter-tokenbf-v1-for-word-based-search">Token Bloom filter (tokenbf_v1) for word-based search <em>(Deprecated)</em></a><li><a class="table-of-contents__link toc-highlight" href="#add-indexes-during-create-table-multiple-examples">Add indexes during CREATE TABLE (multiple examples)</a><li><a class="table-of-contents__link toc-highlight" href="#materializing-on-existing-data-and-verifying">Materializing on existing data and verifying</a><li><a class="table-of-contents__link toc-highlight" href="#when-use-and-when-to-avoid">When to use and when to avoid skipping indexes</a><li><a class="table-of-contents__link toc-highlight" href="#temporarily-ignore-or-force-indexes">Temporarily ignore or force indexes</a><li><a class="table-of-contents__link toc-highlight" href="#notes-and-caveats">Notes and caveats</a><li><a class="table-of-contents__link toc-highlight" href="#related-docs">Related docs</a></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

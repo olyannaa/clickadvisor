@@ -1,0 +1,37 @@
+{
+  "statement_id": "main",
+  "explain_kind": "PLAN",
+  "generated_at": "2026-05-25T12:20:00Z",
+  "clickhouse_version": "25.3.2.5",
+  "payload": {
+    "Plan": {
+      "Node Type": "Sorting",
+      "Plans": [
+        {
+          "Node Type": "Distinct",
+          "Plans": [
+            {
+              "Node Type": "Aggregating",
+              "Description": "count(DISTINCT session_id)",
+              "Plans": [
+                {
+                  "Node Type": "Expression",
+                  "Plans": [
+                    {
+                      "Node Type": "ReadFromMergeTree",
+                      "Description": "analytics.events",
+                      "Estimate": {
+                        "rows": 194000000,
+                        "marks": 24100
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

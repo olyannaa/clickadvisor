@@ -1,0 +1,342 @@
+<h1>Encryption functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Encryption</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/encryption-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Encryption functions</h1></header><p>These functions implement encryption and decryption of data with AES (Advanced Encryption Standard) algorithm.</p>
+<p>The key length depends on the encryption mode: <code>16</code>, <code>24</code>, and <code>32</code> bytes long for <code>-128-</code>, <code>-196-</code>, and <code>-256-</code> modes respectively.</p>
+<p>The initialization vector length is always 16 bytes (bytes in excess of 16 are ignored).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="HMAC">HMAC<a aria-label="Direct link to HMAC" class="hash-link" href="#HMAC" title="Direct link to HMAC">​</a></h2>
+<p>Introduced in: v25.12.0</p>
+<p>Computes the HMAC (Hash-based Message Authentication Code) for the given message using the specified hash algorithm and secret key.</p>
+<p>Supported hash algorithms:</p>
+<ul class="custom-ul">
+<li class="custom-li">blake2b512</li>
+<li class="custom-li">blake2s256</li>
+<li class="custom-li">md4</li>
+<li class="custom-li">md5</li>
+<li class="custom-li">md5-sha1</li>
+<li class="custom-li">mdc2</li>
+<li class="custom-li">ripemd (aliases: RIPEMD160, ripemd)</li>
+<li class="custom-li">ripemd160</li>
+<li class="custom-li">rmd160 (aliases: RIPEMD160, rmd160)</li>
+<li class="custom-li">sha1</li>
+<li class="custom-li">sha224</li>
+<li class="custom-li">sha256</li>
+<li class="custom-li">sha3-224</li>
+<li class="custom-li">sha3-256</li>
+<li class="custom-li">sha3-384</li>
+<li class="custom-li">sha3-512</li>
+<li class="custom-li">sha384</li>
+<li class="custom-li">sha512</li>
+<li class="custom-li">sha512-224</li>
+<li class="custom-li">sha512-256</li>
+<li class="custom-li">shake128</li>
+<li class="custom-li">shake256</li>
+<li class="custom-li">sm3</li>
+<li class="custom-li">ssl3-md5 (aliases: MD5, ssl3-md5)</li>
+<li class="custom-li">ssl3-sha1 (aliases: SHA1, ssl3-sha1)</li>
+<li class="custom-li">whirlpool</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">HMAC(mode, message, key)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Hash algorithm name (case-insensitive). Supported: md5, sha1, sha224, sha256, sha384, sha512. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>message</code> — Message to be authenticated. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Secret key for HMAC. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a binary string containing the HMAC digest. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic HMAC-SHA256</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hex(HMAC('sha256', 'The quick brown fox jumps over the lazy dog', 'secret_key'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hex(HMAC('sha256', 'The quick brown fox jumps over the lazy dog', 'secret_key'))─┐
+│ 31FD15FA0F61FD40DC09D919D4AA5B4141A0B27C1D51E74A6789A890AAAA187C                 │
+└──────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Different hash algorithms</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    hex(HMAC('md5', 'message', 'key')) AS hmac_md5,
+    hex(HMAC('sha1', 'message', 'key')) AS hmac_sha1,
+    hex(HMAC('sha256', 'message', 'key')) AS hmac_sha256;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─hmac_md5─────────────────────────┬─hmac_sha1────────────────────────────────┬─hmac_sha256──────────────────────────────────────────────────────┐
+│ 4E4748E62B463521F6775FBF921234B5 │ 2088DF74D5F2146B48146CAF4965377E9D0BE3A4 │ 6E9EF29B75FFFC5B7ABAE527D58FDADB2FE42E7219011976917343065F58ED4A │
+└──────────────────────────────────┴──────────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Case-insensitive mode</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    hmac('SHA256', 'message', 'key') = HMAC('sha256', 'message', 'key') AS same_result,
+    HMAC('SHA256', 'message', 'key') = Hmac('Sha256', 'message', 'key') AS also_same;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─same_result─┬─also_same─┐
+│           1 │         1 │
+└─────────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aes_decrypt_mysql">aes_decrypt_mysql<a aria-label="Direct link to aes_decrypt_mysql" class="hash-link" href="#aes_decrypt_mysql" title="Direct link to aes_decrypt_mysql">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Decrypts data encrypted by MySQL's <a href="https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-encrypt" rel="noopener noreferrer" target="_blank"><code>AES_ENCRYPT</code></a> function.</p>
+<p>Produces the same plaintext as <a href="#decrypt"><code>decrypt</code></a> for the same inputs.
+When <code>key</code> or <code>iv</code> are longer than they should normally be, <code>aes_decrypt_mysql</code> will stick to what MySQL's <code>aes_decrypt</code> does which is to 'fold' <code>key</code> and ignore the excess bits of <code>IV</code>.</p>
+<p>Supports the following decryption modes:</p>
+<ul class="custom-ul">
+<li class="custom-li">aes-128-ecb, aes-192-ecb, aes-256-ecb</li>
+<li class="custom-li">aes-128-cbc, aes-192-cbc, aes-256-cbc</li>
+<li class="custom-li">aes-128-cfb128</li>
+<li class="custom-li">aes-128-ofb, aes-192-ofb, aes-256-ofb</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aes_decrypt_mysql(mode, ciphertext, key[, iv])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Decryption mode. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ciphertext</code> — Encrypted text that needs to be decrypted. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Decryption key. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>iv</code> — Optional. Initialization vector. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the decrypted String. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Decrypt MySQL data</strong></p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Let's decrypt data we've previously encrypted with MySQL:
+mysql&gt; SET  block_encryption_mode='aes-256-ofb';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; SELECT aes_encrypt('Secret', '123456789101213141516171819202122', 'iviviviviviviviv123456') as ciphertext;
++------------------------+
+| ciphertext             |
++------------------------+
+| 0x24E9E4966469         |
++------------------------+
+1 row in set (0.00 sec)
+
+SELECT aes_decrypt_mysql('aes-256-ofb', unhex('24E9E4966469'), '123456789101213141516171819202122', 'iviviviviviviviv123456') AS plaintext
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─plaintext─┐
+│ Secret    │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aes_encrypt_mysql">aes_encrypt_mysql<a aria-label="Direct link to aes_encrypt_mysql" class="hash-link" href="#aes_encrypt_mysql" title="Direct link to aes_encrypt_mysql">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Encrypts text the same way as MySQL's <code>AES_ENCRYPT</code> function does.
+The resulting ciphertext can be decrypted with MySQL's <code>AES_DECRYPT</code> function.
+Produces the same ciphertext as the <code>encrypt</code> function for the same inputs.
+When <code>key</code> or <code>iv</code> are longer than they should normally be, <code>aes_encrypt_mysql</code> will stick to what MySQL's <code>aes_encrypt</code> does which is to 'fold' <code>key</code> and ignore the excess bits of <code>iv</code>.</p>
+<p>The supported encryption modes are:</p>
+<ul class="custom-ul">
+<li class="custom-li">aes-128-ecb, aes-192-ecb, aes-256-ecb</li>
+<li class="custom-li">aes-128-cbc, aes-192-cbc, aes-256-cbc</li>
+<li class="custom-li">aes-128-ofb, aes-192-ofb, aes-256-ofb</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aes_encrypt_mysql(mode, plaintext, key[, iv])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Encryption mode. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>plaintext</code> — Text that should be encrypted. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Encryption key. If the key is longer than required by <code>mode</code>, MySQL-specific key folding is performed. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>iv</code> — Optional. Initialization vector. Only the first 16 bytes are taken into account. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Ciphertext binary string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Equal input comparison</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Given equal input encrypt and aes_encrypt_mysql produce the same ciphertext:
+SELECT encrypt('aes-256-ofb', 'Secret', '12345678910121314151617181920212', 'iviviviviviviviv') = aes_encrypt_mysql('aes-256-ofb', 'Secret', '12345678910121314151617181920212', 'iviviviviviviviv') AS ciphertexts_equal;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─ciphertexts_equal─┐
+│                 1 │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Encrypt fails with long key</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- But encrypt fails when key or iv is longer than expected:
+SELECT encrypt('aes-256-ofb', 'Secret', '123456789101213141516171819202122', 'iviviviviviviviv123');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Received exception from server (version 22.6.1):
+Code: 36. DB::Exception: Received from localhost:9000. DB::Exception: Invalid key size: 33 expected 32: While processing encrypt('aes-256-ofb', 'Secret', '123456789101213141516171819202122', 'iviviviviviviviv123').
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>MySQL compatibility</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- aes_encrypt_mysql produces MySQL-compatible output:
+SELECT hex(aes_encrypt_mysql('aes-256-ofb', 'Secret', '123456789101213141516171819202122', 'iviviviviviviviv123')) AS ciphertext;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─ciphertext───┐
+│ 24E9E4966469 │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Longer IV produces the same result</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Notice how supplying even longer IV produces the same result
+SELECT hex(aes_encrypt_mysql('aes-256-ofb', 'Secret', '123456789101213141516171819202122', 'iviviviviviviviv123456')) AS ciphertext
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─ciphertext───┐
+│ 24E9E4966469 │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="decrypt">decrypt<a aria-label="Direct link to decrypt" class="hash-link" href="#decrypt" title="Direct link to decrypt">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>This function decrypts an AES-encrypted binary string using the following modes:</p>
+<ul class="custom-ul">
+<li class="custom-li">aes-128-ecb, aes-192-ecb, aes-256-ecb</li>
+<li class="custom-li">aes-128-cbc, aes-192-cbc, aes-256-cbc</li>
+<li class="custom-li">aes-128-ofb, aes-192-ofb, aes-256-ofb</li>
+<li class="custom-li">aes-128-gcm, aes-192-gcm, aes-256-gcm</li>
+<li class="custom-li">aes-128-ctr, aes-192-ctr, aes-256-ctr</li>
+<li class="custom-li">aes-128-cfb, aes-128-cfb1, aes-128-cfb8</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">decrypt(mode, ciphertext, key[, iv, aad])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Decryption mode. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ciphertext</code> — Encrypted text that should be decrypted. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Decryption key. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>iv</code> — Initialization vector. Required for <code>-gcm</code> modes, optional for others. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>aad</code> — Additional authenticated data. Won't decrypt if this value is incorrect. Works only in <code>-gcm</code> modes, for others throws an exception. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns decrypted plaintext. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Correctly decrypting encrypted data</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Re-using the table from the encrypt function example
+SELECT comment, hex(secret) FROM encryption_test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─comment──────────────┬─hex(secret)──────────────────────────────────┐
+│ aes-256-gcm          │ A8A3CCBC6426CFEEB60E4EAE03D3E94204C1B09E0254 │
+│ aes-256-gcm with AAD │ A8A3CCBC6426D9A1017A0A932322F1852260A4AD6837 │
+└──────────────────────┴──────────────────────────────────────────────┘
+┌─comment──────────────────────────┬─hex(secret)──────────────────────┐
+│ aes-256-ofb no IV                │ B4972BDC4459                     │
+│ aes-256-ofb no IV, different key │ 2FF57C092DC9                     │
+│ aes-256-ofb with IV              │ 5E6CB398F653                     │
+│ aes-256-cbc no IV                │ 1BC0629A92450D9E73A00E7D02CF4142 │
+└──────────────────────────────────┴──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Incorrectly decrypting encrypted data</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT comment, decrypt('aes-256-cfb128', secret, '12345678910121314151617181920212') AS plaintext FROM encryption_test
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-- Notice how only a portion of the data was properly decrypted, and the rest is gibberish since either `mode`, `key`, or `iv` were different upon encryption.
+┌─comment──────────────┬─plaintext──┐
+│ aes-256-gcm          │ OQ�E
+                             �t�7T�\���\�   │
+│ aes-256-gcm with AAD │ OQ�E
+                             �\��si����;�o�� │
+└──────────────────────┴────────────┘
+┌─comment──────────────────────────┬─plaintext─┐
+│ aes-256-ofb no IV                │ Secret    │
+│ aes-256-ofb no IV, different key │ �4�
+                                        �         │
+│ aes-256-ofb with IV              │ ���6�~        │
+│aes-256-cbc no IV                │ �2*4�h3c�4w��@
+└──────────────────────────────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="encrypt">encrypt<a aria-label="Direct link to encrypt" class="hash-link" href="#encrypt" title="Direct link to encrypt">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Encrypts plaintext into ciphertext using AES in one of the following modes:</p>
+<ul class="custom-ul">
+<li class="custom-li">aes-128-ecb, aes-192-ecb, aes-256-ecb</li>
+<li class="custom-li">aes-128-cbc, aes-192-cbc, aes-256-cbc</li>
+<li class="custom-li">aes-128-ofb, aes-192-ofb, aes-256-ofb</li>
+<li class="custom-li">aes-128-gcm, aes-192-gcm, aes-256-gcm</li>
+<li class="custom-li">aes-128-ctr, aes-192-ctr, aes-256-ctr</li>
+<li class="custom-li">aes-128-cfb, aes-128-cfb1, aes-128-cfb8</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">encrypt(mode, plaintext, key[, iv, aad])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Encryption mode. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>plaintext</code> — Text that should be encrypted. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Encryption key. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>iv</code> — Initialization vector. Required for <code>-gcm</code> modes, optional for others. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>aad</code> — Additional authenticated data. It isn't encrypted, but it affects decryption. Works only in <code>-gcm</code> modes, for others it throws an exception. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns binary string ciphertext. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example encryption</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE encryption_test
+(
+    `comment` String,
+    `secret` String
+)
+ENGINE = MergeTree;
+
+INSERT INTO encryption_test VALUES
+('aes-256-ofb no IV', encrypt('aes-256-ofb', 'Secret', '12345678910121314151617181920212')),
+('aes-256-ofb no IV, different key', encrypt('aes-256-ofb', 'Secret', 'keykeykeykeykeykeykeykeykeykeyke')),
+('aes-256-ofb with IV', encrypt('aes-256-ofb', 'Secret', '12345678910121314151617181920212', 'iviviviviviviviv')),
+('aes-256-cbc no IV', encrypt('aes-256-cbc', 'Secret', '12345678910121314151617181920212'));
+
+SELECT comment, hex(secret) FROM encryption_test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─comment──────────────────────────┬─hex(secret)──────────────────────┐
+│ aes-256-ofb no IV                │ B4972BDC4459                     │
+│ aes-256-ofb no IV, different key │ 2FF57C092DC9                     │
+│ aes-256-ofb with IV              │ 5E6CB398F653                     │
+│ aes-256-cbc no IV                │ 1BC0629A92450D9E73A00E7D02CF4142 │
+└──────────────────────────────────┴──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example with GCM mode</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO encryption_test VALUES
+('aes-256-gcm', encrypt('aes-256-gcm', 'Secret', '12345678910121314151617181920212', 'iviviviviviviviv')),
+
+('aes-256-gcm with AAD', encrypt('aes-256-gcm', 'Secret', '12345678910121314151617181920212', 'iviviviviviviviv', 'aad'));
+
+SELECT comment, hex(secret) FROM encryption_test WHERE comment LIKE '%gcm%';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─comment──────────────┬─hex(secret)──────────────────────────────────┐
+│ aes-256-gcm          │ A8A3CCBC6426CFEEB60E4EAE03D3E94204C1B09E0254 │
+│ aes-256-gcm with AAD │ A8A3CCBC6426D9A1017A0A932322F1852260A4AD6837 │
+└──────────────────────┴──────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tryDecrypt">tryDecrypt<a aria-label="Direct link to tryDecrypt" class="hash-link" href="#tryDecrypt" title="Direct link to tryDecrypt">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Similar to the <code>decrypt</code> function, but returns <code>NULL</code> if decryption fails when using the wrong key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tryDecrypt(mode, ciphertext, key[, iv, aad])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>mode</code> — Decryption mode. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>ciphertext</code> — Encrypted text that should be decrypted. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>key</code> — Decryption key. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>iv</code> — Optional. Initialization vector. Required for <code>-gcm</code> modes, optional for other modes. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>aad</code> — Optional. Additional authenticated data. Won't decrypt if this value is incorrect. Works only in <code>-gcm</code> modes, for other modes throws an exception. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the decrypted String, or <code>NULL</code> if decryption fails. <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Create table and insert data</strong></p>
+<div class="wrapper_EBtA" style="height:452.40000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Let's create a table where user_id is the unique user id, encrypted is an encrypted string field, iv is an initial vector for decrypt/encrypt.
+-- Assume that users know their id and the key to decrypt the encrypted field:
+CREATE TABLE decrypt_null
+(
+    dt DateTime,
+    user_id UInt32,
+    encrypted String,
+    iv String
+)
+ENGINE = MergeTree;
+
+-- Insert some data:
+INSERT INTO decrypt_null VALUES
+('2022-08-02 00:00:00', 1, encrypt('aes-256-gcm', 'value1', 'keykeykeykeykeykeykeykeykeykey01', 'iv1'), 'iv1'),
+('2022-09-02 00:00:00', 2, encrypt('aes-256-gcm', 'value2', 'keykeykeykeykeykeykeykeykeykey02', 'iv2'), 'iv2'),
+('2022-09-02 00:00:01', 3, encrypt('aes-256-gcm', 'value3', 'keykeykeykeykeykeykeykeykeykey03', 'iv3'), 'iv3');
+
+-- Try decrypt with one key
+SELECT
+    dt,
+    user_id,
+    tryDecrypt('aes-256-gcm', encrypted, 'keykeykeykeykeykeykeykeykeykey02', iv) AS value
+FROM decrypt_null
+ORDER BY user_id ASC
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────────────dt─┬─user_id─┬─value──┐
+│ 2022-08-02 00:00:00 │       1 │ ᴺᵁᴸᴸ   │
+│ 2022-09-02 00:00:00 │       2 │ value2 │
+│ 2022-09-02 00:00:01 │       3 │ ᴺᵁᴸᴸ   │
+└─────────────────────┴─────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/encoding-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Encoding</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/ext-dict-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Dictionaries</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#HMAC">HMAC</a><li><a class="table-of-contents__link toc-highlight" href="#aes_decrypt_mysql">aes_decrypt_mysql</a><li><a class="table-of-contents__link toc-highlight" href="#aes_encrypt_mysql">aes_encrypt_mysql</a><li><a class="table-of-contents__link toc-highlight" href="#decrypt">decrypt</a><li><a class="table-of-contents__link toc-highlight" href="#encrypt">encrypt</a><li><a class="table-of-contents__link toc-highlight" href="#tryDecrypt">tryDecrypt</a></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

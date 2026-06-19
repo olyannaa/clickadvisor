@@ -1,0 +1,98 @@
+<h1>KILL Statements | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">KILL</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/kill.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>KILL Statements</h1></header><p>There are two kinds of kill statements: to kill a query and to kill a mutation</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="kill-query">KILL QUERY<a aria-label="Direct link to KILL QUERY" class="hash-link" href="#kill-query" title="Direct link to KILL QUERY">​</a></h2>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">KILL QUERY [ON CLUSTER cluster]
+  WHERE &lt;where expression to SELECT FROM system.processes query&gt;
+  [SYNC|ASYNC|TEST]
+  [FORMAT format]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Attempts to forcibly terminate the currently running queries.
+The queries to terminate are selected from the system.processes table using the criteria defined in the <code>WHERE</code> clause of the <code>KILL</code> query.</p>
+<p>Examples:</p>
+<p>First, you'll need to get the list of incomplete queries. This SQL query provides them according to those running the longest:</p>
+<p>List from a single ClickHouse node:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+  initial_query_id,
+  query_id,
+  formatReadableTimeDelta(elapsed) AS time_delta,
+  query,
+  *
+  FROM system.processes
+  WHERE query ILIKE 'SELECT%'
+  ORDER BY time_delta DESC;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>List from a ClickHouse cluster:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+  initial_query_id,
+  query_id,
+  formatReadableTimeDelta(elapsed) AS time_delta,
+  query,
+  *
+  FROM clusterAllReplicas(default, system.processes)
+  WHERE query ILIKE 'SELECT%'
+  ORDER BY time_delta DESC;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Kill the query:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Forcibly terminates all queries with the specified query_id:
+KILL QUERY WHERE query_id='2-857d-4a57-9ee0-327da5d60a90'
+
+-- Synchronously terminates all queries run by 'username':
+KILL QUERY WHERE user='username' SYNC
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><mdxadmonitiontitle></mdxadmonitiontitle><p>If you are killing a query in ClickHouse Cloud or in a self-managed cluster, then be sure to use the <code>ON CLUSTER [cluster-name]</code>option, in order to ensure the query is killed on all replicas</p></div></div>
+<p>Read-only users can only stop their own queries.</p>
+<p>By default, the asynchronous version of queries is used (<code>ASYNC</code>), which does not wait for confirmation that queries have stopped.</p>
+<p>The synchronous version (<code>SYNC</code>) waits for all queries to stop and displays information about each process as it stops.
+The response contains the <code>kill_status</code> column, which can take the following values:</p>
+<ol class="custom-ol">
+<li class="custom-li"><code>finished</code> – The query was terminated successfully.</li>
+<li class="custom-li"><code>waiting</code> – Waiting for the query to end after sending it a signal to terminate.</li>
+<li class="custom-li">The other values ​​explain why the query can't be stopped.</li>
+</ol>
+<p>A test query (<code>TEST</code>) only checks the user's rights and displays a list of queries to stop.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="kill-mutation">KILL MUTATION<a aria-label="Direct link to KILL MUTATION" class="hash-link" href="#kill-mutation" title="Direct link to KILL MUTATION">​</a></h2>
+<p>The presence of long-running or incomplete mutations often indicates that a ClickHouse service is running poorly. The asynchronous nature of mutations can cause them to consume all available resources on a system. You may need to either:</p>
+<ul class="custom-ul">
+<li class="custom-li">Pause all new mutations, <code>INSERT</code>s , and <code>SELECT</code>s and allow the queue of mutations to complete.</li>
+<li class="custom-li">Or manually kill some of these mutations by sending a <code>KILL</code> command.</li>
+</ul>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">KILL MUTATION
+  WHERE &lt;where expression to SELECT FROM system.mutations query&gt;
+  [TEST]
+  [FORMAT format]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Tries to cancel and remove <a href="/docs/sql-reference/statements/alter#mutations">mutations</a> that are currently executing. Mutations to cancel are selected from the <a href="/docs/operations/system-tables/mutations"><code>system.mutations</code></a> table using the filter specified by the <code>WHERE</code> clause of the <code>KILL</code> query.</p>
+<p>A test query (<code>TEST</code>) only checks the user's rights and displays a list of mutations to stop.</p>
+<p>Examples:</p>
+<p>Get a <code>count()</code> of the number of incomplete mutations:</p>
+<p>Count of mutations from a single ClickHouse node:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count(*)
+FROM system.mutations
+WHERE is_done = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Count of mutations from a ClickHouse cluster of replicas:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count(*)
+FROM clusterAllReplicas('default', system.mutations)
+WHERE is_done = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query the list of incomplete mutations:</p>
+<p>List of mutations from a single ClickHouse node:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mutation_id, *
+FROM system.mutations
+WHERE is_done = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>List of mutations from a ClickHouse cluster:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mutation_id, *
+FROM clusterAllReplicas('default', system.mutations)
+WHERE is_done = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Kill the mutations as needed:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Cancel and remove all mutations of the single table:
+KILL MUTATION WHERE database = 'default' AND table = 'table'
+
+-- Cancel the specific mutation:
+KILL MUTATION WHERE database = 'default' AND table = 'table' AND mutation_id = 'mutation_3.txt'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The query is useful when a mutation is stuck and cannot finish (e.g. if some function in the mutation query throws an exception when applied to the data contained in the table).</p>
+<p>Changes already made by the mutation are not rolled back.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><mdxadmonitiontitle></mdxadmonitiontitle><p><code>is_killed=1</code> column (ClickHouse Cloud only) in the <a href="/docs/operations/system-tables/mutations">system.mutations</a> table does not necessarily mean the mutation is completely finalized. It is possible for a mutation to remain in a state where <code>is_killed=1</code> and <code>is_done=0</code> for an extended period. This can happen if another long-running mutation is blocking the killed mutation. This is a normal situation.</p></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/exists"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">EXISTS</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/optimize"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">OPTIMIZE</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#kill-query">KILL QUERY</a><li><a class="table-of-contents__link toc-highlight" href="#kill-mutation">KILL MUTATION</a></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

@@ -1,0 +1,1319 @@
+<h1>JSON Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">JSON</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/json-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>JSON Functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="types-of-functions">Types of JSON functions<a aria-label="Direct link to Types of JSON functions" class="hash-link" href="#types-of-functions" title="Direct link to Types of JSON functions">​</a></h2>
+<p>There are two sets of functions to parse JSON:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#simplejson-visitparam-functions"><code>simpleJSON*</code> (<code>visitParam*</code>)</a> which is made for parsing a limited subset of JSON extremely fast.</li>
+<li class="custom-li"><a href="#jsonextract-functions"><code>JSONExtract*</code></a> which is made for parsing ordinary JSON.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="simplejson-visitparam-functions">simpleJSON (visitParam) functions<a aria-label="Direct link to simpleJSON (visitParam) functions" class="hash-link" href="#simplejson-visitparam-functions" title="Direct link to simpleJSON (visitParam) functions">​</a></h3>
+<p>ClickHouse has special functions for working with simplified JSON. All these JSON functions are based on strong assumptions about what the JSON can be. They try to do as little as possible to get the job done as quickly as possible.</p>
+<p>The following assumptions are made:</p>
+<ol class="custom-ol">
+<li class="custom-li">The field name (function argument) must be a constant.</li>
+<li class="custom-li">The field name is somehow canonically encoded in JSON. For example: <code>simpleJSONHas('{"abc":"def"}', 'abc') = 1</code>, but <code>simpleJSONHas('{"\\u0061\\u0062\\u0063":"def"}', 'abc') = 0</code></li>
+<li class="custom-li">Fields are searched for on any nesting level, indiscriminately. If there are multiple matching fields, the first occurrence is used.</li>
+<li class="custom-li">The JSON does not have space characters outside of string literals.</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="jsonextract-functions">JSONExtract functions<a aria-label="Direct link to JSONExtract functions" class="hash-link" href="#jsonextract-functions" title="Direct link to JSONExtract functions">​</a></h3>
+<p>These functions are based on <a href="https://github.com/lemire/simdjson" rel="noopener noreferrer" target="_blank">simdjson</a>, and designed for more complex JSON parsing requirements.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="case-insensitive-jsonextract-functions">Case-Insensitive JSONExtract Functions<a aria-label="Direct link to Case-Insensitive JSONExtract Functions" class="hash-link" href="#case-insensitive-jsonextract-functions" title="Direct link to Case-Insensitive JSONExtract Functions">​</a></h3>
+<p>These functions perform ASCII case-insensitive key matching when extracting values from JSON objects.
+They work identically to their case-sensitive counterparts, except that object keys are matched without regard to case.
+When multiple keys match with different cases, the first match is returned.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>These functions may be less performant than their case-sensitive counterparts, so use the regular JSONExtract functions if possible.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONAllPaths">JSONAllPaths<a aria-label="Direct link to JSONAllPaths" class="hash-link" href="#JSONAllPaths" title="Direct link to JSONAllPaths">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of all paths stored in each row in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONAllPaths(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of all paths in the JSON column. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONAllPaths(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONAllPaths(json)─┐
+│ {"a":"42"}                           │ ['a']              │
+│ {"b":"Hello"}                        │ ['b']              │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ ['a','c']          │
+└──────────────────────────────────────┴────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONAllPathsWithTypes">JSONAllPathsWithTypes<a aria-label="Direct link to JSONAllPathsWithTypes" class="hash-link" href="#JSONAllPathsWithTypes" title="Direct link to JSONAllPathsWithTypes">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of all paths and their data types stored in each row in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONAllPathsWithTypes(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map of all paths and their data types in the JSON column. <a href="/docs/sql-reference/data-types/map"><code>Map(String, String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONAllPathsWithTypes(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONAllPathsWithTypes(json)───────────────┐
+│ {"a":"42"}                           │ {'a':'Int64'}                             │
+│ {"b":"Hello"}                        │ {'b':'String'}                            │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ {'a':'Array(Nullable(Int64))','c':'Date'} │
+└──────────────────────────────────────┴───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONAllValues">JSONAllValues<a aria-label="Direct link to JSONAllValues" class="hash-link" href="#JSONAllValues" title="Direct link to JSONAllValues">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Returns all values from each row in a JSON column as an array of strings.
+Values are serialized in their text representation and ordered by their path names.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONAllValues(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of all values as strings in the JSON column. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json": {"a": 42}}, {"json": {"b": "Hello"}}, {"json": {"a": [1, 2, 3], "c": "2020-01-01"}}
+SELECT json, JSONAllValues(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONAllValues(json)──────┐
+│ {"a":42}                             │ ['42']                   │
+│ {"b":"Hello"}                        │ ['Hello']                │
+│ {"a":[1,2,3],"c":"2020-01-01"}       │ ['[1,2,3]','2020-01-01'] │
+└──────────────────────────────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONArrayLength">JSONArrayLength<a aria-label="Direct link to JSONArrayLength" class="hash-link" href="#JSONArrayLength" title="Direct link to JSONArrayLength">​</a></h2>
+<p>Introduced in: v23.2.0</p>
+<p>Returns the number of elements in the outermost JSON array.
+The function returns <code>NULL</code> if input JSON string is invalid.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONArrayLength(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>JSON_ARRAY_LENGTH</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — String with valid JSON. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number of array elements if <code>json</code> is a valid JSON array string, otherwise returns <code>NULL</code>. <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(UInt64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    JSONArrayLength(''),
+    JSONArrayLength('[1,2,3]');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─JSONArrayLength('')─┬─JSONArrayLength('[1,2,3]')─┐
+│                ᴺᵁᴸᴸ │                          3 │
+└─────────────────────┴────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONDynamicPaths">JSONDynamicPaths<a aria-label="Direct link to JSONDynamicPaths" class="hash-link" href="#JSONDynamicPaths" title="Direct link to JSONDynamicPaths">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of dynamic paths that are stored as separate subcolumns in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONDynamicPaths(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of dynamic paths in the JSON column. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONDynamicPaths(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONDynamicPaths(json)─┐
+│ {"a":"42"}                           │ ['a']                  │
+│ {"b":"Hello"}                        │ []                     │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ ['a']                  │
+└──────────────────────────────────────┴────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONDynamicPathsWithTypes">JSONDynamicPathsWithTypes<a aria-label="Direct link to JSONDynamicPathsWithTypes" class="hash-link" href="#JSONDynamicPathsWithTypes" title="Direct link to JSONDynamicPathsWithTypes">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of dynamic paths that are stored as separate subcolumns and their types in each row in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONDynamicPathsWithTypes(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map of dynamic paths and their data types in the JSON column. <a href="/docs/sql-reference/data-types/map"><code>Map(String, String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONDynamicPathsWithTypes(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONDynamicPathsWithTypes(json)─┐
+│ {"a":"42"}                           │ {'a':'Int64'}                   │
+│ {"b":"Hello"}                        │ {}                              │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ {'a':'Array(Nullable(Int64))'}  │
+└──────────────────────────────────────┴─────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtract">JSONExtract<a aria-label="Direct link to JSONExtract" class="hash-link" href="#JSONExtract" title="Direct link to JSONExtract">​</a></h2>
+<p>Introduced in: v19.14.0</p>
+<p>Parses JSON and extracts a value with given ClickHouse data type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtract(json[, indices_or_keys, ...], return_type)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>return_type</code> — ClickHouse data type to return. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a value of specified ClickHouse data type if possible, otherwise returns the default value for that type.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtract('{"a": "hello", "b": [-100, 200.0, 300]}', 'Tuple(String, Array(Float64))') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────────────────────┐
+│ ('hello',[-100,200,300])         │
+└──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractArrayRaw">JSONExtractArrayRaw<a aria-label="Direct link to JSONExtractArrayRaw" class="hash-link" href="#JSONExtractArrayRaw" title="Direct link to JSONExtractArrayRaw">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns an array with elements of JSON array, each represented as unparsed string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractArrayRaw(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of strings with JSON array elements. If the part is not an array or does not exist, an empty array will be returned. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractArrayRaw('{"a": "hello", "b": [-100, 200.0, "hello"]}', 'b') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────────────────┐
+│ ['-100','200.0','"hello"']   │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractArrayRawCaseInsensitive">JSONExtractArrayRawCaseInsensitive<a aria-label="Direct link to JSONExtractArrayRawCaseInsensitive" class="hash-link" href="#JSONExtractArrayRawCaseInsensitive" title="Direct link to JSONExtractArrayRawCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Returns an array with elements of JSON array, each represented as unparsed string, using case-insensitive key matching. This function is similar to <a href="#JSONExtractArrayRaw"><code>JSONExtractArrayRaw</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractArrayRawCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the array. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of raw JSON strings. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractArrayRawCaseInsensitive('{"Items": [1, 2, 3]}', 'ITEMS')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['1','2','3']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractBool">JSONExtractBool<a aria-label="Direct link to JSONExtractBool" class="hash-link" href="#JSONExtractBool" title="Direct link to JSONExtractBool">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses JSON and extracts a value of Bool type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractBool(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a Bool value if it exists, otherwise returns <code>0</code>. <a href="/docs/sql-reference/data-types/boolean"><code>Bool</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractBool('{"passed": true}', 'passed') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   1 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractBoolCaseInsensitive">JSONExtractBoolCaseInsensitive<a aria-label="Direct link to JSONExtractBoolCaseInsensitive" class="hash-link" href="#JSONExtractBoolCaseInsensitive" title="Direct link to JSONExtractBoolCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a boolean value using case-insensitive key matching. This function is similar to <a href="#JSONExtractBool"><code>JSONExtractBool</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractBoolCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted boolean value (1 for true, 0 for false), 0 if not found. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractBoolCaseInsensitive('{"IsActive": true}', 'isactive')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractCaseInsensitive">JSONExtractCaseInsensitive<a aria-label="Direct link to JSONExtractCaseInsensitive" class="hash-link" href="#JSONExtractCaseInsensitive" title="Direct link to JSONExtractCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a value of the given ClickHouse data type using case-insensitive key matching. This function is similar to <a href="#JSONExtract"><code>JSONExtract</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractCaseInsensitive(json [, indices_or_keys...], return_type)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>return_type</code> — The ClickHouse data type to extract <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted value in the specified data type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>int_type</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractCaseInsensitive('{"Number": 123}', 'number', 'Int32')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">123
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>array_type</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractCaseInsensitive('{"List": [1, 2, 3]}', 'list', 'Array(Int32)')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[1,2,3]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractFloat">JSONExtractFloat<a aria-label="Direct link to JSONExtractFloat" class="hash-link" href="#JSONExtractFloat" title="Direct link to JSONExtractFloat">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses JSON and extracts a value of Float type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractFloat(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a Float value if it exists, otherwise returns <code>0</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractFloat('{"a": "hello", "b": [-100, 200.0, 300]}', 'b', 2) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│ 200 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractFloatCaseInsensitive">JSONExtractFloatCaseInsensitive<a aria-label="Direct link to JSONExtractFloatCaseInsensitive" class="hash-link" href="#JSONExtractFloatCaseInsensitive" title="Direct link to JSONExtractFloatCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a value of Float type using case-insensitive key matching. This function is similar to <a href="#JSONExtractFloat"><code>JSONExtractFloat</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractFloatCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted Float value, 0 if not found or cannot be converted. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractFloatCaseInsensitive('{"Price": 12.34}', 'PRICE')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">12.34
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractInt">JSONExtractInt<a aria-label="Direct link to JSONExtractInt" class="hash-link" href="#JSONExtractInt" title="Direct link to JSONExtractInt">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses JSON and extracts a value of Int type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractInt(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an Int value if it exists, otherwise returns <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractInt('{"a": "hello", "b": [-100, 200.0, 300]}', 'b', 1) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──res─┐
+│ -100 │
+└──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractIntCaseInsensitive">JSONExtractIntCaseInsensitive<a aria-label="Direct link to JSONExtractIntCaseInsensitive" class="hash-link" href="#JSONExtractIntCaseInsensitive" title="Direct link to JSONExtractIntCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a value of Int type using case-insensitive key matching. This function is similar to <a href="#JSONExtractInt"><code>JSONExtractInt</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractIntCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted Int value, 0 if not found or cannot be converted. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractIntCaseInsensitive('{"Value": 123}', 'value')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">123
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>nested</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractIntCaseInsensitive('{"DATA": {"COUNT": 42}}', 'data', 'Count')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">42
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeys">JSONExtractKeys<a aria-label="Direct link to JSONExtractKeys" class="hash-link" href="#JSONExtractKeys" title="Direct link to JSONExtractKeys">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Parses a JSON string and extracts the keys.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeys(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array with the keys of the JSON object. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeys('{"a": "hello", "b": [-100, 200.0, 300]}') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─────────┐
+│ ['a','b']   │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeysAndValues">JSONExtractKeysAndValues<a aria-label="Direct link to JSONExtractKeysAndValues" class="hash-link" href="#JSONExtractKeysAndValues" title="Direct link to JSONExtractKeysAndValues">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses key-value pairs from a JSON where the values are of the given ClickHouse data type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeysAndValues(json[, indices_or_keys, ...], value_type)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>value_type</code> — ClickHouse data type of the values. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of tuples with the parsed key-value pairs. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, value_type))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysAndValues('{"x": {"a": 5, "b": 7, "c": 11}}', 'Int8', 'x') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res────────────────────┐
+│ [('a',5),('b',7),('c',11)] │
+└────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeysAndValuesCaseInsensitive">JSONExtractKeysAndValuesCaseInsensitive<a aria-label="Direct link to JSONExtractKeysAndValuesCaseInsensitive" class="hash-link" href="#JSONExtractKeysAndValuesCaseInsensitive" title="Direct link to JSONExtractKeysAndValuesCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses key-value pairs from JSON using case-insensitive key matching. This function is similar to <a href="#JSONExtractKeysAndValues"><code>JSONExtractKeysAndValues</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeysAndValuesCaseInsensitive(json [, indices_or_keys...], value_type)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the object. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>value_type</code> — The ClickHouse data type of the values <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of tuples containing key-value pairs. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, T))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysAndValuesCaseInsensitive('{"Name": "Alice", "AGE": 30}', 'String')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[('Name','Alice'),('AGE','30')]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeysAndValuesRaw">JSONExtractKeysAndValuesRaw<a aria-label="Direct link to JSONExtractKeysAndValuesRaw" class="hash-link" href="#JSONExtractKeysAndValuesRaw" title="Direct link to JSONExtractKeysAndValuesRaw">​</a></h2>
+<p>Introduced in: v20.4.0</p>
+<p>Returns an array of tuples with keys and values from a JSON object. All values are represented as unparsed strings.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeysAndValuesRaw(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of tuples with parsed key-value pairs where values are unparsed strings. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysAndValuesRaw('{"a": [-100, 200.0], "b": "hello"}') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────────────────────────┐
+│ [('a','[-100,200.0]'),('b','"hello"')] │
+└──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeysAndValuesRawCaseInsensitive">JSONExtractKeysAndValuesRawCaseInsensitive<a aria-label="Direct link to JSONExtractKeysAndValuesRawCaseInsensitive" class="hash-link" href="#JSONExtractKeysAndValuesRawCaseInsensitive" title="Direct link to JSONExtractKeysAndValuesRawCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Extracts raw key-value pairs from JSON using case-insensitive key matching. This function is similar to <a href="#JSONExtractKeysAndValuesRaw"><code>JSONExtractKeysAndValuesRaw</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeysAndValuesRawCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the object. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of tuples containing key-value pairs as raw strings. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysAndValuesRawCaseInsensitive('{"Name": "Alice", "AGE": 30}')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[('Name','"Alice"'),('AGE','30')]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractKeysCaseInsensitive">JSONExtractKeysCaseInsensitive<a aria-label="Direct link to JSONExtractKeysCaseInsensitive" class="hash-link" href="#JSONExtractKeysCaseInsensitive" title="Direct link to JSONExtractKeysCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses a JSON string and extracts the keys using case-insensitive key matching to navigate to nested objects. This function is similar to <a href="#JSONExtractKeys"><code>JSONExtractKeys</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractKeysCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the object. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of keys from the JSON object. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysCaseInsensitive('{"Name": "Alice", "AGE": 30}')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['Name','AGE']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>nested</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractKeysCaseInsensitive('{"User": {"name": "John", "AGE": 25}}', 'user')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['name','AGE']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractRaw">JSONExtractRaw<a aria-label="Direct link to JSONExtractRaw" class="hash-link" href="#JSONExtractRaw" title="Direct link to JSONExtractRaw">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns a part of JSON as unparsed string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractRaw(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of JSON as an unparsed string. If the part does not exist or has a wrong type, an empty string will be returned. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractRaw('{"a": "hello", "b": [-100, 200.0, 300]}', 'b') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res──────────────┐
+│ [-100,200.0,300] │
+└──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractRawCaseInsensitive">JSONExtractRawCaseInsensitive<a aria-label="Direct link to JSONExtractRawCaseInsensitive" class="hash-link" href="#JSONExtractRawCaseInsensitive" title="Direct link to JSONExtractRawCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Returns part of the JSON as an unparsed string using case-insensitive key matching. This function is similar to <a href="#JSONExtractRaw"><code>JSONExtractRaw</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractRawCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the raw JSON string of the extracted element. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>object</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractRawCaseInsensitive('{"Object": {"key": "value"}}', 'OBJECT')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{"key":"value"}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractString">JSONExtractString<a aria-label="Direct link to JSONExtractString" class="hash-link" href="#JSONExtractString" title="Direct link to JSONExtractString">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses JSON and extracts a value of String type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractString(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a String value if it exists, otherwise returns an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractString('{"a": "hello", "b": [-100, 200.0, 300]}', 'a') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───┐
+│ hello │
+└───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractStringCaseInsensitive">JSONExtractStringCaseInsensitive<a aria-label="Direct link to JSONExtractStringCaseInsensitive" class="hash-link" href="#JSONExtractStringCaseInsensitive" title="Direct link to JSONExtractStringCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a string using case-insensitive key matching. This function is similar to <a href="#JSONExtractString"><code>JSONExtractString</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractStringCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted string value, empty string if not found. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractStringCaseInsensitive('{"ABC": "def"}', 'abc')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">def
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>nested</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractStringCaseInsensitive('{"User": {"Name": "John"}}', 'user', 'name')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">John
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractUInt">JSONExtractUInt<a aria-label="Direct link to JSONExtractUInt" class="hash-link" href="#JSONExtractUInt" title="Direct link to JSONExtractUInt">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Parses JSON and extracts a value of UInt type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractUInt(json [, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — A list of zero or more arguments each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a UInt value if it exists, otherwise returns <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractUInt('{"a": "hello", "b": [-100, 200.0, 300]}', 'b', -1) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│ 300 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONExtractUIntCaseInsensitive">JSONExtractUIntCaseInsensitive<a aria-label="Direct link to JSONExtractUIntCaseInsensitive" class="hash-link" href="#JSONExtractUIntCaseInsensitive" title="Direct link to JSONExtractUIntCaseInsensitive">​</a></h2>
+<p>Introduced in: v25.8.0</p>
+<p>Parses JSON and extracts a value of UInt type using case-insensitive key matching. This function is similar to <a href="#JSONExtractUInt"><code>JSONExtractUInt</code></a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONExtractUIntCaseInsensitive(json [, indices_or_keys]...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional. Indices or keys to navigate to the field. Keys use case-insensitive matching <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted UInt value, 0 if not found or cannot be converted. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>basic</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONExtractUIntCaseInsensitive('{"COUNT": 789}', 'count')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">789
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONHas">JSONHas<a aria-label="Direct link to JSONHas" class="hash-link" href="#JSONHas" title="Direct link to JSONHas">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Checks for the existence of the provided value(s) in the JSON document.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONHas(json[ ,indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>[ ,indices_or_keys, ...]</code> — A list of zero or more arguments. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the value exists in <code>json</code>, otherwise <code>0</code> <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 'b') = 1;
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 'b', 4) = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONKey">JSONKey<a aria-label="Direct link to JSONKey" class="hash-link" href="#JSONKey" title="Direct link to JSONKey">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the key of a JSON object field by its index (1-based). If the JSON is passed as a string, it is parsed first. The second argument is a JSON path to navigate into nested objects. The function returns the key name at the specified position.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONKey(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indices_or_keys</code> — Optional list of indices or keys specifying a path to a nested element. Each argument can be either a string (access by key) or an integer (access by index starting from 1). <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the key name at the specified position in the JSON object. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONKey('{"a": "hello", "b": [-100, 200.0, 300]}', 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">a
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONLength">JSONLength<a aria-label="Direct link to JSONLength" class="hash-link" href="#JSONLength" title="Direct link to JSONLength">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Return the length of a JSON array or a JSON object.
+If the value does not exist or has the wrong type, <code>0</code> will be returned.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONLength(json [, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>[, indices_or_keys, ...]</code> — Optional. A list of zero or more arguments. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the length of the JSON array or JSON object, otherwise returns <code>0</code> if the value does not exist or has the wrong type. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONLength('{"a": "hello", "b": [-100, 200.0, 300]}', 'b') = 3;
+SELECT JSONLength('{"a": "hello", "b": [-100, 200.0, 300]}') = 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONMergePatch">JSONMergePatch<a aria-label="Direct link to JSONMergePatch" class="hash-link" href="#JSONMergePatch" title="Direct link to JSONMergePatch">​</a></h2>
+<p>Introduced in: v23.10.0</p>
+<p>Returns the merged JSON object string which is formed by merging multiple JSON objects.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONMergePatch(json1[, json2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>jsonMergePatch</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json1[, json2, ...]</code> — One or more strings with valid JSON. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the merged JSON object string, if the JSON object strings are valid. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONMergePatch('{"a":1}', '{"name": "joey"}', '{"name": "tom"}', '{"name": "zoey"}') AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res───────────────────┐
+│ {"a":1,"name":"zoey"} │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONSharedDataPaths">JSONSharedDataPaths<a aria-label="Direct link to JSONSharedDataPaths" class="hash-link" href="#JSONSharedDataPaths" title="Direct link to JSONSharedDataPaths">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of paths that are stored in shared data structure in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONSharedDataPaths(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of paths stored in shared data structure in the JSON column. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONSharedDataPaths(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONSharedDataPaths(json)─┐
+│ {"a":"42"}                           │ []                        │
+│ {"b":"Hello"}                        │ ['b']                     │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ ['c']                     │
+└──────────────────────────────────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONSharedDataPathsWithTypes">JSONSharedDataPathsWithTypes<a aria-label="Direct link to JSONSharedDataPathsWithTypes" class="hash-link" href="#JSONSharedDataPathsWithTypes" title="Direct link to JSONSharedDataPathsWithTypes">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Returns the list of paths that are stored in shared data structure and their types in each row in JSON column.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONSharedDataPathsWithTypes(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON column. <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map of paths stored in shared data structure and their data types in the JSON column. <a href="/docs/sql-reference/data-types/map"><code>Map(String, String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}}
+SELECT json, JSONSharedDataPathsWithTypes(json) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─json─────────────────────────────────┬─JSONSharedDataPathsWithTypes(json)─┐
+│ {"a":"42"}                           │ {}                                  │
+│ {"b":"Hello"}                        │ {'b':'String'}                      │
+│ {"a":["1","2","3"],"c":"2020-01-01"} │ {'c':'Date'}                        │
+└──────────────────────────────────────┴─────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSONType">JSONType<a aria-label="Direct link to JSONType" class="hash-link" href="#JSONType" title="Direct link to JSONType">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Return the type of a JSON value. If the value does not exist, <code>Null=0</code> will be returned.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSONType(json[, indices_or_keys, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to parse <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>json[, indices_or_keys, ...]</code> — A list of zero or more arguments, each of which can be either string or integer. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the type of a JSON value as a string, otherwise if the value doesn't exist it returns <code>Null=0</code> <a href="/docs/sql-reference/data-types/enum"><code>Enum</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONType('{"a": "hello", "b": [-100, 200.0, 300]}') = 'Object';
+SELECT JSONType('{"a": "hello", "b": [-100, 200.0, 300]}', 'a') = 'String';
+SELECT JSONType('{"a": "hello", "b": [-100, 200.0, 300]}', 'b') = 'Array';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+1
+1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSON_EXISTS">JSON_EXISTS<a aria-label="Direct link to JSON_EXISTS" class="hash-link" href="#JSON_EXISTS" title="Direct link to JSON_EXISTS">​</a></h2>
+<p>Introduced in: v21.8.0</p>
+<p>If the value exists in the JSON document, <code>1</code> will be returned.
+If the value does not exist, <code>0</code> will be returned.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSON_EXISTS(json, path)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — A string with valid JSON. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>path</code> — A string representing the path. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the value exists in the JSON document, otherwise <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSON_EXISTS('{"hello":1}', '$.hello');
+SELECT JSON_EXISTS('{"hello":{"world":1}}', '$.hello.world');
+SELECT JSON_EXISTS('{"hello":["world"]}', '$.hello[*]');
+SELECT JSON_EXISTS('{"hello":["world"]}', '$.hello[0]');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─JSON_EXISTS(⋯ '$.hello')─┐
+│                        1 │
+└──────────────────────────┘
+┌─JSON_EXISTS(⋯llo.world')─┐
+│                        1 │
+└──────────────────────────┘
+┌─JSON_EXISTS(⋯.hello[*]')─┐
+│                        1 │
+└──────────────────────────┘
+┌─JSON_EXISTS(⋯.hello[0]')─┐
+│                        1 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSON_QUERY">JSON_QUERY<a aria-label="Direct link to JSON_QUERY" class="hash-link" href="#JSON_QUERY" title="Direct link to JSON_QUERY">​</a></h2>
+<p>Introduced in: v21.8.0</p>
+<p>Parses a JSON and extract a value as a JSON array or JSON object.
+If the value does not exist, an empty string will be returned.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSON_QUERY(json, path)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — A string with valid JSON. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>path</code> — A string representing the path. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted JSON array or JSON object as a string, or an empty string if the value does not exist. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSON_QUERY('{"hello":"world"}', '$.hello');
+SELECT JSON_QUERY('{"array":[[0, 1, 2, 3, 4, 5], [0, -1, -2, -3, -4, -5]]}', '$.array[*][0 to 2, 4]');
+SELECT JSON_QUERY('{"hello":2}', '$.hello');
+SELECT toTypeName(JSON_QUERY('{"hello":2}', '$.hello'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">["world"]
+[0, 1, 4, 0, -1, -4]
+[2]
+String
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="JSON_VALUE">JSON_VALUE<a aria-label="Direct link to JSON_VALUE" class="hash-link" href="#JSON_VALUE" title="Direct link to JSON_VALUE">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Parses a JSON and extract a value as a JSON scalar. If the value does not exist, an empty string will be returned by default.</p>
+<p>This function is controlled by the following settings:</p>
+<ul class="custom-ul">
+<li class="custom-li">by SET <code>function_json_value_return_type_allow_nullable</code> = <code>true</code>, <code>NULL</code> will be returned. If the value is complex type (such as: struct, array, map), an empty string will be returned by default.</li>
+<li class="custom-li">by SET <code>function_json_value_return_type_allow_complex</code> = <code>true</code>, the complex value will be returned.</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">JSON_VALUE(json, path)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — A string with valid JSON. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>path</code> — A string representing the path. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the extracted JSON scalar as a string, or an empty string if the value does not exist. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSON_VALUE('{"hello":"world"}', '$.hello');
+SELECT JSON_VALUE('{"array":[[0, 1, 2, 3, 4, 5], [0, -1, -2, -3, -4, -5]]}', '$.array[*][0 to 2, 4]');
+SELECT JSON_VALUE('{"hello":2}', '$.hello');
+SELECT JSON_VALUE('{"hello":"world"}', '$.b') settings function_json_value_return_type_allow_nullable=true;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">world
+0
+2
+ᴺᵁᴸᴸ
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="dynamicElement">dynamicElement<a aria-label="Direct link to dynamicElement" class="hash-link" href="#dynamicElement" title="Direct link to dynamicElement">​</a></h2>
+<p>Introduced in: v24.1.0</p>
+<p>Extracts a column with specified type from a <code>Dynamic</code> column.</p>
+<p>This function allows you to extract values of a specific type from a Dynamic column. If a row contains a value
+of the requested type, it returns that value. If the row contains a different type or NULL, it returns NULL
+for scalar types or an empty array for array types.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">dynamicElement(dynamic, type_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>dynamic</code> — Dynamic column to extract from. <a href="/docs/sql-reference/data-types/dynamic"><code>Dynamic</code></a></li>
+<li class="custom-li"><code>type_name</code> — The name of the variant type to extract (e.g., 'String', 'Int64', 'Array(Int64)').</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values of the specified type from the Dynamic column. Returns NULL for non-matching types (or empty array for array types). <a href="/docs/sql-reference/data-types"><code>Any</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Extracting different types from Dynamic column</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (d Dynamic) ENGINE = Memory;
+INSERT INTO test VALUES (NULL), (42), ('Hello, World!'), ([1, 2, 3]);
+SELECT d, dynamicType(d), dynamicElement(d, 'String'), dynamicElement(d, 'Int64'), dynamicElement(d, 'Array(Int64)'), dynamicElement(d, 'Date'), dynamicElement(d, 'Array(String)') FROM test
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─d─────────────┬─dynamicType(d)─┬─dynamicElement(d, 'String')─┬─dynamicElement(d, 'Int64')─┬─dynamicElement(d, 'Array(Int64)')─┬─dynamicElement(d, 'Date')─┬─dynamicElement(d, 'Array(String)')─┐
+│ ᴺᵁᴸᴸ          │ None           │ ᴺᵁᴸᴸ                        │                       ᴺᵁᴸᴸ │ []                                │                      ᴺᵁᴸᴸ │ []                                 │
+│ 42            │ Int64          │ ᴺᵁᴸᴸ                        │                         42 │ []                                │                      ᴺᵁᴸᴸ │ []                                 │
+│ Hello, World! │ String         │ Hello, World!               │                       ᴺᵁᴸᴸ │ []                                │                      ᴺᵁᴸᴸ │ []                                 │
+│ [1,2,3]       │ Array(Int64)   │ ᴺᵁᴸᴸ                        │                       ᴺᵁᴸᴸ │ [1,2,3]                           │                      ᴺᵁᴸᴸ │ []                                 │
+└───────────────┴────────────────┴─────────────────────────────┴────────────────────────────┴───────────────────────────────────┴───────────────────────────┴────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="dynamicType">dynamicType<a aria-label="Direct link to dynamicType" class="hash-link" href="#dynamicType" title="Direct link to dynamicType">​</a></h2>
+<p>Introduced in: v24.1.0</p>
+<p>Returns the variant type name for each row of a <code>Dynamic</code> column.</p>
+<p>For rows containing NULL, the function returns 'None'. For all other rows, it returns the actual data type
+stored in that row of the Dynamic column (e.g., 'Int64', 'String', 'Array(Int64)').</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">dynamicType(dynamic)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>dynamic</code> — Dynamic column to inspect. <a href="/docs/sql-reference/data-types/dynamic"><code>Dynamic</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the type name of the value stored in each row, or 'None' for NULL values. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Inspecting types in Dynamic column</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (d Dynamic) ENGINE = Memory;
+INSERT INTO test VALUES (NULL), (42), ('Hello, World!'), ([1, 2, 3]);
+SELECT d, dynamicType(d) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─d─────────────┬─dynamicType(d)─┐
+│ ᴺᵁᴸᴸ          │ None           │
+│ 42            │ Int64          │
+│ Hello, World! │ String         │
+│ [1,2,3]       │ Array(Int64)   │
+└───────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isDynamicElementInSharedData">isDynamicElementInSharedData<a aria-label="Direct link to isDynamicElementInSharedData" class="hash-link" href="#isDynamicElementInSharedData" title="Direct link to isDynamicElementInSharedData">​</a></h2>
+<p>Introduced in: v24.1.0</p>
+<p>Returns true for rows in a Dynamic column that are stored in shared variant format rather than as separate subcolumns.</p>
+<p>When a Dynamic column has a <code>max_types</code> limit, values that exceed this limit are stored in a shared binary format
+instead of being separated into individual typed subcolumns. This function identifies which rows are stored in this shared format.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isDynamicElementInSharedData(dynamic)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>dynamic</code> — Dynamic column to inspect. <a href="/docs/sql-reference/data-types/dynamic"><code>Dynamic</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns true if the value is stored in shared variant format, false if stored as a separate subcolumn or is NULL. <a href="/docs/sql-reference/data-types/boolean"><code>Bool</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Checking storage format in Dynamic column with max_types limit</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (d Dynamic(max_types=2)) ENGINE = Memory;
+INSERT INTO test VALUES (NULL), (42), ('Hello, World!'), ([1, 2, 3]);
+SELECT d, isDynamicElementInSharedData(d) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─d─────────────┬─isDynamicElementInSharedData(d)─┐
+│ ᴺᵁᴸᴸ          │ false                           │
+│ 42            │ false                           │
+│ Hello, World! │ true                            │
+│ [1,2,3]       │ true                            │
+└───────────────┴─────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isValidJSON">isValidJSON<a aria-label="Direct link to isValidJSON" class="hash-link" href="#isValidJSON" title="Direct link to isValidJSON">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Checks that the string passed is valid JSON.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isValidJSON(json)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — JSON string to validate <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the string is valid JSON, otherwise <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isValidJSON('{"a": "hello", "b": [-100, 200.0, 300]}') = 1;
+SELECT isValidJSON('not JSON') = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Using integers to access both JSON arrays and JSON objects</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 0);
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 1);
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 2);
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', -1);
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', -2);
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+1
+1
+1
+1
+1
+0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="prettyPrintJSON">prettyPrintJSON<a aria-label="Direct link to prettyPrintJSON" class="hash-link" href="#prettyPrintJSON" title="Direct link to prettyPrintJSON">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Returns a pretty-printed version of a JSON string with newlines and indentation with spaces.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">prettyPrintJSON(json [, indent])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — A valid JSON string to format. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>indent</code> — Number of spaces per indentation level. Default: 4. Max: 32 <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A pretty-printed JSON string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Simple object</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT prettyPrintJSON('{"a":1,"b":"hello"}');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{
+    "a": 1,
+    "b": "hello"
+}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Custom indent</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT prettyPrintJSON('{"a":1}', 8);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{
+        "a": 1
+}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractBool">simpleJSONExtractBool<a aria-label="Direct link to simpleJSONExtractBool" class="hash-link" href="#simpleJSONExtractBool" title="Direct link to simpleJSONExtractBool">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Parses a true/false value from the value of the field named <code>field_name</code>.
+The result is <code>UInt8</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractBool(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractBool</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the value of the field is <code>true</code>, <code>0</code> otherwise. This means this function will return <code>0</code> including (and not only) in the following cases:</p>
+<ul class="custom-ul">
+<li class="custom-li">If the field doesn't exists.</li>
+<li class="custom-li">If the field contains <code>true</code> as a string, e.g.: <code>{"field":"true"}</code>.</li>
+<li class="custom-li">If the field contains <code>1</code> as a numerical value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></li>
+</ul>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":false,"bar":true}');
+INSERT INTO jsons VALUES ('{"foo":"true","qux":1}');
+
+SELECT simpleJSONExtractBool(json, 'bar') FROM jsons ORDER BY json;
+SELECT simpleJSONExtractBool(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+1
+0
+0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractFloat">simpleJSONExtractFloat<a aria-label="Direct link to simpleJSONExtractFloat" class="hash-link" href="#simpleJSONExtractFloat" title="Direct link to simpleJSONExtractFloat">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Parses <code>Float64</code> from the value of the field named <code>field_name</code>.
+If <code>field_name</code> is a string field, it tries to parse a number from the beginning of the string.
+If the field does not exist, or it exists but does not contain a number, it returns <code>0</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractFloat(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractFloat</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number parsed from the field if the field exists and contains a number, otherwise <code>0</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"-4e3"}');
+INSERT INTO jsons VALUES ('{"foo":-3.4}');
+INSERT INTO jsons VALUES ('{"foo":5}');
+INSERT INTO jsons VALUES ('{"foo":"not1number"}');
+INSERT INTO jsons VALUES ('{"baz":2}');
+
+SELECT simpleJSONExtractFloat(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+-4000
+0
+-3.4
+5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractInt">simpleJSONExtractInt<a aria-label="Direct link to simpleJSONExtractInt" class="hash-link" href="#simpleJSONExtractInt" title="Direct link to simpleJSONExtractInt">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Parses <code>Int64</code> from the value of the field named <code>field_name</code>.
+If <code>field_name</code> is a string field, it tries to parse a number from the beginning of the string.
+If the field does not exist, or it exists but does not contain a number, it returns <code>0</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractInt(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractInt</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number parsed from the field if the field exists and contains a number, <code>0</code> otherwise <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"-4e3"}');
+INSERT INTO jsons VALUES ('{"foo":-3.4}');
+INSERT INTO jsons VALUES ('{"foo":5}');
+INSERT INTO jsons VALUES ('{"foo":"not1number"}');
+INSERT INTO jsons VALUES ('{"baz":2}');
+
+SELECT simpleJSONExtractInt(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+-4
+0
+-3
+5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractRaw">simpleJSONExtractRaw<a aria-label="Direct link to simpleJSONExtractRaw" class="hash-link" href="#simpleJSONExtractRaw" title="Direct link to simpleJSONExtractRaw">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Returns the value of the field named <code>field_name</code> as a <code>String</code>, including separators.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractRaw(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractRaw</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value of the field as a string, including separators if the field exists, or an empty string otherwise <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"-4e3"}');
+INSERT INTO jsons VALUES ('{"foo":-3.4}');
+INSERT INTO jsons VALUES ('{"foo":5}');
+INSERT INTO jsons VALUES ('{"foo":{"def":[1,2,3]}}');
+INSERT INTO jsons VALUES ('{"baz":2}');
+
+SELECT simpleJSONExtractRaw(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">"-4e3"
+-3.4
+5
+{"def":[1,2,3]}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractString">simpleJSONExtractString<a aria-label="Direct link to simpleJSONExtractString" class="hash-link" href="#simpleJSONExtractString" title="Direct link to simpleJSONExtractString">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Parses <code>String</code> in double quotes from the value of the field named <code>field_name</code>.</p>
+<p><strong>Implementation details</strong></p>
+<p>There is currently no support for code points in the format <code>\uXXXX\uYYYY</code> that are not from the basic multilingual plane (they are converted to CESU-8 instead of UTF-8).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractString(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractString</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the unescaped value of a field as a string, including separators. An empty string is returned if the field doesn't contain a double quoted string, if unescaping fails or if the field doesn't exist <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"\\n\\u0000"}');
+INSERT INTO jsons VALUES ('{"foo":"\\u263"}');
+INSERT INTO jsons VALUES ('{"foo":"\\u263a"}');
+INSERT INTO jsons VALUES ('{"foo":"hello}');
+
+SELECT simpleJSONExtractString(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\n\0
+
+☺
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONExtractUInt">simpleJSONExtractUInt<a aria-label="Direct link to simpleJSONExtractUInt" class="hash-link" href="#simpleJSONExtractUInt" title="Direct link to simpleJSONExtractUInt">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Parses <code>UInt64</code> from the value of the field named <code>field_name</code>.
+If <code>field_name</code> is a string field, it tries to parse a number from the beginning of the string.
+If the field does not exist, or it exists but does not contain a number, it returns <code>0</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONExtractUInt(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamExtractUInt</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the number parsed from the field if the field exists and contains a number, <code>0</code> otherwise <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"4e3"}');
+INSERT INTO jsons VALUES ('{"foo":3.4}');
+INSERT INTO jsons VALUES ('{"foo":5}');
+INSERT INTO jsons VALUES ('{"foo":"not1number"}');
+INSERT INTO jsons VALUES ('{"baz":2}');
+
+SELECT simpleJSONExtractUInt(json, 'foo') FROM jsons ORDER BY json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+4
+0
+3
+5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="simpleJSONHas">simpleJSONHas<a aria-label="Direct link to simpleJSONHas" class="hash-link" href="#simpleJSONHas" title="Direct link to simpleJSONHas">​</a></h2>
+<p>Introduced in: v21.4.0</p>
+<p>Checks whether there is a field named <code>field_name</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">simpleJSONHas(json, field_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>visitParamHas</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>json</code> — The JSON in which the field is searched for. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>field_name</code> — The name of the field to search for. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the field exists, <code>0</code> otherwise <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE jsons
+(
+    `json` String
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO jsons VALUES ('{"foo":"true","qux":1}');
+
+SELECT simpleJSONHas(json, 'foo') FROM jsons;
+SELECT simpleJSONHas(json, 'bar') FROM jsons;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="toJSONString">toJSONString<a aria-label="Direct link to toJSONString" class="hash-link" href="#toJSONString" title="Direct link to toJSONString">​</a></h2>
+<p>Introduced in: v21.7.0</p>
+<p>Serializes a value to its JSON representation. Various data types and nested structures are supported.
+64-bit <a href="/docs/sql-reference/data-types/int-uint">integers</a> or bigger (like <code>UInt64</code> or <code>Int128</code>) are enclosed in quotes by default. <a href="/docs/operations/settings/formats#output_format_json_quote_64bit_integers">output_format_json_quote_64bit_integers</a> controls this behavior.
+Special values <code>NaN</code> and <code>inf</code> are replaced with <code>null</code>. Enable <a href="/docs/operations/settings/formats#output_format_json_quote_denormals">output_format_json_quote_denormals</a> setting to show them.
+When serializing an <a href="/docs/sql-reference/data-types/enum">Enum</a> value, the function outputs its name.</p>
+<p>See also:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/formats#output_format_json_quote_64bit_integers">output_format_json_quote_64bit_integers</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#output_format_json_quote_denormals">output_format_json_quote_denormals</a></li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">toJSONString(value)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>value</code> — Value to serialize. Value may be of any data type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the JSON representation of the value. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Map serialization</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toJSONString(map('key1', 1, 'key2', 2));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─toJSONString(map('key1', 1, 'key2', 2))─┐
+│ {"key1":1,"key2":2}                     │
+└─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Special values</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toJSONString(tuple(1.25, NULL, NaN, +inf, -inf, [])) SETTINGS output_format_json_quote_denormals = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─toJSONString(tuple(1.25, NULL, NaN, plus(inf), minus(inf), []))─┐
+│ [1.25,null,"nan","inf","-inf",[]]                               │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/ip-address-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">IP Addresses</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/logical-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Logical</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#types-of-functions">Types of JSON functions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#simplejson-visitparam-functions">simpleJSON (visitParam) functions</a><li><a class="table-of-contents__link toc-highlight" href="#jsonextract-functions">JSONExtract functions</a><li><a class="table-of-contents__link toc-highlight" href="#case-insensitive-jsonextract-functions">Case-Insensitive JSONExtract Functions</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#JSONAllPaths">JSONAllPaths</a><li><a class="table-of-contents__link toc-highlight" href="#JSONAllPathsWithTypes">JSONAllPathsWithTypes</a><li><a class="table-of-contents__link toc-highlight" href="#JSONAllValues">JSONAllValues</a><li><a class="table-of-contents__link toc-highlight" href="#JSONArrayLength">JSONArrayLength</a><li><a class="table-of-contents__link toc-highlight" href="#JSONDynamicPaths">JSONDynamicPaths</a><li><a class="table-of-contents__link toc-highlight" href="#JSONDynamicPathsWithTypes">JSONDynamicPathsWithTypes</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtract">JSONExtract</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractArrayRaw">JSONExtractArrayRaw</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractArrayRawCaseInsensitive">JSONExtractArrayRawCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractBool">JSONExtractBool</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractBoolCaseInsensitive">JSONExtractBoolCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractCaseInsensitive">JSONExtractCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractFloat">JSONExtractFloat</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractFloatCaseInsensitive">JSONExtractFloatCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractInt">JSONExtractInt</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractIntCaseInsensitive">JSONExtractIntCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeys">JSONExtractKeys</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeysAndValues">JSONExtractKeysAndValues</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeysAndValuesCaseInsensitive">JSONExtractKeysAndValuesCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeysAndValuesRaw">JSONExtractKeysAndValuesRaw</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeysAndValuesRawCaseInsensitive">JSONExtractKeysAndValuesRawCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractKeysCaseInsensitive">JSONExtractKeysCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractRaw">JSONExtractRaw</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractRawCaseInsensitive">JSONExtractRawCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractString">JSONExtractString</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractStringCaseInsensitive">JSONExtractStringCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractUInt">JSONExtractUInt</a><li><a class="table-of-contents__link toc-highlight" href="#JSONExtractUIntCaseInsensitive">JSONExtractUIntCaseInsensitive</a><li><a class="table-of-contents__link toc-highlight" href="#JSONHas">JSONHas</a><li><a class="table-of-contents__link toc-highlight" href="#JSONKey">JSONKey</a><li><a class="table-of-contents__link toc-highlight" href="#JSONLength">JSONLength</a><li><a class="table-of-contents__link toc-highlight" href="#JSONMergePatch">JSONMergePatch</a><li><a class="table-of-contents__link toc-highlight" href="#JSONSharedDataPaths">JSONSharedDataPaths</a><li><a class="table-of-contents__link toc-highlight" href="#JSONSharedDataPathsWithTypes">JSONSharedDataPathsWithTypes</a><li><a class="table-of-contents__link toc-highlight" href="#JSONType">JSONType</a><li><a class="table-of-contents__link toc-highlight" href="#JSON_EXISTS">JSON_EXISTS</a><li><a class="table-of-contents__link toc-highlight" href="#JSON_QUERY">JSON_QUERY</a><li><a class="table-of-contents__link toc-highlight" href="#JSON_VALUE">JSON_VALUE</a><li><a class="table-of-contents__link toc-highlight" href="#dynamicElement">dynamicElement</a><li><a class="table-of-contents__link toc-highlight" href="#dynamicType">dynamicType</a><li><a class="table-of-contents__link toc-highlight" href="#isDynamicElementInSharedData">isDynamicElementInSharedData</a><li><a class="table-of-contents__link toc-highlight" href="#isValidJSON">isValidJSON</a><li><a class="table-of-contents__link toc-highlight" href="#prettyPrintJSON">prettyPrintJSON</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractBool">simpleJSONExtractBool</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractFloat">simpleJSONExtractFloat</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractInt">simpleJSONExtractInt</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractRaw">simpleJSONExtractRaw</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractString">simpleJSONExtractString</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONExtractUInt">simpleJSONExtractUInt</a><li><a class="table-of-contents__link toc-highlight" href="#simpleJSONHas">simpleJSONHas</a><li><a class="table-of-contents__link toc-highlight" href="#toJSONString">toJSONString</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

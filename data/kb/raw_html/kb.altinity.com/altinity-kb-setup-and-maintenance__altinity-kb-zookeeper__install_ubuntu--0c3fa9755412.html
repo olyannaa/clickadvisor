@@ -1,0 +1,85 @@
+<h1>Install standalone Zookeeper for ClickHouse® on Ubuntu / Debian | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/altinity-kb-zookeeper/">ZooKeeper</a></li><li aria-current="page" class="breadcrumb-item active">Zookeeper install on Ubuntu</li></ol></nav><div class="td-content"><h1>Install standalone Zookeeper for ClickHouse® on Ubuntu / Debian</h1><div class="lead">Install standalone Zookeeper for ClickHouse® on Ubuntu / Debian.</div><h2 id="reference-script-to-install-standalone-zookeeper-for-ubuntu--debian">Reference script to install standalone Zookeeper for Ubuntu / Debian</h2><p>Tested on Ubuntu 20.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># install java runtime environment</span>
+</span></span><span style="display:flex"><span>sudo apt-get update
+</span></span><span style="display:flex"><span>sudo apt install default-jre
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># prepare folders, logs folder should be on the low-latency disk.</span>
+</span></span><span style="display:flex"><span>sudo mkdir -p /var/lib/zookeeper/data /var/lib/zookeeper/logs /etc/zookeeper /var/log/zookeeper /opt 
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># download and install files </span>
+</span></span><span style="display:flex"><span><span style="color:#204a87">export</span> <span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#ce5c00;font-weight:700">=</span>3.6.3
+</span></span><span style="display:flex"><span>wget https://dlcdn.apache.org/zookeeper/zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin.tar.gz -O /tmp/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin.tar.gz
+</span></span><span style="display:flex"><span>sudo tar -xvf /tmp/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin.tar.gz -C /opt
+</span></span><span style="display:flex"><span>rm -rf /tmp/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin.tar.gz
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># create the user </span>
+</span></span><span style="display:flex"><span>sudo groupadd -r zookeeper
+</span></span><span style="display:flex"><span>sudo useradd -r -g zookeeper --home-dir<span style="color:#ce5c00;font-weight:700">=</span>/var/lib/zookeeper --shell<span style="color:#ce5c00;font-weight:700">=</span>/bin/false zookeeper
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># symlink pointing to the used version of zookeeper distibution</span>
+</span></span><span style="display:flex"><span>sudo ln -s /opt/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin /opt/zookeeper 
+</span></span><span style="display:flex"><span>sudo chown -R zookeeper:zookeeper /var/lib/zookeeper /var/log/zookeeper /etc/zookeeper /opt/apache-zookeeper-<span style="color:#4e9a06">${</span><span style="color:#000">ZOOKEEPER_VERSION</span><span style="color:#4e9a06">}</span>-bin
+</span></span><span style="display:flex"><span>sudo chown -h zookeeper:zookeeper /opt/zookeeper
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># shortcuts in /usr/local/bin/</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> -e <span style="color:#4e9a06">'#!/usr/bin/env bash\n/opt/zookeeper/bin/zkCli.sh "$@"'</span>             <span style="color:#000;font-weight:700">|</span> sudo tee /usr/local/bin/zkCli
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> -e <span style="color:#4e9a06">'#!/usr/bin/env bash\n/opt/zookeeper/bin/zkServer.sh "$@"'</span>          <span style="color:#000;font-weight:700">|</span> sudo tee /usr/local/bin/zkServer
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> -e <span style="color:#4e9a06">'#!/usr/bin/env bash\n/opt/zookeeper/bin/zkCleanup.sh "$@"'</span>         <span style="color:#000;font-weight:700">|</span> sudo tee /usr/local/bin/zkCleanup
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> -e <span style="color:#4e9a06">'#!/usr/bin/env bash\n/opt/zookeeper/bin/zkSnapShotToolkit.sh "$@"'</span> <span style="color:#000;font-weight:700">|</span> sudo tee /usr/local/bin/zkSnapShotToolkit
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> -e <span style="color:#4e9a06">'#!/usr/bin/env bash\n/opt/zookeeper/bin/zkTxnLogToolkit.sh "$@"'</span>   <span style="color:#000;font-weight:700">|</span> sudo tee /usr/local/bin/zkTxnLogToolkit
+</span></span><span style="display:flex"><span>sudo chmod +x /usr/local/bin/zkCli /usr/local/bin/zkServer /usr/local/bin/zkCleanup /usr/local/bin/zkSnapShotToolkit /usr/local/bin/zkTxnLogToolkit
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># put in the config</span>
+</span></span><span style="display:flex"><span>sudo cp opt/zookeeper/conf/* /etc/zookeeper
+</span></span><span style="display:flex"><span>cat <span style="color:#4e9a06">&lt;&lt;EOF | sudo tee /etc/zookeeper/zoo.cfg
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">initLimit=20
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">syncLimit=10
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">maxSessionTimeout=60000000
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">maxClientCnxns=2000
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">preAllocSize=131072
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">snapCount=3000000
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">dataDir=/var/lib/zookeeper/data
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">dataLogDir=/var/lib/zookeeper/logs # use low-latency disk!
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">clientPort=2181
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">#clientPortAddress=nthk-zoo1.localdomain
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">autopurge.snapRetainCount=10
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">autopurge.purgeInterval=1
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">4lw.commands.whitelist=*
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">EOF</span>
+</span></span><span style="display:flex"><span>sudo chown -R zookeeper:zookeeper /etc/zookeeper
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># create systemd service file</span>
+</span></span><span style="display:flex"><span>cat <span style="color:#4e9a06">&lt;&lt;EOF | sudo tee /etc/systemd/system/zookeeper.service
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">[Unit]
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Description=Zookeeper Daemon
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Documentation=http://zookeeper.apache.org
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Requires=network.target
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">After=network.target
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">[Service]
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Type=forking
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">WorkingDirectory=/var/lib/zookeeper
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">User=zookeeper
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Group=zookeeper
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Environment=ZK_SERVER_HEAP=1536 # in megabytes, adjust to ~ 80-90% of avaliable RAM (more than 8Gb is rather overkill)
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Environment=SERVER_JVMFLAGS="-Xms256m -XX:+AlwaysPreTouch -Djute.maxbuffer=8388608 -XX:MaxGCPauseMillis=50"
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Environment=ZOO_LOG_DIR=/var/log/zookeeper
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">ExecStart=/opt/zookeeper/bin/zkServer.sh start /etc/zookeeper/zoo.cfg
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">ExecStop=/opt/zookeeper/bin/zkServer.sh stop /etc/zookeeper/zoo.cfg
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">ExecReload=/opt/zookeeper/bin/zkServer.sh restart /etc/zookeeper/zoo.cfg
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">TimeoutSec=30
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">Restart=on-failure
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">[Install]
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">WantedBy=default.target
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06">EOF</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># start zookeeper</span>
+</span></span><span style="display:flex"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex"><span>sudo systemctl start zookeeper.service 
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># check status etc.</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> stat <span style="color:#000;font-weight:700">|</span> nc localhost <span style="color:#0000cf;font-weight:700">2181</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> ruok <span style="color:#000;font-weight:700">|</span> nc localhost <span style="color:#0000cf;font-weight:700">2181</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87">echo</span> mntr <span style="color:#000;font-weight:700">|</span> nc localhost <span style="color:#0000cf;font-weight:700">2181</span>
+</span></span></code></pre></div><div class="td-page-meta__lastmod">Last modified 2024.07.30: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4a96398d6e97ac2935110b426947487e2e202d9">Site cleanup, mostly minor changes (a4a9639)</a></div></div></main>

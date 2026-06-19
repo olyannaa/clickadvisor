@@ -1,0 +1,18 @@
+case_id: synthetic_03
+source: synthetic
+sql: |
+  SELECT quantileExact(0.95)(response_time) FROM requests
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: quantileExact_to_quantileTDigest
+  detected_by_rule: R-003
+  severity: medium
+  description: quantileExact(0.95) можно заменить advisory-вариантом quantileTDigest.
+expected_rules_to_fire:
+- R-003
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-003.
+expected_findings_count: 1
+status: validated

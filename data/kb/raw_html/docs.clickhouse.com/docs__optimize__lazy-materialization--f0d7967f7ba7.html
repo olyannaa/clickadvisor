@@ -1,0 +1,128 @@
+<h1>Lazy materialization | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/operations/overview" itemprop="item"><span itemprop="name">Performance and optimizations</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Lazy materialization</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/guides/lazy-materialization.mdx" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Lazy materialization</h1></header><p>This article describes how lazy materialization works and how it fits into ClickHouse’s broader I/O optimization stack.
+It presents a real-world example demonstrating how lazy materialization increases query performance.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Available from version 25.4</div><p>Lazy materialization was introduced in version 25.4 of ClickHouse, and is turned on by default.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a aria-label="Direct link to Overview" class="hash-link" href="#overview" title="Direct link to Overview">​</a></h2>
+<p>Over the years, ClickHouse has introduced a series of layered optimizations to aggressively reduce I/O.
+These techniques form the foundation of its speed and efficiency:</p>
+<table><thead><tr><th>Optimization<th>Description<tbody><tr><td><a href="/docs/intro#row-oriented-vs-column-oriented-storage"><strong>Columnar storage</strong></a><td>Allows skipping entire columns that aren't needed for a query and also enables high compression by grouping similar values together, minimizing I/O during data loading.<tr><td><a href="/docs/guides/best-practices/sparse-primary-indexes"><strong>Sparse primary indexes</strong></a> | <a href="/docs/optimize/skipping-indexes"><strong>secondary data-skipping indexes</strong></a> | <a href="/docs/data-modeling/projections"><strong>projections</strong></a><td>Prune irrelevant data by identifying which <a href="/docs/concepts/glossary#granule">granules</a> (row blocks) might match filters on <em>indexed columns</em>. These techniques operate at the granule level and can be used individually or in combination.<tr><td><a href="/docs/sql-reference/statements/select/prewhere"><strong>PREWHERE</strong></a><td>Checks matches also for filters on <em>non-indexed</em> columns to skip data early that would otherwise be loaded and discarded. It can work independently or refine the granules selected by indexes, complementing granule pruning by skipping rows that don't match <em>all</em> column filters.<tr><td><a href="/docs/operations/query-condition-cache"><strong>Query condition cache</strong></a><td>Speeds up repeated queries by remembering which granules matched all filters last time. ClickHouse can then skip reading and filtering granules that didn't match, even if the query shape changes.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>While the aforementioned I/O optimizations can significantly reduce data read, they still assume that all columns for rows passing the <code>WHERE</code> clause must be loaded before running operations like sorting, aggregation, or <code>LIMIT</code>. But what if some columns aren’t needed until later, or some data, despite passing the <code>WHERE</code> clause, is never needed at all?
+That’s where lazy materialization comes in. It is an orthogonal enhancement that completes the I/O optimization stack:</p>
+<ul class="custom-ul">
+<li class="custom-li">Indexing, together with <code>PREWHERE</code>, ensures that only rows matching column filters in the <code>WHERE</code> clause are processed.</li>
+<li class="custom-li">Lazy materialization builds on this by deferring column reads until they’re actually required by the query execution plan.
+Even after filtering, only the columns needed for the next operation - such as sorting - are loaded immediately.
+Others are postponed and, due to <code>LIMIT</code>, are often read only partially, just enough to produce the final result.
+This makes lazy materialization especially powerful for Top N queries, where the final result may only require a handful of rows from certain, often large, columns.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="worked-example">A worked example<a aria-label="Direct link to A worked example" class="hash-link" href="#worked-example" title="Direct link to A worked example">​</a></h2>
+<p>We highly recommend the blogpost <a href="https://clickhouse.com/blog/clickhouse-gets-lazier-and-faster-introducing-lazy-materialization#speed-without-filters-lazy-materialization-in-isolation" rel="noopener noreferrer" target="_blank">"ClickHouse gets lazier (and faster): Introducing lazy materialization"</a>
+for a deep dive on lazy materialization. The example below is taken from the aforementioned blogpost and reproduced here to demonstrate how a ClickHouse query can go from 219 seconds to just 139 milliseconds (a 1576× speedup) with lazy materialization.</p>
+<p>To benefit from indexing and <code>PREWHERE</code>, a query needs filters, on primary key columns for indexing, and on any columns for <code>PREWHERE</code>.
+Lazy materialization layers cleanly on top, but unlike the other optimizations mentioned previously, it can also speed up queries with no column filters at all.</p>
+<p>Consider the following example query which finds Amazon reviews with the highest number of helpful votes, regardless of date, product, rating, or verification status, and returns the top 3 along with their title, headline, and full text.</p>
+<p>First running the query (with cold filesystem caches) with lazy materialization disabled (using <a href="/docs/operations/settings/settings#query_plan_optimize_lazy_materialization"><code>query_plan_optimize_lazy_materialization</code></a>):</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    helpful_votes,
+    product_title,
+    review_headline,
+    review_body
+FROM amazon.amazon_reviews
+ORDER BY helpful_votes DESC
+LIMIT 3
+FORMAT Vertical
+SETTINGS
+    query_plan_optimize_lazy_materialization = false;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+helpful_votes:   47524
+product_title:   Kindle: Amazon's Original Wireless Reading Device (1st generation)
+review_headline: Why and how the Kindle changes everything
+review_body:     This is less a \"pros and cons\" review than a hopefully use...
+
+Row 2:
+──────
+helpful_votes:   41393
+product_title:   BIC Cristal For Her Ball Pen, 1.0mm, Black, 16ct (MSLP16-Blk)
+review_headline: FINALLY!
+review_body:     Someone has answered my gentle prayers and FINALLY designed ...
+
+Row 3:
+──────
+helpful_votes:   41278
+product_title:   The Mountain Kids 100% Cotton Three Wolf Moon T-Shirt
+review_headline: Dual Function Design
+review_body:     This item has wolves on it which makes it intrinsically swee...
+
+# highlight-start
+0 rows in set. Elapsed: 219.071 sec. Processed 150.96 million rows, 71.38 GB (689.08 thousand rows/s., 325.81 MB/s.)
+Peak memory usage: 1.11 GiB.
+# highlight-end
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Next the query is rerun (again with a cold filesystem cache), but this time with lazy materialization enabled:</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    helpful_votes,
+    product_title,
+    review_headline,
+    review_body
+FROM amazon.amazon_reviews
+ORDER BY helpful_votes DESC
+LIMIT 3
+FORMAT Vertical
+SETTINGS
+-- highlight-next-line
+query_plan_optimize_lazy_materialization = true;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>Ordinarily you don't need to explicitly set <code>query_plan_optimize_lazy_materialization = true</code> to gain the benefit of lazy materialization.
+It is enabled by default.</p></div></div>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+helpful_votes:   47524
+product_title:   Kindle: Amazon's Original Wireless Reading Device (1st generation)
+review_headline: Why and how the Kindle changes everything
+review_body:     This is less a \"pros and cons\" review than a hopefully use...
+
+Row 2:
+──────
+helpful_votes:   41393
+product_title:   BIC Cristal For Her Ball Pen, 1.0mm, Black, 16ct (MSLP16-Blk)
+review_headline: FINALLY!
+review_body:     Someone has answered my gentle prayers and FINALLY designed ...
+
+Row 3:
+──────
+helpful_votes:   41278
+product_title:   The Mountain Kids 100% Cotton Three Wolf Moon T-Shirt
+review_headline: Dual Function Design
+review_body:     This item has wolves on it which makes it intrinsically swee...
+
+# highlight-start
+0 rows in set. Elapsed: 0.139 sec. Processed 150.96 million rows, 1.81 GB (1.09 billion rows/s., 13.06 GB/s.)
+Peak memory usage: 3.80 MiB.
+# highlight-end
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Consider the difference in performance with lazy materialization turned off and turned on:</p>
+<table><thead><tr><th>Metric<th>Lazy materialization off<th>Lazy materialization on<th>Improvement<tbody><tr><td>Elapsed time<td>219.071 sec<td>0.139 sec<td>~1576× faster<tr><td>Data read<td>71.38 GB<td>1.81 GB<td>~40× less<tr><td>Peak memory<td>1.11 GiB<td>3.80 MiB<td>~300× less</td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="confirm-lazy-materialization">How to confirm lazy materialization in the query execution plan<a aria-label="Direct link to How to confirm lazy materialization in the query execution plan" class="hash-link" href="#confirm-lazy-materialization" title="Direct link to How to confirm lazy materialization in the query execution plan">​</a></h2>
+<p>You can observe usage of lazy materialization for the previous query by inspecting the query’s logical execution plan using the <a href="/docs/sql-reference/statements/explain"><code>EXPLAIN</code></a> clause:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN actions = 1
+SELECT
+    helpful_votes,
+    product_title,
+    review_headline,
+    review_body
+FROM amazon.amazon_reviews
+ORDER BY helpful_votes DESC
+LIMIT 3
+SETTINGS
+    query_plan_optimize_lazy_materialization = true;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">...
+# highlight-next-line
+Lazily read columns: review_headline, review_body, product_title
+  Limit
+    Sorting
+      ReadFromMergeTree
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can read the operator plan from bottom to top and observe that ClickHouse defers reading the three large String columns until after sorting and limiting.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/optimize/prewhere"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">PREWHERE optimization</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/optimize/bulk-inserts"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Bulk inserts</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview</a><li><a class="table-of-contents__link toc-highlight" href="#worked-example">A worked example</a><li><a class="table-of-contents__link toc-highlight" href="#confirm-lazy-materialization">How to confirm lazy materialization in the query execution plan</a></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

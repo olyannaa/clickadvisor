@@ -1,0 +1,24 @@
+case_id: tpch_q02
+source: tpch
+sql: "SELECT\n    s_acctbal,\n    s_name,\n    n_name,\n    p_partkey,\n    p_mfgr,\n    s_address,\n    s_phone,\n    s_comment\nFROM\n    part,\n    supplier,\n    partsupp,\n    nation,\n    region\nWHERE\n    p_partkey = ps_partkey\n    AND s_suppkey = ps_suppkey\n    AND p_size = 15\n    AND p_type LIKE '%BRASS'\n    AND s_nationkey = n_nationkey\n    AND n_regionkey = r_regionkey\n    AND r_name = 'EUROPE'\n    AND ps_supplycost = (\n        SELECT\n            min(ps_supplycost)\n        FROM\n            partsupp,\n            supplier,\n            nation,\n            region\n        WHERE\n            p_partkey = ps_partkey\n            AND s_suppkey = ps_suppkey\n            AND s_nationkey = n_nationkey\n            AND n_regionkey = r_regionkey\n            AND r_name = 'EUROPE'\n    )\nORDER BY\n    s_acctbal DESC,\n    n_name,\n    s_name,\n    p_partkey\nLIMIT 100;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Коррелированный подзапрос в WHERE с вложенностью >3
+- issue_id: I-2
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT на потенциально большом результате
+expected_rules_to_fire:
+- D-013
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q2: Minimum Cost Supplier. Содержит коррелированный подзапрос.'
+expected_findings_count: 2
+status: reviewed

@@ -1,0 +1,43 @@
+---
+source: kb.altinity.com
+url: https://github.com/ClickHouse/ClickHouse/blob/8ab5270ded39c8b044f60f73c1de00c8117ab8f2/src/Interpreters/Aggregator.cpp#L382
+topic: queries-syntax-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '8.888'
+last_updated: '2026-06-12'
+chunk_index: 60
+total_chunks_in_doc: 117
+---
+
+│ 1 │ 2020-10-11 10:10:17 │ 7 │ 7 │ │ 1 │ 2020-10-11 10:10:18 │ 7 │ 7 │ │ 1 │ 2020-10-11 10:10:19 │ 7 │ 7 │ └─────┴─────────────────────┴─────────┴─────────┘ ``` # 22 \- FINAL clause speed
+
+FINAL clause speed`SELECT * FROM table FINAL`
+
+### History
+
+- Before ClickHouse® 20\.5 \- always executed in a single thread and slow.
+- Since 20\.5 \- final can be parallel, see <https://github.com/ClickHouse/ClickHouse/pull/10463>
+- Since 20\.10 \- you can use `do_not_merge_across_partitions_select_final` setting. See <https://github.com/ClickHouse/ClickHouse/pull/15938>
+and <https://github.com/ClickHouse/ClickHouse/issues/11722>
+- Since 22\.6 \- final even more parallel, see <https://github.com/ClickHouse/ClickHouse/pull/36396>
+- Since 22\.8 \- final doesn’t read excessive data, see <https://github.com/ClickHouse/ClickHouse/pull/47801>
+- Since 23\.5 \- final use less memory, see <https://github.com/ClickHouse/ClickHouse/pull/50429>
+- Since 23\.9 \- final doesn’t read PK columns if unneeded ie only one part in partition, see <https://github.com/ClickHouse/ClickHouse/pull/53919>
+- Since 23\.12 \- final applied only for intersecting ranges of parts, see <https://github.com/ClickHouse/ClickHouse/pull/58120>
+- Since 24\.1 \- final doesn’t compare rows from the same part with level \> 0, see <https://github.com/ClickHouse/ClickHouse/pull/58142>
+- Since 24\.1 \- final use vertical algorithm (more cache friendly), see <https://github.com/ClickHouse/ClickHouse/pull/54366>
+- Since 25\.6 \- final supports skip indexes (`use_skip_indexes_if_final=1` by default)
+- Since 25\.12 \- `apply_prewhere_after_final` and `apply_row_policy_after_final` settings for correct PREWHERE/row policy handling with FINAL
+- Since 26\.2 \- `enable_automatic_decision_for_merging_across_partitions_for_final=1` by default (auto\-enables cross\-partition optimization when safe)
+
+### Partitioning
+
+Proper partition design could speed up FINAL processing.
+
+For example, if you have a table with Daily partitioning, you can:
+
+- After day end \+ some time interval during which you can get some updates run `OPTIMIZE TABLE xxx PARTITION 'prev_day' FINAL`
+- or add table SETTINGS min\_age\_to\_force\_merge\_seconds\=86400,min\_age\_to\_force\_merge\_on\_partition\_only\=1
+
+In that case, using FINAL with `do_not_merge_across_partitions_select_final` will be cheap or even zero.
+
+Example:

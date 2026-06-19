@@ -1,0 +1,17 @@
+{
+  "statement_id": "main",
+  "explain_kind": "PIPELINE",
+  "generated_at": "2026-05-25T12:00:00Z",
+  "clickhouse_version": "25.3.2.5",
+  "payload": {
+    "Pipeline": {
+      "threads": 64,
+      "processors": [
+        "ReadFromMergeTree",
+        "AggregatingTransform",
+        "PartialSortingTransform",
+        "LimitTransform"
+      ]
+    }
+  }
+}

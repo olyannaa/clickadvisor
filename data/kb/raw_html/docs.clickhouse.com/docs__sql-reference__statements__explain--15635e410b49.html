@@ -1,0 +1,521 @@
+<h1>EXPLAIN Statement | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">EXPLAIN</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/explain.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>EXPLAIN Statement</h1></header><p>Shows the execution plan of a statement.</p>
+<div class="vimeo-container"><iframe allow="autoplay;
+fullscreen;
+picture-in-picture" frameborder="0" height="360" src="//www.youtube.com/embed/hP6G2Nlz_cA" width="640"></iframe></div>
+<p>Syntax:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN [AST | SYNTAX | QUERY TREE | PLAN | PIPELINE | ESTIMATE | TABLE OVERRIDE] [setting = value, ...]
+    [
+      SELECT ... |
+      tableFunction(...) [COLUMNS (...)] [ORDER BY ...] [PARTITION BY ...] [PRIMARY KEY] [SAMPLE BY ...] [TTL ...]
+    ]
+    [FORMAT ...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN SELECT sum(number) FROM numbers(10) UNION ALL SELECT sum(number) FROM numbers(10) ORDER BY sum(number) ASC FORMAT TSV;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:301.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">Union
+  Expression (Projection)
+    Expression (Before ORDER BY and SELECT)
+      Aggregating
+        Expression (Before GROUP BY)
+          SettingQuotaAndLimits (Set limits and quota after reading from storage)
+            ReadFromStorage (SystemNumbers)
+  Expression (Projection)
+    MergingSorted (Merge sorted streams for ORDER BY)
+      MergeSorting (Merge sorted blocks for ORDER BY)
+        PartialSorting (Sort each block for ORDER BY)
+          Expression (Before ORDER BY and SELECT)
+            Aggregating
+              Expression (Before GROUP BY)
+                SettingQuotaAndLimits (Set limits and quota after reading from storage)
+                  ReadFromStorage (SystemNumbers)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="explain-types">EXPLAIN Types<a aria-label="Direct link to EXPLAIN Types" class="hash-link" href="#explain-types" title="Direct link to EXPLAIN Types">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><code>AST</code> — Abstract syntax tree.</li>
+<li class="custom-li"><code>SYNTAX</code> — Query text after AST-level optimizations.</li>
+<li class="custom-li"><code>QUERY TREE</code> — Query tree after Query Tree level optimizations.</li>
+<li class="custom-li"><code>PLAN</code> — Query execution plan.</li>
+<li class="custom-li"><code>PIPELINE</code> — Query execution pipeline.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-ast">EXPLAIN AST<a aria-label="Direct link to EXPLAIN AST" class="hash-link" href="#explain-ast" title="Direct link to EXPLAIN AST">​</a></h3>
+<p>Dump query AST. Supports all types of queries, not only <code>SELECT</code>.</p>
+<p>Settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>graph</code> – Prints AST as a graph described in the <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)" rel="noopener noreferrer" target="_blank">DOT</a> graph description language. Default: 0.</li>
+</ul>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN AST SELECT 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 1)
+    Literal UInt64_1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN AST ALTER TABLE t1 DELETE WHERE date = today();
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">  explain
+  AlterQuery  t1 (children 1)
+   ExpressionList (children 1)
+    AlterCommand 27 (children 1)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier date
+       Function today (children 1)
+        ExpressionList
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-syntax">EXPLAIN SYNTAX<a aria-label="Direct link to EXPLAIN SYNTAX" class="hash-link" href="#explain-syntax" title="Direct link to EXPLAIN SYNTAX">​</a></h3>
+<p>Shows the Abstract Syntax Tree (AST) of a query after syntax analysis.</p>
+<p>It's done by parsing the query, constructing query AST and query tree, optionally running query analyzer and optimization passes, and then converting the query tree back to the query AST.</p>
+<p>Settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>oneline</code> – Print the query in one line. Default: <code>0</code>.</li>
+<li class="custom-li"><code>run_query_tree_passes</code> – Run query tree passes before dumping the query tree. Default: <code>0</code>.</li>
+<li class="custom-li"><code>query_tree_passes</code> – If <code>run_query_tree_passes</code> is set, specifies how many passes to run. Without specifying <code>query_tree_passes</code> it runs all the passes.</li>
+</ul>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN SYNTAX SELECT * FROM system.numbers AS a, system.numbers AS b, system.numbers AS c WHERE a.number = b.number AND b.number = c.number;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM system.numbers AS a, system.numbers AS b, system.numbers AS c
+WHERE (a.number = b.number) AND (b.number = c.number)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>run_query_tree_passes</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN SYNTAX run_query_tree_passes = 1 SELECT * FROM system.numbers AS a, system.numbers AS b, system.numbers AS c WHERE a.number = b.number AND b.number = c.number;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    __table1.number AS `a.number`,
+    __table2.number AS `b.number`,
+    __table3.number AS `c.number`
+FROM system.numbers AS __table1
+ALL INNER JOIN system.numbers AS __table2 ON __table1.number = __table2.number
+ALL INNER JOIN system.numbers AS __table3 ON __table2.number = __table3.number
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-query-tree">EXPLAIN QUERY TREE<a aria-label="Direct link to EXPLAIN QUERY TREE" class="hash-link" href="#explain-query-tree" title="Direct link to EXPLAIN QUERY TREE">​</a></h3>
+<p>Settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>run_passes</code> — Run all query tree passes before dumping the query tree. Default: <code>1</code>.</li>
+<li class="custom-li"><code>dump_passes</code> — Dump information about used passes before dumping the query tree. Default: <code>0</code>.</li>
+<li class="custom-li"><code>passes</code> — Specifies how many passes to run. If set to <code>-1</code>, runs all the passes. Default: <code>-1</code>.</li>
+<li class="custom-li"><code>dump_tree</code> — Display the query tree. Default: <code>1</code>.</li>
+<li class="custom-li"><code>dump_ast</code> — Display the query AST generated from the query tree. Default: <code>0</code>.</li>
+</ul>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN QUERY TREE SELECT id, value FROM test_table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">QUERY id: 0
+  PROJECTION COLUMNS
+    id UInt64
+    value String
+  PROJECTION
+    LIST id: 1, nodes: 2
+      COLUMN id: 2, column_name: id, result_type: UInt64, source_id: 3
+      COLUMN id: 4, column_name: value, result_type: String, source_id: 3
+  JOIN TREE
+    TABLE id: 3, table_name: default.test_table
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-plan">EXPLAIN PLAN<a aria-label="Direct link to EXPLAIN PLAN" class="hash-link" href="#explain-plan" title="Direct link to EXPLAIN PLAN">​</a></h3>
+<p>Dump query plan steps.</p>
+<p>Settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>optimize</code> — Controls whether query plan optimizations are applied before displaying the plan. Default: 1.</li>
+<li class="custom-li"><code>header</code> — Prints output header for step. Default: 0.</li>
+<li class="custom-li"><code>description</code> — Prints step description. Default: 1.</li>
+<li class="custom-li"><code>indexes</code> — Shows used indexes, the number of filtered parts and the number of filtered granules for every index applied. Default: 0. Supported for <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> tables. Starting from ClickHouse &gt;= v25.9, this statement only shows reasonable output when used with <code>SETTINGS use_query_condition_cache = 0, use_skip_indexes_on_data_read = 0</code>.</li>
+<li class="custom-li"><code>projections</code> — Shows all analyzed projections and their effect on part-level filtering based on projection primary key conditions. For each projection, this section includes statistics such as the number of parts, rows, marks, and ranges that were evaluated using the projection's primary key. It also shows how many data parts were skipped due to this filtering, without reading from the projection itself. Whether a projection was actually used for reading or only analyzed for filtering can be determined by the <code>description</code> field. Default: 0. Supported for <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> tables.</li>
+<li class="custom-li"><code>actions</code> — Prints detailed information about step actions. Default: 0.</li>
+<li class="custom-li"><code>sorting</code> — Prints the sort description for each plan step that produces sorted output. Default: 0.</li>
+<li class="custom-li"><code>keep_logical_steps</code> — Keeps logical plan steps for joins instead of converting them to physical join implementations. Default: 0.</li>
+<li class="custom-li"><code>json</code> — Prints query plan steps as a row in <a href="/docs/interfaces/formats/JSON">JSON</a> format. Default: 0. It is recommended to use <a href="/docs/interfaces/formats/TabSeparatedRaw">TabSeparatedRaw (TSVRaw)</a> format to avoid unnecessary escaping.</li>
+<li class="custom-li"><code>input_headers</code> — Prints input headers for step. Default: 0. Mostly useful only for developers to debug issues related to input-output header mismatch.</li>
+<li class="custom-li"><code>column_structure</code> — Prints also the structure of columns in headers on top of their name and type. Default: 0. Mostly useful only for developers to debug issues related to input-output header mismatch.</li>
+<li class="custom-li"><code>distributed</code> — Shows query plans executed on remote nodes for distributed tables or parallel replicas. Default: 0.</li>
+<li class="custom-li"><code>compact</code> — When enabled, hides expression steps and detailed action info (inputs, functions, aliases, and output positions) from the plan. Only has an effect when actions = 1. Default: 0.</li>
+<li class="custom-li"><code>pretty</code> — Prints the plan tree using line-drawing characters (├──, └──, │) instead of indentation to visualize the hierarchy. Also formats join step properties inline. Default: 0.</li>
+</ul>
+<p>When <code>json=1</code> step names will contain an additional suffix with unique step identifier.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN SELECT sum(number) FROM numbers(10) GROUP BY number % 4;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">Union
+  Expression (Projection)
+  Expression (Before ORDER BY and SELECT)
+    Aggregating
+      Expression (Before GROUP BY)
+        SettingQuotaAndLimits (Set limits and quota after reading from storage)
+          ReadFromStorage (SystemNumbers)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Step and query cost estimation is not supported.</p></div></div>
+<p>When <code>json = 1</code>, the query plan is represented in JSON format. Every node is a dictionary that always has the keys <code>Node Type</code> and <code>Plans</code>. <code>Node Type</code> is a string with a step name. <code>Plans</code> is an array with child step descriptions. Other optional keys may be added depending on node type and settings.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN json = 1, description = 0 SELECT 1 UNION ALL SELECT 2 FORMAT TSVRaw;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:565.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">[
+  {
+    "Plan": {
+      "Node Type": "Union",
+      "Node Id": "Union_10",
+      "Plans": [
+        {
+          "Node Type": "Expression",
+          "Node Id": "Expression_13",
+          "Plans": [
+            {
+              "Node Type": "ReadFromStorage",
+              "Node Id": "ReadFromStorage_0"
+            }
+          ]
+        },
+        {
+          "Node Type": "Expression",
+          "Node Id": "Expression_16",
+          "Plans": [
+            {
+              "Node Type": "ReadFromStorage",
+              "Node Id": "ReadFromStorage_4"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>description</code> = 1, the <code>Description</code> key is added to the step:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">{
+  "Node Type": "ReadFromStorage",
+  "Description": "SystemOne"
+}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>header</code> = 1, the <code>Header</code> key is added to the step as an array of columns.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN json = 1, description = 0, header = 1 SELECT 1, 2 + dummy;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:565.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">[
+  {
+    "Plan": {
+      "Node Type": "Expression",
+      "Node Id": "Expression_5",
+      "Header": [
+        {
+          "Name": "1",
+          "Type": "UInt8"
+        },
+        {
+          "Name": "plus(2, dummy)",
+          "Type": "UInt16"
+        }
+      ],
+      "Plans": [
+        {
+          "Node Type": "ReadFromStorage",
+          "Node Id": "ReadFromStorage_0",
+          "Header": [
+            {
+              "Name": "dummy",
+              "Type": "UInt8"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>indexes</code> = 1, the <code>Indexes</code> key is added. It contains an array of used indexes. Each index is described as JSON with <code>Type</code> key (a string <code>Partition Min-Max</code>, <code>Partition</code>, <code>Statistics</code>, <code>PrimaryKey</code> or <code>Skip</code>) and optional keys:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>Name</code> — The index name (currently only used for <code>Skip</code> indexes).</li>
+<li class="custom-li"><code>Keys</code> — The array of columns used by the index.</li>
+<li class="custom-li"><code>Condition</code> —  The used condition.</li>
+<li class="custom-li"><code>Description</code> — The index description (currently only used for <code>Skip</code> indexes).</li>
+<li class="custom-li"><code>Parts</code> — The number of parts after/before the index is applied.</li>
+<li class="custom-li"><code>Granules</code> — The number of granules after/before the index is applied.</li>
+<li class="custom-li"><code>Ranges</code> — The number of granules ranges after the index is applied.</li>
+</ul>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:735.1500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">"Node Type": "ReadFromMergeTree",
+"Indexes": [
+  {
+    "Type": "Partition Min-Max",
+    "Keys": ["y"],
+    "Condition": "(y in [1, +inf))",
+    "Parts": 4/5,
+    "Granules": 11/12
+  },
+  {
+    "Type": "Partition",
+    "Keys": ["y", "bitAnd(z, 3)"],
+    "Condition": "and((bitAnd(z, 3) not in [1, 1]), and((y in [1, +inf)), (bitAnd(z, 3) not in [1, 1])))",
+    "Parts": 3/4,
+    "Granules": 10/11
+  },
+  {
+    "Type": "PrimaryKey",
+    "Keys": ["x", "y"],
+    "Condition": "and((x in [11, +inf)), (y in [1, +inf)))",
+    "Parts": 2/3,
+    "Granules": 6/10,
+    "Search Algorithm": "generic exclusion search"
+  },
+  {
+    "Type": "Skip",
+    "Name": "t_minmax",
+    "Description": "minmax GRANULARITY 2",
+    "Parts": 1/2,
+    "Granules": 2/6
+  },
+  {
+    "Type": "Skip",
+    "Name": "t_set",
+    "Description": "set GRANULARITY 2",
+    "": 1/1,
+    "Granules": 1/2
+  }
+]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>projections</code> = 1, the <code>Projections</code> key is added. It contains an array of analyzed projections. Each projection is described as JSON with following keys:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>Name</code> — The projection name.</li>
+<li class="custom-li"><code>Condition</code> —  The used projection primary key condition.</li>
+<li class="custom-li"><code>Description</code> — The description of how the projection is used (e.g. part-level filtering).</li>
+<li class="custom-li"><code>Selected Parts</code> — Number of parts selected by the projection.</li>
+<li class="custom-li"><code>Selected Marks</code> — Number of marks selected.</li>
+<li class="custom-li"><code>Selected Ranges</code> — Number of ranges selected.</li>
+<li class="custom-li"><code>Selected Rows</code> — Number of rows selected.</li>
+<li class="custom-li"><code>Filtered Parts</code> — Number of parts skipped due to part-level filtering.</li>
+</ul>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">"Node Type": "ReadFromMergeTree",
+"Projections": [
+  {
+    "Name": "region_proj",
+    "Description": "Projection has been analyzed and is used for part-level filtering",
+    "Condition": "(region in ['us_west', 'us_west'])",
+    "Search Algorithm": "binary search",
+    "Selected Parts": 3,
+    "Selected Marks": 3,
+    "Selected Ranges": 3,
+    "Selected Rows": 3,
+    "Filtered Parts": 2
+  },
+  {
+    "Name": "user_id_proj",
+    "Description": "Projection has been analyzed and is used for part-level filtering",
+    "Condition": "(user_id in [107, 107])",
+    "Search Algorithm": "binary search",
+    "Selected Parts": 1,
+    "Selected Marks": 1,
+    "Selected Ranges": 1,
+    "Selected Rows": 1,
+    "Filtered Parts": 2
+  }
+]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>actions</code> = 1, added keys depend on step type.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN json = 1, actions = 1, description = 0 SELECT 1 FORMAT TSVRaw;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:904.8000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">[
+  {
+    "Plan": {
+      "Node Type": "Expression",
+      "Node Id": "Expression_5",
+      "Expression": {
+        "Inputs": [
+          {
+            "Name": "dummy",
+            "Type": "UInt8"
+          }
+        ],
+        "Actions": [
+          {
+            "Node Type": "INPUT",
+            "Result Type": "UInt8",
+            "Result Name": "dummy",
+            "Arguments": [0],
+            "Removed Arguments": [0],
+            "Result": 0
+          },
+          {
+            "Node Type": "COLUMN",
+            "Result Type": "UInt8",
+            "Result Name": "1",
+            "Column": "Const(UInt8)",
+            "Arguments": [],
+            "Removed Arguments": [],
+            "Result": 1
+          }
+        ],
+        "Outputs": [
+          {
+            "Name": "1",
+            "Type": "UInt8"
+          }
+        ],
+        "Positions": [1]
+      },
+      "Plans": [
+        {
+          "Node Type": "ReadFromStorage",
+          "Node Id": "ReadFromStorage_0"
+        }
+      ]
+    }
+  }
+]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>compact = 1</code>, each <code>Expression</code> step is removed. Along with that, if <code>actions = 1</code> is set, then <code>Actions</code> and <code>Positions</code> lines are hidden, leaving only the step descriptions:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN actions = 1, compact = 1 SELECT sum(number) FROM numbers(10) GROUP BY number % 4 FORMAT Raw;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Aggregating
+Keys: modulo(__table1.number, 4_UInt8)
+Aggregates:
+    sum(__table1.number)
+      Function: sum(UInt64) → UInt64
+      Arguments: __table1.number
+Skip merging: 0
+  ReadFromSystemNumbers
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With <code>distributed</code> = 1, the output includes not only the local query plan but also the query plans that will be executed on remote nodes. This is useful for analyzing and debugging distributed queries.</p>
+<p>Example with distributed table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN distributed=1 SELECT * FROM remote('127.0.0.{1,2}', numbers(2)) WHERE number = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">Union
+  Expression ((Project names + (Projection + (Change column names to column identifiers + (Project names + Projection)))))
+    Filter ((WHERE + Change column names to column identifiers))
+      ReadFromSystemNumbers
+  Expression ((Project names + (Projection + Change column names to column identifiers)))
+    ReadFromRemote (Read from remote replica)
+      Expression ((Project names + Projection))
+        Filter ((WHERE + Change column names to column identifiers))
+          ReadFromSystemNumbers
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example with parallel replicas:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_parallel_replicas = 2, max_parallel_replicas = 2, cluster_for_parallel_replicas = 'default';
+
+EXPLAIN distributed=1 SELECT sum(number) FROM test_table GROUP BY number % 4;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">Expression ((Project names + Projection))
+  MergingAggregated
+    Union
+      Aggregating
+        Expression ((Before GROUP BY + Change column names to column identifiers))
+          ReadFromMergeTree (default.test_table)
+      ReadFromRemoteParallelReplicas
+        BlocksMarshalling
+          Aggregating
+            Expression ((Before GROUP BY + Change column names to column identifiers))
+              ReadFromMergeTree (default.test_table)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In both examples, the query plan shows the complete execution flow including local and remote steps.</p>
+<p>With <code>pretty</code> = 1, the plan tree is displayed using line-drawing characters instead of indentation, and additional information is shown for key steps:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Query output columns</strong> are printed at the top of the plan.</li>
+<li class="custom-li"><strong>Expressions</strong> in filters, aggregation keys, sort descriptions, and window functions are displayed in human-readable SQL-like notation (e.g., <code>a + 1 &gt; 5</code> instead of <code>greater(plus(a, 1), 5)</code>). Internal column identifier prefixes (such as <code>__table1.</code>) are removed for clarity.</li>
+<li class="custom-li"><strong>Source steps</strong> (such as <code>ReadFromMergeTree</code>) display their output columns.</li>
+<li class="custom-li"><strong>Filter steps</strong> display the filter condition in SQL notation. When runtime join filters are present, they are shown separately.</li>
+<li class="custom-li"><strong>Aggregation steps</strong> display keys and aggregate functions with their arguments (e.g., <code>sum(c)</code>, <code>count()</code>).</li>
+<li class="custom-li"><strong>IN sets</strong> from tuple literals show their values (truncated for large sets), subquery-based sets are labeled <code>subquery1</code>, <code>subquery2</code>, etc., and sets from <code>Set</code> engine tables show the table name.</li>
+<li class="custom-li"><strong>Join steps</strong> display the join relation using mathematical notation, estimated result row count,
+and which output columns come from the left vs. right side. The following symbols are used to
+represent different join types:</li>
+</ul>
+<table><thead><tr><th>Symbol<th>Join Type<tbody><tr><td><code>⋈</code><td>Inner Join<tr><td><code>⟕</code><td>Left Join<tr><td><code>⟖</code><td>Right Join<tr><td><code>⟗</code><td>Full Join<tr><td><code>⋉</code><td>Left Semi Join<tr><td><code>⋊</code><td>Right Semi Join<tr><td><code>⋉</code> with strikethrough<td>Left Anti Join<tr><td><code>⋊</code> with strikethrough<td>Right Anti Join<tr><td><code>×</code><td>Cross Join</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>For example, <code>t1 ⟕ t2</code> means a left join between tables <code>t1</code> and <code>t2</code>.
+The number in brackets after the table name (e.g., <code>t1[100]</code>) indicates the estimated row count
+when table statistics are available.</p>
+<p>The <code>pretty</code> option works well together with <code>compact = 1</code>, which hides <code>Expression</code> steps and detailed action info, making the plan easier to read.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN pretty = 1 SELECT sum(number) FROM numbers(10) GROUP BY number % 4 FORMAT Raw;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Expression ((Project names + Projection))
+└──Aggregating
+   └──Expression ((Before GROUP BY + Change column names to column identifiers))
+      └──ReadFromSystemNumbers
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>A more detailed example with joins:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t1 (id UInt64, value String) ENGINE = MergeTree ORDER BY id;
+CREATE TABLE t2 (id UInt64, value String) ENGINE = MergeTree ORDER BY id;
+INSERT INTO t1 SELECT number, toString(number) FROM numbers(100);
+INSERT INTO t2 SELECT number, toString(number) FROM numbers(100);
+
+EXPLAIN actions = 1, compact = 1, pretty = 1
+SELECT * FROM t1 INNER JOIN t2 ON t1.id = t2.id FORMAT Raw;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Output: id, value, t2.id, t2.value
+
+Join (JOIN FillRightFirst)
+│  t1[100] ⋈ t2[100]
+│  Type: inner | Strictness: all | Algorithm: ConcurrentHashJoin
+│  Result rows: 100
+│  Output:
+│    Left:  id, value
+│    Right: id, value
+│  Join conditions: id = id
+├──ReadFromMergeTree (default.t1)
+│     Read type: Default
+│     Parts: 1 | Granules: 1
+│     Output: id, value
+└──ReadFromMergeTree (default.t2)
+      Read type: Default
+      Parts: 1 | Granules: 1
+      Output: id, value
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-pipeline">EXPLAIN PIPELINE<a aria-label="Direct link to EXPLAIN PIPELINE" class="hash-link" href="#explain-pipeline" title="Direct link to EXPLAIN PIPELINE">​</a></h3>
+<p>Settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>header</code> — Prints header for each output port. Default: 0.</li>
+<li class="custom-li"><code>graph</code> — Prints a graph described in the <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)" rel="noopener noreferrer" target="_blank">DOT</a> graph description language. Default: 0.</li>
+<li class="custom-li"><code>compact</code> — Prints graph in compact mode if <code>graph</code> setting is enabled. Default: 1.</li>
+</ul>
+<p>When <code>compact=0</code> and <code>graph=1</code> processor names will contain an additional suffix with unique processor identifier.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN PIPELINE SELECT sum(number) FROM numbers_mt(100000) GROUP BY number % 4;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">(Union)
+(Expression)
+ExpressionTransform
+  (Expression)
+  ExpressionTransform
+    (Aggregating)
+    Resize 2 → 1
+      AggregatingTransform × 2
+        (Expression)
+        ExpressionTransform × 2
+          (SettingQuotaAndLimits)
+            (ReadFromStorage)
+            NumbersRange × 2 0 → 1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-estimate">EXPLAIN ESTIMATE<a aria-label="Direct link to EXPLAIN ESTIMATE" class="hash-link" href="#explain-estimate" title="Direct link to EXPLAIN ESTIMATE">​</a></h3>
+<p>Shows the estimated number of rows, marks and parts to be read from the tables while processing the query. Works with tables in the <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> family.</p>
+<p><strong>Example</strong></p>
+<p>Creating a table:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE ttt (i Int64) ENGINE = MergeTree() ORDER BY i SETTINGS index_granularity = 16, write_final_mark = 0;
+INSERT INTO ttt SELECT number FROM numbers(128);
+OPTIMIZE TABLE ttt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN ESTIMATE SELECT * FROM ttt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─database─┬─table─┬─parts─┬─rows─┬─marks─┐
+│ default  │ ttt   │     1 │  128 │     8 │
+└──────────┴───────┴───────┴──────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="explain-table-override">EXPLAIN TABLE OVERRIDE<a aria-label="Direct link to EXPLAIN TABLE OVERRIDE" class="hash-link" href="#explain-table-override" title="Direct link to EXPLAIN TABLE OVERRIDE">​</a></h3>
+<p>Shows the result of a table override on a table schema accessed through a table function.
+Also does some validation, throwing an exception if the override would have caused some kind of failure.</p>
+<p><strong>Example</strong></p>
+<p>Assume you have a remote MySQL table like this:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE db.tbl (
+    id INT PRIMARY KEY,
+    created DATETIME DEFAULT now()
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN TABLE OVERRIDE mysql('127.0.0.1:3306', 'db', 'tbl', 'root', 'clickhouse')
+PARTITION BY toYYYYMM(assumeNotNull(created))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─explain─────────────────────────────────────────────────┐
+│ PARTITION BY uses columns: `created` Nullable(DateTime) │
+└─────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The validation is not complete, so a successful query does not guarantee that the override would not cause issues.</p></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/grant"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">GRANT</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/revoke"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">REVOKE</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#explain-types">EXPLAIN Types</a><ul><li><a class="table-of-contents__link toc-highlight" href="#explain-ast">EXPLAIN AST</a><li><a class="table-of-contents__link toc-highlight" href="#explain-syntax">EXPLAIN SYNTAX</a><li><a class="table-of-contents__link toc-highlight" href="#explain-query-tree">EXPLAIN QUERY TREE</a><li><a class="table-of-contents__link toc-highlight" href="#explain-plan">EXPLAIN PLAN</a><li><a class="table-of-contents__link toc-highlight" href="#explain-pipeline">EXPLAIN PIPELINE</a><li><a class="table-of-contents__link toc-highlight" href="#explain-estimate">EXPLAIN ESTIMATE</a><li><a class="table-of-contents__link toc-highlight" href="#explain-table-override">EXPLAIN TABLE OVERRIDE</a></li></li></li></li></li></li></li></ul></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

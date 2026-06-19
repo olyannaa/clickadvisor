@@ -1,0 +1,14 @@
+case_id: clickbench_q17
+source: clickbench
+sql: 'SELECT UserID, SearchPhrase, COUNT(*) FROM hits GROUP BY UserID, SearchPhrase
+  ORDER BY COUNT(*) DESC LIMIT 10;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

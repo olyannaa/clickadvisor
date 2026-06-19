@@ -1,0 +1,18 @@
+case_id: tpch_q14
+source: tpch
+sql: "SELECT\n    100.00 * sum(CASE\n        WHEN p_type LIKE 'PROMO%' THEN l_extendedprice * (1 - l_discount)\n        ELSE 0\n    END) / sum(l_extendedprice * (1 - l_discount)) AS promo_revenue\nFROM\n    lineitem,\n    part\nWHERE\n    l_partkey = p_partkey\n    AND l_shipdate >= toDate('1995-09-01')\n    AND l_shipdate < toDate('1995-09-01') + INTERVAL 1 MONTH;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM lineitem, part — implicit JOIN
+expected_rules_to_fire:
+- D-002
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q14: Promotion Effect.'
+expected_findings_count: 1
+status: reviewed

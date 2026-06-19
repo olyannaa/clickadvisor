@@ -1,0 +1,115 @@
+---
+source: kb.altinity.com
+url: http://altinity.com/
+topic: altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '1.0'
+last_updated: '2026-06-12'
+chunk_index: 408
+total_chunks_in_doc: 478
+---
+
+WHERE event_time > (now() - toIntervalHour(24)) GROUP BY m, database, table ORDER BY database ASC, table ASC, m ASC ``` > For the past day, returns per\-second insert throughput metrics, by db and table, over 30 minute buckets
+
+```
+WITH 30 * 60 AS frame_size
+SELECT
+    toStartOfInterval(event_time, toIntervalSecond(frame_size)) AS m,
+    database,
+    table,
+    ROUND(countIf(event_type = 'NewPart') / frame_size, 2) AS inserts_per_sec,
+    ROUND(sumIf(rows, event_type = 'NewPart') / frame_size, 2) AS rows_per_sec,
+    ROUND(sumIf(size_in_bytes, event_type = 'NewPart') / frame_size, 2) AS bytes_per_sec
+FROM system.part_log
+WHERE event_time > (now() - toIntervalHour(24))
+GROUP BY
+    m,
+    database,
+    table
+ORDER BY
+    database ASC,
+    table ASC,
+    m ASC
+
+```
+## Understanding partitioning
+
+> Partition distribution analysis, aggregating system.parts metrics by partition. The quantiles results can indicate whether there is skewed distribution of data between partitions.
+
+```
+SELECT
+    database,
+    table,
+    count(),
+    topK(5)(partition),
+    COLUMNS('metric.*') APPLY(quantiles(0.005, 0.05, 0.10, 0.25, 0.5, 0.75, 0.9, 0.95, 0.995))
+FROM
+(
+    SELECT
+        database,
+        table,
+        partition,
+        sum(bytes_on_disk) AS metric_bytes,
+        sum(data_uncompressed_bytes) AS metric_uncompressed_bytes,
+        sum(rows) AS metric_rows,
+        sum(primary_key_bytes_in_memory) AS metric_pk_size,
+        count() AS metric_count,
+        countIf(part_type = 'Wide') AS metric_wide_count,
+        countIf(part_type = 'Compact') AS metric_compact_count,
+        countIf(part_type = 'Memory') AS metric_memory_count
+    FROM system.parts
+    GROUP BY
+        database,
+        table,
+        partition
+)
+GROUP BY
+    database,
+    table
+FORMAT Vertical
+
+```
+## Subcolumns sizes
+
+> Returns column\-level storage metrics, including subcolumns (JSON, tuples, maps, etc \- if present)
+
+```
+WITH 
+     if(
+          length(subcolumns.names) > 0, 
+          arrayMap( (sc_n,sc_t,sc_s, sc_bod, sc_dcb, sc_dub) -> tuple(sc_n,sc_t,sc_s, sc_bod, sc_dcb, sc_dub), subcolumns.names, subcolumns.types, subcolumns.serializations, subcolumns.bytes_on_disk, subcolumns.data_compressed_bytes, subcolumns.data_uncompressed_bytes),
+          [tuple('',type,serialization_kind,column_bytes_on_disk,column_data_compressed_bytes,column_data_uncompressed_bytes)]) as _subcolumns_data,
+     arrayJoin(_subcolumns_data) as _subcolumn,
+     _subcolumn.1 as _sc_name, 
+     _subcolumn.2 as _sc_type,
+     _subcolumn.3 as _sc_serialization,
+     _subcolumn.4 as _sc_bytes_on_disk,
+     _subcolumn.5 as _sc_data_compressed_bytes,
+     _subcolumn.6 as _sc_uncompressed_bytes
+SELECT
+    database || '.' || table as table_,
+    column as colunm_, 
+    _sc_name as subcolumn_,
+    any(_sc_type),
+    formatReadableSize(sum(_sc_data_compressed_bytes) AS size) AS compressed,
+    formatReadableSize(sum(_sc_uncompressed_bytes) AS usize) AS uncompressed,
+    round(usize / size, 2) AS compr_ratio,
+    sum(rows) AS rows_cnt,
+    round(usize / rows_cnt, 2) AS avg_row_size
+FROM system.parts_columns
+WHERE (active = 1) AND (database LIKE '%') AND (`table` LIKE '%')
+GROUP BY  
+     table_,
+     colunm_,
+     subcolumn_
+ORDER BY size DESC ;
+
+```
+# 6\.10 \- Notes on Various Errors with respect to replication and distributed connections
+
+Notes on errors related to replication and distributed connections## `ClickHouseDistributedConnectionExceptions`
+
+This alert usually indicates that one of the nodes isn’t responding or that there’s an interconnectivity issue. Debug steps:
+
+## 1\. Check Cluster Connectivity
+
+Verify connectivity inside the cluster by running:

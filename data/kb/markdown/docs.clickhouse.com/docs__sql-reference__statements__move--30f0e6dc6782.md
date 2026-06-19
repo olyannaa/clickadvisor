@@ -1,0 +1,43 @@
+# MOVE access entity statement \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- MOVE
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/move.md)# MOVE access entity statement
+
+This statement allows to move an access entity from one access storage to another.
+
+
+Syntax:
+
+
+
+```
+MOVE {USER, ROLE, QUOTA, SETTINGS PROFILE, ROW POLICY} name1 [, name2, ...] TO access_storage_type
+
+```
+
+Currently, there are five access storages in ClickHouse:
+
+
+- `local_directory`
+- `memory`
+- `replicated`
+- `users_xml` (ro)
+- `ldap` (ro)
+
+
+Examples:
+
+
+
+```
+MOVE USER test TO local_directory
+
+```
+
+
+```
+MOVE ROLE test TO memory
+
+```
+[PreviousWATCH](/docs/sql-reference/statements/watch)[NextCHECK GRANT](/docs/sql-reference/statements/check-grant)Was this page helpful?

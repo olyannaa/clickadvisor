@@ -1,0 +1,9 @@
+\x1b[1mClickAdvisor report\x1b[0m
+
+\x1b[34m[env]\x1b[0m Environment suggestion
+Observed pipeline fan-out exceeds practical parallelism target for the supplied hardware.
+
+Recommendation:
+  Review max_threads relative to 16 physical / 32 logical cores.
+
+Estimated impact: medium

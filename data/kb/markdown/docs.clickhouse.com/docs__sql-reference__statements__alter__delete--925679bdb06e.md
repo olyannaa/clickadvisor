@@ -1,0 +1,41 @@
+# ALTER TABLE ... DELETE Statement \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- [ALTER](/docs/sql-reference/statements/alter)- DELETE
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/alter/delete.md)# ALTER TABLE ... DELETE Statement
+
+
+```
+ALTER TABLE [db.]table [ON CLUSTER cluster] DELETE WHERE filter_expr
+
+```
+
+Deletes data matching the specified filtering expression. Implemented as a [mutation](/docs/sql-reference/statements/alter#mutations).
+
+
+NoteThe `ALTER TABLE` prefix makes this syntax different from most other systems supporting SQL. It is intended to signify that unlike similar queries in OLTP databases this is a heavy operation not designed for frequent use. `ALTER TABLE` is considered a heavyweight operation that requires the underlying data to be merged before it is deleted. For MergeTree tables, consider using the [`DELETE FROM` query](/docs/sql-reference/statements/delete), which performs a lightweight delete and can be considerably faster.
+
+
+The `filter_expr` must be of type `UInt8`. The query deletes rows in the table for which this expression takes a non\-zero value.
+
+
+One query can contain several commands separated by commas.
+
+
+The synchronicity of the query processing is defined by the [mutations\_sync](/docs/operations/settings/settings#mutations_sync) setting. By default, it is asynchronous.
+
+
+**See also**
+
+
+- [Mutations](/docs/sql-reference/statements/alter#mutations)
+- [Synchronicity of ALTER Queries](/docs/sql-reference/statements/alter#synchronicity-of-alter-queries)
+- [mutations\_sync](/docs/operations/settings/settings#mutations_sync) setting
+
+
+## Related content[​](#related-content "Direct link to Related content")
+
+
+- Blog: [Handling Updates and Deletes in ClickHouse](https://clickhouse.com/blog/handling-updates-and-deletes-in-clickhouse)
+[PreviousSETTING](/docs/sql-reference/statements/alter/setting)[NextUPDATE](/docs/sql-reference/statements/alter/update)- [Related content](#related-content)
+Was this page helpful?

@@ -1,0 +1,24 @@
+case_id: tpch_q11
+source: tpch
+sql: "SELECT\n    ps_partkey,\n    sum(ps_supplycost * ps_availqty) AS value\nFROM\n    partsupp,\n    supplier,\n    nation\nWHERE\n    ps_suppkey = s_suppkey\n    AND s_nationkey = n_nationkey\n    AND n_name = 'GERMANY'\nGROUP BY\n    ps_partkey\nHAVING\n    sum(ps_supplycost * ps_availqty) > (\n        SELECT\n            sum(ps_supplycost * ps_availqty) * 0.0001\n        FROM\n            partsupp,\n            supplier,\n            nation\n        WHERE\n            ps_suppkey = s_suppkey\n            AND s_nationkey = n_nationkey\n            AND n_name = 'GERMANY'\n    )\nORDER BY\n    value DESC;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM partsupp, supplier, nation — implicit JOIN
+- issue_id: I-2
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: HAVING с коррелированным подзапросом
+expected_rules_to_fire:
+- D-002
+- D-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q11: Important Stock Identification.'
+expected_findings_count: 2
+status: reviewed

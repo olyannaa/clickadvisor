@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+dist/
+build/
+site/
+*.egg-info/
+
+# Poetry and virtualenvs
+.venv/
+venv/
+poetry.lock
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker artifacts
+*.pid
+*.log
+docker-compose.override.yml
+.docker/
+
+# Local data
+.env
+.env.*
+tmp/

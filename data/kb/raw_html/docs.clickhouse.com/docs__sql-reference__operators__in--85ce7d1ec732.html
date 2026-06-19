@@ -1,0 +1,177 @@
+<h1>IN Operators | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/operators" itemprop="item"><span itemprop="name">Operators</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">IN Operators</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/operators/in.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>IN Operators</h1></header><p>The <code>IN</code>, <code>NOT IN</code>, <code>GLOBAL IN</code>, and <code>GLOBAL NOT IN</code> operators are covered separately, since their functionality is quite rich.</p>
+<p>The left side of the operator is either a single column or a tuple.</p>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT UserID IN (123, 456) FROM ...
+SELECT (CounterID, UserID) IN ((34, 123), (101500, 456)) FROM ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If the left side is a single column that is in the index, and the right side is a set of constants, the system uses the index for processing the query.</p>
+<p>Don't list too many values explicitly (i.e. millions). If a data set is large, put it in a temporary table (for example, see the section <a href="/docs/engines/table-engines/special/external-data">External data for query processing</a>), then use a subquery.</p>
+<p>The right side of the operator can be a set of constant expressions, a set of tuples with constant expressions (shown in the examples above), or the name of a database table or <code>SELECT</code> subquery in brackets.</p>
+<p>For historical compatibility, when the right side is a single <code>tuple</code> expression, it can be interpreted either as a set of values or as one tuple value, depending on the left side of the <code>IN</code> operator. If the left side is a scalar value, ClickHouse treats the elements of this single right-side <code>tuple</code> expression as separate <code>IN</code> values:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    1 IN (tuple(1, 2)) AS one_in_tuple,
+    2 IN (tuple(1, 2)) AS two_in_tuple,
+    3 IN (tuple(1, 2)) AS three_in_tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─one_in_tuple─┬─two_in_tuple─┬─three_in_tuple─┐
+│            1 │            1 │              0 │
+└──────────────┴──────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This behaves like <code>SELECT 1 IN (1, 2)</code>. If the left side is also a tuple, the right side is interpreted as a set of tuple values:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tuple(1, 2) IN (tuple(1, 2)) AS tuple_in_tuple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─tuple_in_tuple─┐
+│              1 │
+└────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This special handling applies only when the right side is a single <code>tuple</code> expression. A scalar left side cannot be matched against a right side that contains multiple tuple values:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 1 IN (tuple(1, 2), tuple(3, 4));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Code: 43. DB::Exception: Unsupported types for IN. First argument type UInt8. Second argument type Tuple(Tuple(UInt8, UInt8), Tuple(UInt8, UInt8)). (ILLEGAL_TYPE_OF_ARGUMENT)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse allows types to differ in the left and the right parts of the <code>IN</code> subquery.
+In this case, it converts the right side value to the type of the left side, as
+if the <a href="/docs/sql-reference/functions/type-conversion-functions#accurateCastOrNull">accurateCastOrNull</a> function were applied to the right side.</p>
+<p>This means that the data type becomes <a href="/docs/sql-reference/data-types/nullable">Nullable</a>, and if the conversion
+cannot be performed, it returns <a href="/docs/operations/settings/formats#input_format_null_as_default">NULL</a>.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT '1' IN (SELECT 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─in('1', _subquery49)─┐
+│                    1 │
+└──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If the right side of the operator is the name of a table (for example, <code>UserID IN users</code>), this is equivalent to the subquery <code>UserID IN (SELECT * FROM users)</code>. Use this when working with external data that is sent along with the query. For example, the query can be sent together with a set of user IDs loaded to the 'users' temporary table, which should be filtered.</p>
+<p>If the right side of the operator is a table name that has the Set engine (a prepared data set that is always in RAM), the data set will not be created over again for each query.</p>
+<p>The subquery may specify more than one column for filtering tuples.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT (CounterID, UserID) IN (SELECT CounterID, UserID FROM ...) FROM ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The columns to the left and right of the <code>IN</code> operator should have the same type.</p>
+<p>The <code>IN</code> operator and subquery may occur in any part of the query, including in aggregate functions and lambda functions.
+Example:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    EventDate,
+    avg(UserID IN
+    (
+        SELECT UserID
+        FROM test.hits
+        WHERE EventDate = toDate('2014-03-17')
+    )) AS ratio
+FROM test.hits
+GROUP BY EventDate
+ORDER BY EventDate ASC
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──EventDate─┬────ratio─┐
+│ 2014-03-17 │        1 │
+│ 2014-03-18 │ 0.807696 │
+│ 2014-03-19 │ 0.755406 │
+│ 2014-03-20 │ 0.723218 │
+│ 2014-03-21 │ 0.697021 │
+│ 2014-03-22 │ 0.647851 │
+│ 2014-03-23 │ 0.648416 │
+└────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For each day after March 17th, count the percentage of pageviews made by users who visited the site on March 17th.
+A subquery in the <code>IN</code> clause is always run just one time on a single server. There are no dependent subqueries.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="null-processing">NULL Processing<a aria-label="Direct link to NULL Processing" class="hash-link" href="#null-processing" title="Direct link to NULL Processing">​</a></h2>
+<p>During request processing, the <code>IN</code> operator assumes that the result of an operation with <a href="/docs/operations/settings/formats#input_format_null_as_default">NULL</a> always equals <code>0</code>, regardless of whether <code>NULL</code> is on the right or left side of the operator. <code>NULL</code> values are not included in any dataset, do not correspond to each other and cannot be compared if <a href="/docs/operations/settings/settings#transform_null_in">transform_null_in = 0</a>.</p>
+<p>Here is an example with the <code>t_null</code> table:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─x─┬────y─┐
+│ 1 │ ᴺᵁᴸᴸ │
+│ 2 │    3 │
+└───┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Running the query <code>SELECT x FROM t_null WHERE y IN (NULL,3)</code> gives you the following result:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─x─┐
+│ 2 │
+└───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can see that the row in which <code>y = NULL</code> is thrown out of the query results. This is because ClickHouse can't decide whether <code>NULL</code> is included in the <code>(NULL,3)</code> set, returns <code>0</code> as the result of the operation, and <code>SELECT</code> excludes this row from the final output.</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT y IN (NULL, 3)
+FROM t_null
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─in(y, tuple(NULL, 3))─┐
+│                     0 │
+│                     1 │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="distributed-subqueries">Distributed Subqueries<a aria-label="Direct link to Distributed Subqueries" class="hash-link" href="#distributed-subqueries" title="Direct link to Distributed Subqueries">​</a></h2>
+<p>There are two options for <code>IN</code> operators with subqueries (similar to <code>JOIN</code> operators): normal <code>IN</code> / <code>JOIN</code> and <code>GLOBAL IN</code> / <code>GLOBAL JOIN</code>. They differ in how they are run for distributed query processing.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><mdxadmonitiontitle></mdxadmonitiontitle><p>Remember that the algorithms described below may work differently depending on the <a href="/docs/operations/settings/settings">settings</a> <code>distributed_product_mode</code> setting.</p></div></div>
+<p>When using the regular <code>IN</code>, the query is sent to remote servers, and each of them runs the subqueries in the <code>IN</code> or <code>JOIN</code> clause.</p>
+<p>When using <code>GLOBAL IN</code> / <code>GLOBAL JOIN</code>, first all the subqueries are run for <code>GLOBAL IN</code> / <code>GLOBAL JOIN</code>, and the results are collected in temporary tables. Then the temporary tables are sent to each remote server, where the queries are run using this temporary data.</p>
+<p>For <code>GLOBAL ... JOIN</code>, which side of the join is calculated as the subquery depends on the join kind: for <code>LEFT</code> and <code>INNER</code> joins, the right table is calculated; for <code>RIGHT</code> joins, the left table is calculated instead, since the right table is the preserved side and should be read from shards.</p>
+<p>For a non-distributed query, use the regular <code>IN</code> / <code>JOIN</code>.</p>
+<p>Be careful when using subqueries in the <code>IN</code> / <code>JOIN</code> clauses for distributed query processing.</p>
+<p>Let's look at some examples. Assume that each server in the cluster has a normal <strong>local_table</strong>. Each server also has a <strong>distributed_table</strong> table with the <strong>Distributed</strong> type, which looks at all the servers in the cluster.</p>
+<p>For a query to the <strong>distributed_table</strong>, the query will be sent to all the remote servers and run on them using the <strong>local_table</strong>.</p>
+<p>For example, the query</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM distributed_table
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>will be sent to all remote servers as</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM local_table
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>and run on each of them in parallel, until it reaches the stage where intermediate results can be combined. Then the intermediate results will be returned to the requestor server and merged on it, and the final result will be sent to the client.</p>
+<p>Now let's examine a query with <code>IN</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM distributed_table WHERE CounterID = 101500 AND UserID IN (SELECT UserID FROM local_table WHERE CounterID = 34)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Calculation of the intersection of audiences of two sites.</li>
+</ul>
+<p>This query will be sent to all remote servers as</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM local_table WHERE CounterID = 101500 AND UserID IN (SELECT UserID FROM local_table WHERE CounterID = 34)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In other words, the data set in the <code>IN</code> clause will be collected on each server independently, only across the data that is stored locally on each of the servers.</p>
+<p>This will work correctly and optimally if you are prepared for this case and have spread data across the cluster servers such that the data for a single UserID resides entirely on a single server. In this case, all the necessary data will be available locally on each server. Otherwise, the result will be inaccurate. We refer to this variation of the query as "local IN".</p>
+<p>To correct how the query works when data is spread randomly across the cluster servers, you could specify <strong>distributed_table</strong> inside a subquery. The query would look like this:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM distributed_table WHERE CounterID = 101500 AND UserID IN (SELECT UserID FROM distributed_table WHERE CounterID = 34)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query will be sent to all remote servers as</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM local_table WHERE CounterID = 101500 AND UserID IN (SELECT UserID FROM distributed_table WHERE CounterID = 34)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The subquery will begin running on each remote server. Since the subquery uses a distributed table, the subquery that is on each remote server will be resent to every remote server as:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT UserID FROM local_table WHERE CounterID = 34
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For example, if you have a cluster of 100 servers, executing the entire query will require 10,000 elementary requests, which is generally considered unacceptable.</p>
+<p>In such cases, you should always use <code>GLOBAL IN</code> instead of <code>IN</code>. Let's look at how it works for the query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM distributed_table WHERE CounterID = 101500 AND UserID GLOBAL IN (SELECT UserID FROM distributed_table WHERE CounterID = 34)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The requestor server will run the subquery:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT UserID FROM distributed_table WHERE CounterID = 34
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>and the result will be put in a temporary table in RAM. Then the request will be sent to each remote server as:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT uniq(UserID) FROM local_table WHERE CounterID = 101500 AND UserID GLOBAL IN _data1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The temporary table <code>_data1</code> will be sent to every remote server with the query (the name of the temporary table is implementation-defined).</p>
+<p>This is more optimal than using the normal <code>IN</code>. However, keep the following points in mind:</p>
+<ol class="custom-ol">
+<li class="custom-li">When creating a temporary table, data is not made unique. To reduce the volume of data transmitted over the network, specify DISTINCT in the subquery. (You do not need to do this for a normal <code>IN</code>.)</li>
+<li class="custom-li">The temporary table will be sent to all the remote servers. Transmission does not account for network topology. For example, if 10 remote servers reside in a datacenter that is very remote in relation to the requestor server, the data will be sent 10 times over the channel to the remote datacenter. Try to avoid large data sets when using <code>GLOBAL IN</code>.</li>
+<li class="custom-li">When transmitting data to remote servers, restrictions on network bandwidth are not configurable. You might overload the network.</li>
+<li class="custom-li">Try to distribute data across servers so that you do not need to use <code>GLOBAL IN</code> on a regular basis.</li>
+<li class="custom-li">If you need to use <code>GLOBAL IN</code> often, plan the location of the ClickHouse cluster so that a single group of replicas resides in no more than one data center with a fast network between them, so that a query can be processed entirely within a single data center.</li>
+</ol>
+<p>It also makes sense to specify a local table in the <code>GLOBAL IN</code> clause, in case this local table is only available on the requestor server and you want to use data from it on remote servers.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="distributed-subqueries-and-max_rows_in_set">Distributed Subqueries and max_rows_in_set<a aria-label="Direct link to Distributed Subqueries and max_rows_in_set" class="hash-link" href="#distributed-subqueries-and-max_rows_in_set" title="Direct link to Distributed Subqueries and max_rows_in_set">​</a></h3>
+<p>You can use <a href="/docs/operations/settings/settings#max_rows_in_set"><code>max_rows_in_set</code></a> and <a href="/docs/operations/settings/settings#max_bytes_in_set"><code>max_bytes_in_set</code></a> to control how much data is transferred during distributed queries.</p>
+<p>This is specially important if the <code>GLOBAL IN</code> query returns a large amount of data. Consider the following SQL:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM table1 WHERE col1 GLOBAL IN (SELECT col1 FROM table2 WHERE &lt;some_predicate&gt;)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If <code>some_predicate</code> is not selective enough, it will return a large amount of data and cause performance issues. In such cases, it is wise to limit the data transfer over the network. Also, note that <a href="/docs/operations/settings/settings#set_overflow_mode"><code>set_overflow_mode</code></a> is set to <code>throw</code> (by default) meaning that an exception is raised when these thresholds are met.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="distributed-subqueries-and-max_parallel_replicas">Distributed Subqueries and max_parallel_replicas<a aria-label="Direct link to Distributed Subqueries and max_parallel_replicas" class="hash-link" href="#distributed-subqueries-and-max_parallel_replicas" title="Direct link to Distributed Subqueries and max_parallel_replicas">​</a></h3>
+<p>When <a href="#distributed-subqueries-and-max_parallel_replicas">max_parallel_replicas</a> is greater than 1, distributed queries are further transformed.</p>
+<p>For example, the following:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT CounterID, count() FROM distributed_table_1 WHERE UserID IN (SELECT UserID FROM local_table_2 WHERE CounterID &lt; 100)
+SETTINGS max_parallel_replicas=3
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>is transformed on each server into:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT CounterID, count() FROM local_table_1 WHERE UserID IN (SELECT UserID FROM local_table_2 WHERE CounterID &lt; 100)
+SETTINGS parallel_replicas_count=3, parallel_replicas_offset=M
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>where <code>M</code> is between <code>1</code> and <code>3</code> depending on which replica the local query is executing on.</p>
+<p>These settings affect every MergeTree-family table in the query and have the same effect as applying <code>SAMPLE 1/3 OFFSET (M-1)/3</code> on each table.</p>
+<p>Therefore adding the <a href="#distributed-subqueries-and-max_parallel_replicas">max_parallel_replicas</a> setting will only produce correct results if both tables have the same replication scheme and are sampled by UserID or a subkey of it. In particular, if <code>local_table_2</code> does not have a sampling key, incorrect results will be produced. The same rule applies to <code>JOIN</code>.</p>
+<p>One workaround if <code>local_table_2</code> does not meet the requirements, is to use <code>GLOBAL IN</code> or <code>GLOBAL JOIN</code>.</p>
+<p>If a table doesn't have a sampling key, more flexible options for <a href="/docs/operations/settings/settings#parallel_replicas_custom_key">parallel_replicas_custom_key</a> can be used that can produce different and more optimal behaviour.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/operators/exists"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">EXISTS</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Engines</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#null-processing">NULL Processing</a><li><a class="table-of-contents__link toc-highlight" href="#distributed-subqueries">Distributed Subqueries</a><ul><li><a class="table-of-contents__link toc-highlight" href="#distributed-subqueries-and-max_rows_in_set">Distributed Subqueries and max_rows_in_set</a><li><a class="table-of-contents__link toc-highlight" href="#distributed-subqueries-and-max_parallel_replicas">Distributed Subqueries and max_parallel_replicas</a></li></li></ul></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

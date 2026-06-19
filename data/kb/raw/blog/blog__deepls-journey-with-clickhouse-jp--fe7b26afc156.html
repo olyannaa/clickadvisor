@@ -1,0 +1,34 @@
+<h1>ClickHouseとともに歩むDeepLの軌跡</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p><em>DeepL をゲストとして本ブログにお迎えします。DeepL がどのように ClickHouse を中央データウェアハウスとして活用しているか、ぜひお読みください。</em></p>
+<p>DeepL では、ClickHouse を中央データウェアハウスとして使用しています。現在では、ウェブサイトやアプリの分析、社内全員に向けた会社指標の提供、技術的なモニタリングなど、さまざまなユースケースで活用されています。本ブログ記事では、ClickHouse とともに歩んできた私たちの道のり、どのように始めたのか、そして何を構築してきたのかをお話ししたいと思います。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="始まり" level="2">始まり<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/deepls-journey-with-clickhouse-jp#%E5%A7%8B%E3%81%BE%E3%82%8A">#</a></span></h2>
+<p>ClickHouse との歩みは、プライバシーに配慮した方法で分析機能を構築したいと考えた 2020 年に始まりました。当時、私たちはセルフホスト可能なソリューションをいくつか検討していました。Hadoop は運用負荷が高すぎ、セットアップにも時間がかかりすぎると判断されました。一方、ClickHouse は apt リポジトリから単一バイナリでデプロイできるため、MVP(Minimum Viable Product)を素早く簡単にセットアップでき、私たちの規模で実用に耐えるかを確認することができました。最初は単一ノード構成で、ClickHouse は VM 内で動作させ、そのハイパーバイザーは他の複数のサービスと共有していたほどでした。</p>
+<p>MVP は、ユーザーのブラウザがイベントを送信する API、メッセージブローカーとしての Kafka、Kafka から ClickHouse へ書き込むシンク、ClickHouse 本体、そして結果を可視化する Metabase で構成されていました。アーキテクチャは次のようなものでした:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="DeepLArchitecture.png" loading="lazy" src="/uploads/Deep_L_Architecture_c7545bef5f.png"/></span>
+<p>この MVP は数週間で組み上げられ、システムが私たちが投入するデータ量を難なく処理でき、クエリ時間も非常に優れていることを実証しました。</p>
+<p>次のステップとして、私たちは自動化に多大な投資を行いました。振り返ると、これは非常に賢明な判断でした。なぜなら、フロントエンド開発者が新しいイベントを作成するたびにテーブルスキーマを変更する作業に、チームが追われてしまうところだったからです。私たちは、すべてのイベントとテーブルスキーマに対する単一の信頼できる情報源(source of truth)を持つことに決めました。フロントエンドが新しいイベントを作成したい場合、そのイベントを protobuf で定義する必要があります。この protobuf スキーマファイルは、次の 3 つの目的で使用されます:</p>
+<ul>
+<li>API がイベントを検証し、データの整合性をチェックします。これによりエラーが削減され、チームは重要なことに集中する時間を確保できます</li>
+<li>シンクは ClickHouse のテーブルスキーマを計算し、現在の状態と差分を取り、必要に応じてテーブルを変更します</li>
+<li>protobuf ファイルから、すべてのイベントとその意味についてのドキュメントを自動的に生成します</li>
+</ul>
+<p>たとえば e コマースサイトと比較すると、ユーザーが翻訳ツールとやり取りする際の複雑さは桁違いです。ClickHouse のおかげで、ユーザーがどのように私たちと関わっているかを理解するために必要な、複雑なイベントやクエリを作成することができました。これは Google Analytics のようなツールでは実現できないことです。しかも、データ自体を完全に管理下に置き、ユーザーのプライバシーに配慮した上でこれを実現しています。これにより、DeepL の全員に対し、あらゆるプラットフォームで何が起きているかを完全に可視化することが可能となり、社内における事実上の標準システムとなりました。</p>
+<p>これが整ったところで、チームはさらに多くのデータソースを ClickHouse に追加することに注力しました。ネイティブアプリ、Linguee、サードパーティシステムとの連携などを追加していきました。</p>
+<p>DeepL にとって、これは単なる分析プラットフォームの導入をはるかに超えるものであり、多くの重要なコンポーネント、すなわちメインの翻訳ページ、登録ファネル、アプリ内の挙動などのデータ駆動型開発への転換でした。収集されたデータは、プロダクトマネージャーが製品の利用状況を把握するためのインサイトとして、デザイン担当者が改善機会を発見するため、そしてユーザーにとって苦痛となるバグを見つけるために活用されています。</p>
+<p>利用開始から 16 か月後、私たちは単一ノード構成から、3 シャード × 3 レプリカのクラスター構成へと拡張しました。それまでは、レプリカ 1 台付きの単一ノードで十分に機能していました。現在、この構成は 1 日あたり約 5 億行の生データを取り込んでいます。</p>
+<p>データ基盤を構築した後は、このプラットフォーム上でさらに多くのものを構築するフェーズに移りました。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="実験エクスペリメンテーション" level="2">実験(エクスペリメンテーション)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/deepls-journey-with-clickhouse-jp#%E5%AE%9F%E9%A8%93%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9A%E3%83%AA%E3%83%A1%E3%83%B3%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">#</a></span></h2>
+<p>実験、いわゆる AB テストは、トラフィックをコントロール(A)群とテスト(B)群に分け、それぞれに異なるバージョンのページを表示することで、ウェブサイトへの変更を定量的に評価する手法です。この実験フレームワークのアーキテクチャは次のようになっています:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="DeepLArchitecture2.png" loading="lazy" src="/uploads/Deep_L_Architecture2_bd4e7f3a03.png"/></span>
+<p>このフレームワークにおいて、ClickHouse は統計分析の重い処理を担う役割を果たしています。実行中のすべての実験について、ClickHouse は数億行のデータを処理し、平均、標準偏差、外れ値補正のための係数などを計算しています。ClickHouse がこれに最適化されているおかげで、データサイエンティストはインデックスやデータ型の最適化にほとんど手をかけずに済み、実際のソリューション構築に専念できました。特に配列関数は統計分析の構築において非常に役立ち、ユーザーが多数の実験にさらされている場合の複雑な管理処理を省くことができました。これにより、フレームワークを数か月で開発し、最初の実験を稼働させることができました。これによって DeepL は、フロントエンドやアルゴリズム的なバックエンドの変更を高速に反復できるようになり、これらの領域における文化的な変革にも貢献しました。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="パーソナライゼーションのための-ml-インフラストラクチャ" level="2">パーソナライゼーションのための ML インフラストラクチャ<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/deepls-journey-with-clickhouse-jp#%E3%83%91%E3%83%BC%E3%82%BD%E3%83%8A%E3%83%A9%E3%82%A4%E3%82%BC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E3%81%9F%E3%82%81%E3%81%AE-ml-%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%82%B9%E3%83%88%E3%83%A9%E3%82%AF%E3%83%81%E3%83%A3">#</a></span></h2>
+<p>DeepL を利用するすべての人がすべての機能を必要としているわけではなく、また DeepL を利用するすべての人がすべての機能を知っているわけでもありません。この問題に取り組むため、私たちはウェブサイトをパーソナライズするチームを立ち上げました。たとえば、特定の機能がそのユーザーにとって有用だと思われる場合に、その機能をさりげなく示唆したりしています。これを実現するために必要なものは 3 つあります:</p>
+<ul>
+<li>ユーザーの履歴</li>
+<li>その履歴を取得し、ML モデルを学習させる能力</li>
+<li>学習済みモデルで新規ユーザーを推論し、その出力に基づいてウェブサイトをカスタマイズする能力</li>
+</ul>
+<p>ClickHouse はこのアーキテクチャに非常に適しています。私たちはユーザーの履歴を ClickHouse 上で集約し、学習および推論のためのデータストアとして利用しています。数千万行を読み込む場合でも、パフォーマンスは非常に良好で、新しいモデルの学習においてボトルネックとなることはありませんでした。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="著者" level="3">著者<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/deepls-journey-with-clickhouse-jp#%E8%91%97%E8%80%85">#</a></span></h3>
+<p><a href="https://www.linkedin.com/in/hfjn/">Jannik Hoffjann</a>: Engineering Lead Data Platform</p>
+<p><a href="https://www.linkedin.com/in/till-westermann-23ab3ba3/">Till Westermann</a>: Group Product Manager Data Platform</p></div></div></article>

@@ -1,0 +1,211 @@
+<h1>Use data skipping indices where appropriate | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/best-practices" itemprop="item"><span itemprop="name">Best practices</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Data skipping indices</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/best-practices/using_data_skipping_indices.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Use data skipping indices where appropriate</h1></header><p>Data skipping indices should be considered when previous best practices have been followed i.e. types are optimized, a good primary key has been selected and materialized views have been exploited. If you're new to skipping indices, <a href="/docs/optimize/skipping-indexes">this guide</a> is a good place to start.</p>
+<p>These types of indices can be used to accelerate query performance if used carefully with an understanding of how they work.</p>
+<p>ClickHouse provides a powerful mechanism called <strong>data skipping indices</strong> that can dramatically reduce the amount of data scanned during query execution — particularly when the primary key isn't helpful for a specific filter condition. Unlike traditional databases that rely on row-based secondary indexes (like B-trees), ClickHouse is a column-store and doesn't store row locations in a way that supports such structures. Instead, it uses skip indexes, which help it avoid reading blocks of data guaranteed not to match a query's filtering conditions.</p>
+<p>Skip indexes work by storing metadata about blocks of data — such as min/max values, value sets, or Bloom filter representations — and using this metadata during query execution to determine which data blocks can be skipped entirely. They apply only to the <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree family</a> of table engines and are defined using an expression, an index type, a name, and a granularity that defines the size of each indexed block. These indexes are stored alongside the table data and are consulted when the query filter matches the index expression.</p>
+<p>There are several types of data skipping indexes, each suited to different types of queries and data distributions:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>minmax</strong>: Tracks the minimum and maximum value of an expression per block. Ideal for range queries on loosely sorted data.</li>
+<li class="custom-li"><strong>set(N)</strong>: Tracks a set of values up to a specified size N for each block. Effective on columns with low cardinality per blocks.</li>
+<li class="custom-li"><strong>text</strong>: Builds an inverted index over tokenized string data, enabling efficient and deterministic full-text search. Recommended for natural language or large free-form text columns where precise token lookup and scalable multi-term search are required, instead of approximate Bloom filter–based approaches.</li>
+<li class="custom-li"><strong>bloom_filter</strong>: Probabilistically determines if a value exists in a block, allowing fast approximate filtering for set membership. Effective for optimizing queries looking for the “needle in a haystack”, where a positive match is needed.</li>
+<li class="custom-li"><strong>tokenbf_v1 / ngrambf_v1</strong>: <em>(Deprecated)</em> Specialized Bloom filter variants designed for searching tokens or character sequences in strings — particularly useful for log data or text search use cases. Deprecated in ClickHouse versions &gt;= 26.2 in favor of text indexes.</li>
+</ul>
+<p>While powerful, skip indexes must be used with care. They only provide benefit when they eliminate a meaningful number of data blocks, and can actually introduce overhead if the query or data structure doesn't align. If even a single matching value exists in a block, that entire block must still be read.</p>
+<p><strong>Effective skip index usage often depends on a strong correlation between the indexed column and the table's primary key, or inserting data in a way that groups similar values together.</strong></p>
+<p>In general, data skipping indices are best applied after ensuring proper primary key design and type optimization. They're particularly useful for:</p>
+<ul class="custom-ul">
+<li class="custom-li">Columns with high overall cardinality but low cardinality within a block.</li>
+<li class="custom-li">Rare values that are critical for search (e.g. error codes, specific IDs).</li>
+<li class="custom-li">Cases where filtering occurs on non-primary key columns with localized distribution.</li>
+</ul>
+<p>Always:</p>
+<ol class="custom-ol">
+<li class="custom-li">Test skip indexes on real data with realistic queries. Try different index types and granularity values.</li>
+<li class="custom-li">Evaluate their impact using tools like send_logs_level='trace' and <code>EXPLAIN indexes=1</code> to view index effectiveness.</li>
+<li class="custom-li">Always evaluate the size of an index and how it is impacted by granularity. Reducing granularity size often will improve performance to a point, resulting in more granules being filtered and needing to be scanned. However, as index size increases with lower granularity, performance can also degrade. Measure the performance and index size for various granularity data points. This is particularly pertinent on bloom filter indexes.</li>
+</ol>
+<p></p>
+<p><strong>When used appropriately, skip indexes can provide a substantial performance boost — when used blindly, they can add unnecessary cost.</strong></p>
+<p>For a more detailed guide on Data Skipping Indices see <a href="/docs/sql-reference/statements/alter/skipping-index">here</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="example">Example<a aria-label="Direct link to Example" class="hash-link" href="#example" title="Direct link to Example">​</a></h2>
+<p>Consider the following optimized table. This contains Stack Overflow data with a row per post.</p>
+<div class="wrapper_EBtA" style="height:527.8000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE stackoverflow.posts
+(
+  `Id` Int32 CODEC(Delta(4), ZSTD(1)),
+  `PostTypeId` Enum8('Question' = 1, 'Answer' = 2, 'Wiki' = 3, 'TagWikiExcerpt' = 4, 'TagWiki' = 5, 'ModeratorNomination' = 6, 'WikiPlaceholder' = 7, 'PrivilegeWiki' = 8),
+  `AcceptedAnswerId` UInt32,
+  `CreationDate` DateTime64(3, 'UTC'),
+  `Score` Int32,
+  `ViewCount` UInt32 CODEC(Delta(4), ZSTD(1)),
+  `Body` String,
+  `OwnerUserId` Int32,
+  `OwnerDisplayName` String,
+  `LastEditorUserId` Int32,
+  `LastEditorDisplayName` String,
+  `LastEditDate` DateTime64(3, 'UTC') CODEC(Delta(8), ZSTD(1)),
+  `LastActivityDate` DateTime64(3, 'UTC'),
+  `Title` String,
+  `Tags` String,
+  `AnswerCount` UInt16 CODEC(Delta(2), ZSTD(1)),
+  `CommentCount` UInt8,
+  `FavoriteCount` UInt8,
+  `ContentLicense` LowCardinality(String),
+  `ParentId` String,
+  `CommunityOwnedDate` DateTime64(3, 'UTC'),
+  `ClosedDate` DateTime64(3, 'UTC')
+)
+ENGINE = MergeTree
+PARTITION BY toYear(CreationDate)
+ORDER BY (PostTypeId, toDate(CreationDate))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This table is optimized for queries which filter and aggregate by post type and date. Suppose we wished to count the number of posts with over 10,000,000 views published after 2009.</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count()
+FROM stackoverflow.posts
+WHERE (CreationDate &gt; '2009-01-01') AND (ViewCount &gt; 10000000)
+
+┌─count()─┐
+│     5   │
+└─────────┘
+
+1 row in set. Elapsed: 0.720 sec. Processed 59.55 million rows, 230.23 MB (82.66 million rows/s., 319.56 MB/s.)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query is able to exclude some of the rows (and granules) using the primary index. However, the majority of rows still need to be read as indicated by the above response and the following <code>EXPLAIN indexes = 1</code>:</p>
+<div class="wrapper_EBtA" style="height:659.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1
+SELECT count()
+FROM stackoverflow.posts
+WHERE (CreationDate &gt; '2009-01-01') AND (ViewCount &gt; 10000000)
+LIMIT 1
+
+┌─explain──────────────────────────────────────────────────────────┐
+│ Expression ((Project names + Projection))                        │
+│   Limit (preliminary LIMIT (without OFFSET))                     │
+│     Aggregating                                                  │
+│       Expression (Before GROUP BY)                               │
+│         Expression                                               │
+│           ReadFromMergeTree (stackoverflow.posts)                │
+│           Indexes:                                               │
+│             MinMax                                               │
+│               Keys:                                              │
+│                 CreationDate                                     │
+│               Condition: (CreationDate in ('1230768000', +Inf))  │
+│               Parts: 123/128                                     │
+│               Granules: 8513/8545                                │
+│             Partition                                            │
+│               Keys:                                              │
+│                 toYear(CreationDate)                             │
+│               Condition: (toYear(CreationDate) in [2009, +Inf))  │
+│               Parts: 123/123                                     │
+│               Granules: 8513/8513                                │
+│             PrimaryKey                                           │
+│               Keys:                                              │
+│                 toDate(CreationDate)                             │
+│               Condition: (toDate(CreationDate) in [14245, +Inf)) │
+│               Parts: 123/123                                     │
+│               Granules: 8513/8513                                │
+└──────────────────────────────────────────────────────────────────┘
+
+25 rows in set. Elapsed: 0.070 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>A simple analysis shows that <code>ViewCount</code> is correlated with the <code>CreationDate</code> (a primary key) as one might expect — the longer a post exists, the more time it has to be viewed.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toDate(CreationDate) AS day, avg(ViewCount) AS view_count FROM stackoverflow.posts WHERE day &gt; '2009-01-01'  GROUP BY day
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This therefore makes a logical choice for a data skipping index. Given the numeric type, a minmax index makes sense. We add an index using the following <code>ALTER TABLE</code> commands — first adding it, then "materializing it".</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE stackoverflow.posts
+  (ADD INDEX view_count_idx ViewCount TYPE minmax GRANULARITY 1);
+
+ALTER TABLE stackoverflow.posts MATERIALIZE INDEX view_count_idx;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This index could have also been added during initial table creation. The schema with the minmax index defined as part of the DDL:</p>
+<div class="wrapper_EBtA" style="height:546.6500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE stackoverflow.posts
+(
+  `Id` Int32 CODEC(Delta(4), ZSTD(1)),
+  `PostTypeId` Enum8('Question' = 1, 'Answer' = 2, 'Wiki' = 3, 'TagWikiExcerpt' = 4, 'TagWiki' = 5, 'ModeratorNomination' = 6, 'WikiPlaceholder' = 7, 'PrivilegeWiki' = 8),
+  `AcceptedAnswerId` UInt32,
+  `CreationDate` DateTime64(3, 'UTC'),
+  `Score` Int32,
+  `ViewCount` UInt32 CODEC(Delta(4), ZSTD(1)),
+  `Body` String,
+  `OwnerUserId` Int32,
+  `OwnerDisplayName` String,
+  `LastEditorUserId` Int32,
+  `LastEditorDisplayName` String,
+  `LastEditDate` DateTime64(3, 'UTC') CODEC(Delta(8), ZSTD(1)),
+  `LastActivityDate` DateTime64(3, 'UTC'),
+  `Title` String,
+  `Tags` String,
+  `AnswerCount` UInt16 CODEC(Delta(2), ZSTD(1)),
+  `CommentCount` UInt8,
+  `FavoriteCount` UInt8,
+  `ContentLicense` LowCardinality(String),
+  `ParentId` String,
+  `CommunityOwnedDate` DateTime64(3, 'UTC'),
+  `ClosedDate` DateTime64(3, 'UTC'),
+  INDEX view_count_idx ViewCount TYPE minmax GRANULARITY 1 --index here
+)
+ENGINE = MergeTree
+PARTITION BY toYear(CreationDate)
+ORDER BY (PostTypeId, toDate(CreationDate))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The following animation illustrates how our minmax skipping index is built for the example table, tracking the minimum and maximum <code>ViewCount</code> values for each block of rows (granule) in the table:</p>
+<div style="position:relative;display:flex"><img alt="Building skipping indices" src="/docs/assets/images/building_skipping_indices-6eca7eaddcf4b0696ee580c4347802cc.gif" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px;box-shadow:none"/></div>
+<p>Repeating our earlier query shows significant performance improvements. Notice the reduced number of rows scanned:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count()
+FROM stackoverflow.posts
+WHERE (CreationDate &gt; '2009-01-01') AND (ViewCount &gt; 10000000)
+
+┌─count()─┐
+│     5   │
+└─────────┘
+
+1 row in set. Elapsed: 0.012 sec. Processed 39.11 thousand rows, 321.39 KB (3.40 million rows/s., 27.93 MB/s.)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>An <code>EXPLAIN indexes = 1</code> confirms use of the index.</p>
+<div class="wrapper_EBtA" style="height:716.3000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1
+SELECT count()
+FROM stackoverflow.posts
+WHERE (CreationDate &gt; '2009-01-01') AND (ViewCount &gt; 10000000)
+
+┌─explain────────────────────────────────────────────────────────────┐
+│ Expression ((Project names + Projection))                          │
+│   Aggregating                                                      │
+│     Expression (Before GROUP BY)                                   │
+│       Expression                                                   │
+│         ReadFromMergeTree (stackoverflow.posts)                    │
+│         Indexes:                                                   │
+│           MinMax                                                   │
+│             Keys:                                                  │
+│               CreationDate                                         │
+│             Condition: (CreationDate in ('1230768000', +Inf))      │
+│             Parts: 123/128                                         │
+│             Granules: 8513/8545                                    │
+│           Partition                                                │
+│             Keys:                                                  │
+│               toYear(CreationDate)                                 │
+│             Condition: (toYear(CreationDate) in [2009, +Inf))      │
+│             Parts: 123/123                                         │
+│             Granules: 8513/8513                                    │
+│           PrimaryKey                                               │
+│             Keys:                                                  │
+│               toDate(CreationDate)                                 │
+│             Condition: (toDate(CreationDate) in [14245, +Inf))     │
+│             Parts: 123/123                                         │
+│             Granules: 8513/8513                                    │
+│           Skip                                                     │
+│             Name: view_count_idx                                   │
+│             Description: minmax GRANULARITY 1                      │
+│             Parts: 5/123                                           │
+│             Granules: 23/8513                                      │
+└────────────────────────────────────────────────────────────────────┘
+
+29 rows in set. Elapsed: 0.211 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We also show an animation how the minmax skipping index prunes all row blocks that can't possibly contain matches for the <code>ViewCount</code> &gt; 10,000,000 predicate in our example query:</p>
+<div style="position:relative;display:flex"><img alt="Using skipping indices" src="/docs/assets/images/using_skipping_indices-bb0da0780cb9a1590b323e198a336b10.gif" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px;box-shadow:none"/></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-docs">Related docs<a aria-label="Direct link to Related docs" class="hash-link" href="#related-docs" title="Direct link to Related docs">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/optimize/skipping-indexes">Data skipping indices guide</a></li>
+<li class="custom-li"><a href="/docs/optimize/skipping-indexes/examples">Data skipping index examples</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/alter/skipping-index">Manipulating data skipping indices</a></li>
+<li class="custom-li"><a href="/docs/operations/system-tables/data_skipping_indices">System table information</a></li>
+</ul></div></article><div></div><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/best-practices/selecting-an-insert-strategy"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Selecting an insert strategy</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/best-practices/avoid-mutations"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Avoid mutations</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#example">Example</a><li><a class="table-of-contents__link toc-highlight" href="#related-docs">Related docs</a></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

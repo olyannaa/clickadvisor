@@ -1,0 +1,33 @@
+id: D-001
+name: full_scan_on_partitioned_table
+tier: detector
+category: scan_efficiency
+status: proposed
+statement: схема содержит PARTITION BY; WHERE не фильтрует по partition-колонке
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: high
+detection_method:
+  ast_pattern: схема содержит PARTITION BY; WHERE не фильтрует по partition-колонке
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"Таблица {table} партиционирована по {part_col}, но фильтр
+  на эту колонку отсутствует. Сканируются все {N} партиций."'
+false_positives:
+- full aggregate без time-filter — может быть намеренным
+example_trigger: '`SELECT * FROM events WHERE user_id = 5` при `PARTITION BY toYYYYMM(date)`'

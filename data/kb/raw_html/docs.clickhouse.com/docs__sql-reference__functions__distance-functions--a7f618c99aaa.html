@@ -1,0 +1,381 @@
+<h1>Distance functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Distance</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/distance-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Distance functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="L1Distance">L1Distance<a aria-label="Direct link to L1Distance" class="hash-link" href="#L1Distance" title="Direct link to L1Distance">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the distance between two points (the elements of the vectors are the coordinates) in <code>L1</code> space (1-norm (<a href="https://en.wikipedia.org/wiki/Taxicab_geometry" rel="noopener noreferrer" target="_blank">taxicab geometry</a> distance)).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L1Distance(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceL1</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the 1-norm distance. For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, the return type follows the arithmetic result type of the element-wise operations (integer types are preserved). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L1Distance((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L1Distance((1, 2), (2, 3))─┐
+│                          2 │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L1Norm">L1Norm<a aria-label="Direct link to L1Norm" class="hash-link" href="#L1Norm" title="Direct link to L1Norm">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the sum of absolute elements of a vector.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L1Norm(vector)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normL1</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector</code> — Vector or tuple of numeric values. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the L1-norm or <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" rel="noopener noreferrer" target="_blank">taxicab geometry</a> distance. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L1Norm((1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L1Norm((1, 2))─┐
+│              3 │
+└────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L1Normalize">L1Normalize<a aria-label="Direct link to L1Normalize" class="hash-link" href="#L1Normalize" title="Direct link to L1Normalize">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the unit vector of a given vector (the elements of the tuple are the coordinates) in <code>L1</code> space (<a href="https://en.wikipedia.org/wiki/Taxicab_geometry" rel="noopener noreferrer" target="_blank">taxicab geometry</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L1Normalize(tuple)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normalizeL1</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — A tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the unit vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L1Normalize((1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L1Normalize((1, 2))─────────────────────┐
+│ (0.3333333333333333,0.6666666666666666) │
+└─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2Distance">L2Distance<a aria-label="Direct link to L2Distance" class="hash-link" href="#L2Distance" title="Direct link to L2Distance">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the distance between two points (the elements of the vectors are the coordinates) in Euclidean space (<a href="https://en.wikipedia.org/wiki/Euclidean_distance" rel="noopener noreferrer" target="_blank">Euclidean distance</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2Distance(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceL2</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the 2-norm distance. For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, always returns <code>Float64</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L2Distance((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L2Distance((1, 2), (2, 3))─┐
+│         1.4142135623730951 │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2DistanceTransposed">L2DistanceTransposed<a aria-label="Direct link to L2DistanceTransposed" class="hash-link" href="#L2DistanceTransposed" title="Direct link to L2DistanceTransposed">​</a></h2>
+<p>Introduced in: v25.10.0</p>
+<p>Calculates the approximate distance between two points (the values of the vectors are the coordinates) in Euclidean space (<a href="https://en.wikipedia.org/wiki/Euclidean_distance" rel="noopener noreferrer" target="_blank">Euclidean distance</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2DistanceTransposed(vector1, vector2, p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceL2Transposed</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vectors</code> — Vectors. <a href="/docs/sql-reference/data-types/qbit"><code>QBit(T, UInt64)</code></a></li>
+<li class="custom-li"><code>reference</code> — Reference vector. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>p</code> — Number of bits from each vector element to use in the distance calculation (1 to element bit-width). The quantization level controls the precision-speed trade-off. Using fewer bits results in faster I/O and calculations with reduced accuracy, while using more bits increases accuracy at the cost of performance. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the approximate 2-norm distance. Always returns <code>Float64</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE qbit (id UInt32, vec QBit(Float64, 2)) ENGINE = Memory;
+INSERT INTO qbit VALUES (1, [0, 1]);
+SELECT L2DistanceTransposed(vec, array(1, 2), 16) FROM qbit;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L2DistanceTransposed([0, 1], [1, 2], 16)─┐
+│                       1.4142135623730951 │
+└──────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2Norm">L2Norm<a aria-label="Direct link to L2Norm" class="hash-link" href="#L2Norm" title="Direct link to L2Norm">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the square root of the sum of the squares of the vector elements.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2Norm(vector)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normL2</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector</code> — Vector or tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the L2-norm or <a href="https://en.wikipedia.org/wiki/Euclidean_distance" rel="noopener noreferrer" target="_blank">Euclidean distance</a>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L2Norm((1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───L2Norm((1, 2))─┐
+│ 2.23606797749979 │
+└──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2Normalize">L2Normalize<a aria-label="Direct link to L2Normalize" class="hash-link" href="#L2Normalize" title="Direct link to L2Normalize">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the unit vector of a given vector (the elements of the tuple are the coordinates) in Euclidean space (using <a href="https://en.wikipedia.org/wiki/Euclidean_distance" rel="noopener noreferrer" target="_blank">Euclidean distance</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2Normalize(tuple)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normalizeL2</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — A tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the unit vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L2Normalize((3, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L2Normalize((3, 4))─┐
+│ (0.6,0.8)           │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2SquaredDistance">L2SquaredDistance<a aria-label="Direct link to L2SquaredDistance" class="hash-link" href="#L2SquaredDistance" title="Direct link to L2SquaredDistance">​</a></h2>
+<p>Introduced in: v22.7.0</p>
+<p>Calculates the sum of the squares of the difference between the corresponding elements of two vectors.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2SquaredDistance(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceL2Squared</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the sum of the squares of the differences between the corresponding elements of two vectors. For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, the return type follows the arithmetic result type of the element-wise operations (integer types are preserved). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L2SquaredDistance([1, 2, 3], [0, 0, 0])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L2SquaredDis⋯ [0, 0, 0])─┐
+│                       14 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="L2SquaredNorm">L2SquaredNorm<a aria-label="Direct link to L2SquaredNorm" class="hash-link" href="#L2SquaredNorm" title="Direct link to L2SquaredNorm">​</a></h2>
+<p>Introduced in: v22.7.0</p>
+<p>Calculates the square root of the sum of the squares of the vector elements (the <a href="#L2Norm"><code>L2Norm</code></a>) squared.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">L2SquaredNorm(vector)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normL2Squared</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector</code> — Vector or tuple of numeric values. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the L2-norm squared. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT L2SquaredNorm((1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─L2SquaredNorm((1, 2))─┐
+│                     5 │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LinfDistance">LinfDistance<a aria-label="Direct link to LinfDistance" class="hash-link" href="#LinfDistance" title="Direct link to LinfDistance">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the distance between two points (the elements of the vectors are the coordinates) in <code>L_{inf}</code> space (<a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#Maximum_norm_(special_case_of:_infinity_norm,_uniform_norm,_or_supremum_norm)" rel="noopener noreferrer" target="_blank">maximum norm</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LinfDistance(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceLinf</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the infinity-norm distance. For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, always returns <code>Float64</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LinfDistance((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LinfDistance((1, 2), (2, 3))─┐
+│                            1 │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LinfNorm">LinfNorm<a aria-label="Direct link to LinfNorm" class="hash-link" href="#LinfNorm" title="Direct link to LinfNorm">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the maximum of absolute elements of a vector.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LinfNorm(vector)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normLinf</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector</code> — Vector or tuple of numeric values. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the Linf-norm or the maximum absolute value. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LinfNorm((1, -2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LinfNorm((1, -2))─┐
+│                 2 │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LinfNormalize">LinfNormalize<a aria-label="Direct link to LinfNormalize" class="hash-link" href="#LinfNormalize" title="Direct link to LinfNormalize">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the unit vector of a given vector (the elements of the tuple are the coordinates) in <code>L_{inf}</code> space (using <a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#Maximum_norm_(special_case_of:_infinity_norm,_uniform_norm,_or_supremum_norm)" rel="noopener noreferrer" target="_blank">maximum norm</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LinfNormalize(tuple)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normalizeLinf</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — A tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the unit vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LinfNormalize((3, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LinfNormalize((3, 4))─┐
+│ (0.75,1)              │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LpDistance">LpDistance<a aria-label="Direct link to LpDistance" class="hash-link" href="#LpDistance" title="Direct link to LpDistance">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the distance between two points (the elements of the vectors are the coordinates) in <code>Lp</code> space (<a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#p-norm" rel="noopener noreferrer" target="_blank">p-norm distance</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LpDistance(vector1, vector2, p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceLp</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>p</code> — The power. Possible values: real number from <code>[1; inf)</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the p-norm distance. For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, always returns <code>Float64</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LpDistance((1, 2), (2, 3), 3)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LpDistance((1, 2), (2, 3), 3)─┐
+│            1.2599210498948732 │
+└───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LpNorm">LpNorm<a aria-label="Direct link to LpNorm" class="hash-link" href="#LpNorm" title="Direct link to LpNorm">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the p-norm of a vector, which is the p-th root of the sum of the p-th powers of the absolute elements of its elements.</p>
+<p>Special cases:</p>
+<ul class="custom-ul">
+<li class="custom-li">When p=1, it's equivalent to L1Norm (Manhattan distance).</li>
+<li class="custom-li">When p=2, it's equivalent to L2Norm (Euclidean distance).</li>
+<li class="custom-li">When p=∞, it's equivalent to LinfNorm (maximum norm).</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LpNorm(vector, p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normLp</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector</code> — Vector or tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>p</code> — The power. Possible values are real numbers in the range <code>[1; inf)</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the <a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#p-norm" rel="noopener noreferrer" target="_blank">Lp-norm</a>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LpNorm((1, -2), 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LpNorm((1, -2), 2)─┐
+│   2.23606797749979 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="LpNormalize">LpNormalize<a aria-label="Direct link to LpNormalize" class="hash-link" href="#LpNormalize" title="Direct link to LpNormalize">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the unit vector of a given vector (the elements of the tuple are the coordinates) in <code>Lp</code> space (using <a href="https://en.wikipedia.org/wiki/Norm_(mathematics)#p-norm" rel="noopener noreferrer" target="_blank">p-norm</a>).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">LpNormalize(tuple, p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>normalizeLp</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — A tuple of numeric values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+<li class="custom-li"><code>p</code> — The power. Possible values are any number in the range range from <code>[1; inf)</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the unit vector. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT LpNormalize((3, 4), 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─LpNormalize((3, 4), 5)──────────────────┐
+│ (0.7187302630182624,0.9583070173576831) │
+└─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cosineDistance">cosineDistance<a aria-label="Direct link to cosineDistance" class="hash-link" href="#cosineDistance" title="Direct link to cosineDistance">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the <a href="https://en.wikipedia.org/wiki/Cosine_similarity#Cosine_distance" rel="noopener noreferrer" target="_blank">cosine distance</a> between two vectors (the elements of the tuples are the coordinates). The smaller the returned value is, the more similar are the vectors.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cosineDistance(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceCosine</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the cosine distance (one minus the cosine similarity). For <code>Array</code> inputs, returns <code>Float32</code> if the least common supertype of the element types is <code>Float32</code> or <code>BFloat16</code>, otherwise <code>Float64</code>. For <code>Tuple</code> inputs, always returns <code>Float64</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cosineDistance((1, 2), (2, 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cosineDistance((1, 2), (2, 3))─┐
+│           0.007722123286332261 │
+└────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cosineDistanceTransposed">cosineDistanceTransposed<a aria-label="Direct link to cosineDistanceTransposed" class="hash-link" href="#cosineDistanceTransposed" title="Direct link to cosineDistanceTransposed">​</a></h2>
+<p>Introduced in: v26.1.0</p>
+<p>Calculates the approximate <a href="https://en.wikipedia.org/wiki/Cosine_similarity#Cosine_distance" rel="noopener noreferrer" target="_blank">cosine distance</a> between two points (the values of the vectors are the coordinates). The smaller the returned value is, the more similar are the vectors.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cosineDistanceTransposed(vector1, vector2, p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>distanceCosineTransposed</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vectors</code> — Vectors. <a href="/docs/sql-reference/data-types/qbit"><code>QBit(T, UInt64)</code></a></li>
+<li class="custom-li"><code>reference</code> — Reference vector. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>p</code> — Number of bits from each vector element to use in the distance calculation (1 to element bit-width). The quantization level controls the precision-speed trade-off. Using fewer bits results in faster I/O and calculations with reduced accuracy, while using more bits increases accuracy at the cost of performance. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the approximate cosine distance (one minus the cosine similarity). Always returns Float64. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE qbit (id UInt32, vec QBit(Float64, 2)) ENGINE = Memory;
+INSERT INTO qbit VALUES (1, [0, 1]);
+SELECT cosineDistanceTransposed(vec, array(1, 2), 16) FROM qbit;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cosineDistanceTransposed([0, 1], [1, 2], 16)─┐
+│                          0.10557281085638826 │
+└──────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/date-time-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Dates and time</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/ym-dict-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Embedded dictionary</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#L1Distance">L1Distance</a><li><a class="table-of-contents__link toc-highlight" href="#L1Norm">L1Norm</a><li><a class="table-of-contents__link toc-highlight" href="#L1Normalize">L1Normalize</a><li><a class="table-of-contents__link toc-highlight" href="#L2Distance">L2Distance</a><li><a class="table-of-contents__link toc-highlight" href="#L2DistanceTransposed">L2DistanceTransposed</a><li><a class="table-of-contents__link toc-highlight" href="#L2Norm">L2Norm</a><li><a class="table-of-contents__link toc-highlight" href="#L2Normalize">L2Normalize</a><li><a class="table-of-contents__link toc-highlight" href="#L2SquaredDistance">L2SquaredDistance</a><li><a class="table-of-contents__link toc-highlight" href="#L2SquaredNorm">L2SquaredNorm</a><li><a class="table-of-contents__link toc-highlight" href="#LinfDistance">LinfDistance</a><li><a class="table-of-contents__link toc-highlight" href="#LinfNorm">LinfNorm</a><li><a class="table-of-contents__link toc-highlight" href="#LinfNormalize">LinfNormalize</a><li><a class="table-of-contents__link toc-highlight" href="#LpDistance">LpDistance</a><li><a class="table-of-contents__link toc-highlight" href="#LpNorm">LpNorm</a><li><a class="table-of-contents__link toc-highlight" href="#LpNormalize">LpNormalize</a><li><a class="table-of-contents__link toc-highlight" href="#cosineDistance">cosineDistance</a><li><a class="table-of-contents__link toc-highlight" href="#cosineDistanceTransposed">cosineDistanceTransposed</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

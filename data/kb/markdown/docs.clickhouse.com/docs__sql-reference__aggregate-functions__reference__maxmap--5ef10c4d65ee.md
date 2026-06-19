@@ -1,0 +1,63 @@
+# maxMap \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- maxMap
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/maxMappedArrays.md)# maxMap
+
+## maxMappedArrays[​](#maxMappedArrays "Direct link to maxMappedArrays")
+
+
+Introduced in: v20\.5\.0
+
+
+Calculates the maximum from `value` array according to the keys specified in the `key` array.
+
+
+Note- Passing a tuple of keys and value arrays is identical to passing an array of keys and an array of values.
+- The number of elements in `key` and `value` must be the same for each row that is totaled.
+
+**Syntax**
+
+
+
+```
+maxMappedArrays(key, value)
+maxMappedArrays(Tuple(key, value))
+
+```
+
+**Arguments**
+
+
+- `key` — Array of keys. [`Array(T)`](/docs/sql-reference/data-types/array)
+- `value` — Array of values. [`Array(T)`](/docs/sql-reference/data-types/array)
+
+
+**Returned value**
+
+
+Returns a tuple of two arrays: keys in sorted order, and values calculated for the corresponding keys. [`Tuple(Array(T), Array(T))`](/docs/sql-reference/data-types/tuple)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+SELECT maxMappedArrays(a, b)
+FROM VALUES('a Array(Char), b Array(Int64)', (['x', 'y'], [2, 2]), (['y', 'z'], [3, 1]));
+
+```
+
+
+```
+┌─maxMappedArrays(a, b)───┐
+│ (['x','y','z'],[2,3,1]) │
+└─────────────────────────┘
+
+```
+[PreviousmaxIntersectionsPosition](/docs/sql-reference/aggregate-functions/reference/maxintersectionsposition)[NextmeanZTest](/docs/sql-reference/aggregate-functions/reference/meanztest)- [maxMappedArrays](#maxMappedArrays)
+Was this page helpful?

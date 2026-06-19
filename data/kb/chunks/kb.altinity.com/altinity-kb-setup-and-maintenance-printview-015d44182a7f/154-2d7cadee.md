@@ -1,0 +1,70 @@
+---
+source: kb.altinity.com
+url: http://s3.us-east-1.amazonaws.com/BUCKET_NAME/test_s3_disk/</endpoint>
+topic: setup-maintenance-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '98.091'
+last_updated: '2026-06-12'
+chunk_index: 154
+total_chunks_in_doc: 186
+---
+
+limitations. The most typical is `<max_execution_time>` It’s actually also not a way to plan/share existing resources better, but it at least disciplines users. Also introducing some [restrictions on query complexity](https://clickhouse.tech/docs/en/operations/settings/query-complexity/) can be a good option to discipline users.
+
+You can find the preset example [here](https://clickhouse.tech/docs/en/operations/settings/settings-profiles/)
+.
+Also, force\_index\_by\_date \+ force\_primary\_key can be a nice idea to avoid queries that ‘accidentally’ do full scans, max\_concurrent\_queries\_for\_user
+8. merge\_tree settings: `max_bytes_to_merge_at_max_space_in_pool` (may be reduced in some scenarios), `inactive_parts_to_throw_insert` \- can be enabled, `replicated_deduplication_window` \- can be extended if single insert create lot of parts , `merge_with_ttl_timeout` \- when you use ttl
+9. `insert_distributed_sync` \- for small clusters you may sometimes want to enable it
+10. when the durability is the main requirement (or server / storage is not stable) \- you may want to enable `fsync_*` setting (impacts the write performance significantly!!), and `insert_quorum`
+11. If you use FINAL queries \- usually you want to enable `do_not_merge_across_partitions_select_final`
+12. memory usage per server / query / user: [memory configuration settings](/altinity-kb-setup-and-maintenance/altinity-kb-memory-configuration-settings/)
+13. if you use async\_inserts \- you often may want to increase max\_concurrent\_queries
+
+```
+<clickhouse>
+    <max_concurrent_queries>500</max_concurrent_queries>
+    <max_concurrent_insert_queries>400</max_concurrent_insert_queries>
+    <max_concurrent_select_queries>100</max_concurrent_select_queries>
+</clickhouse>
+
+```
+11. materialize\_ttl\_after\_modify\=0
+12. access\_management\=1
+13. secret in \<remote\_servers\>
+
+See also:
+
+[https://docs.altinity.com/operationsguide/security/clickhouse\-hardening\-guide/](https://docs.altinity.com/operationsguide/security/clickhouse-hardening-guide/)
+
+# 61 \- Shutting down a node
+
+Shutting down a nodeIt’s possible to shutdown server on fly, but that would lead to failure of some queries.
+
+More safer way:
+
+- Remove server (which is going to be disabled) from remote\_server section of config.xml on all servers.
+
+	- avoid removing the last replica of the shard (that can lead to incorrect data placement if you use non\-random distribution)
+- Remove server from load balancer, so new queries wouldn’t hit it.
+- Detach Kafka / Rabbit / Buffer tables (if used), and Materialized\* databases.
+- Wait until all already running queries would finish execution on it.
+It’s possible to check it via query:
+
+```
+SHOW PROCESSLIST;
+
+```
+- Ensure there is no pending data in distributed tables
+
+```
+SELECT * FROM system.distribution_queue;
+SYSTEM FLUSH DISTRIBUTED <table_name>;
+
+```
+- Run sync replica query in related shard replicas (others than the one you remove) via query:
+
+```
+SYSTEM SYNC REPLICA db.table;
+
+```
+- Shutdown server.

@@ -1,0 +1,18 @@
+case_id: synthetic_09
+source: synthetic
+sql: |
+  SELECT * FROM events WHERE country IN ('RU')
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: in_singleton_to_equality
+  detected_by_rule: R-009
+  severity: high
+  description: Singleton IN по country можно заменить на простое равенство.
+expected_rules_to_fire:
+- R-009
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-009.
+expected_findings_count: 1
+status: validated

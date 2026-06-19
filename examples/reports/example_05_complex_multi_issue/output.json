@@ -1,0 +1,143 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-05-25T12:26:00Z",
+  "analyzer_version": "0.1.0",
+  "llm_mode": "local",
+  "input_summary": {
+    "statements_total": 1,
+    "target_statements": 1,
+    "schema_tables_seen": 1,
+    "explain_kinds": ["PLAN"]
+  },
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "finding_type": "rule_match",
+      "rule_id": "R-010",
+      "tier": "1A",
+      "title": "Collapse OR chain into IN",
+      "severity": "low",
+      "confidence": 0.99,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "toDate(event_time)=... OR toDate(event_time)=...",
+        "plan_signals": ["Expression"],
+        "metadata_signals": []
+      },
+      "recommendation": {
+        "before_sql": "WHERE toDate(event_time) = toDate('2026-05-01') OR toDate(event_time) = toDate('2026-05-02')",
+        "after_sql": "WHERE toDate(event_time) IN (toDate('2026-05-01'), toDate('2026-05-02'))",
+        "notes": []
+      }
+    },
+    {
+      "finding_id": "F-002",
+      "finding_type": "rule_match",
+      "rule_id": "R-015",
+      "tier": "1A",
+      "title": "Remove DISTINCT after GROUP BY",
+      "severity": "medium",
+      "confidence": 0.98,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "SELECT DISTINCT ... GROUP BY user_id",
+        "plan_signals": ["Distinct", "Aggregating"],
+        "metadata_signals": []
+      },
+      "recommendation": {
+        "before_sql": "SELECT DISTINCT user_id, count(DISTINCT session_id) AS sessions, sumIf(revenue, event_type = 'purchase') AS revenue_sum FROM base GROUP BY user_id",
+        "after_sql": "SELECT user_id, count(DISTINCT session_id) AS sessions, sumIf(revenue, event_type = 'purchase') AS revenue_sum FROM base GROUP BY user_id",
+        "notes": []
+      }
+    },
+    {
+      "finding_id": "F-003",
+      "finding_type": "rule_match",
+      "rule_id": "R-009",
+      "tier": "1A",
+      "title": "Replace singleton IN with equality",
+      "severity": "low",
+      "confidence": 0.99,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "user_id IN (42)",
+        "plan_signals": [],
+        "metadata_signals": []
+      },
+      "recommendation": {
+        "before_sql": "HAVING user_id IN (42)",
+        "after_sql": "HAVING user_id = 42",
+        "notes": []
+      }
+    },
+    {
+      "finding_id": "F-004",
+      "finding_type": "rule_match",
+      "rule_id": "R-001",
+      "tier": "1A",
+      "title": "Use uniqExact for exact distinct counting",
+      "severity": "medium",
+      "confidence": 0.97,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "count(DISTINCT session_id)",
+        "plan_signals": ["Aggregating"],
+        "metadata_signals": []
+      },
+      "recommendation": {
+        "before_sql": "count(DISTINCT session_id) AS sessions",
+        "after_sql": "uniqExact(session_id) AS sessions",
+        "notes": []
+      }
+    },
+    {
+      "finding_id": "F-005",
+      "finding_type": "rule_match",
+      "rule_id": "R-005",
+      "tier": "1A",
+      "title": "Rewrite toDate equality into datetime range",
+      "severity": "high",
+      "confidence": 0.95,
+      "statement_ref": "main",
+      "evidence": {
+        "matched_pattern": "toDate(event_time) predicate on DateTime column",
+        "plan_signals": ["ReadFromMergeTree"],
+        "metadata_signals": ["marks=24100"]
+      },
+      "recommendation": {
+        "before_sql": "WHERE toDate(event_time) IN (toDate('2026-05-01'), toDate('2026-05-02'))",
+        "after_sql": "WHERE (event_time >= toDateTime('2026-05-01 00:00:00') AND event_time < toDateTime('2026-05-03 00:00:00'))",
+        "notes": ["Potentially strongest impact among formal findings."]
+      }
+    },
+    {
+      "finding_id": "F-006",
+      "finding_type": "advisory",
+      "tier": "3",
+      "title": "Evaluate projection or PREWHERE-friendly shape for repeated event filters",
+      "confidence": 0.57,
+      "verification_required": true,
+      "evidence": {
+        "matched_pattern": "multi-issue scan-heavy aggregation query",
+        "plan_signals": ["ReadFromMergeTree", "Aggregating", "Distinct"],
+        "metadata_signals": []
+      },
+      "recommendation": {
+        "before_sql": null,
+        "after_sql": null,
+        "notes": [
+          "Advisory only.",
+          "Verify against production schema and settings before acting."
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "findings_total": 6,
+    "by_tier": {
+      "1A": 5,
+      "3": 1
+    },
+    "estimated_cost_reduction": "high"
+  }
+}

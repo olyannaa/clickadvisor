@@ -1,0 +1,832 @@
+<h1>Vector Search with ClickHouse - Part 2</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">Vector Search with ClickHouse - Part 2</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="Dale McDirmid" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/dale-mcdiarmid">Dale McDiarmid</a></div><div class="text-sm text-neutral-300">May 31, 2023 · 45 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="rich_content rich-text-content mb-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-header&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. To learn more about our volume-based discounts, <a href="/company/contact?loc=blog-cta-header">contact us</a> or visit our <a href="/pricing?loc=blog-cta-header">pricing page</a>.</p></div><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="table-of-contents" level="2" style="margin-bottom:20px">Table of Contents<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#table-of-contents">#</a></span></h2>
+<ul>
+<li><a href="blog/vector-search-clickhouse-p2#introduction">Introduction</a></li>
+<li><a href="blog/vector-search-clickhouse-p2#when-should-i-use-clickhouse-for-vector-search">When should I use ClickHouse for vector search?</a></li>
+<li><a href="blog/vector-search-clickhouse-p2#setting-up-an-example">Setting up an example</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#the-laion-dataset">The LAION dataset</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#using-the-clip-model-to-generate-embeddings">Using the CLIP model to generate embeddings</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#preparing-the-data-for-loading">Preparing the data for loading</a></li>
+</ul>
+</li>
+<li><a href="blog/vector-search-clickhouse-p2#storing-vectors-in-clickhouse">Storing vectors in ClickHouse</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#schema-and-loading-process">Schema and loading process</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#storage-performance-with-compression">Storage performance with compression</a></li>
+</ul>
+</li>
+<li><a href="blog/vector-search-clickhouse-p2#searching-vectors-in-clickhouse">Searching vectors in ClickHouse</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#choosing-a-distance-function">Choosing a distance function</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#generating-an-input-vector">Generating an input vector</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#putting-it-all-together">Putting it all together</a></li>
+</ul>
+</li>
+<li><a href="blog/vector-search-clickhouse-p2#the-benefits-of-sql">The benefits of SQL</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#filtering-with-metadata">Filtering with metadata</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#aggregating-with-metadata">Aggregating with metadata</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#using-inverted-indices">Using inverted indices</a></li>
+</ul>
+</li>
+<li><a href="blog/vector-search-clickhouse-p2#advanced-features">Advanced features</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#approximate-nearest-neighbour-annoy">Approximate Nearest Neighbour (Annoy)</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#user-defined-functions-udfs">User Defined Functions (UDFs)</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#improving-compression">Improving compression</a></li>
+<li style="margin-top:10px"><a href="blog/vector-search-clickhouse-p2#bonus-vector-fun">Bonus vector fun</a></li>
+</ul>
+</li>
+<li><a href="blog/vector-search-clickhouse-p2#conclusion">Conclusion</a></li>
+</ul>
+</div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="introduction" level="2">Introduction<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#introduction">#</a></span></h2>
+<p>This blog post continues our series on vector search, building on the <a href="https://clickhouse.com/blog/vector-search-clickhouse-p1">previous post</a> where we provided an overview of what vector search is, its relation to historical inverted index-based approaches, possible use cases for which it currently delivers value, and some high-level implementation approaches. In this post, we explore vector search in relation to ClickHouse in detail through practical examples as well as answering the question, "When should I use ClickHouse for vector search?"</p>
+<p>For our examples, we utilize a ClickHouse Cloud cluster with a total of 60 cores and 240GB of RAM per node. These examples should, however, be reproducible on an equivalently sized self-managed cluster. Alternatively, <a href="https://clickhouse.cloud/signUp">start your ClickHouse Cloud</a> cluster today, and receive $300 of credit. Let us worry about the infrastructure, and get querying!</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="when-should-i-use-clickhouse-for-vector-search" level="2">When should I use ClickHouse for vector search?<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#when-should-i-use-clickhouse-for-vector-search">#</a></span></h2>
+<p>ClickHouse is a real-time OLAP database with full SQL support and a wide range of functions to assist users in writing analytical queries. Some of these functions and data structures perform distance operations between vectors, enabling ClickHouse to be used as a vector database.</p>
+<p>Due to the fully parallelized query pipeline, ClickHouse can process vector search operations very quickly, especially when performing exact matching through a linear scan over all rows, delivering processing speed comparable to dedicated vector databases.</p>
+<p>High compression levels, tunable through custom compression codecs, enable very large datasets to be stored and queried. ClickHouse is not memory-bound, allowing multi-TB datasets containing embeddings to be queried.</p>
+<p>The capabilities for computing the distance between two vectors are just another SQL function and can be effectively combined with more traditional SQL filtering and aggregation capabilities. This allows vectors to be stored and queried alongside metadata, and even rich text, enabling a broad array of use cases and applications.</p>
+<p>Finally, experimental ClickHouse capabilities like Approximate Nearest Neighbour (ANN) indices support faster approximate matching of vectors and provide a promising development aimed to further enhance the vector matching capabilities of ClickHouse.</p>
+<p>In summary, ClickHouse is an effective platform for vector search when any of the following are true:</p>
+<ul>
+<li>You wish to combine vector matching with filtering on metadata and/or aggregation or join capabilities</li>
+<li>You need to perform linear distance matching over very large vector datasets and wish to parallelize and distribute this work across many CPU cores with no additional work or configuration</li>
+<li>You need to match on vector datasets of a size where relying on memory-only indices is not viable either due to cost or availability of hardware</li>
+<li>You would benefit from full SQL support when querying your vectors</li>
+<li>You have an existing embedding generation pipeline that produces your vectors and do not require this capability to be native to your storage engine</li>
+<li>You already have related data in ClickHouse and do not wish to incur the overhead and cost of learning another tool for a few million vectors</li>
+<li>You principally need fast parallelized exact matching of your vectors and do not need a production implementation of ANN (yet!)</li>
+<li>You're an experienced or curious ClickHouse user and trust us to improve our vector matching capabilities and wish to be part of this journey</li>
+</ul>
+<p>While this covers a wide range of use cases, there are some instances where ClickHouse may be less appropriate as a vector storage engine, and you may wish to consider alternatives such as <a href="https://github.com/facebookresearch/faiss">Faiss</a>, or a dedicated vector database. Today ClickHouse may provide fewer benefits as a vector search engine if:</p>
+<ul>
+<li>Your vector dataset is small and easily fits in memory. While ClickHouse can easily accomplish vector search for small datasets, it may be more powerful than is needed in this case.</li>
+<li>You have no additional metadata with the vectors and need distance matching and sorting only. If joining vector search results with other metadata isn’t useful, and your dataset is small, then as described above, ClickHouse may be more powerful than you really need.</li>
+<li>You have a very high QPS, greater than several thousand per second. Typically, for these use cases, the dataset will fit in memory, and matching times of a few ms are required. While ClickHouse can serve these use cases, a simple in-memory index is probably sufficient.</li>
+<li>You need a solution that includes embedding generation capabilities out-of-the-box, where a model is integrated at insert and query time. Vector databases, such as Weaviate, are specifically designed for this use case and may be more appropriate given these needs.</li>
+</ul>
+<p>With this in mind, let's explore the vector capabilities of ClickHouse.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="setting-up-an-example" level="2">Setting up an example<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#setting-up-an-example">#</a></span></h2>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="the-laion-dataset" level="3">The LAION dataset<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#the-laion-dataset">#</a></span></h3>
+<p>As discussed in our previous post, vector search operates on embeddings – vectors representing a contextual meaning. Embeddings are generated by passing raw content, such as images or text, through a pre-trained machine learning model.</p>
+<p>For this post, we used a prepared set of embeddings, available publicly for download, called the <a href="https://laion.ai/blog/laion-5b/">LAION 5 billion test set</a>. We selected this dataset because we believe at the time of writing this to be the largest available dataset of pre-computed embeddings available for testing. It consists of embeddings with a dimension of 768 for several billion public images on the internet and their captions, generated through a public crawl of the internet. Created with the explicit purpose of testing vector search at scale, it also includes metadata that is in turn useful for illustrating how to combine general purpose analytics capabilities of ClickHouse with vector search.</p>
+<p>In the LAION dataset, embeddings have been generated for each image and its associated caption - giving us two embeddings for each object. For this post, we have focused on the English subset only, which consists of a reduced 2.2 billion objects. Although each of these objects has two embeddings, one for its image and one caption, respectively, we store each pair as a single row in ClickHouse, giving us almost 2.2 billion rows in total and 4.4 billion vectors. For each row, we include the metadata as columns, which captures information such as the image dimensions, the similarity of the image, and caption embedding. This similarity, a cosine distance, allows us to identify objects where the caption and image do not conceptually align, potentially filtering these out in queries.</p>
+<p>We want to acknowledge the effort required by the original authors to collate this dataset and produce the embeddings for public use. We recommend reading the full <a href="https://laion.ai/blog/laion-5b/">process for generating</a> this dataset, which overcame a number of challenging data engineering challenges, such as downloading and resizing billions of images efficiently and in a reasonable time and at an acceptable cost.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="using-the-clip-model-to-generate-embeddings" level="3">Using the CLIP model to generate embeddings<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#using-the-clip-model-to-generate-embeddings">#</a></span></h3>
+<p>These LAION embeddings were generated with the ViT-L/14 model, trained by LAION using <a href="https://laion.ai/blog/large-openclip/">openCLIP</a>, an open source implementation of the <a href="https://openai.com/research/clip">CLIP model developed by OpenAI</a>. This isn't a cheap process! On 400 million images, this took around 30 days and needed 592 V100 GPUs (about $1M on AWS on-demand instances).</p>
+<p>CLIP (Contrastive Language–Image Pre-training) is a multi-modal model, which means that it is designed to train multiple related types of data, such as images and associated text. CLIP has proved effective at learning visual representations of text with promising results in OCR, geolocalisation, and action recognition. For encoding of the images, the authors of CLIP used Resnet50 and Vision Transformer (ViT), and for the encoding of the text used a transformer similar to GPT-2 . Resulting embeddings are represented as two separate sets of vectors.</p>
+<p>The key outcome of the training process is that the embeddings for the two data types are comparable – if the vectors for an image and the caption are close, then they can be considered conceptually similar. A good model like CLIP would result in close embeddings with respect to distance, or a high value close to 1 for cosine similarity, for an image vector and its associated caption vector. This is illustrated below in the image below, where T1 is the embedded representation of the 1st image's caption, and I1 is the encoding of the image itself. This means we want to maximize the diagonal of this matrix during the training process, where our images and text coincide.</p>
+<p>As a post-processing step, the authors discarded images where the cosine similarity with the text caption was less than 0.28, thus filtering out potentially poor quality results where the caption and image don’t align. Further filtering by image size, caption length, possible illegality, and removal of duplicates reduced the total dataset from over 5 billion to 2.2 billion.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="clip_pretrain.png" loading="lazy" src="/uploads/clip_pretrain_6be92ed159.png"/></span>
+<em>Credit: <a href="https://openai.com/research/clip">https://openai.com/research/clip</a></em>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="preparing-the-data-for-loading" level="3">Preparing the data for loading<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#preparing-the-data-for-loading">#</a></span></h3>
+<p>The LAION dataset is downloadable from a number of sources. Selecting the English subset, we utilized the <a href="https://huggingface.co/datasets/laion/laion2b-en-vit-l-14-embeddings">version hosted by Hugging Face</a>. This service relies on Git Large File Storage (LFS), which requires a client to be installed to download files. Once installed, downloading the data requires a single command. For this, ensure you have at least 20TB of disk space available.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word">git lfs install
+git clone https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>huggingface.co<span class="hljs-operator">/</span>datasets<span class="hljs-operator">/</span>laion<span class="hljs-operator">/</span>laion2b<span class="hljs-operator">-</span>en<span class="hljs-operator">-</span>vit<span class="hljs-operator">-</span>l<span class="hljs-number">-14</span><span class="hljs-operator">-</span>embeddings
+</code></pre>
+<p>Download consists of three folders; two of these contain embeddings in the format <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">npy</code> (effectively a multi-dimensional array format) for the images and captions, and the third directory contains Parquet files containing the metadata for each image and caption pair.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">ubuntu@ip-172-31-2-70:/data$ <span class="hljs-built_in">ls</span> -l ./laion2b-en-vit-l-14-embeddings
+total 456
+drwxrwxr-x 2 ubuntu ubuntu  77824 May 16 12:28 img_emb
+drwxrwxr-x 2 ubuntu ubuntu 110592 May 16 12:27 metadata
+drwxrwxr-x 2 ubuntu ubuntu 270336 May 16 12:28 text_emb
+</code></pre>
+<p>To load this data into ClickHouse, we wanted to produce a single row per embedding pair with the metadata for enrichment. This would require a process that merged the respective embedding and metadata for each object. Considering that vectors in ClickHouse can be represented as an array of Floats, a JSON row produced as a result of this process may look like the following:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+ <span class="hljs-attr">"key"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"196060024"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"url"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"https://cdn.shopify.com/s/files/1/1194/1070/products/s-l1600_16_-_Copy_110x110@2x.jpg?v=1477414012"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"caption"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"MERCEDES BENZ G65 RIDE-ON TOY CAR WITH PARENTAL REMOTE |  CHERRY"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"similarity"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0.33110910654067993</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"width"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"220"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"height"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"147"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"original_width"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"220"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"original_height"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"147"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"status"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"success"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"NSFW"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"UNLIKELY"</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"exif"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+   <span class="hljs-attr">"Image Orientation"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Horizontal (normal)"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"Image XResolution"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"72"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"Image YResolution"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"72"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"Image ResolutionUnit"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Pixels/Inch"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"Image YCbCrPositioning"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Centered"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"Image ExifOffset"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"102"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF ExifVersion"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"0210"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF ComponentsConfiguration"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"YCbCr"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF FlashPixVersion"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"0100"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF ColorSpace"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Uncalibrated"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF ExifImageWidth"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"220"</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-attr">"EXIF ExifImageLength"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"147"</span>
+ <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"text_embedding"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+   <span class="hljs-number">0.025299072265625</span><span class="hljs-punctuation">,</span>
+   ...
+   <span class="hljs-number">-0.031829833984375</span>
+ <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+ <span class="hljs-attr">"image_embedding"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+   <span class="hljs-number">0.0302276611328125</span><span class="hljs-punctuation">,</span>
+   ...
+   <span class="hljs-number">-0.00667572021484375</span>
+ <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>The full code for pre-processing the dataset can be found <a href="https://github.com/clickHouse/laion">here</a>. The final 2313 Parquet files generated as a result of this process consume around 5.9TB of disk space. We have combined these to produce a 6TB Parquet dataset our users can <a href="javascript:void(0)">s3://datasets-documentation/laion/</a> and use to reproduce examples.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="storing-vectors-in-clickhouse" level="2">Storing vectors in ClickHouse<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#storing-vectors-in-clickhouse">#</a></span></h2>
+<p>Loading resulting Parquet files into ClickHouse requires a few simple steps.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="schema-and-loading-process" level="3">Schema and loading process<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#schema-and-loading-process">#</a></span></h3>
+<p>The following shows our table schema, with embeddings stored as <a href="https://clickhouse.com/docs/en/sql-reference/data-types/array"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Array(Float32)</code></a> columns.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> laion
+(
+	`_file` LowCardinality(String),
+	`key` String,
+	`url` String,
+	`caption` String,
+	`similarity` Float64,
+	`width` Int64,
+	`height` Int64,
+	`original_width` Int64,
+	`original_height` Int64,
+	`status` LowCardinality(String),
+	`NSFW` LowCardinality(String),
+	`exif` Map(String, String),
+	`text_embedding` <span class="hljs-keyword">Array</span>(Float32),
+	`image_embedding` <span class="hljs-keyword">Array</span>(Float32),
+	`orientation` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Orientation'</span>],
+	`software` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Software'</span>],
+	`copyright` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Copyright'</span>],
+	`image_make` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Make'</span>],
+	`image_model` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Model'</span>]
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (height, width, similarity)
+</code></pre>
+<p>The <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">exif</code> column contains metadata we can later use for filtering and aggregation. We have mapped this as a<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Map(String,String)</code> for flexibility and schema succinctness. This column contains over 100,000 unique meta labels. Accessing a sub key requires all of the keys to be loaded from the column, potentially slowing down some queries, so we have extracted five properties of interest to the root for later analytics using the <a href="https://clickhouse.com/docs/en/sql-reference/statements/create/table#default"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">DEFAULT</code> syntax</a>. For users interested in the full list of available meta properties, the following query can be used to identify available Map keys and their frequency:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	arrayJoin(mapKeys(exif)) <span class="hljs-keyword">AS</span> keys,
+	<span class="hljs-built_in">count</span>() <span class="hljs-keyword">AS</span> c
+<span class="hljs-keyword">FROM</span> laion
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> keys
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> c <span class="hljs-keyword">DESC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>Our schema also includes a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_file</code> column, denoting the original Parquet file from which this data is generated. This allows us to restart a specific file load should it fail during insertion into ClickHouse.</p>
+<p>For future usage, we loaded this data into a public S3 bucket. To insert this data into ClickHouse, users can execute the following query:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> laion <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/laion/*.parquet'</span>)
+</code></pre>
+<p>This is a considerable amount of data to load, with an unoptimized load taking several hours. We recommend that users batch the loading process, to avoid interruptions such as network connectivity issues. Users can target specific subsets using glob patterns, e.g., <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">s3(https://datasets-documentation.s3.eu-west-3.amazonaws.com/laion/00*.parquet)</code>. The <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_file</code> column can be used to reconcile any loading issues by confirming the count in ClickHouse with that in the original Parquet files.</p>
+<p>For our examples below, we have created tables of various sizes with a suffix denoting the number of rows; e.g., laion_100m contains 100 million rows. These are created with appropriate glob patterns.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> laion_sample (_file, key, url, caption, similarity, width, height, original_width, original_height, status, NSFW, exif, text_embedding, image_embedding) <span class="hljs-keyword">SELECT</span>
+    _file,
+    key,
+    url,
+    caption,
+    similarity,
+    width,
+    height,
+    original_width,
+    original_height,
+    status,
+    NSFW,
+    exif,
+    text_embedding,
+    image_embedding
+<span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/laion/*.parquet'</span>)
+</code></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="storage-performance-with-compression" level="3">Storage performance with compression<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#storage-performance-with-compression">#</a></span></h3>
+<p>The column-oriented structure of ClickHouse means the values for a column are sorted and written in sequence. The clustering of identical and similar values on disk typically leads to high compression ratios. ClickHouse even offers several <a href="https://clickhouse.com/blog/optimize-clickhouse-codecs-compression-schema">schemas and codecs</a> to allow users to tune their configuration based on the properties of their data. For arrays of floating point numbers, high compression is harder to achieve since the values of the embeddings have no domain-agnostic properties to exploit. The full 32-bit range is utilized, and for most codecs, the relation between adjacent values in an embedding is random. For this reason, we recommend the ZSTD codec for compressing embeddings. Below we show the compression ratio for our vector columns in four tables of increasing size: 1m, 10m, 100m, and 2b rows.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	<span class="hljs-keyword">table</span>,
+	name,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_compressed_bytes)) <span class="hljs-keyword">AS</span> compressed_size,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes)) <span class="hljs-keyword">AS</span> uncompressed_size,
+	round(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes) <span class="hljs-operator">/</span> <span class="hljs-built_in">sum</span>(data_compressed_bytes), <span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> ratio
+<span class="hljs-keyword">FROM</span> system.columns
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-keyword">table</span> <span class="hljs-keyword">IN</span> (<span class="hljs-string">'laion_100m'</span>, <span class="hljs-string">'laion_1m'</span>, <span class="hljs-string">'laion_10m'</span>, <span class="hljs-string">'laion_2b'</span>)) <span class="hljs-keyword">AND</span> (name <span class="hljs-keyword">IN</span> (<span class="hljs-string">'text_embedding'</span>, <span class="hljs-string">'image_embedding'</span>))
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+	<span class="hljs-keyword">table</span>,
+	name
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">DESC</span>
+
+┌─<span class="hljs-keyword">table</span>──────┬─name────────────┬─compressed_size─┬─uncompressed_size─┬─ratio─┐
+│ laion_1m   │ text_embedding  │ <span class="hljs-number">1.60</span> GiB    	│ <span class="hljs-number">2.50</span> GiB      	 │  <span class="hljs-number">1.56</span> │
+│ laion_1m   │ image_embedding │ <span class="hljs-number">1.61</span> GiB    	│ <span class="hljs-number">2.50</span> GiB      	 │  <span class="hljs-number">1.55</span> │
+│ laion_10m  │ text_embedding  │ <span class="hljs-number">18.36</span> GiB   	│ <span class="hljs-number">28.59</span> GiB     	 │  <span class="hljs-number">1.56</span> │
+│ laion_10m  │ image_embedding │ <span class="hljs-number">18.36</span> GiB   	│ <span class="hljs-number">28.59</span> GiB     	 │  <span class="hljs-number">1.56</span> │
+│ laion_100m │ text_embedding  │ <span class="hljs-number">181.64</span> GiB  	│ <span class="hljs-number">286.43</span> GiB    	 │  <span class="hljs-number">1.58</span> │
+│ laion_100m │ image_embedding │ <span class="hljs-number">182.29</span> GiB  	│ <span class="hljs-number">286.43</span> GiB    	 │  <span class="hljs-number">1.57</span> │
+│ laion_1b   │ image_embedding │ <span class="hljs-number">1.81</span> TiB    	│ <span class="hljs-number">2.81</span> TiB      	 │  <span class="hljs-number">1.55</span> │
+│ laion_1b   │ text_embedding  │ <span class="hljs-number">1.81</span> TiB    	│ <span class="hljs-number">2.81</span> TiB      	 │  <span class="hljs-number">1.55</span> │
+└────────────┴─────────────────┴─────────────────┴───────────────────┴───────┘
+
+<span class="hljs-number">6</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.006</span> sec.
+</code></pre>
+<p>While compression rates can <a href="https://clickhouse.com/docs/en/optimize/sparse-primary-indexes">usually be influenced by primary key selection</a>, this constant compression ratio of 1.56 is unlikely to be impacted by how the data is sorted. The compression level of the ZSTD codec can be increased from its default value of 1 in ClickHouse Cloud. This delivers around a 10% improvement, compressing our data by 1.71 on a 10 million row sample:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	<span class="hljs-keyword">table</span>,
+	name,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_compressed_bytes)) <span class="hljs-keyword">AS</span> compressed_size,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes)) <span class="hljs-keyword">AS</span> uncompressed_size,
+	round(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes) <span class="hljs-operator">/</span> <span class="hljs-built_in">sum</span>(data_compressed_bytes), <span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> ratio
+<span class="hljs-keyword">FROM</span> system.columns
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-keyword">table</span> <span class="hljs-keyword">IN</span> (<span class="hljs-string">'laion_10m_zstd_3'</span>)) <span class="hljs-keyword">AND</span> (name <span class="hljs-keyword">IN</span> (<span class="hljs-string">'text_embedding'</span>, <span class="hljs-string">'image_embedding'</span>))
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+	<span class="hljs-keyword">table</span>,
+	name
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">DESC</span>
+
+┌─<span class="hljs-keyword">table</span>────────────┬─name────────────┬─compressed_size─┬─uncompressed_size─┬─ratio─┐
+│ laion_10m_zstd_3 │ text_embedding  │ <span class="hljs-number">16.68</span> GiB   	   │ <span class="hljs-number">28.56</span> GiB     	   │  <span class="hljs-number">1.71</span> │
+│ laion_10m_zstd_3 │ image_embedding │ <span class="hljs-number">16.72</span> GiB   	   │ <span class="hljs-number">28.56</span> GiB     	   │  <span class="hljs-number">1.71</span> │
+└──────────────────┴─────────────────┴─────────────────┴───────────────────┴───────┘
+
+<span class="hljs-number">2</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.026</span> sec.
+</code></pre>
+<p>Note that higher values for ZSTD will slow down compression and data insertion, although decompression speeds should remain reasonably constant (around <a href="https://engineering.fb.com/2016/08/31/core-data/smaller-and-faster-data-compression-with-zstandard/">20% variance</a>)).</p>
+<p>The compression of floating point numbers is an area of research, with several lossy candidates based on quantization, such as the SZ algorithm being possible additions to ClickHouse. Other options include reducing the precision of our floating points to 16 bits. We discuss this below in the “Improving compression” section.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="searching-vectors-in-clickhouse" level="2">Searching vectors in ClickHouse<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#searching-vectors-in-clickhouse">#</a></span></h2>
+<p>As we covered in <a href="https://docs.google.com/document/d/1bmjP6Tb4hIp6ef9V2l-Pw01T0g23j9_rf8vCCBTgc50/edit#heading=h.rmyhuljgdjn9">Part 1 of this series</a>, performing vector search means comparing an input vector against a repository of vectors to find the closest match.</p>
+<p>The input vector represents the concept of interest. In our case, this is either an encoded image or caption. The repository of vectors represents other images and their captions we wish to compare against.</p>
+<p>When performing the search, the vectors are compared for proximity or distance. Two vectors that are close in distance represent similar concepts. The two vectors that are the <em>closest</em> in distance are the most similar in the set.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="choosing-a-distance-function" level="3">Choosing a distance function<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#choosing-a-distance-function">#</a></span></h3>
+<p>Given the high dimensionality of vectors, there are many ways to compare distance. These different mechanisms are referred to as <em>distance functions</em>.</p>
+<p>ClickHouse supports a wide range of distance functions - you can choose which is most appropriate for you, given your use case. For this post, we focus on two which are very commonly used in vector search:</p>
+<ul>
+<li><strong>Cosine Distance</strong> - <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">cosineDistance(vector1, vector2)</code> - This gives us a Cosine distance between 2 vectors (1 - cosine similarity). More specifically, this measures the cosine of the angle between two vectors, i.e. the dot product divided by the length. This produces a value between -1 and 1, where 1 indicates the two embeddings are <a href="https://en.wikipedia.org/wiki/Proportionality_(mathematics)">proportional</a> and thus conceptually identical. A column name and input embedding can be parsed for vector search. This function is particularly relevant if the vectors have not been normalized, as well as delivering a bounded range useful for filtering.</li>
+<li><strong>L2 Distance</strong>- <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">L2Distance(vector1, vector2)</code> - This measures the L2 distance between 2 points. Effectively this is the <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean distance</a> between two input vectors, i.e. the length of the line between the points represented by the vectors. The lower the distance, the more conceptually similar the source objects.</li>
+</ul>
+<p>Both functions compute a score that is used to compare vector embeddings. For our pre-trained CLIP model, <strong>L2 Distance</strong> represents the most appropriate distance function based on the internal scoring used for the <a href="https://codeandlife.com/2023/01/26/mastering-the-huggingface-clip-model-how-to-extract-embeddings-and-calculate-similarity-for-text-and-images/">official examples</a>.</p>
+<p>For a full list of available distance and vector normalization functions, <a href="https://clickhouse.com/docs/en/sql-reference/functions/distance-functions">see here</a>. We would love to hear how you utilize these to search your embeddings!</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="generating-an-input-vector" level="3">Generating an input vector<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#generating-an-input-vector">#</a></span></h3>
+<p>Now that we’ve identified which <em>distance function</em> we’ll be using, we need to transform the input (the image or caption we want to search) into a vector embedding.</p>
+<p>This requires us to invoke the CLIP model. This is easily achieved through a simple Python script. The instructions for installing the dependencies for this script can be found <a href="github.com/clickHouse/laion">here</a>. We show this script below:</p>
+<pre><code class="hljs language-python mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">#!/usr/bin/python3</span>
+<span class="hljs-keyword">import</span> argparse
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image
+<span class="hljs-keyword">import</span> clip
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+	parser = argparse.ArgumentParser(
+    	prog=<span class="hljs-string">'generate'</span>,
+    	description=<span class="hljs-string">'Generate CLIP embeddings for images or text'</span>)
+	group = parser.add_mutually_exclusive_group(required=<span class="hljs-literal">True</span>)
+	group.add_argument(<span class="hljs-string">'--text'</span>, required=<span class="hljs-literal">False</span>)
+	group.add_argument(<span class="hljs-string">'--image'</span>, required=<span class="hljs-literal">False</span>)
+	parser.add_argument(<span class="hljs-string">'--limit'</span>, default=<span class="hljs-number">1</span>)
+	parser.add_argument(<span class="hljs-string">'--table'</span>, default=<span class="hljs-string">'laion_1m'</span>)
+	args = parser.parse_args()
+	device = <span class="hljs-string">"cuda"</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">"cpu"</span>
+	<span class="hljs-built_in">print</span>(<span class="hljs-string">f"using <span class="hljs-subst">{device}</span>"</span>)
+	device = torch.device(device)
+	model, preprocess = clip.load(<span class="hljs-string">"ViT-L/14"</span>)
+	model.to(device)
+	images = []
+	<span class="hljs-keyword">if</span> args.text:
+    	inputs = clip.tokenize(args.text)
+    	<span class="hljs-keyword">with</span> torch.no_grad():
+        	<span class="hljs-built_in">print</span>(model.encode_text(inputs)[<span class="hljs-number">0</span>].tolist())
+	<span class="hljs-keyword">elif</span> args.image:
+    	image = preprocess(Image.<span class="hljs-built_in">open</span>(args.image)).unsqueeze(<span class="hljs-number">0</span>).to(device)
+    	<span class="hljs-keyword">with</span> torch.no_grad():
+        	<span class="hljs-built_in">print</span>(model.encode_image(image)[<span class="hljs-number">0</span>].tolist())
+</code></pre>
+<p>This version of the script accepts either text or an image path as input, outputting the embedding to the command line. Note that this will exploit CUDA-enabled GPUs if present. This can make a dramatic difference to the generation time - when tested on a Mac M1 2021, the generation time for 100 captions takes around 6 secs vs 1 sec on a <a href="https://aws.amazon.com/ec2/instance-types/p3/">p3.2xlarge</a> with 1 GPU core.</p>
+<p>As an example, let’s convert the text "a sleepy <a href="https://en.wikipedia.org/wiki/Rhodesian_Ridgeback">ridgeback dog</a>" into an embedding. For purposes of brevity, we have cropped the full embedding result which can be found <a href="https://pastila.nl/?ffffffff/ac5c42ab3cac40415c015dcae8650cff">here</a>.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python generate.py --text <span class="hljs-string">"a sleepy ridgeback dog"</span>
+
+[0.5736801028251648, 0.2516217529773712, ...,  -0.6825592517852783]
+</code></pre>
+<p>We now have a vector embedding that represents the text “a sleepy ridgeback dog.” This is our search input vector. We can now compare this input vector against our repository of vector embeddings to find images and their captions that represent conceptually similar things.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="putting-it-all-together" level="3">Putting it all together<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#putting-it-all-together">#</a></span></h3>
+<p>The query below searches for conceptually similar embeddings, and sorts them by distance. Embeddings are stored in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">image_embedding</code> column. Distance is stored as <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">similarity.</code> We filter out any distances that are greater than 0.2 to reduce noise.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, [<span class="hljs-number">0.5736801028251648</span>, <span class="hljs-number">0.2516217529773712</span>, ...,  <span class="hljs-number">-0.6825592517852783</span>]) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m <span class="hljs-keyword">WHERE</span> similarity <span class="hljs-operator">&gt;=</span> <span class="hljs-number">0.2</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">2</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>thumb9.shutterstock.com<span class="hljs-operator">/</span>image<span class="hljs-operator">-</span>photo<span class="hljs-operator">/</span>stock<span class="hljs-operator">-</span>photo<span class="hljs-operator">-</span>front<span class="hljs-operator">-</span><span class="hljs-keyword">view</span><span class="hljs-operator">-</span><span class="hljs-keyword">of</span><span class="hljs-operator">-</span>a<span class="hljs-operator">-</span>cute<span class="hljs-operator">-</span>little<span class="hljs-operator">-</span>young<span class="hljs-operator">-</span>thoroughbred<span class="hljs-operator">-</span>african<span class="hljs-operator">-</span>rhodesian<span class="hljs-operator">-</span>ridgeback<span class="hljs-operator">-</span>hound<span class="hljs-operator">-</span>dog<span class="hljs-operator">-</span>puppy<span class="hljs-operator">-</span>lying<span class="hljs-operator">-</span><span class="hljs-keyword">in</span><span class="hljs-number">-450</span>w<span class="hljs-number">-62136922.</span>jpg
+caption: Front <span class="hljs-keyword">view</span> <span class="hljs-keyword">of</span> a cute little young thoroughbred African Rhodesian Ridgeback hound dog puppy lying <span class="hljs-keyword">in</span> the woods outdoors <span class="hljs-keyword">and</span> staring.
+score:   <span class="hljs-number">12.262665434714496</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>m.psecn.photoshelter.com<span class="hljs-operator">/</span>img<span class="hljs-operator">-</span>get2<span class="hljs-operator">/</span>I0000_1Vigovbi4o<span class="hljs-operator">/</span>fit<span class="hljs-operator">=</span><span class="hljs-number">180</span>x180<span class="hljs-operator">/</span>fill<span class="hljs-operator">=</span><span class="hljs-operator">/</span>g<span class="hljs-operator">=</span>G0000x325fvoXUls<span class="hljs-operator">/</span>I0000_1Vigovbi4o.jpg
+caption: SHOT <span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">1</span><span class="hljs-operator">/</span><span class="hljs-number">08</span> <span class="hljs-number">3</span>:<span class="hljs-number">15</span>:<span class="hljs-number">27</span> PM <span class="hljs-operator">-</span> Images <span class="hljs-keyword">of</span> Tanner a three <span class="hljs-keyword">year</span><span class="hljs-operator">-</span><span class="hljs-keyword">old</span> male Vizsla sleeping <span class="hljs-keyword">in</span> the sun <span class="hljs-keyword">on</span> the couch <span class="hljs-keyword">in</span> his home <span class="hljs-keyword">in</span> Denver, Co. The Hungarian Vizsla, <span class="hljs-keyword">is</span> a dog breed originating <span class="hljs-keyword">in</span> Hungary. Vizslas <span class="hljs-keyword">are</span> known <span class="hljs-keyword">as</span> excellent hunting dogs, <span class="hljs-keyword">and</span> also have a level personality making them suited <span class="hljs-keyword">for</span> families. The Vizsla <span class="hljs-keyword">is</span> a medium<span class="hljs-operator">-</span>sized hunting dog <span class="hljs-keyword">of</span> distinguished appearance <span class="hljs-keyword">and</span> bearing. Robust but rather lightly built, they <span class="hljs-keyword">are</span> lean dogs, have defined muscles, <span class="hljs-keyword">and</span> <span class="hljs-keyword">are</span> <span class="hljs-keyword">similar</span> <span class="hljs-keyword">to</span> a Weimaraner but smaller <span class="hljs-keyword">in</span> size. The breed standard calls <span class="hljs-keyword">for</span> the tail <span class="hljs-keyword">to</span> be docked <span class="hljs-keyword">to</span> two<span class="hljs-operator">-</span>thirds <span class="hljs-keyword">of</span> its original length <span class="hljs-keyword">in</span> smooth Vizslas <span class="hljs-keyword">and</span> <span class="hljs-keyword">to</span> three<span class="hljs-operator">-</span>fourths <span class="hljs-keyword">in</span> Wirehaired Vizslas..(Photo <span class="hljs-keyword">by</span> Marc Piscotty<span class="hljs-operator">/</span> (c) <span class="hljs-number">2007</span>)
+score:   <span class="hljs-number">12.265194306913513</span>
+
+<span class="hljs-number">2</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.595</span> sec. Processed <span class="hljs-number">9.92</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">32.52</span> GB (<span class="hljs-number">6.22</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">20.38</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>The results show that our input vector “a sleepy <a href="https://en.wikipedia.org/wiki/Rhodesian_Ridgeback">ridgeback dog</a>” is most conceptually similar to a photo in the dataset of a African Rhodesian Ridgeback hound, and also very conceptually similar to an image of a sleeping hunting dog.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="kibo.png" loading="lazy" src="/uploads/kibo_b84961c31e.png"/></span>
+<p><em>My Dog Kibo</em></p>
+<p>To further demonstrate the utility of these models, as an alternative to searching with text, we could start with <a href="https://github.com/ClickHouse/laion/blob/main/images/ridgeback.jpg">an image</a> of a sleeping dog, and search for similar images that way. We generate an input vector that represents this photo, and search for conceptually similar results.</p>
+<p>To do so, we repeat the above query using the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">text_embedding</code> column. The full embedding can be found <a href="https://pastila.nl/?ffffffff/c764acc01aa4ab87b3a8fe5e40f8b4bc">here</a>.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python generate.py --image images/ridgeback.jpg
+
+[0.17179889976978302, 0.6171532273292542, ...,  -0.21313616633415222]
+</code></pre>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(text_embedding, [<span class="hljs-number">0.17179889976978302</span>, ..., <span class="hljs-number">-0.21313616633415222</span>]
+) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m <span class="hljs-keyword">WHERE</span> similarity <span class="hljs-operator">&gt;=</span> <span class="hljs-number">0.2</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">2</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>i.pinimg.com<span class="hljs-operator">/</span><span class="hljs-number">236</span>x<span class="hljs-operator">/</span>ab<span class="hljs-operator">/</span><span class="hljs-number">85</span><span class="hljs-operator">/</span><span class="hljs-number">4</span>c<span class="hljs-operator">/</span>ab854cca81a3e19ae231c63f57ed6cfe<span class="hljs-comment">--submissive--year-olds.jpg</span>
+caption: Lenny <span class="hljs-keyword">is</span> a <span class="hljs-number">2</span> <span class="hljs-keyword">to</span> <span class="hljs-number">3</span> <span class="hljs-keyword">year</span> <span class="hljs-keyword">old</span> male hound <span class="hljs-keyword">cross</span>, about <span class="hljs-number">25</span> pounds <span class="hljs-keyword">and</span> much too thin. He has either been neglected <span class="hljs-keyword">or</span> <span class="hljs-keyword">on</span> his own <span class="hljs-keyword">for</span> a while. He <span class="hljs-keyword">is</span> very friendly if a little submissive, he ducked his head <span class="hljs-keyword">and</span> tucked his tail a couple <span class="hljs-keyword">of</span> times <span class="hljs-keyword">when</span> I...
+score:   <span class="hljs-number">17.903361349936052</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>d1n3ar4lqtlydb.cloudfront.net<span class="hljs-operator">/</span>c<span class="hljs-operator">/</span>a<span class="hljs-operator">/</span><span class="hljs-number">4</span><span class="hljs-operator">/</span><span class="hljs-number">2246967.</span>jpg
+caption: American Pit Bull Terrier<span class="hljs-operator">/</span>Rhodesian Ridgeback Mix Dog <span class="hljs-keyword">for</span> adoption <span class="hljs-keyword">in</span> San Clemente, California <span class="hljs-operator">-</span> MARCUS <span class="hljs-operator">=</span> Quite A Friendly Guy<span class="hljs-operator">!</span>
+score:   <span class="hljs-number">17.90681696075351</span>
+
+<span class="hljs-number">2</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.516</span> sec. Processed <span class="hljs-number">9.92</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">32.52</span> GB (<span class="hljs-number">6.54</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">21.45</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>For convenience, we’ve provided a simple result generator <a href="https://github.com/ClickHouse/laion/blob/main/search.py">search.py</a>, which encodes the passed image or text and executes the query, rendering the query results as a local html file. This file is then automatically opened in the local browser. The result file for the above query is shown below:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py search --image images/ridgeback.jpg --table laion_10m
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="ridgebacks.png" loading="lazy" src="/uploads/ridgebacks_25a29f60f3.png"/></span>
+<p>In both of these examples, we have matched embeddings for different <a href="https://en.wikipedia.org/wiki/Multimodal_learning">modals</a>, i.e. embeddings from image inputs are matched against the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">text_embedding</code> column and vice versa. This aligns with the original model training as described earlier, and is the intended application. While matching input embeddings against the same type has been explored, previous attempts have resulted in <a href="https://github.com/openai/CLIP/issues/1">mixed results</a>.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="the-benefits-of-sql" level="2">The benefits of SQL<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#the-benefits-of-sql">#</a></span></h2>
+<p>Oftentimes, in practice with vector search, we don’t just search across embeddings. Frequently, there is additional utility in combining search with filtering or aggregating on metadata.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="filtering-with-metadata" level="3">Filtering with metadata<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#filtering-with-metadata">#</a></span></h3>
+<p>As an example, suppose we wish to perform vector search on images that are non-copyrighted. This kind of query would combine vector search with filtering based on copyright metadata.</p>
+<p>To take another example, suppose we want to limit our search to large images only - at least 300px*500px, and where the caption similarity satisfies a higher cosine similarity score of 0.3. For this example, let’s start with a search for “great animal migrations.” Fortunately, formulating this as a SQL query is simple. Below, we execute this query for 100 million images.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, [<span class="hljs-operator">&lt;</span>embedding<span class="hljs-operator">&gt;</span>]) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_100m
+<span class="hljs-keyword">WHERE</span> (width <span class="hljs-operator">&gt;=</span> <span class="hljs-number">300</span>) <span class="hljs-keyword">AND</span> (height <span class="hljs-operator">&gt;=</span> <span class="hljs-number">500</span>) <span class="hljs-keyword">AND</span> (copyright <span class="hljs-operator">=</span> <span class="hljs-string">''</span>) <span class="hljs-keyword">AND</span> similarity <span class="hljs-operator">&gt;</span> <span class="hljs-number">0.3</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+FORMAT Vertical
+
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>aentcdn.azureedge.net<span class="hljs-operator">/</span>graphics<span class="hljs-operator">/</span>items<span class="hljs-operator">/</span>sdimages<span class="hljs-operator">/</span>a<span class="hljs-operator">/</span><span class="hljs-number">500</span><span class="hljs-operator">/</span><span class="hljs-number">3</span><span class="hljs-operator">/</span><span class="hljs-number">6</span><span class="hljs-operator">/</span><span class="hljs-number">5</span><span class="hljs-operator">/</span><span class="hljs-number">4</span><span class="hljs-operator">/</span><span class="hljs-number">1744563.</span>jpg
+caption: Great Migrations
+width:   <span class="hljs-number">366</span>
+height:  <span class="hljs-number">500</span>
+score:   <span class="hljs-number">16.242750635008512</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>naturefamiliesdotorg.files.wordpress.com<span class="hljs-operator">/</span><span class="hljs-number">2017</span><span class="hljs-operator">/</span><span class="hljs-number">01</span><span class="hljs-operator">/</span><span class="hljs-keyword">on</span><span class="hljs-operator">-</span>the<span class="hljs-operator">-</span>move.jpg?w<span class="hljs-operator">=</span><span class="hljs-number">418</span><span class="hljs-operator">&amp;</span>h<span class="hljs-operator">=</span><span class="hljs-number">557</span>
+caption: <span class="hljs-keyword">on</span><span class="hljs-operator">-</span>the<span class="hljs-operator">-</span>move
+width:   <span class="hljs-number">384</span>
+height:  <span class="hljs-number">512</span>
+score:   <span class="hljs-number">16.26983713529263</span>
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">2.010</span> sec. Processed <span class="hljs-number">6.82</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">22.52</span> GB (<span class="hljs-number">3.39</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">11.20</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>This illustrates the benefits of using SQL and metadata to limit your vector comparisons to a subset. In this specific case, we query over 100 million vectors, but reduce the actual distance matching to fewer than 7 million because of our metadata.</p>
+<p>For convenience, we’ve also added the ability to pass an additional filter to our <a href="https://github.com/ClickHouse/laion/blob/main/search.py">search.py</a>, allowing us to verify the quality of the above matches:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py search --filter <span class="hljs-string">"(width &gt;= 300) AND (height &gt;= 500) AND (copyright = '') AND simularity &gt; 0.3"</span> --text <span class="hljs-string">"great animal migrations"</span>
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="migrations.png" loading="lazy" src="/uploads/migrations_a577ca8b66.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="aggregating-with-metadata" level="3">Aggregating with metadata<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#aggregating-with-metadata">#</a></span></h3>
+<p>In addition to filtering, we can also perform aggregations on the metadata. As a column-oriented database, ClickHouse is well suited to this task.</p>
+<p>Suppose, for instance, we wanted to identify the primary camera models used for ‘safari pictures.’ We perform that search here:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">WITH</span> results <span class="hljs-keyword">AS</span>
+	(
+    	<span class="hljs-keyword">SELECT</span>
+        	image_make,
+        	image_model,
+        	L2Distance(image_embedding, [<span class="hljs-operator">&lt;</span>embedding<span class="hljs-operator">&gt;</span>]) <span class="hljs-keyword">AS</span> score
+    	<span class="hljs-keyword">FROM</span> laion_100m
+    	<span class="hljs-keyword">WHERE</span> (image_make <span class="hljs-operator">!=</span> <span class="hljs-string">''</span>) <span class="hljs-keyword">AND</span> (image_model <span class="hljs-operator">!=</span> <span class="hljs-string">''</span>)
+    	<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+    	LIMIT <span class="hljs-number">1000</span>
+	)
+<span class="hljs-keyword">SELECT</span>
+	image_make,
+	image_model,
+	<span class="hljs-built_in">count</span>() <span class="hljs-keyword">AS</span> c
+<span class="hljs-keyword">FROM</span> results
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+	image_make,
+	image_model
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> c <span class="hljs-keyword">DESC</span>
+LIMIT <span class="hljs-number">10</span>
+
+┌─image_make────────┬─image_model───────────┬──c─┐
+│ Canon         	│ Canon EOS <span class="hljs-number">7</span>D      	│ <span class="hljs-number">64</span> │
+│ Canon         	│ Canon EOS<span class="hljs-number">-1</span>D X    	│ <span class="hljs-number">51</span> │
+│ Canon         	│ Canon EOS <span class="hljs-number">5</span>D Mark III │ <span class="hljs-number">49</span> │
+│ NIKON CORPORATION │ NIKON D700        	│ <span class="hljs-number">26</span> │
+│ NIKON CORPORATION │ NIKON D800        	│ <span class="hljs-number">24</span> │
+│ Canon         	│ Canon EOS <span class="hljs-number">5</span>D Mark II  │ <span class="hljs-number">23</span> │
+│ NIKON CORPORATION │ NIKON D810        	│ <span class="hljs-number">23</span> │
+│ NIKON CORPORATION │ NIKON D7000       	│ <span class="hljs-number">21</span> │
+│ Canon         	│ Canon EOS <span class="hljs-number">40</span>D     	│ <span class="hljs-number">18</span> │
+│ Canon         	│ Canon EOS <span class="hljs-number">60</span>D     	│ <span class="hljs-number">17</span> │
+└───────────────────┴───────────────────────┴────┘
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">23.897</span> sec. Processed <span class="hljs-number">100.00</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">286.70</span> GB (<span class="hljs-number">4.18</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">12.00</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>Clearly, <em>Canon</em> should be your camera of choice for your next safari. Note that here, we only use the top 1000 results. Unlike cosine distance, which is unbounded, euclidean distance has no upper limit - making imposing a threshold challenging.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="using-inverted-indices" level="3">Using inverted indices<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#using-inverted-indices">#</a></span></h3>
+<p><strong><em>Note: Inverted indices are an experimental feature in ClickHouse.</em></strong></p>
+<p>ClickHouse’s experimental secondary indices feature can also prove to be useful with vector handling.</p>
+<p>For instance, we may wish to enforce a filter that limits our safari pictures to those containing lions. To do so, we could impose a token restriction - requiring the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">caption</code> column to contain the string <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">lions</code>.</p>
+<p>Without inverted indices, our search might look something like the following. Here, we utilize the <a href="https://pastila.nl/?ffffffff/05320db5bdd2d060002cf1f3f3bb6047">embedding</a> for the <a href="https://github.com/ClickHouse/laion/blob/main/images/safari.jpg">following picture</a> and search against 100M vectors.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="safari.png" loading="lazy" src="/uploads/safari_b8ca7295f7.png"/></span>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> url, caption, L2Distance(text_embedding, [<span class="hljs-operator">&lt;</span>embedding<span class="hljs-operator">&gt;</span>]) <span class="hljs-keyword">AS</span> score <span class="hljs-keyword">FROM</span> laion_10m <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(text_embedding, [<span class="hljs-number">-0.17659325897693634</span>, …, <span class="hljs-number">0.05511629953980446</span>]) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_100m
+<span class="hljs-keyword">WHERE</span> hasToken(<span class="hljs-built_in">lower</span>(caption), <span class="hljs-string">'lions'</span>)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>static.wixstatic.com<span class="hljs-operator">/</span>media<span class="hljs-operator">/</span>c571fa_25ec3694e6e04a39a395d07d63ae58fc<span class="hljs-operator">~</span>mv2.jpg<span class="hljs-operator">/</span>v1<span class="hljs-operator">/</span>fill<span class="hljs-operator">/</span>w_420,h_280,al_c,q_80,usm_0<span class="hljs-number">.66</span>_1<span class="hljs-number">.00</span>_0<span class="hljs-number">.01</span><span class="hljs-operator">/</span>Mont<span class="hljs-operator">%</span><span class="hljs-number">20</span>Blanc.jpg
+caption: Travel <span class="hljs-keyword">on</span> a safari <span class="hljs-keyword">to</span> Tanzania, <span class="hljs-keyword">to</span> the rolling plains <span class="hljs-keyword">of</span> the Serengeti, the wildlife<span class="hljs-operator">-</span>filled caldera <span class="hljs-keyword">of</span> the Ngorongoro Crater <span class="hljs-keyword">and</span> the lions <span class="hljs-keyword">and</span> baobabs <span class="hljs-keyword">of</span> Tarangire; Tanzania will impress you <span class="hljs-keyword">like</span> few other countries will.  This tailor<span class="hljs-operator">-</span>made luxury safari will take you <span class="hljs-keyword">to</span> three very different parks <span class="hljs-keyword">in</span> northern Tanzania, <span class="hljs-keyword">each</span> <span class="hljs-keyword">with</span> their own scenery <span class="hljs-keyword">and</span> resident wildlife.   <span class="hljs-keyword">As</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">all</span> our private tours, this sample itinerary can be completely tailored <span class="hljs-keyword">to</span> <span class="hljs-keyword">create</span> the perfect journey <span class="hljs-keyword">of</span> discovery <span class="hljs-keyword">for</span> you.
+score:   <span class="hljs-number">18.960329963316692</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>thumbs.dreamstime.com<span class="hljs-operator">/</span>t<span class="hljs-operator">/</span>jeepsafari<span class="hljs-operator">-</span>ngorongoro<span class="hljs-operator">-</span>tourists<span class="hljs-operator">-</span>photographers<span class="hljs-operator">-</span>watching<span class="hljs-operator">-</span>wild<span class="hljs-operator">-</span>lions<span class="hljs-operator">-</span>who<span class="hljs-operator">-</span>walk<span class="hljs-operator">-</span>jeeps<span class="hljs-number">-79635001.</span>jpg
+caption: Jeep safari <span class="hljs-keyword">in</span> Ngorongoro3. Tourists <span class="hljs-keyword">and</span> photographers <span class="hljs-keyword">are</span> watching wild lions, who walk <span class="hljs-keyword">between</span> the jeeps Stock Image
+score:   <span class="hljs-number">18.988379350742093</span>
+hasToken(<span class="hljs-built_in">lower</span>(caption), <span class="hljs-string">'lions'</span>) <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span> LIMIT <span class="hljs-number">10</span> FORMAT Vertical
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">6.194</span> sec. Processed <span class="hljs-number">93.82</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">79.00</span> GB (<span class="hljs-number">15.15</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">12.75</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>To accelerate this kind of metadata query, we can <a href="https://clickhouse.com/blog/clickhouse-search-with-inverted-indices">exploit inverted indices</a>, and add an inverted index for the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">caption</code> column.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SET</span> allow_experimental_inverted_index<span class="hljs-operator">=</span><span class="hljs-number">1</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> laion_100m <span class="hljs-keyword">ADD</span> INDEX caption_idx(<span class="hljs-built_in">lower</span>(caption)) TYPE inverted;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> laion_100m MATERIALIZE INDEX caption_idx;
+</code></pre>
+<p>Repeating our previous query, we can see this delivers significant improvement in query time. The inverted index can be used to limit the number of rows for our distance comparison to 30 million, reducing the time from 6 secs to 3 secs.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> url, caption, L2Distance(text_embedding, [<span class="hljs-operator">&lt;</span>embedding<span class="hljs-operator">&gt;</span>]) <span class="hljs-keyword">AS</span> score <span class="hljs-keyword">FROM</span> laion_10m <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(text_embedding, [<span class="hljs-number">-0.17659325897693634</span>, ..., <span class="hljs-number">0.05511629953980446</span>]) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_100m
+<span class="hljs-keyword">WHERE</span> hasToken(<span class="hljs-built_in">lower</span>(caption), <span class="hljs-string">'lions'</span>)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>static.wixstatic.com<span class="hljs-operator">/</span>media<span class="hljs-operator">/</span>c571fa_25ec3694e6e04a39a395d07d63ae58fc<span class="hljs-operator">~</span>mv2.jpg<span class="hljs-operator">/</span>v1<span class="hljs-operator">/</span>fill<span class="hljs-operator">/</span>w_420,h_280,al_c,q_80,usm_0<span class="hljs-number">.66</span>_1<span class="hljs-number">.00</span>_0<span class="hljs-number">.01</span><span class="hljs-operator">/</span>Mont<span class="hljs-operator">%</span><span class="hljs-number">20</span>Blanc.jpg
+caption: Travel <span class="hljs-keyword">on</span> a safari <span class="hljs-keyword">to</span> Tanzania, <span class="hljs-keyword">to</span> the rolling plains <span class="hljs-keyword">of</span> the Serengeti, the wildlife<span class="hljs-operator">-</span>filled caldera <span class="hljs-keyword">of</span> the Ngorongoro Crater <span class="hljs-keyword">and</span> the lions <span class="hljs-keyword">and</span> baobabs <span class="hljs-keyword">of</span> Tarangire; Tanzania will impress you <span class="hljs-keyword">like</span> few other countries will.  This tailor<span class="hljs-operator">-</span>made luxury safari will take you <span class="hljs-keyword">to</span> three very different parks <span class="hljs-keyword">in</span> northern Tanzania, <span class="hljs-keyword">each</span> <span class="hljs-keyword">with</span> their own scenery <span class="hljs-keyword">and</span> resident wildlife.   <span class="hljs-keyword">As</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">all</span> our private tours, this sample itinerary can be completely tailored <span class="hljs-keyword">to</span> <span class="hljs-keyword">create</span> the perfect journey <span class="hljs-keyword">of</span> discovery <span class="hljs-keyword">for</span> you.
+score:   <span class="hljs-number">18.960329963316692</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>thumbs.dreamstime.com<span class="hljs-operator">/</span>t<span class="hljs-operator">/</span>jeepsafari<span class="hljs-operator">-</span>ngorongoro<span class="hljs-operator">-</span>tourists<span class="hljs-operator">-</span>photographers<span class="hljs-operator">-</span>watching<span class="hljs-operator">-</span>wild<span class="hljs-operator">-</span>lions<span class="hljs-operator">-</span>who<span class="hljs-operator">-</span>walk<span class="hljs-operator">-</span>jeeps<span class="hljs-number">-79635001.</span>jpg
+caption: Jeep safari <span class="hljs-keyword">in</span> Ngorongoro3. Tourists <span class="hljs-keyword">and</span> photographers <span class="hljs-keyword">are</span> watching wild lions, who walk <span class="hljs-keyword">between</span> the jeeps Stock Image
+score:   <span class="hljs-number">18.988379350742093</span>
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">3.554</span> sec. Processed <span class="hljs-number">32.96</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">74.11</span> GB (<span class="hljs-number">9.27</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">20.85</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>The results of this query are as follows:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py search --image ./images/safari.jpg --table laion_100m --filter <span class="hljs-string">"hasToken(lower(caption), 'lions')"</span>
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="lion_safari.png" loading="lazy" src="/uploads/lion_safari_7563141959.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="advanced-features" level="2">Advanced features<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#advanced-features">#</a></span></h2>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="approximate-nearest-neighbour-annoy" level="3">Approximate Nearest Neighbour (Annoy)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#approximate-nearest-neighbour-annoy">#</a></span></h3>
+<p><strong><em>Note: Annoy indexes are highly experimental in ClickHouse.</em></strong></p>
+<p>An Annoy index is designed to improve the efficiency of large-scale nearest-neighbor vector searches. With it comes a trade-off between accuracy and computational efficiency.</p>
+<p>Specifically, an Annoy index is a data structure used for finding approximate nearest neighbors in high-dimensional spaces. Annoy works by organizing vectors into a tree structure. It divides the high-dimensional space into partitions using random hyperplanes (lines in 2d space, planes in 3d, etc.). These hyperplanes split the space into smaller regions, with each region containing only a subset of the data points. These partitions are, in turn, used to build a tree structure (typically binary), where each node represents a hyperplane, and the child nodes represent the regions that split the plane. The leaf nodes of the tree contain the actual data points. Balancing and optimization techniques, such as randomizing the insertion and using heuristics to determine the best hyperplanes for partitioning, ensure that the tree is efficient and well-balanced.</p>
+<p>Once an Annoy index is constructed, it can be used for search. On providing a vector, the tree can be traversed by comparing each vector to each internal node's hyperplanes. At each level of the tree, Annoy estimates the distance between the query vector and the regions represented by the child nodes. Distance measures determine which child node to explore further. Upon reaching either the root or a specified node, the set of nodes it has encountered is returned. The result is an approximate set of results with potentially much faster search times than a linear scan.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="annoy.png" loading="lazy" src="/uploads/annoy_cd47ba916f.png"/></span>
+<em>Image of hyperplanes split by Annoy</em>
+<p>When creating the Annoy index for ClickHouse, we can specify both a NumTree and a DistanceName. The latter represents the distance function used, which defaults to <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">L2Distance</code> and is appropriate for our LAION dataset. The former represents the number of trees that the algorithm will create. The bigger the tree is, the slower it works (in both CREATE and SELECT requests), but the better accuracy you get (adjusted for randomness). By default, NumTree is set to 100.</p>
+<p>Below, we show the schema for the LAION dataset with an Annoy index for each embedding field. We utilize defaults for the index and populate the table with 100m rows.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SET</span> allow_experimental_annoy_index <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> default.laion_100m_annoy
+(
+   `_file` LowCardinality(String),
+   `key` String,
+   `url` String,
+   `caption` String,
+   `similarity` Float64,
+   `width` Int64,
+   `height` Int64,
+   `original_width` Int64,
+   `original_height` Int64,
+   `status` LowCardinality(String),
+   `NSFW` LowCardinality(String),
+   `exif` Map(String, String),
+   `text_embedding` <span class="hljs-keyword">Array</span>(Float32),
+   `image_embedding` <span class="hljs-keyword">Array</span>(Float32),
+   `orientation` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Orientation'</span>],
+   `software` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Software'</span>],
+   `copyright` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Copyright'</span>],
+   `image_make` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Make'</span>],
+   `image_model` String <span class="hljs-keyword">DEFAULT</span> exif[<span class="hljs-string">'Image Model'</span>],
+   INDEX annoy_image image_embedding TYPE annoy(<span class="hljs-number">1000</span>) GRANULARITY <span class="hljs-number">1000</span>,
+   INDEX annoy_text text_embedding TYPE annoy(<span class="hljs-number">1000</span>) GRANULARITY <span class="hljs-number">1000</span>
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (height, width, similarity)
+
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> laion_100m_annoy <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> laion_100m
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1596.941</span> sec. Processed <span class="hljs-number">100.00</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">663.68</span> GB (<span class="hljs-number">62.62</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">415.59</span> MB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>As shown, the overhead of the Annoy index is significant at insert time with the above insert taking around 27 mins for 100m rows. This compares to 10 mins for a table without these indexes. Below, we repeat our <a href="https://gist.github.com/gingerwizard/dce9cecb59213a7b4911c0afccf98141">earlier query</a> which took approximately 24 secs (hot).</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, [embedding]) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_100m_annoy
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span> FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>i.dailymail.co.uk<span class="hljs-operator">/</span>i<span class="hljs-operator">/</span>pix<span class="hljs-operator">/</span><span class="hljs-number">2012</span><span class="hljs-operator">/</span><span class="hljs-number">04</span><span class="hljs-operator">/</span><span class="hljs-number">26</span><span class="hljs-operator">/</span>article<span class="hljs-number">-2135380</span><span class="hljs-number">-12</span>C5ADBC000005DC<span class="hljs-number">-90</span>_634x213.jpg
+caption: Pampered pets: This hammock<span class="hljs-operator">-</span>style dog bed offers equal levels <span class="hljs-keyword">of</span> pet comfort
+score:   <span class="hljs-number">12.313203570174357</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+url: 	https:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>i.pinimg.com<span class="hljs-operator">/</span>originals<span class="hljs-operator">/</span><span class="hljs-number">15</span><span class="hljs-operator">/</span>c2<span class="hljs-operator">/</span><span class="hljs-number">11</span><span class="hljs-operator">/</span><span class="hljs-number">15</span>c2118a862fcd0c4f9f6c960d2638a0.jpg
+caption: rhodesian ridgeback lab mix puppy
+score:   <span class="hljs-number">12.333195649580162</span>
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.456</span> sec. Processed <span class="hljs-number">115.88</span> thousand <span class="hljs-keyword">rows</span>, <span class="hljs-number">379.06</span> MB (<span class="hljs-number">79.56</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">260.27</span> MB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>The Annoy index delivers a significant improvement with respect to query performance, with this query taking between 1 and 2s, at the expense of some search quality.</p>
+<p>The test embedding here represents our "a sleepy ridgeback dog" text. We can see the image results below.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py search --text <span class="hljs-string">"a sleepy ridgeback dog"</span> --table laion_100m_annoy
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="ridgeback_annoy.png" loading="lazy" src="/uploads/ridgeback_annoy_9ac9400f61.png"/></span>
+<p>In ClickHouse, it’s important to note that the Annoy index can be used to speed up queries that either leverage an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY DistanceFunction(Column, vector)</code> or a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">WHERE DistanceFunction(Column, Point) &lt; MaxDistance,</code> but not both. A LIMIT must be imposed on the query, to return the top N matches.  To return the top matches a priority queue-based buffer is used for collecting the matching vectors. Once full, the collection stops, and the buffer is sorted. The size of this buffer is limited by the setting <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_limit_for_ann_queries</code> (1000000 by default).</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="user-defined-functions-udfs" level="3">User Defined Functions (UDFs)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#user-defined-functions-udfs">#</a></span></h3>
+<p>ClickHouse’s <em>user-defined functions</em>, or <a href="https://clickhouse.com/blog/user-defined-functions-clickhouse-udfs">UDFs</a>, allow users to extend the behavior of ClickHouse by creating lambda expressions that can leverage SQL constructs and functions. These functions can then be used like any in-built function in a query.</p>
+<p>Up to now, we've relied on performing our vector generation outside of ClickHouse, and passing the generated embedding at query time from our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">search.py</code> script. While this is sufficient, it would be nice if we could instead simply pass text or image paths (or even urls!) in the SQL query directly.</p>
+<p>We can use UDFs to accomplish this task. The UDFs defined below are called <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedText</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedImage</code>, respectively.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, embedText(<span class="hljs-string">'a sleepy ridgeback dog'</span>)) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+
+<span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(text_embedding, embedImage("https://dogpictures.com/ridgeback.jpg")) <span class="hljs-keyword">as</span> score
+<span class="hljs-keyword">FROM</span> laion_100m
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>In order to define the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedText</code> UDF, we start by adapting our earlier <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">generate.py,</code> used to generate the embeddings, to <a href="https://github.com/ClickHouse/laion/blob/main/udfs/embed_text.py">embed_text.py</a> below.</p>
+<p><em>Note: This should be saved in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">user_scripts</code> folder of ClickHouse.</em></p>
+<pre><code class="hljs language-python mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">#!/usr/bin/python3</span>
+<span class="hljs-keyword">import</span> clip
+<span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> sys
+
+device = <span class="hljs-string">"cuda"</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">"cpu"</span>
+model, preprocess = clip.load(<span class="hljs-string">"ViT-L/14"</span>, device=device)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+	<span class="hljs-keyword">for</span> text <span class="hljs-keyword">in</span> sys.stdin:
+    	inputs = clip.tokenize(text)
+    	<span class="hljs-keyword">with</span> torch.no_grad():
+        	text_features = []
+        	text_features = model.encode_text(inputs)[<span class="hljs-number">0</span>].tolist()
+        	<span class="hljs-built_in">print</span>(text_features)
+        	sys.stdout.flush()
+</code></pre>
+<p>This <a href="https://github.com/ClickHouse/laion/blob/main/udfs/embed_text.py">embed_text.py</a> script can then be exposed through the custom function, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedText.</code> The following configuration can be placed under the ClickHouse configuration directory (default <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">/etc/clickhouse-server/</code>) with the name <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embed_text__function.xml</code>.</p>
+<p><em>Note: Users should ensure the dependencies for this script have been installed for the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">clickhouse</code> user - see <a href="github.com/clickHouse/laion">here</a> for steps.</em></p>
+<pre><code class="hljs language-xml mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-tag">&lt;<span class="hljs-name">functions</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">function</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>executable<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>embedText<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">return_type</span>&gt;</span>Array(Float32)<span class="hljs-tag">&lt;/<span class="hljs-name">return_type</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>
+        	<span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+        	<span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>text<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+    	<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">format</span>&gt;</span>TabSeparated<span class="hljs-tag">&lt;/<span class="hljs-name">format</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">command</span>&gt;</span>embed_text.py<span class="hljs-tag">&lt;/<span class="hljs-name">command</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">command_read_timeout</span>&gt;</span>1000000<span class="hljs-tag">&lt;/<span class="hljs-name">command_read_timeout</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">function</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">functions</span>&gt;</span>
+</code></pre>
+<p>With the function registered, we can now utilize this as shown in our previous example:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, embedText(<span class="hljs-string">'a sleepy ridgeback dog'</span>)) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>For our similar <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedImage</code> function, we add another UDF based on the following python script <a href="https://github.com/ClickHouse/laion/blob/main/udfs/embed_image.py">embed_image.py.</a></p>
+<pre><code class="hljs language-python mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">#!/usr/bin/python3</span>
+<span class="hljs-keyword">from</span> io <span class="hljs-keyword">import</span> BytesIO
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image
+<span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">import</span> clip
+<span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> sys
+
+device = <span class="hljs-string">"cuda"</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">"cpu"</span>
+model, preprocess = clip.load(<span class="hljs-string">"ViT-L/14"</span>, device=device)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+	<span class="hljs-keyword">for</span> url <span class="hljs-keyword">in</span> sys.stdin:
+    	response = requests.get(url.strip())
+    	response.raise_for_status()
+    	image = preprocess(Image.<span class="hljs-built_in">open</span>(BytesIO(response.content))).unsqueeze(<span class="hljs-number">0</span>).to(device)
+    	<span class="hljs-keyword">with</span> torch.no_grad():
+        	<span class="hljs-built_in">print</span>(model.encode_image(image)[<span class="hljs-number">0</span>].tolist())
+        	sys.stdout.flush()
+</code></pre>
+<pre><code class="hljs language-xml mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-tag">&lt;<span class="hljs-name">functions</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">function</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>executable_pool<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>embedImage<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">return_type</span>&gt;</span>Array(Float32)<span class="hljs-tag">&lt;/<span class="hljs-name">return_type</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+    	<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">format</span>&gt;</span>TabSeparated<span class="hljs-tag">&lt;/<span class="hljs-name">format</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">command</span>&gt;</span>embed_image.py<span class="hljs-tag">&lt;/<span class="hljs-name">command</span>&gt;</span>
+    	<span class="hljs-tag">&lt;<span class="hljs-name">command_read_timeout</span>&gt;</span>1000000<span class="hljs-tag">&lt;/<span class="hljs-name">command_read_timeout</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">function</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">functions</span>&gt;</span>
+</code></pre>
+<p>When the UDF is set to type <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">executable_pool,</code> ClickHouse maintains a pool of pre-loaded python instances ready to receive input. For our function, this is beneficial as it reduces model load time after the first execution. This allows subsequent invocations to be much faster. For further details on how the pool size can be controlled and other configuration parameters, further details can be found <a href="https://clickhouse.com/docs/en/sql-reference/functions/udf">here</a>.</p>
+<p>Now that both UDFs are configured, we can query as follows:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> embedImage(<span class="hljs-string">'https://cdn.britannica.com/12/236912-050-B39F82AF/Rhodesian-Ridgeback-dog.jpg'</span>)
+...
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">13.421</span> sec.
+
+<span class="hljs-keyword">SELECT</span> embedImage(<span class="hljs-string">'https://cdn.britannica.com/12/236912-050-B39F82AF/Rhodesian-Ridgeback-dog.jpg'</span>)
+...
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.317</span> sec.
+
+<span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, embedImage(<span class="hljs-string">'https://cdn.britannica.com/12/236912-050-B39F82AF/Rhodesian-Ridgeback-dog.jpg'</span>)) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>Completing this, we can expose our earlier concept math capabilities with an <a href="https://github.com/ClickHouse/laion/blob/main/udfs/embed_concept.py">embed_concept.py</a> script and function <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">embedConcept</code>.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">select</span> embedConcept(<span class="hljs-string">'(berlin - germany) + (uk + bridge)'</span>)
+
+<span class="hljs-keyword">SELECT</span>
+	url,
+	caption,
+	L2Distance(image_embedding, embedConcept(<span class="hljs-string">'(berlin - germany) + (uk + bridge)'</span>)) <span class="hljs-keyword">AS</span> score
+<span class="hljs-keyword">FROM</span> laion_10m
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>Note that the examples above do not include error handling and input validation. We leave this as an exercise for the reader. Hopefully these examples have provided some inspiration for combining User Defined Functions, embedding models, and vector search!</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="improving-compression" level="3">Improving compression<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#improving-compression">#</a></span></h3>
+<p>Enhanced compression techniques may help with overall data size and storage needs. For instance, our previous schema and resulting compression statistics were based on storing our vectors as the type <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Array(Float32)</code>. Though, for some models, 32-bit floating point precision is not required, and similar matching quality can be achieved by reducing this to 16 bits.</p>
+<p>While ClickHouse does not have a native 16-bit floating point type, we can still reduce our precision to 16 bits and reuse the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float32</code> type, with each value simply padded with zeros. These zeros will be efficiently compressed with the ZSTD codec (the standard in ClickHouse Cloud), reducing our compressed storage requirements.</p>
+<p>To achieve this, we need to ensure that the encoding of the 16-bit floating point values is done properly. Fortunately, <a href="https://cloud.google.com/tpu/docs/bfloat16">Google's bloat16 type</a> for Machine Learning use cases works well, and simply requires truncating the last 16 bits of a 32-bit floating point number, assuming the latter uses the IEE-754 encoding.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Bfloat16.png" loading="lazy" src="/uploads/Bfloat16_a2059b234a.png"/></span>
+<em>Credit: <a href="https://cloud.google.com/tpu/docs/bfloat16">https://cloud.google.com/tpu/docs/bfloat16</a></em>
+<p>While bfloat16 is <a href="https://github.com/ClickHouse/ClickHouse/issues/44206">not currently native to ClickHouse</a>, it can easily be replicated with other functions. We do so below for the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">image_embedding</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">text_embedding</code> columns.</p>
+<p>To do so, all rows from the table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">laion_100m</code> (containing 100m rows) are selected, and inserted into the table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">laion_100m_bfloat16</code> using an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code> clause. During the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">SELECT</code>, we transform the values in the embeddings to a BFloat16 representation.</p>
+<p>This bfloat16 conversion is achieved using an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">arrayMap</code> function, i.e., <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">arrayMap(x -&gt; reinterpretAsFloat32(bitAnd(reinterpretAsUInt32(x), 4294901760)), image_embedding)</code>.</p>
+<p>This iterates over every value <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">x</code> in a vector embedding, executing the transformation <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word"> reinterpretAsFloat32(bitAnd(reinterpretAsUInt32(x), 4294901760))</code> - this interprets the binary sequence as an Int32 using the function <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">reinterpretAsUInt32</code> and performs a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">bitAnd</code> with the value <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">4294901760</code>. This latter value is the binary sequence <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">000000000000000001111111111111111</code>. This operation, therefore, zeros the trailing 16 bits, performing an effective truncation. The resulting binary value is then re-interpreted as a float32.</p>
+<p>We illustrate this process below:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> default.laion_1m_bfloat16 <span class="hljs-keyword">SELECT</span>
+	_file,
+	key,
+	url,
+	caption,
+	similarity,
+	width,
+	height,
+	original_width,
+	original_height,
+	status,
+	NSFW,
+	exif,
+	arrayMap(x <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> reinterpretAsFloat32(bitAnd(reinterpretAsUInt32(x), <span class="hljs-number">4294901760</span>)), text_embedding) <span class="hljs-keyword">AS</span> text_embedding,
+	arrayMap(x <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> reinterpretAsFloat32(bitAnd(reinterpretAsUInt32(x), <span class="hljs-number">4294901760</span>)), image_embedding) <span class="hljs-keyword">AS</span> image_embedding,
+	orientation,
+	software,
+	copyright,
+	image_make,
+	image_model
+<span class="hljs-keyword">FROM</span> laion_1m
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="bfloat16_process.png" loading="lazy" src="/uploads/bfloat16_process_ea6a655b7b.png"/></span>
+<p>As shown below, this has the effect of reducing our compressed data by over 35% - 0s compress really well.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+   <span class="hljs-keyword">table</span>,
+   name,
+   formatReadableSize(<span class="hljs-built_in">sum</span>(data_compressed_bytes)) <span class="hljs-keyword">AS</span> compressed_size,
+   formatReadableSize(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes)) <span class="hljs-keyword">AS</span> uncompressed_size,
+   round(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes) <span class="hljs-operator">/</span> <span class="hljs-built_in">sum</span>(data_compressed_bytes), <span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> ratio
+<span class="hljs-keyword">FROM</span> system.columns
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-keyword">table</span> <span class="hljs-keyword">IN</span> (<span class="hljs-string">'laion_100m'</span>, <span class="hljs-string">'laion_100m_bfloat16'</span>, <span class="hljs-string">'laion_10m'</span>, <span class="hljs-string">'laion_10m_bfloat16'</span>)) <span class="hljs-keyword">AND</span> (name <span class="hljs-keyword">IN</span> (<span class="hljs-string">'text_embedding'</span>, <span class="hljs-string">'image_embedding'</span>))
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+   <span class="hljs-keyword">table</span>,
+   name
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">DESC</span>
+
+┌─<span class="hljs-keyword">table</span>───────────────┬─name────────────┬─compressed_size─┬─uncompressed_size─┬─ratio─┐
+│ laion_10m_bfloat16  │ text_embedding  │ <span class="hljs-number">13.51</span> GiB       │ <span class="hljs-number">28.46</span> GiB         │  <span class="hljs-number">2.11</span> │
+│ laion_10m_bfloat16  │ image_embedding │ <span class="hljs-number">13.47</span> GiB       │ <span class="hljs-number">28.46</span> GiB         │  <span class="hljs-number">2.11</span> │
+│ laion_10m           │ text_embedding  │ <span class="hljs-number">18.36</span> GiB       │ <span class="hljs-number">28.59</span> GiB         │  <span class="hljs-number">1.56</span> │
+│ laion_10m           │ image_embedding │ <span class="hljs-number">18.36</span> GiB       │ <span class="hljs-number">28.59</span> GiB         │  <span class="hljs-number">1.56</span> │
+│ laion_100m_bfloat16 │ image_embedding │ <span class="hljs-number">134.02</span> GiB      │ <span class="hljs-number">286.75</span> GiB        │  <span class="hljs-number">2.14</span> │
+│ laion_100m_bfloat16 │ text_embedding  │ <span class="hljs-number">134.82</span> GiB      │ <span class="hljs-number">286.75</span> GiB        │  <span class="hljs-number">2.13</span> │
+│ laion_100m          │ text_embedding  │ <span class="hljs-number">181.64</span> GiB      │ <span class="hljs-number">286.43</span> GiB        │  <span class="hljs-number">1.58</span> │
+│ laion_100m          │ image_embedding │ <span class="hljs-number">182.29</span> GiB      │ <span class="hljs-number">286.43</span> GiB        │  <span class="hljs-number">1.57</span> │
+└─────────────────────┴─────────────────┴─────────────────┴───────────────────┴───────┘
+
+<span class="hljs-number">8</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.009</span> sec.
+</code></pre>
+<p>With our precision reduced to 16 bits, further increases in the ZSTD compression level will have less impact than for our 32 bit representation. As shown below, ZSTD(3) makes a minimal difference to our compressed bfloat16.</p>
+<pre style="font-size:13px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	<span class="hljs-keyword">table</span>,
+	name,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_compressed_bytes)) <span class="hljs-keyword">AS</span> compressed_size,
+	formatReadableSize(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes)) <span class="hljs-keyword">AS</span> uncompressed_size,
+	round(<span class="hljs-built_in">sum</span>(data_uncompressed_bytes) <span class="hljs-operator">/</span> <span class="hljs-built_in">sum</span>(data_compressed_bytes), <span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> ratio
+<span class="hljs-keyword">FROM</span> system.columns
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-keyword">table</span> <span class="hljs-keyword">IN</span> (<span class="hljs-string">'laion_100m_bfloat16'</span>, <span class="hljs-string">'laion_100m_bfloat16_zstd_3'</span>)) <span class="hljs-keyword">AND</span> (name <span class="hljs-keyword">IN</span> (<span class="hljs-string">'text_embedding'</span>, <span class="hljs-string">'image_embedding'</span>))
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+	<span class="hljs-keyword">table</span>,
+	name
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">DESC</span>
+
+┌─<span class="hljs-keyword">table</span>──────────────────────┬─name────────────┬─compressed_size─┬─uncompressed_size─┬─ratio─┐
+│ laion_100m_bfloat16_zstd_3 │ text_embedding  │ <span class="hljs-number">128.12</span> GiB  	 │ <span class="hljs-number">286.85</span> GiB    	 │  <span class="hljs-number">2.24</span> │
+│ laion_100m_bfloat16_zstd_3 │ image_embedding │ <span class="hljs-number">127.28</span> GiB   	 │ <span class="hljs-number">286.85</span> GiB    	 │  <span class="hljs-number">2.25</span> │
+│ laion_100m_bfloat16    	 │ image_embedding  │ <span class="hljs-number">133.80</span> GiB  	 │ <span class="hljs-number">286.75</span> GiB    	 │  <span class="hljs-number">2.14</span> │
+│ laion_100m_bfloat16    	 │ text_embedding   │ <span class="hljs-number">134.59</span> GiB  	 │ <span class="hljs-number">286.75</span> GiB    	 │  <span class="hljs-number">2.13</span> │
+└────────────────────────────┴─────────────────┴─────────────────┴───────────────────┴───────┘
+</code></pre>
+<p>This increase in compression has other potential benefits aside from reducing disk space. We demonstrate these benefits through the query performance for tables containing 10m and 100m rows, using both embeddings encoded as float32 and bfloat16. These results are based on the <a href="https://gist.github.com/gingerwizard/dce9cecb59213a7b4911c0afccf98141">same query</a> used earlier.</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th style="text-align:center">Table</th><th>Encoding</th><th>Cold (secs)</th><th>Hot (secs)</th></tr></thead><tbody><tr><td style="text-align:center">laion_10m</td><td>Float32</td><td>12.851s</td><td>2.406s</td></tr><tr><td style="text-align:center">laion_10m</td><td>bloat16</td><td>7.285s</td><td>1.554s</td></tr><tr><td style="text-align:center">laion_100m</td><td>Float32</td><td>111.857s</td><td>24.444s</td></tr><tr><td style="text-align:center">laion_100m</td><td>bloat16</td><td>71.362s</td><td>16.271s</td></tr></tbody></table></div>
+<p>The gains on our linear scan speed here are appreciable, with the bfloat16 variant improving our performance from 111 secs to 71 specs for the 100m row dataset on cold queries.</p>
+<p>An obvious question might be how this reduction in precision impacts our ability to represent concepts in our vectors and whether it results in reduced search quality. We have, after all, reduced the information encoded in our multidimensional space and effectively condensed our vectors "closer" together. Below we show the results for the earlier "a sleepy ridgeback dog" query using our new <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">laion_100m_v2</code> table and our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">search.py</code> script.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py search --text <span class="hljs-string">"a sleepy ridgeback dog"</span> --table laion_100m_bfloat16
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="bfloat16_ridgebacks.png" loading="lazy" src="/uploads/bfloat16_ridgebacks_4d8e02c76d.png"/></span>
+<p>While this is no obvious reduction in search quality for this search, this likely requires relevancy testing across a wider sample of queries. Users will need to test this precision reduction technique on their specific model and dataset, with results likely varying case by case.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="bonus-vector-fun" level="3">Bonus vector fun<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#bonus-vector-fun">#</a></span></h3>
+<p>After reading an <a href="https://x.st/fooling-around-with-word-embeddings/#What-are-the-300-dimensions">interesting blog post</a> about how vector math can be used to move around a high-dimensionality space, we thought it might be interesting to see if the same concepts could be applied to our CLIP-generated embeddings.</p>
+<p>For example, suppose we have embeddings for the words <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Berlin</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Germany</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">United Kingdom</code>, and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Bridge</code>. The following mathematical operation can be performed on their respective vectors.</p>
+<p><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">(berlin - germany) + ('united kingdom' + bridge)</code></p>
+<p>If we logically subtract and add the above concepts, we could hypothesize that the result would represent a bridge in London.</p>
+<p>Testing this idea, we enhanced our simple <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">search.py</code> script to support a basic parser that could accept input similar to the above. This parser supports the operations <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">+</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">-</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">*</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">/</code>, as well as <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">'</code> to denote multi-term input, and is exposed through a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">concept_math</code> command.</p>
+<p>Thanks to the great <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">pyparsing</code> library, building a parser for this grammar is trivial. In summary, the above phrase would be parsed into the following syntax tree:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="merging_concepts.png" loading="lazy" src="/uploads/merging_concepts_aae205d269.png"/></span>
+<p>We can, in turn, recursively compute the vectors for the text terms (the leafs) in the above tree. Branches can then be combined using the equivalent vector functions in ClickHouse for the specified mathematical operator. This process is performed depth-first, resolving the entire tree to a single query (which should represent the equivalent concept).</p>
+<p>Finally, this function is matched on the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">image_embedding</code> column using the same process as a standard search. The above would therefore resolve to the follow query:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> url, caption,
+L2Distance(image_embedding,
+	arrayMap((x,y) <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> x<span class="hljs-operator">+</span>y,
+    	arrayMap((x,y) <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> x<span class="hljs-operator">-</span>y, [berlin embedding], [germany embedding]),
+    	arrayMap((x,y) <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> x<span class="hljs-operator">+</span>y, [<span class="hljs-string">'united kingdom'</span> embedding], [bridge embedding])
+	)
+) <span class="hljs-keyword">AS</span> score <span class="hljs-keyword">FROM</span> laion_10m <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> score <span class="hljs-keyword">ASC</span> LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<p>Notice that we use the <a href="https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraymapfunc-arr1-">arrayMap</a> function to push down our pointwise addition and subtraction (support for <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">+</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">-</code> operators as pointwise operations <a href="https://github.com/ClickHouse/ClickHouse/issues/49939">is under consideration</a>).</p>
+<p>We show the results for this below, matching on the 10m row sample:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">python search.py concept_math —-text <span class="hljs-string">"(berlin - germany) + ('united kingdom' + bridge)"</span>
+</code></pre>
+<span class="relative mb-9 flex w-full justify-center"><img alt="london_bridges.png" loading="lazy" src="/uploads/london_bridges_a80573b9b3.png"/></span>
+<p>Cool! It works! Notice how the text has no mention of London Bridge - the first image is part of <a href="https://en.wikipedia.org/wiki/Waterloo_Bridge_(Monet_series)">Claude Monet Waterloo Bridge</a> series of paintings.</p>
+<p>Finally, we thought enhancing the grammar parser to support integer constants could be useful. Specifically, we wanted to see whether the midpoint between two contrasting concepts produced something interesting. For example, what might the art between the concepts <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">cubism</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">surrealism</code> represent? This can be mathematically represented as <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">(cubism+surrealism)/2</code>. Executing this search actually produced something interesting:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="cubism_surrealism.png" loading="lazy" src="/uploads/cubism_surrealism_8f47c8e4f4.png"/></span>
+<p>We leave it to the artists in our readership to comment on the relevance and accuracy here.</p>
+<p>This demonstrates yet another interesting possibility for combining vectors. There are no doubt other cases where this basic vector math can be useful. We'd love to hear about any examples!</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="conclusion" level="2">Conclusion<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/vector-search-clickhouse-p2#conclusion">#</a></span></h2>
+<p>In this blog post, we’ve shown how a vector dataset of 2 billion rows can be converted into Parquet format and loaded into ClickHouse. We have demonstrated that this compresses well, and that linear search can be scaled with CPUs and complemented with full SQL-based analytics using metadata. Finally, we have shown some newer ANN features of ClickHouse and explored how UDFs can be used to provide elegant functions for generating embeddings.</p></div></div><div class="rich_content rich-text-content mt-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-footer&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. At the end of your 30-day trial, continue with a pay-as-you-go plan, or <a href="/company/contact?loc=blog-cta-footer">contact us</a> to learn more about our volume-based discounts. Visit our <a href="/pricing?loc=blog-cta-header">pricing page</a> for details.</p></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

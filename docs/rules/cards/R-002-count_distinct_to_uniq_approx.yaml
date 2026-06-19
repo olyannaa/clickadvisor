@@ -1,0 +1,36 @@
+id: R-002
+name: count_distinct_to_uniq_approx
+tier: 1B
+category: aggregation_specialization
+status: proposed
+statement: 'Заменить COUNT(DISTINCT x) на uniq(x) — approximate HyperLogLog
+
+  оценку с ожидаемой ошибкой <1%.'
+preconditions:
+  syntactic:
+  - COUNT(DISTINCT) присутствует
+  semantic: []
+  data:
+  - Пользователь дал opt-in флаг --allow-approximate
+proof: 'uniq использует HyperLogLog с precision m=2^17.
+
+  Стандартная погрешность HLL = 1.04/√m ≈ 0.36%.
+
+  Для cardinality 10^6–10^11 ошибка <1% с вероятностью 99%.
+
+  Источник: Flajolet et al. 2007, документация ClickHouse uniq.'
+explain_template: Approximate distinct-агрегаты в ClickHouse существуют потому, что точный distinct быстро становится дорогим на больших объёмах. uniq хранит компактное вероятностное состояние вместо полного набора значений, поэтому требует намного меньше памяти. Цена за это — небольшая погрешность, поэтому правило остаётся opt-in.
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT COUNT(DISTINCT url) FROM logs
+example_after: SELECT uniq(url) FROM logs
+expected_speedup:
+  estimate: 10-100×
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks:
+- Approximate result. Не применять для финансовых отчётов.
+opt_in: true
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/reference/uniq

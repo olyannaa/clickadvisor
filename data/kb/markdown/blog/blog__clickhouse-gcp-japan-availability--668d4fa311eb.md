@@ -1,0 +1,39 @@
+# ClickHouse、Google Cloud 東京リージョンで「ClickHouse Cloud」の提供を開始 ― 日本国内で高速・データマネジメントが可能に ―
+
+
+#### データ分析基盤のリーディングカンパニーであるClickHouse株式会社は、Google Cloud 東京リージョンにおいて「ClickHouse Cloud」が正式に利用可能になったことを発表しました。 [\#](/jp/blog/clickhouse-gcp-japan-availability#%E3%83%87%E3%83%BC%E3%82%BF%E5%88%86%E6%9E%90%E5%9F%BA%E7%9B%A4%E3%81%AE%E3%83%AA%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%82%AB%E3%83%B3%E3%83%91%E3%83%8B%E3%83%BC%E3%81%A7%E3%81%82%E3%82%8Bclickhouse%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE%E3%81%AFgoogle-cloud-%E6%9D%B1%E4%BA%AC%E3%83%AA%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%8A%E3%81%84%E3%81%A6clickhouse-cloud%E3%81%8C%E6%AD%A3%E5%BC%8F%E3%81%AB%E5%88%A9%E7%94%A8%E5%8F%AF%E8%83%BD%E3%81%AB%E3%81%AA%E3%81%A3%E3%81%9F%E3%81%93%E3%81%A8%E3%82%92%E7%99%BA%E8%A1%A8%E3%81%97%E3%81%BE%E3%81%97%E3%81%9F)
+
+
+今回の提供開始により、日本国内の企業はデータを国内に保持したまま、低遅延かつ高信頼性のリアルタイム分析を実現できるようになります。
+
+
+本発表は、2025年11月7日の ClickHouse株式会社の設立に続くもので、当社が日本市場に向けて最適化された分析基盤の提供を加速していく姿勢を示すものです。
+
+
+#### 日本の次世代データドリブンアプリケーションを支える ClickHouse Cloud [\#](/jp/blog/clickhouse-gcp-japan-availability#%E6%97%A5%E6%9C%AC%E3%81%AE%E6%AC%A1%E4%B8%96%E4%BB%A3%E3%83%87%E3%83%BC%E3%82%BF%E3%83%89%E3%83%AA%E3%83%96%E3%83%B3%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E6%94%AF%E3%81%88%E3%82%8B-clickhouse-cloud)
+
+
+ClickHouse Cloud は、オープンソースの ClickHouse を基盤としたフルマネージドサービスで、数十億行のデータをミリ秒単位で処理する超高速クエリエンジンを提供します。
+
+
+世界中のデータドリブン企業に採用されており、日本の企業はインフラ運用負荷を最小限に抑えながら、アプリケーションの高速化、AI/ML ワークロードの効率化、データドリブン経営への対応を実現できます。
+
+
+生成AI、IoT、デジタルマーケティング、金融サービスなど、多くの業界では、競争優位性を高めるためにリアルタイムデータ活用が不可欠な時代に突入しています。
+ClickHouse Cloud は、CIO、CDO、CTO、およびエンジニアリングチームが、複雑なインフラ構築や運用に追われることなく、分析や AI 開発などの付加価値の高い業務に集中できる環境を提供します。
+
+
+#### Google Cloud 東京リージョン提供開始により得られる主なメリット [\#](/jp/blog/clickhouse-gcp-japan-availability#google-cloud-%E6%9D%B1%E4%BA%AC%E3%83%AA%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E6%8F%90%E4%BE%9B%E9%96%8B%E5%A7%8B%E3%81%AB%E3%82%88%E3%82%8A%E5%BE%97%E3%82%89%E3%82%8C%E3%82%8B%E4%B8%BB%E3%81%AA%E3%83%A1%E3%83%AA%E3%83%83%E3%83%88)
+
+
+- 低遅延パフォーマンス：日本国内のユーザーに対して高速レスポンスを実現し、アプリケーション性能を最適化します。
+- データ主権の確保：データの国内処理・保管により、セキュリティおよびコンプライアンス要件に対応できます。
+- AI/MLワークフローの強化：リアルタイムデータの収集・分析からモデル学習・推論まで、Google Cloud の各種サービスとシームレスに連携し、AI 活用のエンドツーエンドの流れを支援します。
+
+
+#### ClickHouse Cloud の導入方法 [\#](/jp/blog/clickhouse-gcp-japan-availability#clickhouse-cloud-%E3%81%AE%E5%B0%8E%E5%85%A5%E6%96%B9%E6%B3%95)
+
+
+ClickHouse Cloud は Google Cloud Marketplace から利用可能で、既存の Google Cloud 環境とスムーズに統合できます。詳細はこちらをご覧ください。  
+
+<https://clickhouse.com/jp>

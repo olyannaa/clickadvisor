@@ -1,0 +1,10 @@
+\x1b[1mClickAdvisor report\x1b[0m
+
+\x1b[33m[2]\x1b[0m Large right-side JOIN input
+The right side of the JOIN appears substantially larger than the filtered left side.
+
+\x1b[35m[3]\x1b[0m Advisory
+Consider validating whether pre-filtering or dictionary-style access can reduce
+JOIN build pressure.
+
+Estimated impact: medium_to_high

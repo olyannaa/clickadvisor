@@ -1,0 +1,30 @@
+id: D-010
+name: unused_columns_in_select
+tier: detector
+category: io_waste
+status: proposed
+statement: подзапрос проектирует колонки, не используемые во внешнем уровне
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: low
+detection_method:
+  ast_pattern: подзапрос проектирует колонки, не используемые во внешнем уровне
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"Колонки {cols} не используются снаружи, но читаются с диска."'
+false_positives: []

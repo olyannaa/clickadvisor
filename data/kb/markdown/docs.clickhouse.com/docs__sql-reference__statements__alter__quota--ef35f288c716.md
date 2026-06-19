@@ -1,0 +1,54 @@
+# ALTER QUOTA \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- [ALTER](/docs/sql-reference/statements/alter)- QUOTA
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/alter/quota.md)# ALTER QUOTA
+
+Changes quotas.
+
+
+Syntax:
+
+
+
+```
+ALTER QUOTA [IF EXISTS] name [ON CLUSTER cluster_name]
+    [RENAME TO new_name]
+    [KEYED BY {user_name | ip_address | client_key | client_key,user_name | client_key,ip_address | normalized_query_hash} | NOT KEYED]
+    [FOR [RANDOMIZED] INTERVAL number {second | minute | hour | day | week | month | quarter | year}
+        {MAX { {queries | query_selects | query_inserts | errors | result_rows | result_bytes | read_rows | read_bytes | execution_time | queries_per_normalized_hash} = number } [,...] |
+        NO LIMITS | TRACKING ONLY} [,...]]
+    [TO {role [,...] | ALL | ALL EXCEPT role [,...]}]
+
+```
+
+Keys `user_name`, `ip_address`, `client_key`, `client_key, user_name`, `client_key, ip_address`, and `normalized_query_hash` correspond to the fields in the [system.quotas](/docs/operations/system-tables/quotas) table.
+
+
+Parameters `queries`, `query_selects`, `query_inserts`, `errors`, `result_rows`, `result_bytes`, `read_rows`, `read_bytes`, `execution_time`, `queries_per_normalized_hash` correspond to the fields in the [system.quotas\_usage](/docs/operations/system-tables/quotas_usage) table.
+
+
+`ON CLUSTER` clause allows creating quotas on a cluster, see [Distributed DDL](/docs/sql-reference/distributed-ddl).
+
+
+**Examples**
+
+
+Limit the maximum number of queries for the current user with 123 queries in 15 months constraint:
+
+
+
+```
+ALTER QUOTA IF EXISTS qA FOR INTERVAL 15 month MAX queries = 123 TO CURRENT_USER;
+
+```
+
+For the default user limit the maximum execution time with half a second in 30 minutes, and limit the maximum number of queries with 321 and the maximum number of errors with 10 in 5 quarters:
+
+
+
+```
+ALTER QUOTA IF EXISTS qB FOR INTERVAL 30 minute MAX execution_time = 0.5, FOR INTERVAL 5 quarter MAX queries = 321, errors = 10 TO default;
+
+```
+[PreviousAPPLY DELETED MASK](/docs/sql-reference/statements/alter/apply-deleted-mask)[NextROLE](/docs/sql-reference/statements/alter/role)Was this page helpful?

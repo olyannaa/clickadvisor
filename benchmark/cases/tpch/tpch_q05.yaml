@@ -1,0 +1,24 @@
+case_id: tpch_q05
+source: tpch
+sql: "SELECT\n    n_name,\n    sum(l_extendedprice * (1 - l_discount)) AS revenue\nFROM\n    customer,\n    orders,\n    lineitem,\n    supplier,\n    nation,\n    region\nWHERE\n    c_custkey = o_custkey\n    AND l_orderkey = o_orderkey\n    AND l_suppkey = s_suppkey\n    AND c_nationkey = s_nationkey\n    AND s_nationkey = n_nationkey\n    AND n_regionkey = r_regionkey\n    AND r_name = 'ASIA'\n    AND o_orderdate >= toDate('1994-01-01')\n    AND o_orderdate < toDate('1994-01-01') + INTERVAL 1 YEAR\nGROUP BY\n    n_name\nORDER BY\n    revenue DESC;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM customer, orders, lineitem, supplier, nation, region — 6 таблиц через запятую
+- issue_id: I-2
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT
+expected_rules_to_fire:
+- D-002
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q5: Local Supplier Volume. 6 implicit JOIN через запятую.'
+expected_findings_count: 2
+status: reviewed

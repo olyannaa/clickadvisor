@@ -1,0 +1,19 @@
+case_id: synthetic_20
+source: synthetic
+sql: |
+  SELECT user_id, event_type, created_at FROM events
+  WHERE status = 'active'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: Top-level SELECT возвращает детальные строки без LIMIT, DISTINCT и агрегации.
+expected_rules_to_fire:
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for D-004.
+expected_findings_count: 1
+status: validated

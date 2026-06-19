@@ -1,0 +1,33 @@
+id: E-009
+name: query_cache_for_repeated_workload
+tier: env
+category: caching
+status: proposed
+statement: Включить query_cache при высокой повторяемости
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.
+risks: []
+opt_in: false
+references: []
+hardware_preconditions: []
+config_preconditions: []
+workload_preconditions: []
+recommendation:
+  setting: query_cache_for_repeated_workload
+  current_value_check: ''
+  recommended_formula: ''
+  example: ''
+condition: top-100 queries > 50% от total в query_log

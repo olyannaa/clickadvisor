@@ -1,0 +1,199 @@
+<h1>clickhouse-keeper-service | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/altinity-kb-zookeeper/">ZooKeeper</a></li><li aria-current="page" class="breadcrumb-item active">clickhouse-keeper-service</li></ol></nav><div class="td-content"><h1>clickhouse-keeper-service</h1><div class="lead"></div><h2 id="clickhouse-keeper-service">clickhouse-keeper-service</h2><h3 id="installation">installation</h3><p>Need to install <code>clickhouse-common-static</code> + <code>clickhouse-keeper</code> OR <code>clickhouse-common-static</code> + <code>clickhouse-server</code>.
+Both OK, use the first if you don’t need ClickHouse® server locally.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>dpkg -i clickhouse-common-static_<span style="color:#ce5c00;font-weight:700">{</span>%version<span style="color:#ce5c00;font-weight:700">}</span>.deb clickhouse-keeper_<span style="color:#ce5c00;font-weight:700">{</span>%version<span style="color:#ce5c00;font-weight:700">}</span>.deb
+</span></span></code></pre></div><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>dpkg -i clickhouse-common-static_<span style="color:#ce5c00;font-weight:700">{</span>%version<span style="color:#ce5c00;font-weight:700">}</span>.deb clickhouse-server_<span style="color:#ce5c00;font-weight:700">{</span>%version<span style="color:#ce5c00;font-weight:700">}</span>.deb clickhouse-client_<span style="color:#ce5c00;font-weight:700">{</span>%version<span style="color:#ce5c00;font-weight:700">}</span>.deb
+</span></span></code></pre></div><p>Create directories</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>mkdir -p /etc/clickhouse-keeper/config.d
+</span></span><span style="display:flex"><span>mkdir -p /var/log/clickhouse-keeper
+</span></span><span style="display:flex"><span>mkdir -p /var/lib/clickhouse-keeper/coordination/log
+</span></span><span style="display:flex"><span>mkdir -p /var/lib/clickhouse-keeper/coordination/snapshots
+</span></span><span style="display:flex"><span>mkdir -p /var/lib/clickhouse-keeper/cores
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>chown -R clickhouse.clickhouse /etc/clickhouse-keeper /var/log/clickhouse-keeper /var/lib/clickhouse-keeper
+</span></span></code></pre></div><h3 id="config">config</h3><pre tabindex="0"><code>cat /etc/clickhouse-keeper/config.xml
+
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+    &lt;logger&gt;
+        &lt;!-- Possible levels [1]:
+
+          - none (turns off logging)
+          - fatal
+          - critical
+          - error
+          - warning
+          - notice
+          - information
+          - debug
+          - trace
+          - test (not for production usage)
+
+            [1]: https://github.com/pocoproject/poco/blob/poco-1.9.4-release/Foundation/include/Poco/Logger.h#L105-L114
+        --&gt;
+        &lt;level&gt;trace&lt;/level&gt;
+        &lt;log&gt;/var/log/clickhouse-keeper/clickhouse-keeper.log&lt;/log&gt;
+        &lt;errorlog&gt;/var/log/clickhouse-keeper/clickhouse-keeper.err.log&lt;/errorlog&gt;
+        &lt;!-- Rotation policy
+             See https://github.com/pocoproject/poco/blob/poco-1.9.4-release/Foundation/include/Poco/FileChannel.h#L54-L85
+          --&gt;
+        &lt;size&gt;1000M&lt;/size&gt;
+        &lt;count&gt;10&lt;/count&gt;
+        &lt;!-- &lt;console&gt;1&lt;/console&gt; --&gt; &lt;!-- Default behavior is autodetection (log to console if not daemon mode and is tty) --&gt;
+
+        &lt;!-- Per level overrides (legacy):
+
+        For example to suppress logging of the ConfigReloader you can use:
+        NOTE: levels.logger is reserved, see below.
+        --&gt;
+        &lt;!--
+        &lt;levels&gt;
+          &lt;ConfigReloader&gt;none&lt;/ConfigReloader&gt;
+        &lt;/levels&gt;
+        --&gt;
+
+        &lt;!-- Per level overrides:
+
+        For example to suppress logging of the RBAC for default user you can use:
+        (But please note that the logger name maybe changed from version to version, even after minor upgrade)
+        --&gt;
+        &lt;!--
+        &lt;levels&gt;
+          &lt;logger&gt;
+            &lt;name&gt;ContextAccess (default)&lt;/name&gt;
+            &lt;level&gt;none&lt;/level&gt;
+          &lt;/logger&gt;
+          &lt;logger&gt;
+            &lt;name&gt;DatabaseOrdinary (test)&lt;/name&gt;
+            &lt;level&gt;none&lt;/level&gt;
+          &lt;/logger&gt;
+        &lt;/levels&gt;
+        --&gt;
+        &lt;!-- Structured log formatting:
+        You can specify log format(for now, JSON only). In that case, the console log will be printed
+        in specified format like JSON.
+        For example, as below:
+        {"date_time":"1650918987.180175","thread_name":"#1","thread_id":"254545","level":"Trace","query_id":"","logger_name":"BaseDaemon","message":"Received signal 2","source_file":"../base/daemon/BaseDaemon.cpp; virtual void SignalListener::run()","source_line":"192"}
+        To enable JSON logging support, just uncomment &lt;formatting&gt; tag below.
+        --&gt;
+        &lt;!-- &lt;formatting&gt;json&lt;/formatting&gt; --&gt;
+    &lt;/logger&gt;
+
+    &lt;!-- Listen specified address.
+     Use :: (wildcard IPv6 address), if you want to accept connections both with IPv4 and IPv6 from everywhere.
+     Notes:
+     If you open connections from wildcard address, make sure that at least one of the following measures applied:
+     - server is protected by firewall and not accessible from untrusted networks;
+     - all users are restricted to subset of network addresses (see users.xml);
+     - all users have strong passwords, only secure (TLS) interfaces are accessible, or connections are only made via TLS interfaces.
+     - users without password have readonly access.
+     See also: https://www.shodan.io/search?query=clickhouse
+    --&gt;
+    &lt;!-- &lt;listen_host&gt;::&lt;/listen_host&gt; --&gt;
+
+
+    &lt;!-- Same for hosts without support for IPv6: --&gt;
+    &lt;!-- &lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt; --&gt;
+
+    &lt;!-- Default values - try listen localhost on IPv4 and IPv6. --&gt;
+    &lt;!--
+    &lt;listen_host&gt;::1&lt;/listen_host&gt;
+    &lt;listen_host&gt;127.0.0.1&lt;/listen_host&gt;
+    --&gt;
+
+    &lt;!-- &lt;interserver_listen_host&gt;::&lt;/interserver_listen_host&gt; --&gt;
+    &lt;!-- Listen host for communication between replicas. Used for data exchange --&gt;
+    &lt;!-- Default values - equal to listen_host --&gt;
+
+    &lt;!-- Don't exit if IPv6 or IPv4 networks are unavailable while trying to listen. --&gt;
+    &lt;!-- &lt;listen_try&gt;0&lt;/listen_try&gt; --&gt;
+
+    &lt;!-- Allow multiple servers to listen on the same address:port. This is not recommended.
+    --&gt;
+    &lt;!-- &lt;listen_reuse_port&gt;0&lt;/listen_reuse_port&gt; --&gt;
+    &lt;!-- &lt;listen_backlog&gt;4096&lt;/listen_backlog&gt; --&gt;
+
+    &lt;path&gt;/var/lib/clickhouse-keeper/&lt;/path&gt;
+    &lt;core_path&gt;/var/lib/clickhouse-keeper/cores&lt;/core_path&gt;
+
+    &lt;keeper_server&gt;
+	    &lt;tcp_port&gt;2181&lt;/tcp_port&gt;
+	    &lt;server_id&gt;1&lt;/server_id&gt;
+	    &lt;log_storage_path&gt;/var/lib/clickhouse-keeper/coordination/log&lt;/log_storage_path&gt;
+	    &lt;snapshot_storage_path&gt;/var/lib/clickhouse-keeper/coordination/snapshots&lt;/snapshot_storage_path&gt;
+
+	    &lt;coordination_settings&gt;
+        	&lt;operation_timeout_ms&gt;10000&lt;/operation_timeout_ms&gt;
+	        &lt;session_timeout_ms&gt;30000&lt;/session_timeout_ms&gt;
+	        &lt;raft_logs_level&gt;trace&lt;/raft_logs_level&gt;
+	        &lt;rotate_log_storage_interval&gt;10000&lt;/rotate_log_storage_interval&gt;
+	    &lt;/coordination_settings&gt;
+
+            &lt;raft_configuration&gt;
+	              &lt;server&gt;
+                   &lt;id&gt;1&lt;/id&gt;
+                   &lt;hostname&gt;localhost&lt;/hostname&gt;
+                   &lt;port&gt;9444&lt;/port&gt;
+                &lt;/server&gt;
+           &lt;/raft_configuration&gt;
+    &lt;/keeper_server&gt;
+&lt;/clickhouse&gt;
+</code></pre><pre tabindex="0"><code>cat /etc/clickhouse-keeper/config.d/keeper.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+    &lt;listen_host&gt;::&lt;/listen_host&gt;
+    &lt;keeper_server&gt;
+            &lt;tcp_port&gt;2181&lt;/tcp_port&gt;
+            &lt;server_id&gt;1&lt;/server_id&gt;
+            &lt;raft_configuration&gt;
+                &lt;server&gt;
+                   &lt;id&gt;1&lt;/id&gt;
+       	           &lt;hostname&gt;keeper-host-1&lt;/hostname&gt;
+                   &lt;port&gt;9444&lt;/port&gt;
+                &lt;/server&gt;
+                &lt;server&gt;
+                   &lt;id&gt;2&lt;/id&gt;
+                   &lt;hostname&gt;keeper-host-2&lt;/hostname&gt;
+                   &lt;port&gt;9444&lt;/port&gt;
+                &lt;/server&gt;
+                &lt;server&gt;
+                   &lt;id&gt;3&lt;/id&gt;
+                   &lt;hostname&gt;keeper-host-3&lt;/hostname&gt;
+                   &lt;port&gt;9444&lt;/port&gt;
+                &lt;/server&gt;                
+           &lt;/raft_configuration&gt;
+    &lt;/keeper_server&gt;
+&lt;/clickhouse&gt;
+</code></pre><h3 id="systemd-service">systemd service</h3><pre tabindex="0"><code>cat /lib/systemd/system/clickhouse-keeper.service
+[Unit]
+Description=ClickHouse Keeper (analytic DBMS for big data)
+Requires=network-online.target
+# NOTE: that After/Wants=time-sync.target is not enough, you need to ensure
+# that the time was adjusted already, if you use systemd-timesyncd you are
+# safe, but if you use ntp or some other daemon, you should configure it
+# additionaly.
+After=time-sync.target network-online.target
+Wants=time-sync.target
+
+[Service]
+Type=simple
+User=clickhouse
+Group=clickhouse
+Restart=always
+RestartSec=30
+RuntimeDirectory=clickhouse-keeper
+ExecStart=/usr/bin/clickhouse-keeper --config=/etc/clickhouse-keeper/config.xml --pid-file=/run/clickhouse-keeper/clickhouse-keeper.pid
+# Minus means that this file is optional.
+EnvironmentFile=-/etc/default/clickhouse
+LimitCORE=infinity
+LimitNOFILE=500000
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_IPC_LOCK CAP_SYS_NICE CAP_NET_BIND_SERVICE
+
+[Install]
+# ClickHouse should not start from the rescue shell (rescue.target).
+WantedBy=multi-user.target
+</code></pre><pre tabindex="0"><code>systemctl daemon-reload
+
+systemctl status clickhouse-keeper
+
+systemctl start clickhouse-keeper
+</code></pre><h3 id="debug-start-without-service-as-foreground-application">debug start without service (as foreground application)</h3><pre tabindex="0"><code>sudo -u clickhouse /usr/bin/clickhouse-keeper --config=/etc/clickhouse-keeper/config.xml
+</code></pre><div class="td-page-meta__lastmod">Last modified 2024.07.30: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4a96398d6e97ac2935110b426947487e2e202d9">Site cleanup, mostly minor changes (a4a9639)</a></div></div></main>

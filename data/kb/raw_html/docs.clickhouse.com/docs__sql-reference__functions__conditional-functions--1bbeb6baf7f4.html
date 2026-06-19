@@ -1,0 +1,394 @@
+<h1>Conditional Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Conditional</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/conditional-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Conditional Functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a aria-label="Direct link to Overview" class="hash-link" href="#overview" title="Direct link to Overview">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="using-conditional-results-directly">Using Conditional Results Directly<a aria-label="Direct link to Using Conditional Results Directly" class="hash-link" href="#using-conditional-results-directly" title="Direct link to Using Conditional Results Directly">​</a></h3>
+<p>Conditionals always result to <code>0</code>, <code>1</code> or <code>NULL</code>. So you can use conditional results directly like this:</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT left &lt; right AS is_small
+FROM LEFT_RIGHT
+
+┌─is_small─┐
+│     ᴺᵁᴸᴸ │
+│        1 │
+│        0 │
+│        0 │
+│     ᴺᵁᴸᴸ │
+└──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="null-values-in-conditionals">NULL Values in Conditionals<a aria-label="Direct link to NULL Values in Conditionals" class="hash-link" href="#null-values-in-conditionals" title="Direct link to NULL Values in Conditionals">​</a></h3>
+<p>When <code>NULL</code> values are involved in conditionals, the result will also be <code>NULL</code>.</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    NULL &lt; 1,
+    2 &lt; NULL,
+    NULL &lt; NULL,
+    NULL = NULL
+
+┌─less(NULL, 1)─┬─less(2, NULL)─┬─less(NULL, NULL)─┬─equals(NULL, NULL)─┐
+│ ᴺᵁᴸᴸ          │ ᴺᵁᴸᴸ          │ ᴺᵁᴸᴸ             │ ᴺᵁᴸᴸ               │
+└───────────────┴───────────────┴──────────────────┴────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>So you should construct your queries carefully if the types are <code>Nullable</code>.</p>
+<p>The following example demonstrates this by failing to add equals condition to <code>multiIf</code>.</p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    left,
+    right,
+    multiIf(left &lt; right, 'left is smaller', left &gt; right, 'right is smaller', 'Both equal') AS faulty_result
+FROM LEFT_RIGHT
+
+┌─left─┬─right─┬─faulty_result────┐
+│ ᴺᵁᴸᴸ │     4 │ Both equal       │
+│    1 │     3 │ left is smaller  │
+│    2 │     2 │ Both equal       │
+│    3 │     1 │ right is smaller │
+│    4 │  ᴺᵁᴸᴸ │ Both equal       │
+└──────┴───────┴──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="case-statement">CASE statement<a aria-label="Direct link to CASE statement" class="hash-link" href="#case-statement" title="Direct link to CASE statement">​</a></h3>
+<p>The CASE expression in ClickHouse provides conditional logic similar to the SQL CASE operator. It evaluates conditions and returns values based on the first matching condition.</p>
+<p>ClickHouse supports two forms of CASE:</p>
+<ol class="custom-ol">
+<li class="custom-li"><code>CASE WHEN ... THEN ... ELSE ... END</code>
+<br/>
+<!-- -->This form allows full flexibility and is internally implemented using the <a href="/docs/sql-reference/functions/conditional-functions#multiIf">multiIf</a> function. Each condition is evaluated independently, and expressions can include non-constant values.</li>
+</ol>
+<div class="wrapper_EBtA" style="height:490.1px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    number,
+    CASE
+        WHEN number % 2 = 0 THEN number + 1
+        WHEN number % 2 = 1 THEN number * 10
+        ELSE number
+    END AS result
+FROM system.numbers
+WHERE number &lt; 5;
+
+-- is translated to
+SELECT
+    number,
+    multiIf((number % 2) = 0, number + 1, (number % 2) = 1, number * 10, number) AS result
+FROM system.numbers
+WHERE number &lt; 5
+
+┌─number─┬─result─┐
+│      0 │      1 │
+│      1 │     10 │
+│      2 │      3 │
+│      3 │     30 │
+│      4 │      5 │
+└────────┴────────┘
+
+5 rows in set. Elapsed: 0.002 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ol class="custom-ol" start="2">
+<li class="custom-li"><code>CASE &lt;expr&gt; WHEN &lt;val1&gt; THEN ... WHEN &lt;val2&gt; THEN ... ELSE ... END</code>
+<br/>
+<!-- -->This more compact form is optimized for constant value matching and internally uses <code>caseWithExpression()</code>.</li>
+</ol>
+<p>For example, the following is valid:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    number,
+    CASE number
+        WHEN 0 THEN 100
+        WHEN 1 THEN 200
+        ELSE 0
+    END AS result
+FROM system.numbers
+WHERE number &lt; 3;
+
+-- is translated to
+
+SELECT
+    number,
+    caseWithExpression(number, 0, 100, 1, 200, 0) AS result
+FROM system.numbers
+WHERE number &lt; 3
+
+┌─number─┬─result─┐
+│      0 │    100 │
+│      1 │    200 │
+│      2 │      0 │
+└────────┴────────┘
+
+3 rows in set. Elapsed: 0.002 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This form also does not require return expressions to be constants.</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    number,
+    CASE number
+        WHEN 0 THEN number + 1
+        WHEN 1 THEN number * 10
+        ELSE number
+    END
+FROM system.numbers
+WHERE number &lt; 3;
+
+-- is translated to
+
+SELECT
+    number,
+    caseWithExpression(number, 0, number + 1, 1, number * 10, number)
+FROM system.numbers
+WHERE number &lt; 3
+
+┌─number─┬─caseWithExpr⋯0), number)─┐
+│      0 │                        1 │
+│      1 │                       10 │
+│      2 │                        2 │
+└────────┴──────────────────────────┘
+
+3 rows in set. Elapsed: 0.001 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="caveats">Caveats<a aria-label="Direct link to Caveats" class="hash-link" href="#caveats" title="Direct link to Caveats">​</a></h4>
+<p>ClickHouse determines the result type of a CASE expression (or its internal equivalent, such as <code>multiIf</code>) before evaluating any conditions. This is important when the return expressions differ in type, such as different timezones or numeric types.</p>
+<ul class="custom-ul">
+<li class="custom-li">The result type is selected based on the largest compatible type among all branches.</li>
+<li class="custom-li">Once this type is selected, all other branches are implicitly cast to it - even if their logic would never be executed at runtime.</li>
+<li class="custom-li">For types like DateTime64, where the timezone is part of the type signature, this can lead to surprising behavior: the first encountered timezone may be used for all branches, even when other branches specify different timezones.</li>
+</ul>
+<p>For example, below all rows return the timestamp in the timezone of the first matched branch i.e. <code>Asia/Kolkata</code></p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    number,
+    CASE
+        WHEN number = 0 THEN fromUnixTimestamp64Milli(0, 'Asia/Kolkata')
+        WHEN number = 1 THEN fromUnixTimestamp64Milli(0, 'America/Los_Angeles')
+        ELSE fromUnixTimestamp64Milli(0, 'UTC')
+    END AS tz
+FROM system.numbers
+WHERE number &lt; 3;
+
+-- is translated to
+
+SELECT
+    number,
+    multiIf(number = 0, fromUnixTimestamp64Milli(0, 'Asia/Kolkata'), number = 1, fromUnixTimestamp64Milli(0, 'America/Los_Angeles'), fromUnixTimestamp64Milli(0, 'UTC')) AS tz
+FROM system.numbers
+WHERE number &lt; 3
+
+┌─number─┬──────────────────────tz─┐
+│      0 │ 1970-01-01 05:30:00.000 │
+│      1 │ 1970-01-01 05:30:00.000 │
+│      2 │ 1970-01-01 05:30:00.000 │
+└────────┴─────────────────────────┘
+
+3 rows in set. Elapsed: 0.011 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Here, ClickHouse sees multiple <code>DateTime64(3, &lt;timezone&gt;)</code> return types. It infers the common type as <code>DateTime64(3, 'Asia/Kolkata'</code> as the first one it sees, implicitly casting other branches to this type.</p>
+<p>This can be addressed by converting to a string to preserve intended timezone formatting:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    number,
+    multiIf(
+        number = 0, formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'Asia/Kolkata'),
+        number = 1, formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'America/Los_Angeles'),
+        formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'UTC')
+    ) AS tz
+FROM system.numbers
+WHERE number &lt; 3;
+
+-- is translated to
+
+SELECT
+    number,
+    multiIf(number = 0, formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'Asia/Kolkata'), number = 1, formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'America/Los_Angeles'), formatDateTime(fromUnixTimestamp64Milli(0), '%F %T', 'UTC')) AS tz
+FROM system.numbers
+WHERE number &lt; 3
+
+┌─number─┬─tz──────────────────┐
+│      0 │ 1970-01-01 05:30:00 │
+│      1 │ 1969-12-31 16:00:00 │
+│      2 │ 1970-01-01 00:00:00 │
+└────────┴─────────────────────┘
+
+3 rows in set. Elapsed: 0.002 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="clamp">clamp<a aria-label="Direct link to clamp" class="hash-link" href="#clamp" title="Direct link to clamp">​</a></h2>
+<p>Introduced in: v24.5.0</p>
+<p>Restricts a value to be within the specified minimum and maximum bounds.</p>
+<p>If the value is less than the minimum, returns the minimum. If the value is greater than the maximum, returns the maximum. Otherwise, returns the value itself.</p>
+<p>All arguments must be of comparable types. The result type is the largest compatible type among all arguments.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">clamp(value, min, max)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>value</code> — The value to clamp. - <code>min</code> — The minimum bound. - <code>max</code> — The maximum bound.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value, restricted to the [min, max] range.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT clamp(5, 1, 10) AS result;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┐
+│      5 │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Value below minimum</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT clamp(-3, 0, 7) AS result;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┐
+│      0 │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Value above maximum</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT clamp(15, 0, 7) AS result;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┐
+│      7 │
+└────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="greatest">greatest<a aria-label="Direct link to greatest" class="hash-link" href="#greatest" title="Direct link to greatest">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the greatest value among the arguments.
+<code>NULL</code> arguments are ignored.</p>
+<ul class="custom-ul">
+<li class="custom-li">For arrays, returns the lexicographically greatest array.</li>
+<li class="custom-li">For <code>DateTime</code> types, the result type is promoted to the largest type (e.g., <code>DateTime64</code> if mixed with <code>DateTime32</code>).</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><mdxadmonitiontitle>Use setting <code>least_greatest_legacy_null_behavior</code> to change <code>NULL</code> behavior</mdxadmonitiontitle><p>Version <a href="/docs/whats-new/changelog/2024#a-id2412a-clickhouse-release-2412-2024-12-19">24.12</a> introduced a backwards-incompatible change such that <code>NULL</code> values are ignored, while previously it returned <code>NULL</code> if one of the arguments was <code>NULL</code>.
+To retain the previous behavior, set setting <code>least_greatest_legacy_null_behavior</code> (default: <code>false</code>) to <code>true</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">greatest(x1[, x2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x1[, x2, ...]</code> — One or multiple values to compare. All arguments must be of comparable types. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the greatest value among the arguments, promoted to the largest compatible type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Numeric types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT greatest(1, 2, toUInt8(3), 3.) AS result, toTypeName(result) AS type;
+-- The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type────┐
+│      3 │ Float64 │
+└────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arrays</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT greatest(['hello'], ['there'], ['world']);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─greatest(['hello'], ['there'], ['world'])─┐
+│ ['world']                                 │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>DateTime types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT greatest(toDateTime32(now() + toIntervalDay(1)), toDateTime64(now(), 3));
+-- The type returned is a DateTime64 as the DateTime32 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─greatest(toD⋯(now(), 3))─┐
+│  2025-05-28 15:50:53.000 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="if">if<a aria-label="Direct link to if" class="hash-link" href="#if" title="Direct link to if">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs conditional branching.</p>
+<ul class="custom-ul">
+<li class="custom-li">If the condition <code>cond</code> evaluates to a non-zero value, the function returns the result of the expression <code>then</code>.</li>
+<li class="custom-li">If <code>cond</code> evaluates to zero or NULL, the result of the <code>else</code> expression is returned.</li>
+</ul>
+<p>The setting <a href="/docs/operations/settings/settings#short_circuit_function_evaluation"><code>short_circuit_function_evaluation</code></a> controls whether short-circuit evaluation is used.</p>
+<p>If enabled, the <code>then</code> expression is evaluated only on rows where <code>cond</code> is true and the <code>else</code> expression where <code>cond</code> is false.</p>
+<p>For example, with short-circuit evaluation, no division-by-zero exception is thrown when executing the following query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT if(number = 0, 0, intDiv(42, number)) FROM numbers(10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>then</code> and <code>else</code> must be of a similar type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">if(cond, then, else)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>cond</code> — The evaluated condition. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a> or <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(UInt8)</code></a> or <a href="/docs/sql-reference/syntax#null"><code>NULL</code></a></li>
+<li class="custom-li"><code>then</code> — The expression returned if <code>cond</code> is true. - <code>else</code> — The expression returned if <code>cond</code> is false or <code>NULL</code>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The result of either the <code>then</code> or <code>else</code> expressions, depending on condition <code>cond</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Example usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT if(1, 2 + 2, 2 + 6) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─res─┐
+│   4 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="least">least<a aria-label="Direct link to least" class="hash-link" href="#least" title="Direct link to least">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the smallest value among the arguments.
+<code>NULL</code> arguments are ignored.</p>
+<ul class="custom-ul">
+<li class="custom-li">For arrays, returns the lexicographically least array.</li>
+<li class="custom-li">For DateTime types, the result type is promoted to the largest type (e.g., DateTime64 if mixed with DateTime32).</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><mdxadmonitiontitle>Use setting <code>least_greatest_legacy_null_behavior</code> to change <code>NULL</code> behavior</mdxadmonitiontitle><p>Version <a href="/docs/whats-new/changelog/2024#a-id2412a-clickhouse-release-2412-2024-12-19">24.12</a> introduced a backwards-incompatible change such that <code>NULL</code> values are ignored, while previously it returned <code>NULL</code> if one of the arguments was <code>NULL</code>.
+To retain the previous behavior, set setting <code>least_greatest_legacy_null_behavior</code> (default: <code>false</code>) to <code>true</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">least(x1[, x2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x1[, x2, ...]</code> — A single value or multiple values to compare. All arguments must be of comparable types. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the least value among the arguments, promoted to the largest compatible type. <a href="/docs/sql-reference/data-types"><code>Any</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Numeric types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT least(1, 2, toUInt8(3), 3.) AS result, toTypeName(result) AS type;
+-- The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type────┐
+│      1 │ Float64 │
+└────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arrays</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT least(['hello'], ['there'], ['world']);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─least(['hell⋯ ['world'])─┐
+│ ['hello']                │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>DateTime types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT least(toDateTime32(now() + toIntervalDay(1)), toDateTime64(now(), 3));
+-- The type returned is a DateTime64 as the DateTime32 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─least(toDate⋯(now(), 3))─┐
+│  2025-05-27 15:55:20.000 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="multiIf">multiIf<a aria-label="Direct link to multiIf" class="hash-link" href="#multiIf" title="Direct link to multiIf">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Allows writing the <a href="/docs/sql-reference/operators#conditional-expression"><code>CASE</code></a> operator more compactly in the query.
+Evaluates each condition in order. For the first condition that is true (non-zero and not <code>NULL</code>), returns the corresponding branch value.
+If none of the conditions are true, returns the <code>else</code> value.</p>
+<p>Setting <a href="/docs/operations/settings/settings#short_circuit_function_evaluation"><code>short_circuit_function_evaluation</code></a> controls
+whether short-circuit evaluation is used. If enabled, the <code>then_i</code> expression is evaluated only on rows where
+<code>((NOT cond_1) AND ... AND (NOT cond_{i-1}) AND cond_i)</code> is true.</p>
+<p>For example, with short-circuit evaluation, no division-by-zero exception is thrown when executing the following query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT multiIf(number = 2, intDiv(1, number), number = 5) FROM numbers(10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>All branch and else expressions must have a common supertype. <code>NULL</code> conditions are treated as false.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">multiIf(cond_1, then_1, cond_2, then_2, ..., else)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>caseWithoutExpression</code>, <code>caseWithoutExpr</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>cond_N</code> — The N-th evaluated condition which controls if <code>then_N</code> is returned. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a> or <a href="/docs/sql-reference/data-types/nullable"><code>Nullable(UInt8)</code></a> or <a href="/docs/sql-reference/syntax#null"><code>NULL</code></a></li>
+<li class="custom-li"><code>then_N</code> — The result of the function when <code>cond_N</code> is true. - <code>else</code> — The result of the function if none of the conditions is true.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the result of <code>then_N</code> for matching <code>cond_N</code>, otherwise returns the <code>else</code> condition.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Example usage</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE LEFT_RIGHT (left Nullable(UInt8), right Nullable(UInt8)) ENGINE = Memory;
+INSERT INTO LEFT_RIGHT VALUES (NULL, 4), (1, 3), (2, 2), (3, 1), (4, NULL);
+
+SELECT
+    left,
+    right,
+    multiIf(left &lt; right, 'left is smaller', left &gt; right, 'left is greater', left = right, 'Both equal', 'Null value') AS result
+FROM LEFT_RIGHT;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─left─┬─right─┬─result──────────┐
+│ ᴺᵁᴸᴸ │     4 │ Null value      │
+│    1 │     3 │ left is smaller │
+│    2 │     2 │ Both equal      │
+│    3 │     1 │ left is greater │
+│    4 │  ᴺᵁᴸᴸ │ Null value      │
+└──────┴───────┴─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/comparison-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Comparison</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/date-time-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Dates and time</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview</a><ul><li><a class="table-of-contents__link toc-highlight" href="#using-conditional-results-directly">Using Conditional Results Directly</a><li><a class="table-of-contents__link toc-highlight" href="#null-values-in-conditionals">NULL Values in Conditionals</a><li><a class="table-of-contents__link toc-highlight" href="#case-statement">CASE statement</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#clamp">clamp</a><li><a class="table-of-contents__link toc-highlight" href="#greatest">greatest</a><li><a class="table-of-contents__link toc-highlight" href="#if">if</a><li><a class="table-of-contents__link toc-highlight" href="#least">least</a><li><a class="table-of-contents__link toc-highlight" href="#multiIf">multiIf</a></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

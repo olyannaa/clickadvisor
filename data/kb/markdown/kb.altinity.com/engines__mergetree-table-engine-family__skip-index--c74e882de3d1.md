@@ -1,0 +1,48 @@
+# Skip index \| Altinity® Knowledge Base for ClickHouse®
+
+
+1. [Engines](/engines/)
+2. [MergeTree table engine family](/engines/mergetree-table-engine-family/)
+3. Skip index
+# Skip index
+
+#### Warning
+
+When you are creating
+[skip indexes](https://altinity.com/blog/clickhouse-black-magic-skipping-indices)in non\-regular (Replicated)MergeTree tables over non ORDER BY columns. ClickHouse® applies index condition on the first step of query execution, so it’s possible to get outdated rows.
+
+
+
+
+```
+--(1) create test table
+drop table if exists test;
+create table test
+(
+    version UInt32
+    ,id UInt32
+    ,state UInt8
+    ,INDEX state_idx (state) type set(0) GRANULARITY 1
+) ENGINE ReplacingMergeTree(version)
+      ORDER BY (id);
+
+--(2) insert sample data
+INSERT INTO test (version, id, state) VALUES (1,1,1);
+INSERT INTO test (version, id, state) VALUES (2,1,0);
+INSERT INTO test (version, id, state) VALUES (3,1,1);
+
+--(3) check the result:
+-- expected 3, 1, 1
+select version, id, state from test final;
+┌─version─┬─id─┬─state─┐
+│       3 │  1 │     1 │
+└─────────┴────┴───────┘
+
+-- expected empty result
+select version, id, state from test final where state=0;
+┌─version─┬─id─┬─state─┐
+│       2 │  1 │     0 │
+└─────────┴────┴───────┘
+
+```
+Last modified 2024\.07\.29: [Site cleanup, mostly minor changes (3e41a19\)](https://github.com/Altinity/altinityknowledgebase/commit/3e41a19644b66d46db743db20321bd5b94b545df)

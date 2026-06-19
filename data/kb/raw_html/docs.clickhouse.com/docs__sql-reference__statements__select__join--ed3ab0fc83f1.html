@@ -1,0 +1,370 @@
+<h1>JOIN Clause | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/select" itemprop="item"><span itemprop="name">SELECT</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">JOIN</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/join.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>JOIN Clause</h1></header><p>The <code>JOIN</code> clause produces a new table by combining columns from one or multiple tables by using values common to each. It is a common operation in databases with SQL support, which corresponds to <a href="https://en.wikipedia.org/wiki/Relational_algebra#Joins_and_join-like_operators" rel="noopener noreferrer" target="_blank">relational algebra</a> join. The special case of one table join is often referred to as a "self-join".</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT &lt;expr_list&gt;
+FROM &lt;left_table&gt;
+[GLOBAL] [INNER|LEFT|RIGHT|FULL|CROSS] [OUTER|SEMI|ANTI|ANY|ALL|ASOF] JOIN &lt;right_table&gt;
+(ON &lt;expr_list&gt;)|(USING &lt;column_list&gt;) ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Expressions from the <code>ON</code> clause and columns from the <code>USING</code> clause are called "join keys". Unless otherwise stated, a <code>JOIN</code> produces a <a href="https://en.wikipedia.org/wiki/Cartesian_product" rel="noopener noreferrer" target="_blank">Cartesian product</a> from rows with matching "join keys", which might produce results with many more rows than the source tables.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="supported-types-of-join">Supported types of JOIN<a aria-label="Direct link to Supported types of JOIN" class="hash-link" href="#supported-types-of-join" title="Direct link to Supported types of JOIN">​</a></h2>
+<p>All standard <a href="https://en.wikipedia.org/wiki/Join_(SQL)" rel="noopener noreferrer" target="_blank">SQL JOIN</a> types are supported:</p>
+<table><thead><tr><th>Type<th>Description<tbody><tr><td><code>INNER JOIN</code><td>only matching rows are returned.<tr><td><code>LEFT OUTER JOIN</code><td>non-matching rows from left table are returned in addition to matching rows.<tr><td><code>RIGHT OUTER JOIN</code><td>non-matching rows from right table are returned in addition to matching rows.<tr><td><code>FULL OUTER JOIN</code><td>non-matching rows from both tables are returned in addition to matching rows.<tr><td><code>CROSS JOIN</code><td>produces cartesian product of whole tables, "join keys" are <strong>not</strong> specified.<tr><td><code>NATURAL JOIN</code><td>automatically joins on all columns with the same name in both tables; each common column appears once in the result. Supports <code>INNER</code> (default), <code>LEFT</code>, <code>RIGHT</code>, and <code>FULL</code> variants. Equivalent to <code>JOIN ... USING (col1, col2, ...)</code> where the column list is derived automatically.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<ul class="custom-ul">
+<li class="custom-li"><code>JOIN</code> without a type specified implies <code>INNER</code>.</li>
+<li class="custom-li">The keyword <code>OUTER</code> can be safely omitted.</li>
+<li class="custom-li">An alternative syntax for <code>CROSS JOIN</code> is specifying multiple tables in the <a href="/docs/sql-reference/statements/select/from"><code>FROM</code> clause</a> separated by commas.</li>
+<li class="custom-li">If there are no matching columns for a <code>NATURAL JOIN</code>, it functions like a <code>CROSS JOIN</code>.</li>
+</ul>
+<p>Additional join types available in ClickHouse are:</p>
+<table><thead><tr><th>Type<th>Description<tbody><tr><td><code>LEFT SEMI JOIN</code>, <code>RIGHT SEMI JOIN</code><td>An allowlist on "join keys", without producing a cartesian product.<tr><td><code>LEFT ANTI JOIN</code>, <code>RIGHT ANTI JOIN</code><td>A denylist on "join keys", without producing a cartesian product.<tr><td><code>LEFT ANY JOIN</code>, <code>RIGHT ANY JOIN</code>, <code>INNER ANY JOIN</code><td>Partially (for opposite side of <code>LEFT</code> and <code>RIGHT</code>) or completely (for <code>INNER</code> and <code>FULL</code>) disables the cartesian product for standard <code>JOIN</code> types.<tr><td><code>ASOF JOIN</code>, <code>LEFT ASOF JOIN</code><td>Joining sequences with a non-exact match. <code>ASOF JOIN</code> usage is described below.<tr><td><code>PASTE JOIN</code><td>Performs a horizontal concatenation of two tables.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>When <a href="/docs/operations/settings/settings#join_algorithm">join_algorithm</a> is set to <code>partial_merge</code>, <code>RIGHT JOIN</code> and <code>FULL JOIN</code> are supported only with <code>ALL</code> strictness (<code>SEMI</code>, <code>ANTI</code>, <code>ANY</code>, and <code>ASOF</code> are not supported).</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="settings">Settings<a aria-label="Direct link to Settings" class="hash-link" href="#settings" title="Direct link to Settings">​</a></h2>
+<p>The default join type can be overridden using <a href="/docs/operations/settings/settings#join_default_strictness"><code>join_default_strictness</code></a> setting.</p>
+<p>The behavior of the ClickHouse server for <code>ANY JOIN</code> operations depends on the <a href="/docs/operations/settings/settings#any_join_distinct_right_table_keys"><code>any_join_distinct_right_table_keys</code></a> setting.</p>
+<p><strong>See also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#join_algorithm"><code>join_algorithm</code></a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#join_any_take_last_row"><code>join_any_take_last_row</code></a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#join_use_nulls"><code>join_use_nulls</code></a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#partial_merge_join_rows_in_right_blocks"><code>partial_merge_join_rows_in_right_blocks</code></a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#join_on_disk_max_files_to_merge"><code>join_on_disk_max_files_to_merge</code></a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#any_join_distinct_right_table_keys"><code>any_join_distinct_right_table_keys</code></a></li>
+</ul>
+<p>Use the <code>cross_to_inner_join_rewrite</code> setting to define the behavior when ClickHouse fails to rewrite a <code>CROSS JOIN</code> as an <code>INNER JOIN</code>. The default value is <code>1</code>, which  allows the join to continue but it will be slower. Set <code>cross_to_inner_join_rewrite</code> to <code>0</code> if you want an error to be thrown, and set it to <code>2</code> to not run the cross joins but instead force a rewrite of all comma/cross joins. If the rewriting fails when the value is <code>2</code>, you will receive an error message stating "Please, try to simplify <code>WHERE</code> section".</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="on-section-conditions">ON section conditions<a aria-label="Direct link to ON section conditions" class="hash-link" href="#on-section-conditions" title="Direct link to ON section conditions">​</a></h2>
+<p>An <code>ON</code> section can contain several conditions combined using the <code>AND</code> and <code>OR</code> operators. Conditions specifying join keys must:</p>
+<ul class="custom-ul">
+<li class="custom-li">reference both left and right tables</li>
+<li class="custom-li">use the equality operator</li>
+</ul>
+<p>Other conditions may use other logical operators but they must reference either the left or the right table of a query.</p>
+<p>Rows are joined if the whole complex condition is met. If the conditions are not met, rows may still be included in the result depending on the <code>JOIN</code> type. Note that if the same conditions are placed in a <code>WHERE</code> section and they are not met, then rows are always filtered out from the result.</p>
+<p>The <code>OR</code> operator inside the <code>ON</code> clause works using the hash join algorithm — for each <code>OR</code> argument with join keys for <code>JOIN</code>, a separate hash table is created, so memory consumption and query execution time grow linearly with an increase in the number of expressions <code>OR</code> of the <code>ON</code> clause.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If a condition references columns from different tables, then only the equality operator (<code>=</code>) is supported so far.</p></div></div>
+<p><strong>Example</strong></p>
+<p>Consider <code>table_1</code> and <code>table_2</code>:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─Id─┬─name─┐     ┌─Id─┬─text───────────┬─scores─┐
+│  1 │ A    │     │  1 │ Text A         │     10 │
+│  2 │ B    │     │  1 │ Another text A │     12 │
+│  3 │ C    │     │  2 │ Text B         │     15 │
+└────┴──────┘     └────┴────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query with one join key condition and an additional condition for <code>table_2</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT name, text FROM table_1 LEFT OUTER JOIN table_2
+    ON table_1.Id = table_2.Id AND startsWith(table_2.text, 'Text');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that the result contains the row with the name <code>C</code> and the empty text column. It is included into the result because an <code>OUTER</code> type of a join is used.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─name─┬─text───┐
+│ A    │ Text A │
+│ B    │ Text B │
+│ C    │        │
+└──────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query with <code>INNER</code> type of a join and multiple conditions:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT name, text, scores FROM table_1 INNER JOIN table_2
+    ON table_1.Id = table_2.Id AND table_2.scores &gt; 10 AND startsWith(table_2.text, 'Text');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">┌─name─┬─text───┬─scores─┐
+│ B    │ Text B │     15 │
+└──────┴────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query with <code>INNER</code> type of a join and condition with <code>OR</code>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t1 (`a` Int64, `b` Int64) ENGINE = MergeTree() ORDER BY a;
+
+CREATE TABLE t2 (`key` Int32, `val` Int64) ENGINE = MergeTree() ORDER BY key;
+
+INSERT INTO t1 SELECT number as a, -a as b from numbers(5);
+
+INSERT INTO t2 SELECT if(number % 2 == 0, toInt64(number), -number) as key, number as val from numbers(5);
+
+SELECT a, b, val FROM t1 INNER JOIN t2 ON t1.a = t2.key OR t1.b = t2.key;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬──b─┬─val─┐
+│ 0 │  0 │   0 │
+│ 1 │ -1 │   1 │
+│ 2 │ -2 │   2 │
+│ 3 │ -3 │   3 │
+│ 4 │ -4 │   4 │
+└───┴────┴─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query with <code>INNER</code> type of a join and conditions with <code>OR</code> and <code>AND</code>:</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>By default, non-equal conditions are supported as long as they use columns from the same table.
+For example, <code>t1.a = t2.key AND t1.b &gt; 0 AND t2.b &gt; t2.c</code>, because <code>t1.b &gt; 0</code> uses columns only from <code>t1</code> and <code>t2.b &gt; t2.c</code> uses columns only from <code>t2</code>.
+However, you can try experimental support for conditions like <code>t1.a = t2.key AND t1.b &gt; t2.key</code>, check out the section below for more details.</p></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT a, b, val FROM t1 INNER JOIN t2 ON t1.a = t2.key OR t1.b = t2.key AND t2.val &gt; 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬──b─┬─val─┐
+│ 0 │  0 │   0 │
+│ 2 │ -2 │   2 │
+│ 4 │ -4 │   4 │
+└───┴────┴─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="join-with-inequality-conditions-for-columns-from-different-tables">JOIN with inequality conditions for columns from different tables<a aria-label="Direct link to JOIN with inequality conditions for columns from different tables" class="hash-link" href="#join-with-inequality-conditions-for-columns-from-different-tables" title="Direct link to JOIN with inequality conditions for columns from different tables">​</a></h2>
+<p>Clickhouse currently supports <code>ALL/ANY/SEMI/ANTI INNER/LEFT/RIGHT/FULL JOIN</code> with inequality conditions in addition to equality conditions. The inequality conditions are supported only for <code>hash</code> and <code>grace_hash</code> join algorithms. The inequality conditions are not supported with <code>join_use_nulls</code>.</p>
+<p><strong>Example</strong></p>
+<p>Table <code>t1</code>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─key──┬─attr─┬─a─┬─b─┬─c─┐
+│ key1 │ a    │ 1 │ 1 │ 2 │
+│ key1 │ b    │ 2 │ 3 │ 2 │
+│ key1 │ c    │ 3 │ 2 │ 1 │
+│ key1 │ d    │ 4 │ 7 │ 2 │
+│ key1 │ e    │ 5 │ 5 │ 5 │
+│ key2 │ a2   │ 1 │ 1 │ 1 │
+│ key4 │ f    │ 2 │ 3 │ 4 │
+└──────┴──────┴───┴───┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Table <code>t2</code></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─key──┬─attr─┬─a─┬─b─┬─c─┐
+│ key1 │ A    │ 1 │ 2 │ 1 │
+│ key1 │ B    │ 2 │ 1 │ 2 │
+│ key1 │ C    │ 3 │ 4 │ 5 │
+│ key1 │ D    │ 4 │ 1 │ 6 │
+│ key3 │ a3   │ 1 │ 1 │ 1 │
+│ key4 │ F    │ 1 │ 1 │ 1 │
+└──────┴──────┴───┴───┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT t1.*, t2.* FROM t1 LEFT JOIN t2 ON t1.key = t2.key AND (t1.a &lt; t2.a) ORDER BY (t1.key, t1.attr, t2.key, t2.attr);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">key1    a    1    1    2    key1    B    2    1    2
+key1    a    1    1    2    key1    C    3    4    5
+key1    a    1    1    2    key1    D    4    1    6
+key1    b    2    3    2    key1    C    3    4    5
+key1    b    2    3    2    key1    D    4    1    6
+key1    c    3    2    1    key1    D    4    1    6
+key1    d    4    7    2            0    0    \N
+key1    e    5    5    5            0    0    \N
+key2    a2    1    1    1            0    0    \N
+key4    f    2    3    4            0    0    \N
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="null-values-in-join-keys">NULL values in JOIN keys<a aria-label="Direct link to NULL values in JOIN keys" class="hash-link" href="#null-values-in-join-keys" title="Direct link to NULL values in JOIN keys">​</a></h2>
+<p><code>NULL</code> is not equal to any value, including itself. This means that if a <code>JOIN</code> key has a <code>NULL</code> value in one table, it won't match a <code>NULL</code> value in the other table.</p>
+<p><strong>Example</strong></p>
+<p>Table <code>A</code>:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───id─┬─name────┐
+│    1 │ Alice   │
+│    2 │ Bob     │
+│ ᴺᵁᴸᴸ │ Charlie │
+└──────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Table <code>B</code>:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───id─┬─score─┐
+│    1 │    90 │
+│    3 │    85 │
+│ ᴺᵁᴸᴸ │    88 │
+└──────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT A.name, B.score FROM A LEFT JOIN B ON A.id = B.id
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─name────┬─score─┐
+│ Alice   │    90 │
+│ Bob     │     0 │
+│ Charlie │     0 │
+└─────────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Notice that the row with <code>Charlie</code> from table <code>A</code> and the row with score 88 from table <code>B</code> are not in the result because of the <code>NULL</code> value in the <code>JOIN</code> key.</p>
+<p>In case you want to match <code>NULL</code> values, use the <code>isNotDistinctFrom</code> function to compare the <code>JOIN</code> keys.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT A.name, B.score FROM A LEFT JOIN B ON isNotDistinctFrom(A.id, B.id)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-markdown"><code class="language-markdown">┌─name────┬─score─┐
+│ Alice   │    90 │
+│ Bob     │     0 │
+│ Charlie │    88 │
+└─────────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="asof-join-usage">ASOF JOIN usage<a aria-label="Direct link to ASOF JOIN usage" class="hash-link" href="#asof-join-usage" title="Direct link to ASOF JOIN usage">​</a></h2>
+<p><code>ASOF JOIN</code> is useful when you need to join records that have no exact match.</p>
+<p>This JOIN algorithm requires a special column in tables. This column:</p>
+<ul class="custom-ul">
+<li class="custom-li">Must contain an ordered sequence.</li>
+<li class="custom-li">Can be one of the following types: <a href="/docs/sql-reference/data-types/int-uint">Int, UInt</a>, <a href="/docs/sql-reference/data-types/float">Float</a>, <a href="/docs/sql-reference/data-types/date">Date</a>, <a href="/docs/sql-reference/data-types/datetime">DateTime</a>, <a href="/docs/sql-reference/data-types/decimal">Decimal</a>.</li>
+<li class="custom-li">For the <code>hash</code> join algorithm it can't be the only column in the <code>JOIN</code> clause.</li>
+</ul>
+<p>Syntax <code>ASOF JOIN ... ON</code>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT expressions_list
+FROM table_1
+ASOF LEFT JOIN table_2
+ON equi_cond AND closest_match_cond
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can use any number of equality conditions and exactly one closest match condition. For example, <code>SELECT count() FROM table_1 ASOF LEFT JOIN table_2 ON table_1.a == table_2.b AND table_2.t &lt;= table_1.t</code>.</p>
+<p>Conditions supported for the closest match: <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>.</p>
+<p>Syntax <code>ASOF JOIN ... USING</code>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT expressions_list
+FROM table_1
+ASOF JOIN table_2
+USING (equi_column1, ... equi_columnN, asof_column)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>ASOF JOIN</code> uses <code>equi_columnX</code> for joining on equality and <code>asof_column</code> for joining on the closest match with the <code>table_1.asof_column &gt;= table_2.asof_column</code> condition. The <code>asof_column</code> column is always the last one in the <code>USING</code> clause.</p>
+<p>For example, consider the following tables:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">         table_1                           table_2
+      event   | ev_time | user_id       event   | ev_time | user_id
+    ----------|---------|----------   ----------|---------|----------
+                  ...                               ...
+    event_1_1 |  12:00  |  42         event_2_1 |  11:59  |   42
+                  ...                 event_2_2 |  12:30  |   42
+    event_1_2 |  13:00  |  42         event_2_3 |  13:00  |   42
+                  ...                               ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>ASOF JOIN</code> can take the timestamp of a user event from <code>table_1</code> and find an event in <code>table_2</code> where the timestamp is closest to the timestamp of the event from <code>table_1</code> corresponding to the closest match condition. Equal timestamp values are the closest if available. Here, the <code>user_id</code> column can be used for joining on equality and the <code>ev_time</code> column can be used for joining on the closest match. In our example, <code>event_1_1</code> can be joined with <code>event_2_1</code> and <code>event_1_2</code> can be joined with <code>event_2_3</code>, but <code>event_2_2</code> can't be joined.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p><code>ASOF JOIN</code> is supported only by <code>hash</code> and <code>full_sorting_merge</code> join algorithms.
+It's <strong>not</strong> supported in the <a href="/docs/engines/table-engines/special/join">Join</a> table engine.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="paste-join-usage">PASTE JOIN usage<a aria-label="Direct link to PASTE JOIN usage" class="hash-link" href="#paste-join-usage" title="Direct link to PASTE JOIN usage">​</a></h2>
+<p>The result of <code>PASTE JOIN</code> is a table that contains all columns from left subquery followed by all columns from the right subquery.
+The rows are matched based on their positions in the original tables (the order of rows should be defined).
+If the subqueries return a different number of rows, extra rows will be cut.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM
+(
+    SELECT number AS a
+    FROM numbers(2)
+) AS t1
+PASTE JOIN
+(
+    SELECT number AS a
+    FROM numbers(2)
+    ORDER BY a DESC
+) AS t2
+
+┌─a─┬─t2.a─┐
+│ 0 │    1 │
+│ 1 │    0 │
+└───┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: in this case result can be nondeterministic if the reading is parallel. For example:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM
+(
+    SELECT number AS a
+    FROM numbers_mt(5)
+) AS t1
+PASTE JOIN
+(
+    SELECT number AS a
+    FROM numbers(10)
+    ORDER BY a DESC
+) AS t2
+SETTINGS max_block_size = 2;
+
+┌─a─┬─t2.a─┐
+│ 2 │    9 │
+│ 3 │    8 │
+└───┴──────┘
+┌─a─┬─t2.a─┐
+│ 0 │    7 │
+│ 1 │    6 │
+└───┴──────┘
+┌─a─┬─t2.a─┐
+│ 4 │    5 │
+└───┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="distributed-join">Distributed JOIN<a aria-label="Direct link to Distributed JOIN" class="hash-link" href="#distributed-join" title="Direct link to Distributed JOIN">​</a></h2>
+<p>There are two ways to execute a JOIN involving distributed tables:</p>
+<ul class="custom-ul">
+<li class="custom-li">When using a normal <code>JOIN</code>, the query is sent to remote servers. Subqueries are run on each of them in order to make the right table, and the join is performed with this table. In other words, the right table is formed on each server separately.</li>
+<li class="custom-li">When using <code>GLOBAL ... JOIN</code>, first the requestor server runs a subquery to calculate one side of the join and collects the result into a temporary table. This temporary table is then passed to each remote server, and queries are run on them using the temporary data that was transmitted. For <code>LEFT</code> and <code>INNER</code> joins, the right table is calculated as the subquery. For <code>RIGHT</code> joins, the left table is calculated instead, since the right table is the one being preserved and should be read from shards.</li>
+</ul>
+<p>Be careful when using <code>GLOBAL</code>. For more information, see the <a href="/docs/sql-reference/operators/in#distributed-subqueries">Distributed subqueries</a> section.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="implicit-type-conversion">Implicit type conversion<a aria-label="Direct link to Implicit type conversion" class="hash-link" href="#implicit-type-conversion" title="Direct link to Implicit type conversion">​</a></h2>
+<p><code>INNER JOIN</code>, <code>LEFT JOIN</code>, <code>RIGHT JOIN</code>, and <code>FULL JOIN</code> queries support the implicit type conversion for "join keys". However the query can not be executed, if join keys from the left and the right tables cannot be converted to a single type (for example, there is no data type that can hold all values from both <code>UInt64</code> and <code>Int64</code>, or <code>String</code> and <code>Int32</code>).</p>
+<p><strong>Example</strong></p>
+<p>Consider the table <code>t_1</code>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─a─┬─b─┬─toTypeName(a)─┬─toTypeName(b)─┐
+│ 1 │ 1 │ UInt16        │ UInt8         │
+│ 2 │ 2 │ UInt16        │ UInt8         │
+└───┴───┴───────────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>and the table <code>t_2</code>:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──a─┬────b─┬─toTypeName(a)─┬─toTypeName(b)───┐
+│ -1 │    1 │ Int16         │ Nullable(Int64) │
+│  1 │   -1 │ Int16         │ Nullable(Int64) │
+│  1 │    1 │ Int16         │ Nullable(Int64) │
+└────┴──────┴───────────────┴─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The query</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT a, b, toTypeName(a), toTypeName(b) FROM t_1 FULL JOIN t_2 USING (a, b);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>returns the set:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──a─┬────b─┬─toTypeName(a)─┬─toTypeName(b)───┐
+│  1 │    1 │ Int32         │ Nullable(Int64) │
+│  2 │    2 │ Int32         │ Nullable(Int64) │
+│ -1 │    1 │ Int32         │ Nullable(Int64) │
+│  1 │   -1 │ Int32         │ Nullable(Int64) │
+└────┴──────┴───────────────┴─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="usage-recommendations">Usage recommendations<a aria-label="Direct link to Usage recommendations" class="hash-link" href="#usage-recommendations" title="Direct link to Usage recommendations">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="processing-of-empty-or-null-cells">Processing of empty or NULL cells<a aria-label="Direct link to Processing of empty or NULL cells" class="hash-link" href="#processing-of-empty-or-null-cells" title="Direct link to Processing of empty or NULL cells">​</a></h3>
+<p>While joining tables, the empty cells may appear. The setting <a href="/docs/operations/settings/settings#join_use_nulls">join_use_nulls</a> define how ClickHouse fills these cells.</p>
+<p>If the <code>JOIN</code> keys are <a href="/docs/sql-reference/data-types/nullable">Nullable</a> fields, the rows where at least one of the keys has the value <a href="/docs/sql-reference/syntax#null">NULL</a> are not joined.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h3>
+<p>The columns specified in <code>USING</code> must have the same names in both subqueries, and the other columns must be named differently. You can use aliases to change the names of columns in subqueries.</p>
+<p>The <code>USING</code> clause specifies one or more columns to join, which establishes the equality of these columns. The list of columns is set without brackets. More complex join conditions are not supported.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="syntax-limitations">Syntax Limitations<a aria-label="Direct link to Syntax Limitations" class="hash-link" href="#syntax-limitations" title="Direct link to Syntax Limitations">​</a></h3>
+<p>For multiple <code>JOIN</code> clauses in a single <code>SELECT</code> query:</p>
+<ul class="custom-ul">
+<li class="custom-li">Taking all the columns via <code>*</code> is available only if tables are joined, not subqueries.</li>
+<li class="custom-li">The <code>PREWHERE</code> clause is not available.</li>
+<li class="custom-li">The <code>USING</code> clause is not available.</li>
+</ul>
+<p>For <code>ON</code>, <code>WHERE</code>, and <code>GROUP BY</code> clauses:</p>
+<ul class="custom-ul">
+<li class="custom-li">Arbitrary expressions cannot be used in <code>ON</code>, <code>WHERE</code>, and <code>GROUP BY</code> clauses, but you can define an expression in a <code>SELECT</code> clause and then use it in these clauses via an alias.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="performance">Performance<a aria-label="Direct link to Performance" class="hash-link" href="#performance" title="Direct link to Performance">​</a></h3>
+<p>When running a <code>JOIN</code>, there is no optimization of the order of execution in relation to other stages of the query. The join (a search in the right table) is run before filtering in <code>WHERE</code> and before aggregation.</p>
+<p>Each time a query is run with the same <code>JOIN</code>, the subquery is run again because the result is not cached. To avoid this, use the special <a href="/docs/engines/table-engines/special/join">Join</a> table engine, which is a prepared array for joining that is always in RAM.</p>
+<p>In some cases, it is more efficient to use <a href="/docs/sql-reference/operators/in">IN</a> instead of <code>JOIN</code>.</p>
+<p>If you need a <code>JOIN</code> for joining with dimension tables (these are relatively small tables that contain dimension properties, such as names for advertising campaigns), a <code>JOIN</code> might not be very convenient due to the fact that the right table is re-accessed for every query. For such cases, there is a "dictionaries" feature that you should use instead of <code>JOIN</code>. For more information, see the <a href="/docs/sql-reference/statements/create/dictionary">Dictionaries</a> section.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="memory-limitations">Memory limitations<a aria-label="Direct link to Memory limitations" class="hash-link" href="#memory-limitations" title="Direct link to Memory limitations">​</a></h3>
+<p>By default, ClickHouse uses the <a href="https://en.wikipedia.org/wiki/Hash_join" rel="noopener noreferrer" target="_blank">hash join</a> algorithm. ClickHouse takes the right_table and creates a hash table for it in RAM. If <code>join_algorithm = 'auto'</code> is enabled, then after some threshold of memory consumption, ClickHouse falls back to <a href="https://en.wikipedia.org/wiki/Sort-merge_join" rel="noopener noreferrer" target="_blank">merge</a> join algorithm. For <code>JOIN</code> algorithms description see the <a href="/docs/operations/settings/settings#join_algorithm">join_algorithm</a> setting.</p>
+<p>If you need to restrict <code>JOIN</code> operation memory consumption use the following settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#max_rows_in_join">max_rows_in_join</a> — Limits number of rows in the hash table.</li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#max_bytes_in_join">max_bytes_in_join</a> — Limits size of the hash table.</li>
+</ul>
+<p>When any of these limits is reached, ClickHouse acts as the <a href="/docs/operations/settings/settings#join_overflow_mode">join_overflow_mode</a>
+setting instructs.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    CounterID,
+    hits,
+    visits
+FROM
+(
+    SELECT
+        CounterID,
+        count() AS hits
+    FROM test.hits
+    GROUP BY CounterID
+) ANY LEFT JOIN
+(
+    SELECT
+        CounterID,
+        sum(Sign) AS visits
+    FROM test.visits
+    GROUP BY CounterID
+) USING CounterID
+ORDER BY hits DESC
+LIMIT 10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─CounterID─┬───hits─┬─visits─┐
+│   1143050 │ 523264 │  13665 │
+│    731962 │ 475698 │ 102716 │
+│    722545 │ 337212 │ 108187 │
+│    722889 │ 252197 │  10547 │
+│   2237260 │ 196036 │   9522 │
+│  23057320 │ 147211 │   7689 │
+│    722818 │  90109 │  17847 │
+│     48221 │  85379 │   4652 │
+│  19762435 │  77807 │   7026 │
+│    722884 │  77492 │  11056 │
+└───────────┴────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related content<a aria-label="Direct link to Related content" class="hash-link" href="#related-content" title="Direct link to Related content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/clickhouse-fully-supports-joins" rel="noopener noreferrer" target="_blank">ClickHouse: A Blazingly Fast DBMS with Full SQL Join Support - Part 1</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/clickhouse-fully-supports-joins-hash-joins-part2" rel="noopener noreferrer" target="_blank">ClickHouse: A Blazingly Fast DBMS with Full SQL Join Support - Under the Hood - Part 2</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/clickhouse-fully-supports-joins-full-sort-partial-merge-part3" rel="noopener noreferrer" target="_blank">ClickHouse: A Blazingly Fast DBMS with Full SQL Join Support - Under the Hood - Part 3</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/clickhouse-fully-supports-joins-direct-join-part4" rel="noopener noreferrer" target="_blank">ClickHouse: A Blazingly Fast DBMS with Full SQL Join Support - Under the Hood - Part 4</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/into-outfile"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">INTO OUTFILE</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/limit-by"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">LIMIT BY</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#supported-types-of-join">Supported types of JOIN</a><li><a class="table-of-contents__link toc-highlight" href="#settings">Settings</a><li><a class="table-of-contents__link toc-highlight" href="#on-section-conditions">ON section conditions</a><li><a class="table-of-contents__link toc-highlight" href="#join-with-inequality-conditions-for-columns-from-different-tables">JOIN with inequality conditions for columns from different tables</a><li><a class="table-of-contents__link toc-highlight" href="#null-values-in-join-keys">NULL values in JOIN keys</a><li><a class="table-of-contents__link toc-highlight" href="#asof-join-usage">ASOF JOIN usage</a><li><a class="table-of-contents__link toc-highlight" href="#paste-join-usage">PASTE JOIN usage</a><li><a class="table-of-contents__link toc-highlight" href="#distributed-join">Distributed JOIN</a><li><a class="table-of-contents__link toc-highlight" href="#implicit-type-conversion">Implicit type conversion</a><li><a class="table-of-contents__link toc-highlight" href="#usage-recommendations">Usage recommendations</a><ul><li><a class="table-of-contents__link toc-highlight" href="#processing-of-empty-or-null-cells">Processing of empty or NULL cells</a><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#syntax-limitations">Syntax Limitations</a><li><a class="table-of-contents__link toc-highlight" href="#performance">Performance</a><li><a class="table-of-contents__link toc-highlight" href="#memory-limitations">Memory limitations</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related content</a></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

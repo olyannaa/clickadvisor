@@ -1,0 +1,20 @@
+case_id: synthetic_17
+source: synthetic
+sql: |
+  SELECT * FROM (
+      SELECT * FROM events WHERE status = 'active'
+  ) WHERE user_id = 42
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: subquery_filter_pushdown
+  detected_by_rule: R-017
+  severity: high
+  description: Внешний фильтр user_id = 42 можно протолкнуть внутрь подзапроса.
+expected_rules_to_fire:
+- R-017
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-017.
+expected_findings_count: 1
+status: validated

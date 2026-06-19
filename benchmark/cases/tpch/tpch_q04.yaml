@@ -1,0 +1,24 @@
+case_id: tpch_q04
+source: tpch
+sql: "SELECT\n    o_orderpriority,\n    count(*) AS order_count\nFROM\n    orders\nWHERE\n    o_orderdate >= toDate('1993-07-01')\n    AND o_orderdate < toDate('1993-07-01') + INTERVAL 3 MONTH\n    AND exists (\n        SELECT\n            *\n        FROM\n            lineitem\n        WHERE\n            l_orderkey = o_orderkey\n            AND l_commitdate < l_receiptdate\n    )\nGROUP BY\n    o_orderpriority\nORDER BY\n    o_orderpriority;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: EXISTS подзапрос — вложенность >1, в CH плохо оптимизируется
+- issue_id: I-2
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT
+expected_rules_to_fire:
+- D-013
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q4: Order Priority Checking.'
+expected_findings_count: 2
+status: reviewed

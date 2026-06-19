@@ -1,0 +1,339 @@
+<h1>Operators | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Operators</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/operators/index.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Operators</h1></header><p>ClickHouse transforms operators to their corresponding functions at the query parsing stage according to their priority, precedence, and associativity.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="access-operators">Access Operators<a aria-label="Direct link to Access Operators" class="hash-link" href="#access-operators" title="Direct link to Access Operators">​</a></h2>
+<p><code>a[N]</code> – Access to an element of an array. The <code>arrayElement(a, N)</code> function.</p>
+<p><code>a.N</code> – Access to a tuple element. The <code>tupleElement(a, N)</code> function.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="numeric-negation-operator">Numeric Negation Operator<a aria-label="Direct link to Numeric Negation Operator" class="hash-link" href="#numeric-negation-operator" title="Direct link to Numeric Negation Operator">​</a></h2>
+<p><code>-a</code> – The <code>negate (a)</code> function.</p>
+<p>For tuple negation: <a href="/docs/sql-reference/functions/tuple-functions#tupleNegate">tupleNegate</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="multiplication-and-division-operators">Multiplication and Division Operators<a aria-label="Direct link to Multiplication and Division Operators" class="hash-link" href="#multiplication-and-division-operators" title="Direct link to Multiplication and Division Operators">​</a></h2>
+<p><code>a * b</code> – The <code>multiply (a, b)</code> function.</p>
+<p>For multiplying tuple by number: <a href="/docs/sql-reference/functions/tuple-functions#tupleMultiplyByNumber">tupleMultiplyByNumber</a>, for scalar product: <a href="/docs/sql-reference/functions/array-functions#arrayDotProduct">dotProduct</a>.</p>
+<p><code>a / b</code> – The <code>divide(a, b)</code> function.</p>
+<p>For dividing tuple by number: <a href="/docs/sql-reference/functions/tuple-functions#tupleDivideByNumber">tupleDivideByNumber</a>.</p>
+<p><code>a % b</code> – The <code>modulo(a, b)</code> function.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="addition-and-subtraction-operators">Addition and Subtraction Operators<a aria-label="Direct link to Addition and Subtraction Operators" class="hash-link" href="#addition-and-subtraction-operators" title="Direct link to Addition and Subtraction Operators">​</a></h2>
+<p><code>a + b</code> – The <code>plus(a, b)</code> function.</p>
+<p>For tuple addiction: <a href="/docs/sql-reference/functions/tuple-functions#tuplePlus">tuplePlus</a>.</p>
+<p><code>a - b</code> – The <code>minus(a, b)</code> function.</p>
+<p>For tuple subtraction: <a href="/docs/sql-reference/functions/tuple-functions#tupleMinus">tupleMinus</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="comparison-operators">Comparison Operators<a aria-label="Direct link to Comparison Operators" class="hash-link" href="#comparison-operators" title="Direct link to Comparison Operators">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="equals-function">equals function<a aria-label="Direct link to equals function" class="hash-link" href="#equals-function" title="Direct link to equals function">​</a></h3>
+<p><code>a = b</code> – The <code>equals(a, b)</code> function.</p>
+<p><code>a == b</code> – The <code>equals(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notequals-function">notEquals function<a aria-label="Direct link to notEquals function" class="hash-link" href="#notequals-function" title="Direct link to notEquals function">​</a></h3>
+<p><code>a != b</code> – The <code>notEquals(a, b)</code> function.</p>
+<p><code>a &lt;&gt; b</code> – The <code>notEquals(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="lessorequals-function">lessOrEquals function<a aria-label="Direct link to lessOrEquals function" class="hash-link" href="#lessorequals-function" title="Direct link to lessOrEquals function">​</a></h3>
+<p><code>a &lt;= b</code> – The <code>lessOrEquals(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="greaterorequals-function">greaterOrEquals function<a aria-label="Direct link to greaterOrEquals function" class="hash-link" href="#greaterorequals-function" title="Direct link to greaterOrEquals function">​</a></h3>
+<p><code>a &gt;= b</code> – The <code>greaterOrEquals(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="less-function">less function<a aria-label="Direct link to less function" class="hash-link" href="#less-function" title="Direct link to less function">​</a></h3>
+<p><code>a &lt; b</code> – The <code>less(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="greater-function">greater function<a aria-label="Direct link to greater function" class="hash-link" href="#greater-function" title="Direct link to greater function">​</a></h3>
+<p><code>a &gt; b</code> – The <code>greater(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="like-function">like function<a aria-label="Direct link to like function" class="hash-link" href="#like-function" title="Direct link to like function">​</a></h3>
+<p><code>a LIKE b</code> – The <code>like(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notlike-function">notLike function<a aria-label="Direct link to notLike function" class="hash-link" href="#notlike-function" title="Direct link to notLike function">​</a></h3>
+<p><code>a NOT LIKE b</code> – The <code>notLike(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="ilike-function">ilike function<a aria-label="Direct link to ilike function" class="hash-link" href="#ilike-function" title="Direct link to ilike function">​</a></h3>
+<p><code>a ILIKE b</code> – The <code>ilike(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="between-function">BETWEEN function<a aria-label="Direct link to BETWEEN function" class="hash-link" href="#between-function" title="Direct link to BETWEEN function">​</a></h3>
+<p><code>a BETWEEN b AND c</code> – The same as <code>a &gt;= b AND a &lt;= c</code>.</p>
+<p><code>a NOT BETWEEN b AND c</code> – The same as <code>a &lt; b OR a &gt; c</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="is-not-distinct-from">is not distinct from operator (<code>&lt;=&gt;</code>)<a aria-label="Direct link to is-not-distinct-from" class="hash-link" href="#is-not-distinct-from" title="Direct link to is-not-distinct-from">​</a></h3>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>From 25.10 you can use <code>&lt;=&gt;</code> in the same way as any other operator.
+Before 25.10 it could only be used in JOIN expressions, for example:<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE a (x String) ENGINE = Memory;
+INSERT INTO a VALUES ('ClickHouse');
+
+SELECT * FROM a AS a1 JOIN a AS a2 ON a1.x &lt;=&gt; a2.x;
+
+┌─x──────────┬─a2.x───────┐
+│ ClickHouse │ ClickHouse │
+└────────────┴────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<p>The <code>&lt;=&gt;</code> operator is the <code>NULL</code>-safe equality operator, equivalent to <code>IS NOT DISTINCT FROM</code>.
+It works like the regular equality operator (<code>=</code>), but it treats <code>NULL</code> values as comparable.
+Two <code>NULL</code> values are considered equal, and a <code>NULL</code> compared to any non-<code>NULL</code> value returns 0 (false) rather than <code>NULL</code>.</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+  'ClickHouse' &lt;=&gt; NULL,
+  NULL &lt;=&gt; NULL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─isNotDistinc⋯use', NULL)─┬─isNotDistinc⋯NULL, NULL)─┐
+│                        0 │                        1 │
+└──────────────────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="operators-for-working-with-strings">Operators for Working with Strings<a aria-label="Direct link to Operators for Working with Strings" class="hash-link" href="#operators-for-working-with-strings" title="Direct link to Operators for Working with Strings">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="overlay">OVERLAY<a aria-label="Direct link to OVERLAY" class="hash-link" href="#overlay" title="Direct link to OVERLAY">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><code>OVERLAY(string PLACING replacement FROM offset)</code> - The <code>overlay(string, replacement, offset)</code> function.</li>
+<li class="custom-li"><code>OVERLAY(string PLACING replacement FROM offset FOR length)</code> - The <code>overlay(string, replacement, offset, length)</code> function.</li>
+<li class="custom-li"><code>OVERLAYUTF8(string PLACING replacement FROM offset)</code> - The <code>overlayUTF8(string, replacement, offset)</code> function.</li>
+<li class="custom-li"><code>OVERLAYUTF8(string PLACING replacement FROM offset FOR length)</code> - The <code>overlayUTF8(string, replacement, offset, length)</code> function.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="operators-for-working-with-data-sets">Operators for Working with Data Sets<a aria-label="Direct link to Operators for Working with Data Sets" class="hash-link" href="#operators-for-working-with-data-sets" title="Direct link to Operators for Working with Data Sets">​</a></h2>
+<p>See <a href="/docs/sql-reference/operators/in">IN operators</a> and <a href="/docs/sql-reference/operators/exists">EXISTS</a> operator.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="in-function">in function<a aria-label="Direct link to in function" class="hash-link" href="#in-function" title="Direct link to in function">​</a></h3>
+<p><code>a IN ...</code> – The <code>in(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notin-function">notIn function<a aria-label="Direct link to notIn function" class="hash-link" href="#notin-function" title="Direct link to notIn function">​</a></h3>
+<p><code>a NOT IN ...</code> – The <code>notIn(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="globalin-function">globalIn function<a aria-label="Direct link to globalIn function" class="hash-link" href="#globalin-function" title="Direct link to globalIn function">​</a></h3>
+<p><code>a GLOBAL IN ...</code> – The <code>globalIn(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="globalnotin-function">globalNotIn function<a aria-label="Direct link to globalNotIn function" class="hash-link" href="#globalnotin-function" title="Direct link to globalNotIn function">​</a></h3>
+<p><code>a GLOBAL NOT IN ...</code> – The <code>globalNotIn(a, b)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="in-subquery-function">in subquery function<a aria-label="Direct link to in subquery function" class="hash-link" href="#in-subquery-function" title="Direct link to in subquery function">​</a></h3>
+<p><code>a = ANY (subquery)</code> – The <code>in(a, subquery)</code> function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notin-subquery-function">notIn subquery function<a aria-label="Direct link to notIn subquery function" class="hash-link" href="#notin-subquery-function" title="Direct link to notIn subquery function">​</a></h3>
+<p><code>a != ANY (subquery)</code> – The same as <code>a NOT IN (SELECT singleValueOrNull(*) FROM subquery)</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="in-subquery-function-1">in subquery function<a aria-label="Direct link to in subquery function" class="hash-link" href="#in-subquery-function-1" title="Direct link to in subquery function">​</a></h3>
+<p><code>a = ALL (subquery)</code> – The same as <code>a IN (SELECT singleValueOrNull(*) FROM subquery)</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="notin-subquery-function-1">notIn subquery function<a aria-label="Direct link to notIn subquery function" class="hash-link" href="#notin-subquery-function-1" title="Direct link to notIn subquery function">​</a></h3>
+<p><code>a != ALL (subquery)</code> – The <code>notIn(a, subquery)</code> function.</p>
+<p><strong>Examples</strong></p>
+<p>Query with ALL:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT number AS a FROM numbers(10) WHERE a &gt; ALL (SELECT number FROM numbers(3, 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─a─┐
+│ 6 │
+│ 7 │
+│ 8 │
+│ 9 │
+└───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query with ANY:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT number AS a FROM numbers(10) WHERE a &gt; ANY (SELECT number FROM numbers(3, 3));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─a─┐
+│ 4 │
+│ 5 │
+│ 6 │
+│ 7 │
+│ 8 │
+│ 9 │
+└───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="operators-for-working-with-dates-and-times">Operators for Working with Dates and Times<a aria-label="Direct link to Operators for Working with Dates and Times" class="hash-link" href="#operators-for-working-with-dates-and-times" title="Direct link to Operators for Working with Dates and Times">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="extract">EXTRACT<a aria-label="Direct link to EXTRACT" class="hash-link" href="#extract" title="Direct link to EXTRACT">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXTRACT(part FROM date);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Extract parts from a given date. For example, you can retrieve a month from a given date, or a second from a time.</p>
+<p>The <code>part</code> parameter specifies which part of the date to retrieve. The following values are available:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>SECOND</code> — The second. Possible values: 0–59.</li>
+<li class="custom-li"><code>MINUTE</code> — The minute. Possible values: 0–59.</li>
+<li class="custom-li"><code>HOUR</code> — The hour. Possible values: 0–23.</li>
+<li class="custom-li"><code>DAY</code> — The day of the month. Possible values: 1–31.</li>
+<li class="custom-li"><code>WEEK</code> — The ISO 8601 week number. Possible values: 1–53.</li>
+<li class="custom-li"><code>MONTH</code> — The number of a month. Possible values: 1–12.</li>
+<li class="custom-li"><code>QUARTER</code> — The quarter. Possible values: 1–4.</li>
+<li class="custom-li"><code>YEAR</code> — The year.</li>
+<li class="custom-li"><code>EPOCH</code> — The Unix timestamp (seconds since 1970-01-01 00:00:00 UTC). Note: for <code>DateTime64</code>, the subsecond part is truncated.</li>
+<li class="custom-li"><code>DOW</code> — The day of the week (PostgreSQL-compatible). 0 = Sunday, 6 = Saturday.</li>
+<li class="custom-li"><code>DOY</code> — The day of the year. Possible values: 1–366.</li>
+<li class="custom-li"><code>ISODOW</code> — The ISO day of the week. 1 = Monday, 7 = Sunday.</li>
+<li class="custom-li"><code>ISOYEAR</code> — The ISO 8601 week-numbering year.</li>
+<li class="custom-li"><code>CENTURY</code> — The century. For example, the year 2024 is in the 21st century.</li>
+<li class="custom-li"><code>DECADE</code> — The decade (year divided by 10). For example, the year 2024 has decade 202.</li>
+<li class="custom-li"><code>MILLENNIUM</code> — The millennium. For example, the year 2024 is in the 3rd millennium.</li>
+</ul>
+<p>The <code>part</code> parameter is case-insensitive.</p>
+<p>The <code>date</code> parameter specifies the date or the time to process. The <a href="/docs/sql-reference/data-types/date">Date</a>, <a href="/docs/sql-reference/data-types/date32">Date32</a>, <a href="/docs/sql-reference/data-types/datetime">DateTime</a>, and <a href="/docs/sql-reference/data-types/datetime64">DateTime64</a> types are supported.</p>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT EXTRACT(DAY FROM toDate('2017-06-15'));
+SELECT EXTRACT(MONTH FROM toDate('2017-06-15'));
+SELECT EXTRACT(YEAR FROM toDate('2017-06-15'));
+SELECT EXTRACT(EPOCH FROM toDateTime('2024-01-15 12:30:45', 'UTC'));
+SELECT EXTRACT(DOW FROM toDate('2024-01-15'));
+SELECT EXTRACT(CENTURY FROM toDate('2024-01-01'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In the following example we create a table and insert into it a value with the <code>DateTime</code> type.</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test.Orders
+(
+    OrderId UInt64,
+    OrderName String,
+    OrderDate DateTime
+) ENGINE = MergeTree
+ORDER BY ();
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO test.Orders VALUES (1, 'Jarlsberg Cheese', toDateTime('2008-10-11 13:23:44'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    toYear(OrderDate) AS OrderYear,
+    toMonth(OrderDate) AS OrderMonth,
+    toDayOfMonth(OrderDate) AS OrderDay,
+    toHour(OrderDate) AS OrderHour,
+    toMinute(OrderDate) AS OrderMinute,
+    toSecond(OrderDate) AS OrderSecond
+FROM test.Orders;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─OrderYear─┬─OrderMonth─┬─OrderDay─┬─OrderHour─┬─OrderMinute─┬─OrderSecond─┐
+│      2008 │         10 │       11 │        13 │          23 │          44 │
+└───────────┴────────────┴──────────┴───────────┴─────────────┴─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can see more examples in <a href="https://github.com/ClickHouse/ClickHouse/blob/master/tests/queries/0_stateless/00619_extract.sql" rel="noopener noreferrer" target="_blank">tests</a>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="interval">INTERVAL<a aria-label="Direct link to INTERVAL" class="hash-link" href="#interval" title="Direct link to INTERVAL">​</a></h3>
+<p>Creates an <a href="/docs/sql-reference/data-types/special-data-types/interval">Interval</a>-type value that should be used in arithmetical operations with <a href="/docs/sql-reference/data-types/date">Date</a> and <a href="/docs/sql-reference/data-types/datetime">DateTime</a>-type values.</p>
+<p>Types of intervals:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>SECOND</code></li>
+<li class="custom-li"><code>MINUTE</code></li>
+<li class="custom-li"><code>HOUR</code></li>
+<li class="custom-li"><code>DAY</code></li>
+<li class="custom-li"><code>WEEK</code></li>
+<li class="custom-li"><code>MONTH</code></li>
+<li class="custom-li"><code>QUARTER</code></li>
+<li class="custom-li"><code>YEAR</code></li>
+</ul>
+<p>You can also use a string literal when setting the <code>INTERVAL</code> value. For example, <code>INTERVAL 1 HOUR</code> is identical to the <code>INTERVAL '1 hour'</code> or <code>INTERVAL '1' hour</code>.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>Intervals with different types can't be combined. You can't use expressions like <code>INTERVAL 4 DAY 1 HOUR</code>. Specify intervals in units that are smaller or equal to the smallest unit of the interval, for example, <code>INTERVAL 25 HOUR</code>. You can use consecutive operations, like in the example below.</p></div></div>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT now() AS current_date_time, current_date_time + INTERVAL 4 DAY + INTERVAL 3 HOUR;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───current_date_time─┬─plus(plus(now(), toIntervalDay(4)), toIntervalHour(3))─┐
+│ 2020-11-03 22:09:50 │                                    2020-11-08 01:09:50 │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT now() AS current_date_time, current_date_time + INTERVAL '4 day' + INTERVAL '3 hour';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───current_date_time─┬─plus(plus(now(), toIntervalDay(4)), toIntervalHour(3))─┐
+│ 2020-11-03 22:12:10 │                                    2020-11-08 01:12:10 │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT now() AS current_date_time, current_date_time + INTERVAL '4' day + INTERVAL '3' hour;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───current_date_time─┬─plus(plus(now(), toIntervalDay('4')), toIntervalHour('3'))─┐
+│ 2020-11-03 22:33:19 │                                        2020-11-08 01:33:19 │
+└─────────────────────┴────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The <code>INTERVAL</code> syntax or <code>addDays</code> function are always preferred. Simple addition or subtraction (syntax like <code>now() + ...</code>) doesn't consider time settings. For example, daylight saving time.</p></div></div>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toDateTime('2014-10-26 00:00:00', 'Asia/Istanbul') AS time, time + 60 * 60 * 24 AS time_plus_24_hours, time + toIntervalDay(1) AS time_plus_1_day;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────────time─┬──time_plus_24_hours─┬─────time_plus_1_day─┐
+│ 2014-10-26 00:00:00 │ 2014-10-26 23:00:00 │ 2014-10-27 00:00:00 │
+└─────────────────────┴─────────────────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>See Also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/data-types/special-data-types/interval">Interval</a> data type</li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/type-conversion-functions#toIntervalYear">toInterval</a> type conversion functions</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="date-time-addition">Date and Time Addition<a aria-label="Direct link to Date and Time Addition" class="hash-link" href="#date-time-addition" title="Direct link to Date and Time Addition">​</a></h3>
+<p>A <a href="/docs/sql-reference/data-types/date">Date</a> or <a href="/docs/sql-reference/data-types/date32">Date32</a> value can be added to a <a href="/docs/sql-reference/data-types/time">Time</a> or <a href="/docs/sql-reference/data-types/time64">Time64</a> value using the <code>+</code> operator. The result is a <a href="/docs/sql-reference/data-types/datetime">DateTime</a> or <a href="/docs/sql-reference/data-types/datetime64">DateTime64</a> representing the date at the given time of day. The operation is commutative.</p>
+<p>The result type depends on the operand types:</p>
+<table><thead><tr><th>Left operand<th>Right operand<th>Result type<tbody><tr><td><code>Date</code><td><code>Time</code><td><code>DateTime</code><tr><td><code>Date</code><td><code>Time64(s)</code><td><code>DateTime64(s)</code><tr><td><code>Date32</code><td><code>Time</code><td><code>DateTime64(0)</code><tr><td><code>Date32</code><td><code>Time64(s)</code><td><code>DateTime64(s)</code></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The result uses the <a href="/docs/operations/settings/settings#session_timezone">session timezone</a> (or server default timezone if no session timezone is set). The <a href="/docs/operations/settings/formats#date_time_overflow_behavior"><code>date_time_overflow_behavior</code></a> setting controls what happens when the result is outside the representable range.</p></div></div>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET use_legacy_to_time = 0;
+SELECT toDate('2024-07-15') + toTime('14:30:25') AS dt, toTypeName(dt);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────────dt─┬─toTypeName(dt)─┐
+│ 2024-07-15 14:30:25 │ DateTime       │
+└─────────────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toDate('2024-07-15') + toTime64('14:30:25.123456', 6) AS dt, toTypeName(dt);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─────────────────────────dt─┬─toTypeName(dt)─┐
+│ 2024-07-15 14:30:25.123456 │ DateTime64(6)  │
+└────────────────────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toTime64('23:59:59.999', 3) + toDate32('2024-07-15') AS dt, toTypeName(dt);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────────────dt─┬─toTypeName(dt)─┐
+│ 2024-07-15 23:59:59.999 │ DateTime64(3)  │
+└─────────────────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="logical-and-operator">Logical AND Operator<a aria-label="Direct link to Logical AND Operator" class="hash-link" href="#logical-and-operator" title="Direct link to Logical AND Operator">​</a></h2>
+<p>Syntax <code>SELECT a AND b</code> — calculates logical conjunction of <code>a</code> and <code>b</code> with the function <a href="/docs/sql-reference/functions/logical-functions#and">and</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="logical-or-operator">Logical OR Operator<a aria-label="Direct link to Logical OR Operator" class="hash-link" href="#logical-or-operator" title="Direct link to Logical OR Operator">​</a></h2>
+<p>Syntax <code>SELECT a OR b</code> — calculates logical disjunction of <code>a</code> and <code>b</code> with the function <a href="/docs/sql-reference/functions/logical-functions#or">or</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="logical-negation-operator">Logical Negation Operator<a aria-label="Direct link to Logical Negation Operator" class="hash-link" href="#logical-negation-operator" title="Direct link to Logical Negation Operator">​</a></h2>
+<p>Syntax <code>SELECT NOT a</code> — calculates logical negation of <code>a</code> with the function <a href="/docs/sql-reference/functions/logical-functions#not">not</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conditional-operator">Conditional Operator<a aria-label="Direct link to Conditional Operator" class="hash-link" href="#conditional-operator" title="Direct link to Conditional Operator">​</a></h2>
+<p><code>a ? b : c</code> – The <code>if(a, b, c)</code> function.</p>
+<p>Note:</p>
+<p>The conditional operator calculates the values of b and c, then checks whether condition a is met, and then returns the corresponding value. If <code>b</code> or <code>C</code> is an <a href="/docs/sql-reference/functions/array-join">arrayJoin()</a> function, each row will be replicated regardless of the "a" condition.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conditional-expression">Conditional Expression<a aria-label="Direct link to Conditional Expression" class="hash-link" href="#conditional-expression" title="Direct link to Conditional Expression">​</a></h2>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CASE [x]
+    WHEN a THEN b
+    [WHEN ... THEN ...]
+    [ELSE c]
+END
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If <code>x</code> is specified, then <code>transform(x, [a, ...], [b, ...], c)</code> function is used. Otherwise – <code>multiIf(a, b, ..., c)</code>.</p>
+<p>If there is no <code>ELSE c</code> clause in the expression, the default value is <code>NULL</code>.</p>
+<p>The <code>transform</code> function does not work with <code>NULL</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="concatenation-operator">Concatenation Operator<a aria-label="Direct link to Concatenation Operator" class="hash-link" href="#concatenation-operator" title="Direct link to Concatenation Operator">​</a></h2>
+<p><code>s1 || s2</code> – The <code>concat(s1, s2) function.</code></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="lambda-creation-operator">Lambda Creation Operator<a aria-label="Direct link to Lambda Creation Operator" class="hash-link" href="#lambda-creation-operator" title="Direct link to Lambda Creation Operator">​</a></h2>
+<p><code>x -&gt; expr</code> – The <code>lambda(x, expr) function.</code></p>
+<p>The following operators do not have a priority since they are brackets:</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="array-creation-operator">Array Creation Operator<a aria-label="Direct link to Array Creation Operator" class="hash-link" href="#array-creation-operator" title="Direct link to Array Creation Operator">​</a></h2>
+<p><code>[x1, ...]</code> – The <code>array(x1, ...) function.</code></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tuple-creation-operator">Tuple Creation Operator<a aria-label="Direct link to Tuple Creation Operator" class="hash-link" href="#tuple-creation-operator" title="Direct link to Tuple Creation Operator">​</a></h2>
+<p><code>(x1, x2, ...)</code> – The <code>tuple(x2, x2, ...) function.</code></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="associativity">Associativity<a aria-label="Direct link to Associativity" class="hash-link" href="#associativity" title="Direct link to Associativity">​</a></h2>
+<p>All binary operators have left associativity. For example, <code>1 + 2 + 3</code> is transformed to <code>plus(plus(1, 2), 3)</code>.
+Sometimes this does not work the way you expect. For example, <code>SELECT 4 &gt; 2 &gt; 3</code> will result in 0.</p>
+<p>For efficiency, the <code>and</code> and <code>or</code> functions accept any number of arguments. The corresponding chains of <code>AND</code> and <code>OR</code> operators are transformed into a single call of these functions.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="checking-for-null">Checking for <code>NULL</code><a aria-label="Direct link to checking-for-null" class="hash-link" href="#checking-for-null" title="Direct link to checking-for-null">​</a></h2>
+<p>ClickHouse supports the <code>IS NULL</code> and <code>IS NOT NULL</code> operators.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="is_null">IS NULL<a aria-label="Direct link to IS NULL" class="hash-link" href="#is_null" title="Direct link to IS NULL">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">For <a href="/docs/sql-reference/data-types/nullable">Nullable</a> type values, the <code>IS NULL</code> operator returns:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code>, if the value is <code>NULL</code>.</li>
+<li class="custom-li"><code>0</code> otherwise.</li>
+</ul>
+</li>
+<li class="custom-li">For other values, the <code>IS NULL</code> operator always returns <code>0</code>.</li>
+</ul>
+<p>Can be optimized by enabling the <a href="/docs/operations/settings/settings#optimize_functions_to_subcolumns">optimize_functions_to_subcolumns</a> setting. With <code>optimize_functions_to_subcolumns = 1</code> the function reads only <a href="/docs/sql-reference/data-types/nullable#finding-null">null</a> subcolumn instead of reading and processing the whole column data. The query <code>SELECT n IS NULL FROM table</code> transforms to <code>SELECT n.null FROM TABLE</code>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT x+100 FROM t_null WHERE y IS NULL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─plus(x, 100)─┐
+│          101 │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="is_not_null">IS NOT NULL<a aria-label="Direct link to IS NOT NULL" class="hash-link" href="#is_not_null" title="Direct link to IS NOT NULL">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">For <a href="/docs/sql-reference/data-types/nullable">Nullable</a> type values, the <code>IS NOT NULL</code> operator returns:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>0</code>, if the value is <code>NULL</code>.</li>
+<li class="custom-li"><code>1</code> otherwise.</li>
+</ul>
+</li>
+<li class="custom-li">For other values, the <code>IS NOT NULL</code> operator always returns <code>1</code>.</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM t_null WHERE y IS NOT NULL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─x─┬─y─┐
+│ 2 │ 3 │
+└───┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Can be optimized by enabling the <a href="/docs/operations/settings/settings#optimize_functions_to_subcolumns">optimize_functions_to_subcolumns</a> setting. With <code>optimize_functions_to_subcolumns = 1</code> the function reads only <a href="/docs/sql-reference/data-types/nullable#finding-null">null</a> subcolumn instead of reading and processing the whole column data. The query <code>SELECT n IS NOT NULL FROM table</code> transforms to <code>SELECT NOT n.null FROM TABLE</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="checking-boolean-values">Checking Boolean Values<a aria-label="Direct link to Checking Boolean Values" class="hash-link" href="#checking-boolean-values" title="Direct link to Checking Boolean Values">​</a></h2>
+<p>ClickHouse supports the <code>IS TRUE</code>, <code>IS FALSE</code>, <code>IS UNKNOWN</code>, <code>IS NOT TRUE</code>, <code>IS NOT FALSE</code>, and <code>IS NOT UNKNOWN</code> operators.
+They are used with <a href="/docs/sql-reference/data-types/boolean">Bool</a> and <code>Nullable(Bool)</code> expressions.</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>expr IS TRUE</code> returns <code>1</code> only if <code>expr</code> is <code>true</code>.</li>
+<li class="custom-li"><code>expr IS FALSE</code> returns <code>1</code> only if <code>expr</code> is <code>false</code>.</li>
+<li class="custom-li"><code>expr IS UNKNOWN</code> returns <code>1</code> only if <code>expr</code> is <code>NULL</code>.</li>
+<li class="custom-li"><code>expr IS NOT TRUE</code> returns <code>1</code> if <code>expr</code> is <code>false</code> or <code>NULL</code>.</li>
+<li class="custom-li"><code>expr IS NOT FALSE</code> returns <code>1</code> if <code>expr</code> is <code>true</code> or <code>NULL</code>.</li>
+<li class="custom-li"><code>expr IS NOT UNKNOWN</code> returns <code>1</code> if <code>expr</code> is not <code>NULL</code>.</li>
+</ul>
+<p>For boolean expressions, <code>IS UNKNOWN</code> is equivalent to <code>IS NULL</code>, and <code>IS NOT UNKNOWN</code> is equivalent to <code>IS NOT NULL</code>.</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t_bool (x Nullable(Bool)) ENGINE = Memory;
+INSERT INTO t_bool VALUES (true), (false), (NULL);
+
+SELECT
+    x,
+    x IS TRUE,
+    x IS FALSE,
+    x IS UNKNOWN,
+    x IS NOT TRUE,
+    x IS NOT FALSE,
+    x IS NOT UNKNOWN
+FROM t_bool;
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/undrop"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">UNDROP</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/other/distributed-ddl"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Distributed DDL</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#access-operators">Access Operators</a><li><a class="table-of-contents__link toc-highlight" href="#numeric-negation-operator">Numeric Negation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#multiplication-and-division-operators">Multiplication and Division Operators</a><li><a class="table-of-contents__link toc-highlight" href="#addition-and-subtraction-operators">Addition and Subtraction Operators</a><li><a class="table-of-contents__link toc-highlight" href="#comparison-operators">Comparison Operators</a><ul><li><a class="table-of-contents__link toc-highlight" href="#equals-function">equals function</a><li><a class="table-of-contents__link toc-highlight" href="#notequals-function">notEquals function</a><li><a class="table-of-contents__link toc-highlight" href="#lessorequals-function">lessOrEquals function</a><li><a class="table-of-contents__link toc-highlight" href="#greaterorequals-function">greaterOrEquals function</a><li><a class="table-of-contents__link toc-highlight" href="#less-function">less function</a><li><a class="table-of-contents__link toc-highlight" href="#greater-function">greater function</a><li><a class="table-of-contents__link toc-highlight" href="#like-function">like function</a><li><a class="table-of-contents__link toc-highlight" href="#notlike-function">notLike function</a><li><a class="table-of-contents__link toc-highlight" href="#ilike-function">ilike function</a><li><a class="table-of-contents__link toc-highlight" href="#between-function">BETWEEN function</a><li><a class="table-of-contents__link toc-highlight" href="#is-not-distinct-from">is not distinct from operator (<code>&lt;=&gt;</code>)</a></li></li></li></li></li></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#operators-for-working-with-strings">Operators for Working with Strings</a><ul><li><a class="table-of-contents__link toc-highlight" href="#overlay">OVERLAY</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#operators-for-working-with-data-sets">Operators for Working with Data Sets</a><ul><li><a class="table-of-contents__link toc-highlight" href="#in-function">in function</a><li><a class="table-of-contents__link toc-highlight" href="#notin-function">notIn function</a><li><a class="table-of-contents__link toc-highlight" href="#globalin-function">globalIn function</a><li><a class="table-of-contents__link toc-highlight" href="#globalnotin-function">globalNotIn function</a><li><a class="table-of-contents__link toc-highlight" href="#in-subquery-function">in subquery function</a><li><a class="table-of-contents__link toc-highlight" href="#notin-subquery-function">notIn subquery function</a><li><a class="table-of-contents__link toc-highlight" href="#in-subquery-function-1">in subquery function</a><li><a class="table-of-contents__link toc-highlight" href="#notin-subquery-function-1">notIn subquery function</a></li></li></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#operators-for-working-with-dates-and-times">Operators for Working with Dates and Times</a><ul><li><a class="table-of-contents__link toc-highlight" href="#extract">EXTRACT</a><li><a class="table-of-contents__link toc-highlight" href="#interval">INTERVAL</a><li><a class="table-of-contents__link toc-highlight" href="#date-time-addition">Date and Time Addition</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#logical-and-operator">Logical AND Operator</a><li><a class="table-of-contents__link toc-highlight" href="#logical-or-operator">Logical OR Operator</a><li><a class="table-of-contents__link toc-highlight" href="#logical-negation-operator">Logical Negation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#conditional-operator">Conditional Operator</a><li><a class="table-of-contents__link toc-highlight" href="#conditional-expression">Conditional Expression</a><li><a class="table-of-contents__link toc-highlight" href="#concatenation-operator">Concatenation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#lambda-creation-operator">Lambda Creation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#array-creation-operator">Array Creation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#tuple-creation-operator">Tuple Creation Operator</a><li><a class="table-of-contents__link toc-highlight" href="#associativity">Associativity</a><li><a class="table-of-contents__link toc-highlight" href="#checking-for-null">Checking for <code>NULL</code></a><ul><li><a class="table-of-contents__link toc-highlight" href="#is_null">IS NULL</a><li><a class="table-of-contents__link toc-highlight" href="#is_not_null">IS NOT NULL</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#checking-boolean-values">Checking Boolean Values</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

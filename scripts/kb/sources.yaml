@@ -1,0 +1,21 @@
+sources:
+  - name: clickhouse.com/blog
+    kind: sitemap
+    sitemap_url: https://clickhouse.com/sitemap.xml
+    rss_url: https://clickhouse.com/rss.xml
+    allowed_url_prefixes:
+      - https://clickhouse.com/blog/
+    excluded_urls:
+      - https://clickhouse.com/blog
+      - https://clickhouse.com/blog/
+    excluded_url_prefixes:
+      - https://clickhouse.com/blog/category/
+      - https://clickhouse.com/blog/tag/
+      - https://clickhouse.com/blog/author/
+    output_subdir: blog
+
+  - name: github.com/ClickHouse/ClickHouse/releases
+    kind: github_releases
+    api_url: https://api.github.com/repos/ClickHouse/ClickHouse/releases
+    limit: 36
+    output_subdir: releases

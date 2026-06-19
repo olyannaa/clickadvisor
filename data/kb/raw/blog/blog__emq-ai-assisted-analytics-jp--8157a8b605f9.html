@@ -1,0 +1,54 @@
+<h1>EMQとClickHouseの連携: 産業用エッジで機能する、AIを活用したリアルタイム分析</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><style>
+div.w-full + p, 
+pre + p,
+span.relative + p {
+  text-align: center;
+  font-style: italic;
+}
+</style>
+<blockquote>
+<p><strong>TL;DR</strong><br/><br/>EMQは、MQTTベースの産業用IoTプラットフォームにおけるリアルタイム分析基盤として ClickHouse Cloud を活用し、1,000社を超えるエンタープライズ顧客にサービスを提供しています。ClickHouse を中核としたデータパイプラインにより、エッジデバイスからクラウドダッシュボードまでを連携し、高スループットなデータ取り込みとサブセカンドでのクエリ処理を実現しています。
+<br/><br/>
+さらに、ClickHouse MCP を用いることで、オペレーターが自然言語でライブデータにアクセスし、トラブルシューティングを行える AI 主導の可観測性ツールの開発を進めています。</p>
+</blockquote>
+<p>「産業用IoT」と聞いて、何を想像するでしょうか。おそらく、工場で流れる品目を測定するセンサーや、スマート車両からの遠隔測定、生産ラインの機械が出す自動アラートなどが頭に浮ぶことでしょう。ですが、メッセージブローカー、データパイプライン、分析エンジンをすべて連携させて、水面下でリアルタイムにインテリジェンスを生成するシステムなどはご存じないかもしれません。</p>
+<p>10年以上もの間、<a href="https://www.emqx.com/en">EMQ</a>はそのようなインフラストラクチャの最前線にいました。同社の旅は2013年、オープンソースのMQTTブローカーである<a href="https://www.emqx.com/en/platform">EMQX</a>の開発と共に始まります。これは、低帯域幅かつコンカレンシーの高い環境でも、デバイスの連携を可能にする製品です。EMQXは瞬く間に、世界で最も拡張性の高いIoT、IIoT、コネクテッドビークルアプリケーション向けのMQTTプラットフォームとなりました。</p>
+<p>それ以降、EMQは1,000以上の企業クライアントにサービスを提供し、2億5000万以上のデバイスを接続するグローバルリーダーへと成長します。Geely、HPE、VMware、Verifone、SAIC Volkswagen、Lucid、Ericssonなどを顧客に持ち、工場の設備から電力グリッド、自動運転、ロボットシステムまで、あらゆるシステムに同社のテクノロジーが採用されています。</p>
+<p>EMQの規模やリーチが拡大するにつれ、同社のプラットフォームに対する期待も大きくなりました。顧客にとっては、デバイス間でメッセージをルーティングするだけでなく、メッセージの意味を理解することも重要です。リアルタイムのインサイトや、柔軟な分析、データを受け取った瞬間にアクションを起こす機能も要求されました。コネクティビティからインテリジェンスへシフトしたことにより、新しい何かがEMQに求められたのです。</p>
+<p>今年の前半、EMQのソリューションアーキテクト、孫 セイ氏は、ClickHouseによる東京ミートアップに<a href="https://clickhouse.com/videos/tokyo-meetup-EMQ-15apr25">4月</a>と<a href="https://clickhouse.com/videos/tokyo-meetup-emq-29jul25">6月</a>の2回参加し、<a href="https://clickhouse.com/docs/integrations/emqx">EMQをClickHouseと統合させることで</a>、高速かつ柔軟な、エッジからクラウドまでのエンドツーエンドの可視性を構築した事例を紹介しました。メッセージングと分析の機能を別々のシステムに置くのではなく、1つのリアルタイムプラットフォームに組み込むシナリオで、メッセージングの基盤やAIを活用したオブザーバビリティ層をどのように構築するかについて説明しています。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="mqttを大規模に機能させる" level="2">MQTTを大規模に機能させる<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/emq-ai-assisted-analytics-jp#mqtt%E3%82%92%E5%A4%A7%E8%A6%8F%E6%A8%A1%E3%81%AB%E6%A9%9F%E8%83%BD%E3%81%95%E3%81%9B%E3%82%8B">#</a></span></h2>
+<p>EMQの主力製品はMQTTブローカーの<a href="https://www.emqx.com/en">EMQX</a>です。「Kafkaはデータトランザクションの機能を重視し、我々は並列性と低遅延を重視しています」と孫氏は説明します。「データをエッジからクラウドサービスへ、低遅延で配信することが我々の課題です。」</p>
+<p><a href="https://en.wikipedia.org/wiki/MQTT">MQTT</a>はもともとIBMで1999年に作成された軽量プロトコルです。2010年に一般に入手可能になりました。HTTPがポイントツーポイントの通信を使用するのに対し、MQTTではパブリッシャ―とサブスクライバーの間にブローカーが置かれます。「このブローカーにはメッセージを正しくルーティングする役割のほかに、各メッセージや接続の状態を管理する役割もあります」と孫氏は言います。</p>
+<p>また、開発者はMQTTのQuality of Serviceの設定を変えることで、メッセージの配信を細かく調整することもできます。「軽量で重要度の低いデータにレベル0を設定すると、一度だけ送信されて終了します。」と孫氏は説明します。「重要なデータにはレベル1を使用し、少なくとも一度は必ず配信されるようにします。また、必要に応じてレベル2を設定し、データが必ず一度送信されるようにもできます。」</p>
+<p>このように柔軟であり、かつ並列性の高い環境にも対応できることから、MQTTはIoTおよび産業用のワークロードで広く採用されるプロトコルとなっています。</p>
+<p>しかし、大規模なMQTTクラスターを稼働させることは、特にステート管理の面で課題が伴います。すべての接続でメタデータ、つまりメッセージヘッダー、フッター、およびパブリッシャーとサブスクライバーの間の連携の状態がデータでやり取りされます。「たくさんのデータを監視する必要があります」と孫氏は言います。「そのため、クラスター内のサーバー間でデータを同期することが複雑で難しいです。」</p>
+<p>EMQXはこの課題を、セッションの状態を管理するコアノードと、処理をスケールアウトさせるレプリカノードの2種類のノードを持つクラウドアーキテクチャを使用して解決しました。「これで、無限に拡張できるクラウド環境を構築できます。」（孫氏）</p>
+<p>2024年に、孫氏のチームは1億の同時接続を処理できるクラスターを構築しました。「このクラウドで、毎秒200万メッセージという非常に高いスループットを達成しました。」と孫氏は言います。「その当時、最大23のノードを実行していましたが、最近では最大75ノードの大規模なIoTクラウドを構築できるようになりました。」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouseによるリアルタイム分析" level="2">ClickHouseによるリアルタイム分析<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/emq-ai-assisted-analytics-jp#clickhouse%E3%81%AB%E3%82%88%E3%82%8B%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E5%88%86%E6%9E%90">#</a></span></h2>
+<p>未加工のデバイスデータからインサイトをリアルタイムで入手するために、EMQは高インジェスト率と低遅延クエリに対応し、かつ産業用プロトコルと最新の分析ツールに幅広く互換性を維持するセットアップを必要としていました。そのために同社が選んだのが<a href="javascript:void(0)">ClickHouse Cloud</a>です。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="EMQ User Story_Diagram 1.png" loading="lazy" src="/uploads/EMQ_User_Story_Diagram_1_5ee460a97a.png"/></span>
+<em>EMQによるClickHouseベースの分析セットアップ。エッジデバイスとクラウドダッシュボードが連携する。</em>
+<p>ClickHouseはEMQの分析スタックの中心に位置し、インジェストから可視化までのすべての機能を提供します。PostgresやMySQLなどのリレーショナルデータベース、Kafkaなどのストリーミングシステム、EMQXなどの産業用ブローカーを含むさまざまなソースから、データを取り込むことができます。</p>
+<p>一般的なデータフローでは、産業用デバイスからサウスバウンドプロトコル経由でテレメトリが<a href="https://www.emqx.com/en/products/neuronex">NeuronEX</a>（EMQのエッジゲートウェイ）に送信され、データが正規化されます。そこからデータがMQTTを経由してEMQXに移動し、Kafkaを通過したのち、最終的にClickHouse Cloudに取り込まれます。「この種のアーキテクチャでは、エッジのデータからデータベースまでをすべて連携させることができます。」と孫氏は言い、このセットアップならパブリックネットワーク経由でも1秒未満で分析を完了できることを説明しました。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="EMQ diagram 2_JP.png" loading="lazy" src="/uploads/EMQ_diagram_2_JP_3349486942.png"/></span>
+<em>エッジデバイスからClickHouseの分析機能への、エンドツーエンドのデータパイプライン。</em>
+<p>ClickHouseに取り込まれたデータは、すぐさま高速なクエリに使用されます。<a href="https://clickhouse.com/docs/sql-reference/dictionaries">ディクショナリ</a>、<a href="https://clickhouse.com/docs/sql-reference/statements/alter/projection">プロジェクション</a>、<a href="https://clickhouse.com/docs/materialized-views">マテリアライズドビュー</a>などの機能により、アクセスの速度を高め、リソースの使用を減らすことができます。エンジニアはGrafana、Power BI、Tableauなどのツールを使用するか、Python、Java、Rust、Goなどで直接操作することで、データを探索できます。また、ClickHouseは<a href="https://clickhouse.com/docs/integrations/s3">S3</a>や<a href="https://clickhouse.com/docs/integrations/deltalake">Delta Lake</a>などの外部のデータレイクと連携することで、リアルタイムのストリーミングデータを、履歴データと簡単に組み合わせることができます。</p>
+<p>孫氏は4月のミートアップで、Pythonで生成される工場のシミュレーションデータを使用したデモを行っています。OPC-UAデバイスで、温度や湿度などのセンサーによる読み取りデータが生成され、Modbusデバイスでは生産数やエラーコードなどの送信が行われます。データはNeuronEXを使用して正規化されたのち、MQTT経由でEMQXにストリーミングされます。そこから、EMQXのシンク機能により、データをSQLで構成されたパイプラインを使用してClickHouseにルーティングします。</p>
+<p>インジェストされたデータは、すぐさまクエリと可視化に使用されます。孫氏はClickHouseの<a href="https://clickhouse.com/docs/use-cases/AI/ai-powered-sql-generation">AIを活用したクエリビルダー</a>を紹介し、自然言語のプロンプトをSQLに変換する機能について次のように述べています。「ClickHouseのAI機能は非常にユーザーフレンドリーだと思います。AIが1つの文を分析すると、SQLステートメントが瞬時に生成されるので、データをリアルタイムにチェックできます。」</p>
+<p>また、孫氏はClickHouse Cloudに組み込まれたダッシュボードを紹介し、更新の間隔を10秒に設定して、最新のデータを画面に表示しました。「生産数や欠陥品の数などを瞬時に確認できます。」（孫氏）</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouse-mcpによりaiをエッジで活用する" level="2">ClickHouse MCPによりAIをエッジで活用する<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/emq-ai-assisted-analytics-jp#clickhouse-mcp%E3%81%AB%E3%82%88%E3%82%8Aai%E3%82%92%E3%82%A8%E3%83%83%E3%82%B8%E3%81%A7%E6%B4%BB%E7%94%A8%E3%81%99%E3%82%8B">#</a></span></h2>
+<div class="relative styles_responsiveEmbed__qDlEx"><div class="absolute inset-0 flex bg-black"><div class="m-auto aspect-square w-10 animate-spin rounded-full border-4 border-primary-300/20 border-t-primary-300"></div></div><div></div></div>
+<p>孫氏は6月のミートアップで、EMQがClickHouseのAI機能の使用を継続的に拡大し、AIを活用したリアルタイムの分析ツールを産業用IoT環境に構築した事例を紹介しました。そのために、同社は製造業のクライアントを前提に、3つの主な課題に取り組む必要がありました。</p>
+<p>1つ目は多様なエッジデバイスの管理が複雑になること。「装置や製造現場の種類があまりにも多いため、管理が複雑になりました。」（孫氏）</p>
+<p>2つ目はメッセージの遅延を追跡すること。「各メッセージの遅延を個別に追跡することはできません。」と孫氏は説明します。「メッセージ群の平均的な遅延、または遅延を監視することしかできません。」</p>
+<p>そして3つ目は、アーキテクチャのノースバウンド側（つまりクラウド面）で複数のデータベースを操ることです。「各メッセージに対し、時系列のデータベースと、機器の詳細な情報を格納するリレーショナルデータベース、そして内部のナレッジを記録するベクトルデータベースが必要です。」</p>
+<p>そして、孫氏は当時の目標について、「ClickHouseを統合データプラットフォームとして使用し、3つのデータベースの機能を1つにまとめること」だったと説明しました。</p>
+<p>そこでEMQが選んだのが<a href="https://clickhouse.com/blog/integrating-clickhouse-mcp">ClickHouse MCPサーバー</a>でした。MCP (Model Context Protocol) とは、AIエージェントとサードパーティシステム（データベース、API、ツールなど）の間で、自然言語による対話を可能にするための、新しいオープンプロトコルです。各システムをMCPサーバーでラップすることで、イベントの追跡、デバッグ、クエリ、および分析を、AIで拡張したワークフローを使用して行うことができます。EMQの事例では、これを活用することで、オペレーターが「なぜ機械が故障したのか」や、「どこで遅延が発生しているのか」などを自然言語で質問し、ClickHouseのライブデータを基に回答を得ることができます。</p>
+<p>このデモで、孫氏はリアルタイムのオブザーバビリティ、高度な分析、そしてAIを活用したトラブルシューティングが、MCPによって可能になることを説明しました。トレースIDやベクトル検索を使用しているため、オペレーターはエラーの原因を瞬時に突き止めたり、エラーコードを取得したり、解決策を調べたり、また、それらすべてを同じシステム内で行うことができます。「MCPを使用することで、高度に複雑な分析や、データの監視、きめ細かなコントロールが可能になります。」と孫氏は言います。「これにより、遅延の変化やエラーをリアルタイムで検出することができます。」</p>
+<p>孫氏は新しい開発ツールのデモも行い、センサーデータのシミュレート、スキーマレコメンデーションの生成、LLMを使用したEMQXルールエンジンの構成の自動化などを紹介しました。「私はあまりSQLが得意ではないので、このような機能があると本当に助かります」（孫氏）</p>
+<p>このシステムで、大規模なデータのストリーミングや処理が可能ですが、軽量のエッジハードウェアからでもクラウドダッシュボードにデータを送出し、クロスクラスターの可視性を提供することができます。またEMQは、より機能が制限された環境でも、MCPをMQTTと連携させる方法を考案し、対応しています。「軽量のさまざまなデバイスにMCPをインストールすることは難しいので、新しい方法を探さなくてはなりません」と孫氏は言います。「MCPサーバーのプロキシをブローカーにインストールすることで、従来型の標準的なデバイスにもAIの機能を追加することができます。つまり、すべてのデバイスをAI機能で拡張できます。」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="未来の工場に機能を提供する" level="2">未来の工場に機能を提供する<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/emq-ai-assisted-analytics-jp#%E6%9C%AA%E6%9D%A5%E3%81%AE%E5%B7%A5%E5%A0%B4%E3%81%AB%E6%A9%9F%E8%83%BD%E3%82%92%E6%8F%90%E4%BE%9B%E3%81%99%E3%82%8B">#</a></span></h2>
+<p>EMQはClickHouse MCPを導入し、リアルタイムのパイプラインや、AIを活用したオブザーバビリティを構築して、ClickHouseとの連携を実現しました。このように、産業用IoTが飛躍的に進化を遂げていることは明らかです。メッセージング、ストレージ、分析などのシステムを別々に用意してつなぎ合わせるのではなく、高速で柔軟性が高く、AIに対応した統合スタックを導入後すぐに構築する企業が増えているのです。</p>
+<p>データのクエリ、監視、操作を簡単にすることで、EMQは顧客のオペレーションがよりスマートでレスポンシブになるようサポートしています。また、EMQXがClickHouseとシームレスに連携し、MCPなどのAI機能も簡単に追加できることから、今後ますますデータを多用するインテリジェントな工場で、ClickHouseのプラットフォームが積極的に採用されていくことでしょう。</p>
+<p><a href="https://clickhouse.com/docs/integrations/emqx">EMQXとClickHouseの連携についてはこちら</a>をご覧ください。また、無料の試用版を<a href="https://www.emqx.com/en/try">EMQX Cloudはこちら</a>、<a href="https://clickhouse.com/jp/cloud">ClickHouse Cloudはこちら</a>からどうぞ。</p></div><div class="rounded-lg bg-white/10 p-4 toc-ignore" id="blog-cta-27"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">今すぐ始める</h3><div class="text-neutral-200 text-sm font-medium">お客様のデータで ClickHouse がどのように機能するか、ご確認になりませんか。ClickHouse Cloud は数分で利用を開始でき、300ドル分の無料クレジットをご提供いたします。</div><a class="w-full" href="https://console.clickhouse.cloud/signUp?loc=blog-cta-27&amp;utm_blogctaid=27"><button class="styles_button__3smpn mt-6 w-full font-medium" data-type="primary"><span class="flex items-center whitespace-nowrap">サインアップ</span></button></a></div></div></article>

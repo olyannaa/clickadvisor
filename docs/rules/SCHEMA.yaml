@@ -1,0 +1,189 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ClickAdvisor Rule Card
+type: object
+additionalProperties: false
+required:
+  - id
+  - name
+  - tier
+  - category
+  - status
+  - statement
+  - preconditions
+  - proof
+  - ch_version
+  - example_before
+  - example_after
+  - expected_speedup
+  - risks
+  - opt_in
+  - references
+properties:
+  id:
+    type: string
+    pattern: "^(R|D|E)-[0-9]{3}$"
+  name:
+    type: string
+    minLength: 1
+  tier:
+    type: string
+    enum: ["1A", "1B", "1C", "2", "3", "detector", "env"]
+  category:
+    type: string
+    minLength: 1
+  status:
+    type: string
+    enum: ["proposed", "validated", "implemented", "deprecated"]
+  statement:
+    type: string
+  preconditions:
+    type: object
+    additionalProperties: false
+    required: ["syntactic", "semantic", "data"]
+    properties:
+      syntactic:
+        type: array
+        items:
+          type: string
+      semantic:
+        type: array
+        items:
+          type: string
+      data:
+        type: array
+        items:
+          type: string
+      stats_based:
+        type: array
+        items:
+          type: string
+      user:
+        type: array
+        items:
+          type: string
+  proof:
+    oneOf:
+      - type: string
+      - type: object
+        additionalProperties: false
+        properties:
+          status:
+            type: string
+          notes:
+            type: string
+  explain_template:
+    type: string
+  ch_version:
+    type: object
+    additionalProperties: false
+    required: ["introduced", "deprecated", "last_validated"]
+    properties:
+      introduced:
+        type: string
+      deprecated:
+        type: ["string", "null"]
+      last_validated:
+        type: string
+  example_before:
+    type: string
+  example_after:
+    type: string
+  expected_speedup:
+    type: object
+    additionalProperties: false
+    required: ["estimate", "measurement_method"]
+    properties:
+      estimate:
+        type: ["string", "null"]
+      measurement_method:
+        type: ["string", "null"]
+  risks:
+    type: array
+    items:
+      type: string
+  opt_in:
+    type: boolean
+  references:
+    type: array
+    items:
+      type: string
+  detection_method:
+    type: object
+    additionalProperties: false
+    properties:
+      ast_pattern:
+        type: string
+      explain_features:
+        type: array
+        items:
+          type: string
+      metadata_check:
+        type: array
+        items:
+          type: string
+  severity:
+    type: string
+    enum: ["low", "medium", "high"]
+  recommendation_template:
+    type: string
+  false_positives:
+    type: array
+    items:
+      type: string
+  example_trigger:
+    type: string
+  cost_model:
+    type: object
+    additionalProperties: false
+    properties:
+      metric:
+        type: string
+      formula:
+        type: string
+      baseline:
+        type: string
+      projected:
+        type: string
+  confidence_level:
+    type: string
+    enum: ["low", "medium", "high"]
+  confidence_rationale:
+    type: string
+  ddl_template:
+    type: string
+  example_scenario:
+    type: string
+  hardware_preconditions:
+    type: array
+    items:
+      type: string
+  config_preconditions:
+    type: array
+    items:
+      type: string
+  workload_preconditions:
+    type: array
+    items:
+      type: string
+  recommendation:
+    type: object
+    additionalProperties: false
+    properties:
+      setting:
+        type: string
+      current_value_check:
+        type: string
+      recommended_formula:
+        type: string
+      example:
+        type: string
+  reasoning:
+    type: string
+  decision_tree:
+    type: string
+  threshold:
+    type: string
+  condition:
+    type: string
+  important_note:
+    type: string

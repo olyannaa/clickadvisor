@@ -1,0 +1,302 @@
+<h1>WebAssembly User Defined Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">WebAssembly UDFs</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/wasm_udf.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>WebAssembly User-Defined Functions</h1></header>
+<p>ClickHouse supports creating user-defined functions (UDFs) written in WebAssembly. This allows you to execute custom logic written in languages like Rust, C, C++, or others by compiling them to WebAssembly modules.</p>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<div class="experimentalBadge_YmgE"><div class="experimentalIcon_rfgE" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 2H10.5" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M9.50015 2V6.19625L13.4283 12.7425C13.4738 12.8183 13.4985 12.9049 13.4996 12.9934C13.5008 13.0818 13.4785 13.169 13.435 13.246C13.3914 13.323 13.3283 13.3871 13.2519 13.4317C13.1755 13.4764 13.0886 13.4999 13.0002 13.5H3.00015C2.91164 13.5 2.8247 13.4766 2.74822 13.432C2.67174 13.3874 2.60847 13.3233 2.56487 13.2463C2.52126 13.1693 2.49889 13.082 2.50004 12.9935C2.50119 12.905 2.52582 12.8184 2.5714 12.7425L6.50015 6.19625V2" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M4.47656 9.56754C5.30344 9.41254 6.47656 9.47942 7.99969 10.25C10.0153 11.2707 11.4216 11.0569 12.2184 10.7282" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path></svg></div>Experimental feature. <u><a href="/docs/beta-and-experimental-features#experimental-features">Learn more.</a></u></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a aria-label="Direct link to Overview" class="hash-link" href="#overview" title="Direct link to Overview">​</a></h2>
+<p>A WebAssembly module is a compiled binary file that contains one or more functions that can be called from ClickHouse.
+Think of a module as a library or shared object that you load once and reuse many times.</p>
+<p>WebAssembly module containing UDFs can be written in any language that can compile to WebAssembly, such as Rust, C, or C++.</p>
+<p>Code compiled to WebAssembly ("guest" code) and executed by ClickHouse  ("host") run in a sandboxed environment having access only to a dedicated memory space.</p>
+<p>Guest code exports functions that ClickHouse can invoke - these include the functions that implement your custom logic (used to define UDFs) as well as support functions required for memory management and data exchange between ClickHouse and the WebAssembly code.</p>
+<p>Your code should be compiled to "freestanding" WebAssembly (aka <code>wasm32-unknown-unknown</code>) without any dependencies on an operating system or standard library. Also only default 32-bit WebAssembly target is supported (no <code>wasm64</code> extension).
+The module must follow one of the supported communication protocols (ABIs) for interacting with ClickHouse.</p>
+<p>Once compiled, the module's binary code is loaded into ClickHouse by inserting it into the <code>system.webassembly_modules</code> table.
+After that, you can create UDFs that reference functions exported by the module using the <code>CREATE FUNCTION ... LANGUAGE WASM</code> statement.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="prerequisites">Prerequisites<a aria-label="Direct link to Prerequisites" class="hash-link" href="#prerequisites" title="Direct link to Prerequisites">​</a></h2>
+<p>Enable WebAssembly support in your ClickHouse configuration:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;allow_experimental_webassembly_udf&gt;true&lt;/allow_experimental_webassembly_udf&gt;
+    &lt;webassembly_udf_engine&gt;wasmtime&lt;/webassembly_udf_engine&gt;
+&lt;/clickhouse&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Available Engine Implementations:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>wasmtime</code> (default, recommended) — uses <a href="https://github.com/bytecodealliance/wasmtime" rel="noopener noreferrer" target="_blank">WasmTime</a></li>
+<li class="custom-li"><code>wasmedge</code> — uses <a href="https://github.com/WasmEdge/WasmEdge" rel="noopener noreferrer" target="_blank">WasmEdge</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="quick-start">Quick Start<a aria-label="Direct link to Quick Start" class="hash-link" href="#quick-start" title="Direct link to Quick Start">​</a></h2>
+<p>This example demonstrates the complete workflow of creating a WebAssembly UDF by implementing the <a href="https://en.wikipedia.org/wiki/Collatz_conjecture" rel="noopener noreferrer" target="_blank">Collatz conjecture</a> calculator.</p>
+<p>We'll write the code in WebAssembly Text format (WAT), which is a human-readable representation of WebAssembly, so no any programming language is required at this stage.
+ClickHouse requires the module to be in binary format, so we'll use the transpiler to convert WAT to WASM.
+To perform this conversion you may use <code>wat2wasm</code> from the <a href="https://github.com/WebAssembly/wabt" rel="noopener noreferrer" target="_blank">WebAssembly Binary Toolkit (WABT)</a> or <code>parse</code> command from the <a href="https://github.com/bytecodealliance/wasm-tools" rel="noopener noreferrer" target="_blank">wasm-tools</a>.</p>
+<div class="wrapper_EBtA" style="height:358.15000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">cat &lt;&lt; 'EOF' | wasm-tools parse | clickhouse client -q "INSERT INTO system.webassembly_modules (name, code) SELECT 'collatz', code FROM input('code String') FORMAT RawBlob"
+(module
+  (func $next (param $n i32) (result i32)
+    local.get $n i32.const 1 i32.and
+    (if (result i32)
+      (then local.get $n i32.const 3 i32.mul i32.const 1 i32.add)
+      (else local.get $n i32.const 2 i32.div_u)))
+  (func $steps (export "steps") (param $n i32) (result i32)
+    (local $count i32)
+    local.get $n i32.const 1 i32.lt_u
+    (if (then i32.const 0 return))
+    (block $done (loop $loop
+      local.get $n i32.const 1 i32.eq br_if $done
+      local.get $n call $next local.set $n
+      local.get $count i32.const 1 i32.add local.set $count
+      br $loop))
+    local.get $count)
+)
+EOF
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In snippet above we pipe binary WASM code directly into ClickHouse client using <code>FORMAT RawBlob</code> to insert it into <code>system.webassembly_modules</code> table.</p>
+<p>Then we define the UDF that references the <code>steps</code> function exported by the module:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION collatz_steps LANGUAGE WASM ARGUMENTS (n UInt32) RETURNS UInt32 FROM 'collatz' :: 'steps';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that we specify function name from the module after <code>::</code>, because it differs from the UDF name.</p>
+<p>Now we can use the <code>collatz_steps</code> function in our queries:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT groupArray(collatz_steps(number :: UInt32))
+FROM numbers(1, 100)
+FORMAT TSV
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>number</code> column is explicitly cast to <code>UInt32</code>, because WebAssembly functions expect exact type matches specified signature in <code>CREATE FUNCTION</code> statement.</p>
+<p>In the result we got sequence of Collatz steps for numbers from 1 to 100, corresponding to sequence <a href="https://oeis.org/A006577" rel="noopener noreferrer" target="_blank">A006577 from the OEIS</a>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">[0,1,7,2,5,8,16,3,19,6,14,9,9,17,17,4,12,20,20,7,7,15,15,10,23,10,111,18,18,18,106,5,26,13,13,21,21,21,34,8,109,8,29,16,16,16,104,11,24,24,24,11,11,112,112,19,32,19,32,19,19,107,107,6,27,27,27,14,14,14,102,22,115,22,14,22,22,35,35,9,22,110,110,9,9,30,30,17,30,17,92,17,17,105,105,12,118,25,25,25]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="manage-wasm-modules-via-system-table">Manage WASM modules via system table<a aria-label="Direct link to Manage WASM modules via system table" class="hash-link" href="#manage-wasm-modules-via-system-table" title="Direct link to Manage WASM modules via system table">​</a></h2>
+<p>WebAssembly modules are stored in the <code>system.webassembly_modules</code> table having the following structure:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Columns</strong>
+<ul class="custom-ul">
+<li class="custom-li"><code>name</code> String — Module name. Non-empty, word characters only.</li>
+<li class="custom-li"><code>code</code> String — Raw binary WASM code. Write-only, reads return empty string.</li>
+<li class="custom-li"><code>hash</code> UInt256 — SHA256 of the module binary (zero if present on disk but not yet loaded).</li>
+</ul>
+</li>
+</ul>
+<p>Module management happens through standard SQL operations on this table:</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="insert-a-module">Insert a module<a aria-label="Direct link to Insert a module" class="hash-link" href="#insert-a-module" title="Direct link to Insert a module">​</a></h3>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO system.webassembly_modules (name, code)
+SELECT 'my_module', base64Decode('AGFzbQEAAAA...');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Optionally, provide integrity hash:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO system.webassembly_modules (name, code, hash)
+SELECT 'my_module', base64Decode('...'), reinterpretAsUInt256(unhex('369f...c57d'));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If the provided hash does not match the computed SHA256 of the module code, the insertion fails. It may be useful when loading modules from external sources such as S3 or HTTP.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="distribute-a-module-across-a-cluster">Distribute a module across a cluster<a aria-label="Direct link to Distribute a module across a cluster" class="hash-link" href="#distribute-a-module-across-a-cluster" title="Direct link to Distribute a module across a cluster">​</a></h3>
+<p><code>system.webassembly_modules</code> is a per-instance table — an <code>INSERT</code> lands only on the replica handling the connection. There is no <code>ON CLUSTER</code> form of the <code>INSERT</code> statement, so a subsequent <code>CREATE FUNCTION ... ON CLUSTER</code> will fail on replicas that do not have the module:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Code: 674. DB::Exception: WebAssembly module 'collatz' not found:
+while adding user defined function `collatz_steps`. (RESOURCE_NOT_FOUND)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To fan an insert out to every node, write to the <code>cluster</code> table function instead of the local <code>system.webassembly_modules</code> table:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">cat collatz.wasm | clickhouse client -q "
+  INSERT INTO FUNCTION cluster('default', 'system', 'webassembly_modules') (name, code)
+  SELECT 'collatz', code FROM input('code String') FORMAT RawBlob"
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This pattern relies on the underlying distributed-write path visiting every replica within each shard, which only happens when the cluster is configured with <code>internal_replication=false</code>. With <code>internal_replication=true</code> (the default for clusters that use <code>ReplicatedMergeTree</code> to drive replication themselves), the insert is delivered to a single healthy replica per shard, and <code>system.webassembly_modules</code> is not replicated by that path — so some replicas will still be missing the module. In that configuration you need to insert against each replica individually, for example by iterating over <code>system.clusters</code> and writing via <code>remote(...)</code> per host, or by copying the binary into <code>user_scripts/wasm/</code> on every host.<p>You can inspect <code>internal_replication</code> for a cluster with <code>SELECT cluster, shard_num, internal_replication FROM system.clusters</code>.</p></p></div></div>
+<p>After the fanned-out insert, the module is present on every replica and <code>CREATE FUNCTION ... ON CLUSTER</code> succeeds:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION collatz_steps ON CLUSTER 'default'
+LANGUAGE WASM FROM 'collatz' :: 'steps'
+ARGUMENTS (n UInt32) RETURNS UInt32;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can verify the module is loaded everywhere with <code>clusterAllReplicas</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hostName(), name FROM clusterAllReplicas('default', system.webassembly_modules) WHERE name = 'collatz';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Inserts into <code>system.webassembly_modules</code> are idempotent for the same <code>(name, hash)</code> pair, so re-running the fanned-out insert is safe and is a reasonable way to repair state after a replica has been replaced. Note that newly added servers do not retroactively receive existing modules — you must re-run the insert against the updated cluster, or place the binary into the <code>user_scripts/wasm/</code> directory on the new host.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="list-modules">List modules<a aria-label="Direct link to List modules" class="hash-link" href="#list-modules" title="Direct link to List modules">​</a></h3>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT name, lower(hex(reinterpretAsFixedString(hash))) AS sha256 FROM system.webassembly_modules
+
+   ┌─name────┬─sha256───────────────────────────────────────────────────────────┐
+1. │ collatz │ a084a10b7b5cb07db198bc93bf1f3c1f8cb8ef279df7a4f6b66b1cdd55d79c48 │
+   └─────────┴──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="delete-a-module">Delete a module<a aria-label="Direct link to Delete a module" class="hash-link" href="#delete-a-module" title="Direct link to Delete a module">​</a></h3>
+<p>Deletion performed by <code>DELETE FROM system.webassembly_modules WHERE name = '...'</code> statement.
+The predicate must be either <code>name = 'literal'</code> for exact match or <code>name LIKE 'pattern'</code> to delete every module whose name matches the pattern; no other shapes are accepted.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">DELETE FROM system.webassembly_modules WHERE name = 'collatz';
+
+-- Bulk-delete every module whose name starts with `tmp_` (literal underscore is escaped as `\_`):
+DELETE FROM system.webassembly_modules WHERE name LIKE 'tmp\_%';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If any existing UDFs reference one of the matched modules, the deletion fails, so you must drop those UDFs first.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="create-a-webassembly-udf">Create a WebAssembly UDF<a aria-label="Direct link to Create a WebAssembly UDF" class="hash-link" href="#create-a-webassembly-udf" title="Direct link to Create a WebAssembly UDF">​</a></h2>
+<p><strong>Syntax</strong>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE [OR REPLACE] FUNCTION function_name
+LANGUAGE WASM
+FROM 'module_name' [:: 'source_function_name']
+ARGUMENTS ( [name type[, ...]] | [type[, ...]] )
+RETURNS return_type
+[ABI ROW_DIRECT | ABI BUFFERED_V1 | ABI ASSEMBLYSCRIPT]
+[DETERMINISTIC]
+[SHA256_HASH 'hex']
+[SETTINGS key = value[, ...]];
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameters</strong>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>function_name</code>: Name of the function in ClickHouse. May be different from the exported function name in the module.</li>
+<li class="custom-li"><code>FROM 'module_name' :: 'source_function_name'</code>: Name of the loaded WASM module and function name in WASM module to use (defaults to function_name)</li>
+<li class="custom-li"><code>ARGUMENTS</code>: List of argument names and types (names optional and used for serialization formats that support named fields)</li>
+<li class="custom-li"><code>ABI</code>: Application Binary Interface version<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>ROW_DIRECT</code>: Direct type mapping, row-by-row processing</li>
+<li class="custom-li"><code>BUFFERED_V1</code>: Block-based processing with serialization</li>
+<li class="custom-li"><code>ASSEMBLYSCRIPT</code>: Row-by-row processing for modules produced by the <a href="https://www.assemblyscript.org" rel="noopener noreferrer" target="_blank">AssemblyScript</a> compiler. Numeric types map to AssemblyScript primitives; ClickHouse <code>String</code> maps to AssemblyScript <code>string</code>.</li>
+</ul>
+</li>
+<li class="custom-li"><code>DETERMINISTIC</code>: Declares the function as deterministic — always returns the same output for the same input. When specified, ClickHouse may constant-fold calls where all arguments are constants: the function is evaluated once at query analysis time and the result is reused for every row.</li>
+<li class="custom-li"><code>SHA256_HASH</code>: Expected module hash for verification (auto-filled if omitted), can be used to ensure the correct WASM module loaded across different replicas.</li>
+<li class="custom-li"><code>SETTINGS</code>: Per-function settings<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>serialization_format</code> String — Serialization format for ABI requires it. Default: <code>MsgPack</code>.</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="abis-versions">ABIs Versions<a aria-label="Direct link to ABIs Versions" class="hash-link" href="#abis-versions" title="Direct link to ABIs Versions">​</a></h2>
+<p>To interact with ClickHouse, WebAssembly modules must adhere to one of the supported ABIs (Application Binary Interfaces).</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>ROW_DIRECT</code>: Direct type mapping (primitive types <code>Int32</code>, <code>UInt32</code>, <code>Int64</code>, <code>UInt64</code>, <code>Float32</code>, <code>Float64</code> only)</li>
+<li class="custom-li"><code>BUFFERED_V1</code>: Complex types with serialization</li>
+<li class="custom-li"><code>ASSEMBLYSCRIPT</code>: Row-by-row interop with <a href="https://www.assemblyscript.org" rel="noopener noreferrer" target="_blank">AssemblyScript</a> modules; supports numeric types and <code>String</code>.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="abi-row_direct">ABI ROW_DIRECT<a aria-label="Direct link to ABI ROW_DIRECT" class="hash-link" href="#abi-row_direct" title="Direct link to ABI ROW_DIRECT">​</a></h3>
+<p>Calls an exported WASM function directly per row.</p>
+<ul class="custom-ul">
+<li class="custom-li">Arguments and return types as numeric types <code>Int32/UInt32/Int64/UInt64/Float32/Float64/Int128/UInt128</code>.</li>
+<li class="custom-li">Strings are not supported in this ABI.</li>
+<li class="custom-li">Signatures must match the WASM export (<code>i32/i64/f32/f64/v128</code>).</li>
+<li class="custom-li">No support functions required to be exported by the module.</li>
+</ul>
+<p>For example function with signature:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">(func (param i32 i64 f32) (result f64) ...)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Can be created as:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION my_func ARGUMENTS (Int32, UInt64, Float32) RETURNS Float64 ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>WebAssembly does not distinguish between signed and unsigned arguments, but rather uses different instructions to interpret the values. Thus, size of the argument should match exactly, while signedness is determined by the operations inside the function.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="abi-buffered_v1">ABI BUFFERED_V1<a aria-label="Direct link to ABI BUFFERED_V1" class="hash-link" href="#abi-buffered_v1" title="Direct link to ABI BUFFERED_V1">​</a></h3>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This ABI is experimental and subject to change in future releases.</p></div></div>
+<p>Processes entire blocks at once using a (de)serialization through WASM memory. Supports any argument and return types.</p>
+<p>Serialized data is copied to wasm memory passed as pointer to buffer (which consists of pointer to data and size of the data) to the UDF function along with the number of rows in the input. Thus, user-defined function on wasm time always accepts two <code>i32</code> arguments and returns single <code>i32</code> value.
+Guest code processes the data and returns a pointer to the result buffer with serialized result data.</p>
+<p>The guest code must provide two functions to create and destroy these buffers.</p>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">(module
+  ;; Allocate a new buffer of specified size
+  ;; Returns: handle to Buffer structure (not direct data pointer!) with pointer to data and size
+  (func (export "clickhouse_create_buffer")
+    (param $size i32)    ;; Size of data to allocate
+    (result i32))        ;; Returns buffer handle with enough space
+
+  ;; Free a buffer by its handle
+  (func (export "clickhouse_destroy_buffer")
+    (param $handle i32)  ;; Buffer handle to free
+    (result))            ;; No return value
+
+    ;; User-defined function
+    (func (export "user_defined_function1")
+      (param $input_buffer_handle i32)  ;; Input buffer handle
+      (param $n i32)                    ;; Number of rows in input
+      (result i32))                     ;; Returns output buffer handle
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example C definitions:</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-c"><code class="language-c">typedef struct {
+    uint8_t * data;
+    uint32_t size;
+} ClickhouseBuffer;
+
+ClickhouseBuffer * clickhouse_create_buffer(uint32_t size) { /* ... */ }
+
+void clickhouse_destroy_buffer(ClickhouseBuffer * data) { /* ... */ }
+
+/// Example user-defined functions
+ClickhouseBuffer * user_defined_function1(ClickhouseBuffer * span, uint32_t n) { /* ... */ }
+ClickhouseBuffer * user_defined_function2(ClickhouseBuffer * span, uint32_t n) { /* ... */ }
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="abi-assemblyscript">ABI ASSEMBLYSCRIPT<a aria-label="Direct link to ABI ASSEMBLYSCRIPT" class="hash-link" href="#abi-assemblyscript" title="Direct link to ABI ASSEMBLYSCRIPT">​</a></h3>
+<p>Targets modules produced by the <a href="https://www.assemblyscript.org" rel="noopener noreferrer" target="_blank">AssemblyScript</a> compiler. Each row triggers one call into the exported function, mapping ClickHouse values to AssemblyScript primitives and string objects.</p>
+<p><strong>Supported types</strong>:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Numeric: <code>Int8</code>/<code>UInt8</code>, <code>Int16</code>/<code>UInt16</code> (widened to <code>i32</code> at the boundary), <code>Int32</code>/<code>UInt32</code>, <code>Int64</code>/<code>UInt64</code>, <code>Float32</code>, <code>Float64</code></p>
+</li>
+<li class="custom-li">
+<p><code>String</code> — maps to AssemblyScript <code>string</code> (UTF-16 in WASM memory). ClickHouse handles the UTF-8 ↔ UTF-16 conversion automatically.</p>
+</li>
+<li class="custom-li">
+<p>Custom AssemblyScript classes are not supported as argument or return types — their runtime class ids are not stable across compilations (see <a href="https://github.com/AssemblyScript/assemblyscript/issues/2982" rel="noopener noreferrer" target="_blank">AssemblyScript#2982</a>).</p>
+</li>
+</ul>
+<p><strong>Module requirements</strong>:</p>
+<p>The module must be compiled with the AssemblyScript managed runtime so that <code>__new</code>, <code>__pin</code>, and <code>__unpin</code> are exported. The standard incoming/outgoing string handling expects these. The recommended invocation:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">asc src.ts --runtime incremental --exportRuntime -o src.wasm
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>AssemblyScript also imports <code>env.abort</code> for runtime traps (out-of-memory, bounds checks, etc.). ClickHouse provides this import automatically: when an <code>abort</code> is triggered, the active query fails with a <code>WASM_ERROR</code> exception that includes the decoded AssemblyScript message and source location.</p>
+<p><strong>Example</strong>:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-typescript"><code class="language-typescript">// src.ts
+export function add(a: u32, b: u32): u32 {
+  return a + b;
+}
+
+export function greet(name: string): string {
+  return "Hello, " + name + "!";
+}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>After compiling with <code>asc</code> and loading the resulting <code>.wasm</code> into <code>system.webassembly_modules</code>, declare the UDFs as:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION as_add
+    LANGUAGE WASM ABI ASSEMBLYSCRIPT
+    FROM 'as_example' :: 'add'
+    ARGUMENTS (a UInt32, b UInt32) RETURNS UInt32;
+
+CREATE FUNCTION as_greet
+    LANGUAGE WASM ABI ASSEMBLYSCRIPT
+    FROM 'as_example' :: 'greet'
+    ARGUMENTS (name String) RETURNS String;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="note-for-developing-udfs-in-rust">Note for developing UDFs in Rust<a aria-label="Direct link to Note for developing UDFs in Rust" class="hash-link" href="#note-for-developing-udfs-in-rust" title="Direct link to Note for developing UDFs in Rust">​</a></h3>
+<p>For Rust programs we provide a helper crate <a href="https://crates.io/crates/clickhouse-wasm-udf" rel="noopener noreferrer" target="_blank">clickhouse-wasm-udf</a> to simplify development of WebAssembly UDFs for ClickHouse. The crate provides function for memory management, so you don't need to implement <code>clickhouse_create_buffer</code> and <code>clickhouse_destroy_buffer</code> functions manually, but rather add the crate as a dependency. Also there are macros <code>#[clickhouse_wasm_udf]</code> to wrap your regular Rust functions into the required ABI format.</p>
+<p>With the crate you can write UDFs like this:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-rust"><code class="language-rust">
+use clickhouse_wasm_udf_bindgen::clickhouse_udf;
+
+#[clickhouse_udf]
+pub fn some_udf(data: String) -&gt; HashMap&lt;String, String&gt; {
+    // Your implementation here
+}
+
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Macros will generate wrapper function accepting and returning buffer structures and handle serialization/deserialization automatically using <code>serde</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="host-api-available-to-modules">Host API available to modules<a aria-label="Direct link to Host API available to modules" class="hash-link" href="#host-api-available-to-modules" title="Direct link to Host API available to modules">​</a></h2>
+<p>The following host functions may be imported and used by modules:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>clickhouse_server_version() -&gt; i64</code> — returns ClickHouse server version as integer (e.g. 25011001 for v25.11.1.1).</li>
+<li class="custom-li"><code>clickhouse_throw(ptr: i32, size: i32)</code> — throws an error with the provided message. Accepts pointer to the memory location containing the error message string and size of the string.</li>
+<li class="custom-li"><code>clickhouse_log(ptr: i32, size: i32)</code> — logs a message to ClickHouse server text log.</li>
+<li class="custom-li"><code>clickhouse_random(ptr: i32, size: i32)</code> — fills memory with random bytes.</li>
+<li class="custom-li"><code>env.abort(message: i32, fileName: i32, line: i32, column: i32)</code> — supplied for AssemblyScript-compatible modules. Calling it (or triggering an AssemblyScript runtime trap that calls it) terminates the UDF with a <code>WASM_ERROR</code> exception containing the decoded message and source location. Modules that do not import <code>env.abort</code> are unaffected.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="settings">Settings<a aria-label="Direct link to Settings" class="hash-link" href="#settings" title="Direct link to Settings">​</a></h2>
+<p>The following query-level settings control WebAssembly UDF execution:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><code>webassembly_udf_max_fuel</code> — Fuel limit per WebAssembly UDF instance execution. Each WebAssembly instruction consumes some amount of fuel. Set to 0 for no limit.</p>
+</li>
+<li class="custom-li">
+<p><code>webassembly_udf_max_memory</code> — Memory limit in bytes per WebAssembly UDF instance.</p>
+</li>
+<li class="custom-li">
+<p><code>webassembly_udf_max_input_block_size</code> — Maximum number of rows passed to a WebAssembly UDF in a single block. Set to 0 to process all rows at once.</p>
+</li>
+<li class="custom-li">
+<p><code>webassembly_udf_max_instances</code> — Maximum number of WebAssembly UDF instances that can run in parallel per function.</p>
+</li>
+</ul>
+<p>Example usage:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET webassembly_udf_max_fuel = 200000;
+SELECT my_wasm_udf(column) FROM table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="see-also">See also<a aria-label="Direct link to See also" class="hash-link" href="#see-also" title="Direct link to See also">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/functions/udf">ClickHouse UDF overview</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/uuid-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">UUIDs</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/aggregate-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Aggregate Functions</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview</a><li><a class="table-of-contents__link toc-highlight" href="#prerequisites">Prerequisites</a><li><a class="table-of-contents__link toc-highlight" href="#quick-start">Quick Start</a><li><a class="table-of-contents__link toc-highlight" href="#manage-wasm-modules-via-system-table">Manage WASM modules via system table</a><ul><li><a class="table-of-contents__link toc-highlight" href="#insert-a-module">Insert a module</a><li><a class="table-of-contents__link toc-highlight" href="#distribute-a-module-across-a-cluster">Distribute a module across a cluster</a><li><a class="table-of-contents__link toc-highlight" href="#list-modules">List modules</a><li><a class="table-of-contents__link toc-highlight" href="#delete-a-module">Delete a module</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#create-a-webassembly-udf">Create a WebAssembly UDF</a><li><a class="table-of-contents__link toc-highlight" href="#abis-versions">ABIs Versions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#abi-row_direct">ABI ROW_DIRECT</a><li><a class="table-of-contents__link toc-highlight" href="#abi-buffered_v1">ABI BUFFERED_V1</a><li><a class="table-of-contents__link toc-highlight" href="#abi-assemblyscript">ABI ASSEMBLYSCRIPT</a><li><a class="table-of-contents__link toc-highlight" href="#note-for-developing-udfs-in-rust">Note for developing UDFs in Rust</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#host-api-available-to-modules">Host API available to modules</a><li><a class="table-of-contents__link toc-highlight" href="#settings">Settings</a><li><a class="table-of-contents__link toc-highlight" href="#see-also">See also</a></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

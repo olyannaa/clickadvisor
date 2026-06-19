@@ -1,0 +1,31 @@
+id: D-006
+name: arrayjoin_before_filter
+tier: detector
+category: cardinality_explosion
+status: proposed
+statement: arrayJoin до WHERE в плане
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: high
+detection_method:
+  ast_pattern: arrayJoin до WHERE в плане
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"arrayJoin выполняется до фильтрации. Перенесите фильтр
+  до arrayJoin."'
+false_positives: []

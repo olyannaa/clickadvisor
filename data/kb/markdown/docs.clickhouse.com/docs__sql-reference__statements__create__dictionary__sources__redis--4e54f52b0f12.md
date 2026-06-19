@@ -1,0 +1,45 @@
+# Redis dictionary source \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- [CREATE](/docs/sql-reference/statements/create)- DICTIONARY- SOURCE- Redis
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/create/dictionary/sources/redis.md)# Redis dictionary source
+
+Example of settings:
+
+
+- DDL- Configuration file
+
+
+```
+SOURCE(REDIS(
+    host 'localhost'
+    port 6379
+    storage_type 'simple'
+    db_index 0
+))
+
+```
+
+```
+<source>
+    <redis>
+        <host>localhost</host>
+        <port>6379</port>
+        <storage_type>simple</storage_type>
+        <db_index>0</db_index>
+    </redis>
+</source>
+
+```
+
+  
+
+Setting fields:
+
+
+
+
+| Setting Description| `host` The Redis host.| `port` The port on the Redis server.| `storage_type` The structure of internal Redis storage using for work with keys. `simple` is for simple sources and for hashed single key sources, `hash_map` is for hashed sources with two keys. Ranged sources and cache sources with complex key are unsupported. Default value is `simple`. Optional.| `db_index` The specific numeric index of Redis logical database. Default value is `0`. Optional. | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+[PreviousMongoDB](/docs/sql-reference/statements/create/dictionary/sources/mongodb)[NextCassandra](/docs/sql-reference/statements/create/dictionary/sources/cassandra)Was this page helpful?

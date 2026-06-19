@@ -1,0 +1,76 @@
+---
+source: kb.altinity.com
+url: https://clickhouse-driver.readthedocs.io/en/latest/
+topic: integrations-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '0.7'
+last_updated: '2026-06-12'
+chunk_index: 8
+total_chunks_in_doc: 33
+---
+
+for you. Links: - [https://altinity.com/blog/fast\-mysql\-to\-clickhouse\-replication\-announcing\-the\-altinity\-sink\-connector\-for\-clickhouse](https://altinity.com/blog/fast-mysql-to-clickhouse-replication-announcing-the-altinity-sink-connector-for-clickhouse) - [https://altinity.com/mysql\-to\-clickhouse/](https://altinity.com/mysql-to-clickhouse/) - [https://github.com/Altinity/clickhouse\-sink\-connector](https://github.com/Altinity/clickhouse-sink-connector) #### Same as above but using [https://maxwells\-daemon.io/](https://maxwells-daemon.io/) instead of debezium. Have no experience / feedback there, but should be very similar to debezium. ### Replication using clickhouse\-mysql See [https://altinity.com/blog/2018/6/30/realtime\-mysql\-clickhouse\-replication\-in\-practice](https://altinity.com/blog/2018/6/30/realtime-mysql-clickhouse-replication-in-practice)
+
+That was done long time ago in altinity for one use\-case, and it seem like it was never used outside of that.
+It’s a python application with lot of switches which can copy a schema or read binlog from mysql and put it to ClickHouse.
+Not supported currently. But it’s just a python, so maybe can be adjusted to different needs.
+
+### Accessing MySQL data via integration engines from inside ClickHouse.
+
+MySQL [table engine](https://clickhouse.com/docs/en/engines/table-engines/integrations/mysql/)
+/ [table function](https://clickhouse.com/docs/en/sql-reference/table-functions/mysql/)
+, or [MySQL database engine](https://clickhouse.com/docs/en/engines/database-engines/mysql/)
+\- ClickHouse just connects to mysql server as a client, and can do normal selects.
+
+We had webinar about that a year ago: [https://www.youtube.com/watch?v\=44kO3UzIDLI](https://www.youtube.com/watch?v=44kO3UzIDLI)
+
+Using that you can easily create some ETL script which will copy the data from mysql to ClickHouse regularly, i.e. something like
+
+```
+INSERT INTO clickhouse_table SELECT * FROM mysql_table WHERE id > ...
+
+```
+Works great if you have append only table in MySQL.
+
+In newer ClickHouse versions you can query this was also sharded / replicated MySQL cluster \- see [ExternalDistributed](https://clickhouse.com/docs/en/engines/table-engines/integrations/ExternalDistributed/)
+
+### MySQL dictionaries
+
+There are also MySQL dictionaries, which can be very nice alternative for storing some dimensions information in star schema.
+
+- [https://clickhouse.com/docs/en/sql\-reference/dictionaries/external\-dictionaries/external\-dicts\-dict\-sources/\#dicts\-external\_dicts\_dict\_sources\-mysql](https://clickhouse.com/docs/en/sql-reference/dictionaries/external-dictionaries/external-dicts-dict-sources/#dicts-external_dicts_dict_sources-mysql)
+- [https://github.com/ClickHouse/ClickHouse/blob/9f5cd35a6963cc556a51218b46b0754dcac7306a/tests/testflows/aes\_encryption/tests/compatibility/mysql/dictionary.py\#L35\-L51](https://github.com/ClickHouse/ClickHouse/blob/9f5cd35a6963cc556a51218b46b0754dcac7306a/tests/testflows/aes_encryption/tests/compatibility/mysql/dictionary.py#L35-L51)
+# 4 \- ODBC Driver for ClickHouse®
+
+ODBC Driver for ClickHouse®[ODBC](https://docs.microsoft.com/en-us/sql/odbc/reference/odbc-overview)
+interface for ClickHouse® RDBMS.
+
+Licensed under the [Apache 2\.0](https://github.com/ClickHouse/clickhouse-odbc?tab=Apache-2.0-1-ov-file#readme)
+.
+
+## Installation and usage
+
+### Windows
+
+1. Download the latest [release](https://github.com/ClickHouse/clickhouse-odbc/releases)
+. On 64bit system you usually need both 32 bit and 64 bit drivers.
+2. Install (usually you will need ANSI driver, but better to install both versions, see below).
+3. Configure ClickHouse DSN.
+
+Note: that install driver linked against MDAC (which is default for Windows), some non\-windows native
+applications (cygwin / msys64 based) may require driver linked against unixodbc. Build section below.
+
+### MacOS
+
+1. Install [homebrew](https://brew.sh/)
+.
+2. Install driver
+
+```
+brew install https://raw.githubusercontent.com/proller/homebrew-core/chodbc/Formula/clickhouse-odbc.rb
+
+```
+3. Add ClickHouse DSN configuration into \~/.odbc.ini file. (sample
+)
+
+Note: that install driver linked against iodbc (which is default for Mac), some homebrew applications
+(like python) may require unixodbc driver to work properly. In that case see Build section below.

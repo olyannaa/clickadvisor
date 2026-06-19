@@ -1,0 +1,258 @@
+<h1>s3 Table Function | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/table-functions" itemprop="item"><span itemprop="name">Table functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">s3</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/s3.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>s3 Table Function</h1></header>
+<p>Provides a table-like interface to select/insert files in <a href="https://aws.amazon.com/s3/" rel="noopener noreferrer" target="_blank">Amazon S3</a> and <a href="https://cloud.google.com/storage/" rel="noopener noreferrer" target="_blank">Google Cloud Storage</a>. This table function is similar to the <a href="/docs/sql-reference/table-functions/hdfs">hdfs function</a>, but provides S3-specific features.</p>
+<p>If you have multiple replicas in your cluster, you can use the <a href="/docs/sql-reference/table-functions/s3Cluster">s3Cluster function</a> instead to parallelize inserts.</p>
+<p>When using the <code>s3 table function</code> with <a href="/docs/sql-reference/statements/insert-into#inserting-the-results-of-select"><code>INSERT INTO...SELECT</code></a>, data is read and inserted in a streaming fashion. Only a few blocks of data reside in memory while the blocks are continuously read from S3 and pushed into the destination table.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">s3(url [, NOSIGN | access_key_id, secret_access_key, [session_token]] [,format] [,structure] [,compression_method],[,headers], [,extra_credentials], [,partition_strategy], [,partition_columns_in_data_file])
+s3(named_collection[, option=value [,..]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">GCS</div><p>The S3 Table Function integrates with Google Cloud Storage by using the GCS XML API and HMAC keys.  See the <a href="https://cloud.google.com/storage/docs/interoperability" rel="noopener noreferrer" target="_blank">Google interoperability docs</a> for more details about the endpoint and HMAC.<p>For GCS, substitute your HMAC key and HMAC secret where you see <code>access_key_id</code> and <code>secret_access_key</code>.</p></p></div></div>
+<p><strong>Parameters</strong></p>
+<p><code>s3</code> table function supports the following plain parameters:</p>
+<table><thead><tr><th>Parameter<th>Description<tbody><tr><td><code>url</code><td>Bucket url with path to file. Supports following wildcards in readonly mode: <code>*</code>, <code>**</code>, <code>?</code>, <code>{abc,def}</code> and <code>{N..M}</code> where <code>N</code>, <code>M</code> — numbers, <code>'abc'</code>, <code>'def'</code> — strings. For more information see <a href="/docs/engines/table-engines/integrations/s3#wildcards-in-path">here</a>.<tr><td><code>NOSIGN</code><td>If this keyword is provided in place of credentials, all the requests will not be signed.<tr><td><code>access_key_id</code> and <code>secret_access_key</code><td>Keys that specify credentials to use with given endpoint. Optional.<tr><td><code>session_token</code><td>Session token to use with the given keys. Optional when passing keys.<tr><td><code>format</code><td>The <a href="/docs/sql-reference/formats">format</a> of the file.<tr><td><code>structure</code><td>Structure of the table. Format <code>'column1_name column1_type, column2_name column2_type, ...'</code>.<tr><td><code>compression_method</code><td>Parameter is optional. Supported values: <code>none</code>, <code>gzip</code> or <code>gz</code>, <code>brotli</code> or <code>br</code>, <code>xz</code> or <code>LZMA</code>, <code>zstd</code> or <code>zst</code>. By default, it will autodetect compression method by file extension.<tr><td><code>headers</code><td>Parameter is optional. Allows headers to be passed in the S3 request. Pass in the format <code>headers(key=value)</code> e.g. <code>headers('x-amz-request-payer' = 'requester')</code>.<tr><td><code>partition_strategy</code><td>Parameter is optional. Supported values: <code>WILDCARD</code> or <code>HIVE</code>. <code>WILDCARD</code> requires a <code>{_partition_id}</code> in the path, which is replaced with the partition key. <code>HIVE</code> does not allow wildcards, assumes the path is the table root, and generates Hive-style partitioned directories with Snowflake IDs as filenames and the file format as the extension. Defaults to <code>WILDCARD</code><tr><td><code>partition_columns_in_data_file</code><td>Parameter is optional. Only used with <code>HIVE</code> partition strategy. Tells ClickHouse whether to expect partition columns to be written in the data file. Defaults <code>false</code>.<tr><td><code>extra_credentials</code><td>Parameter is optional. Used to pass a <code>role_arn</code> for role-based access in ClickHouse Cloud. See <a href="/docs/cloud/data-sources/secure-s3">Secure S3</a> for configuration steps.<tr><td><code>storage_class_name</code><td>Parameter is optional. Supported values: <code>STANDARD</code> or <code>INTELLIGENT_TIERING</code>. Allow to specify <a href="https://aws.amazon.com/s3/storage-classes/intelligent-tiering/" rel="noopener noreferrer" target="_blank">AWS S3 Intelligent Tiering</a>. Defaults to <code>STANDARD</code>.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">GCS</div><p>The GCS url is in this format as the endpoint for the Google XML API is different than the JSON API:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">  https://storage.googleapis.com/&lt;bucket&gt;/&lt;folder&gt;/&lt;filename(s)&gt;
+</code></pre></div><div class="activity_PoTP"></div></div><p>and not <del><a href="https://storage.cloud.google.com" rel="noopener noreferrer" target="_blank">https://storage.cloud.google.com</a></del>.</p></p></div></div>
+<p>Arguments can also be passed using <a href="/docs/operations/named-collections">named collections</a>. In this case <code>url</code>, <code>access_key_id</code>, <code>secret_access_key</code>, <code>format</code>, <code>structure</code>, <code>compression_method</code> work in the same way, and some extra parameters are supported:</p>
+<table><thead><tr><th>Argument<th>Description<tbody><tr><td><code>filename</code><td>appended to the url if specified.<tr><td><code>use_environment_credentials</code><td>enabled by default, allows passing extra parameters using environment variables <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code>, <code>AWS_CONTAINER_CREDENTIALS_FULL_URI</code>, <code>AWS_CONTAINER_AUTHORIZATION_TOKEN</code>, <code>AWS_EC2_METADATA_DISABLED</code>.<tr><td><code>no_sign_request</code><td>disabled by default.<tr><td><code>expiration_window_seconds</code><td>default value is 120.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="returned_value">Returned value<a aria-label="Direct link to Returned value" class="hash-link" href="#returned_value" title="Direct link to Returned value">​</a></h2>
+<p>A table with the specified structure for reading or writing data in the specified file.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<p>Selecting the first 5 rows from the table from S3 file <code>https://datasets-documentation.s3.eu-west-3.amazonaws.com/aapl_stock.csv</code>:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM s3(
+   'https://datasets-documentation.s3.eu-west-3.amazonaws.com/aapl_stock.csv',
+   'CSVWithNames'
+)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───────Date─┬────Open─┬────High─┬─────Low─┬───Close─┬───Volume─┬─OpenInt─┐
+│ 1984-09-07 │ 0.42388 │ 0.42902 │ 0.41874 │ 0.42388 │ 23220030 │       0 │
+│ 1984-09-10 │ 0.42388 │ 0.42516 │ 0.41366 │ 0.42134 │ 18022532 │       0 │
+│ 1984-09-11 │ 0.42516 │ 0.43668 │ 0.42516 │ 0.42902 │ 42498199 │       0 │
+│ 1984-09-12 │ 0.42902 │ 0.43157 │ 0.41618 │ 0.41618 │ 37125801 │       0 │
+│ 1984-09-13 │ 0.43927 │ 0.44052 │ 0.43927 │ 0.43927 │ 57822062 │       0 │
+└────────────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>ClickHouse uses filename extensions to determine the format of the data. For example, we could have run the previous command without the <code>CSVWithNames</code>:<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM s3(
+   'https://datasets-documentation.s3.eu-west-3.amazonaws.com/aapl_stock.csv'
+)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div><p>ClickHouse also can determine the compression method of the file. For example, if the file was zipped up with a <code>.csv.gz</code> extension, ClickHouse would decompress the file automatically.</p></p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Parquet files with names like <code>*.parquet.snappy</code> or <code>*.parquet.zstd</code> can confuse ClickHouse and cause <code>TOO_LARGE_COMPRESSED_BLOCK</code> or <code>ZSTD_DECODER_FAILED</code> errors.
+This is because ClickHouse would attempt to read the entire file as Snappy or ZSTD-encoded data when, in fact, Parquet applies compression at the row-group and column level.<p>Parquet metadata already specifies the per-column compression, and so the file extension is superfluous.
+You can just use <code>compression_method = 'none'</code> in such cases:<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM s3(
+  'https://&lt;my-bucket&gt;.s3.&lt;my-region&gt;.amazonaws.com/path/to/my-data.parquet.snappy',
+  compression_format = 'none'
+);
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="usage">Usage<a aria-label="Direct link to Usage" class="hash-link" href="#usage" title="Direct link to Usage">​</a></h2>
+<p>Suppose that we have several files with following URIs on S3:</p>
+<ul class="custom-ul">
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_1.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_1.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_2.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_2.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_3.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_3.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_4.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/some_prefix/some_file_4.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_1.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_1.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_2.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_2.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_3.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_3.csv</a>'</li>
+<li class="custom-li">'<a href="https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_4.csv" rel="noopener noreferrer" target="_blank">https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/another_prefix/some_file_4.csv</a>'</li>
+</ul>
+<p>Count the number of rows in files ending with numbers from 1 to 3:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count(*)
+FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/my-test-bucket-768/{some,another}_prefix/some_file_{1..3}.csv', 'CSV', 'column1 UInt32, column2 UInt32, column3 UInt32')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┐
+│      18 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Count the total amount of rows in all files in these two directories:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count(*)
+FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/my-test-bucket-768/{some,another}_prefix/*', 'CSV', 'column1 UInt32, column2 UInt32, column3 UInt32')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┐
+│      24 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>If your listing of files contains number ranges with leading zeros, use the construction with braces for each digit separately or use <code>?</code>.</p></div></div>
+<p>Count the total amount of rows in files named <code>file-000.csv</code>, <code>file-001.csv</code>, ... , <code>file-999.csv</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count(*)
+FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/my-test-bucket-768/big_prefix/file-{000..999}.csv', 'CSV', 'column1 UInt32, column2 UInt32, column3 UInt32');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┐
+│      12 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Insert data into file <code>test-data.csv.gz</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO FUNCTION s3('https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/test-data.csv.gz', 'CSV', 'name String, value UInt32', 'gzip')
+VALUES ('test-data', 1), ('test-data-2', 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Insert data into file <code>test-data.csv.gz</code> from existing table:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO FUNCTION s3('https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/test-data.csv.gz', 'CSV', 'name String, value UInt32', 'gzip')
+SELECT name, value FROM existing_table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Glob ** can be used for recursive directory traversal. Consider the below example, it will fetch all files from <code>my-test-bucket-768</code> directory recursively:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM s3('https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/**', 'CSV', 'name String, value UInt32', 'gzip');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The below get data from all <code>test-data.csv.gz</code> files from any folder inside <code>my-test-bucket</code> directory recursively:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM s3('https://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/**/test-data.csv.gz', 'CSV', 'name String, value UInt32', 'gzip');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note. It is possible to specify custom URL mappers in the server configuration file. Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM s3('s3://clickhouse-public-datasets/my-test-bucket-768/**/test-data.csv.gz', 'CSV', 'name String, value UInt32', 'gzip');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The URL <code>'s3://clickhouse-public-datasets/my-test-bucket-768/**/test-data.csv.gz'</code> would be replaced to <code>'http://clickhouse-public-datasets.s3.amazonaws.com/my-test-bucket-768/**/test-data.csv.gz'</code></p>
+<p>Custom mapper can be added into <code>config.xml</code>:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;url_scheme_mappers&gt;
+   &lt;s3&gt;
+      &lt;to&gt;https://{bucket}.s3.amazonaws.com&lt;/to&gt;
+   &lt;/s3&gt;
+   &lt;gs&gt;
+      &lt;to&gt;https://{bucket}.storage.googleapis.com&lt;/to&gt;
+   &lt;/gs&gt;
+   &lt;oss&gt;
+      &lt;to&gt;https://{bucket}.oss.aliyuncs.com&lt;/to&gt;
+   &lt;/oss&gt;
+&lt;/url_scheme_mappers&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For production use cases it is recommended to use <a href="/docs/operations/named-collections">named collections</a>. Here is the example:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">
+CREATE NAMED COLLECTION creds AS
+        access_key_id = '***',
+        secret_access_key = '***';
+SELECT count(*)
+FROM s3(creds, url='https://s3-object-url.csv')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="partitioned-write">Partitioned Write<a aria-label="Direct link to Partitioned Write" class="hash-link" href="#partitioned-write" title="Direct link to Partitioned Write">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="partition-strategy">Partition Strategy<a aria-label="Direct link to Partition Strategy" class="hash-link" href="#partition-strategy" title="Direct link to Partition Strategy">​</a></h3>
+<p>Supported for INSERT queries only.</p>
+<p><code>WILDCARD</code> (default): Replaces the <code>{_partition_id}</code> wildcard in the file path with the actual partition key.</p>
+<p><code>HIVE</code> implements hive style partitioning for reads &amp; writes. It generates files using the following format: <code>&lt;prefix&gt;/&lt;key1=val1/key2=val2...&gt;/&lt;snowflakeid&gt;.&lt;toLower(file_format)&gt;</code>.</p>
+<p><strong>Example of <code>HIVE</code> partition strategy</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO FUNCTION s3(s3_conn, filename='t_03363_function', format=Parquet, partition_strategy='hive') PARTITION BY (year, country) SELECT 2020 as year, 'Russia' as country, 1 as id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">SELECT _path, * FROM s3(s3_conn, filename='t_03363_function/**.parquet');
+
+   ┌─_path──────────────────────────────────────────────────────────────────────┬─id─┬─country─┬─year─┐
+1. │ test/t_03363_function/year=2020/country=Russia/7351295896279887872.parquet │  1 │ Russia  │ 2020 │
+   └────────────────────────────────────────────────────────────────────────────┴────┴─────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Examples of <code>WILDCARD</code> partition strategy</strong></p>
+<ol class="custom-ol">
+<li class="custom-li">Using partition ID in a key creates separate files:</li>
+</ol>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO TABLE FUNCTION
+    s3('http://bucket.amazonaws.com/my_bucket/file_{_partition_id}.csv', 'CSV', 'a String, b UInt32, c UInt32')
+    PARTITION BY a VALUES ('x', 2, 3), ('x', 4, 5), ('y', 11, 12), ('y', 13, 14), ('z', 21, 22), ('z', 23, 24);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As a result, the data is written into three files: <code>file_x.csv</code>, <code>file_y.csv</code>, and <code>file_z.csv</code>.</p>
+<ol class="custom-ol" start="2">
+<li class="custom-li">Using partition ID in a bucket name creates files in different buckets:</li>
+</ol>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO TABLE FUNCTION
+    s3('http://bucket.amazonaws.com/my_bucket_{_partition_id}/file.csv', 'CSV', 'a UInt32, b UInt32, c UInt32')
+    PARTITION BY a VALUES (1, 2, 3), (1, 4, 5), (10, 11, 12), (10, 13, 14), (20, 21, 22), (20, 23, 24);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As a result, the data is written into three files in different buckets: <code>my_bucket_1/file.csv</code>, <code>my_bucket_10/file.csv</code>, and <code>my_bucket_20/file.csv</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="accessing-public-buckets">Accessing public buckets<a aria-label="Direct link to Accessing public buckets" class="hash-link" href="#accessing-public-buckets" title="Direct link to Accessing public buckets">​</a></h2>
+<p>ClickHouse tries to fetch credentials from many different types of sources.
+Sometimes, it can produce problems when accessing some buckets that are public causing the client to return <code>403</code> error code.
+This issue can be avoided by using <code>NOSIGN</code> keyword, forcing the client to ignore all the credentials, and not sign the requests.</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM s3(
+   'https://datasets-documentation.s3.eu-west-3.amazonaws.com/aapl_stock.csv',
+   NOSIGN,
+   'CSVWithNames'
+)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="using-s3-credentials-clickhouse-cloud">Using S3 credentials (ClickHouse Cloud)<a aria-label="Direct link to Using S3 credentials (ClickHouse Cloud)" class="hash-link" href="#using-s3-credentials-clickhouse-cloud" title="Direct link to Using S3 credentials (ClickHouse Cloud)">​</a></h2>
+<p>For non-public buckets, users can pass an <code>aws_access_key_id</code> and <code>aws_secret_access_key</code> to the function. For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count() FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv', '&lt;KEY&gt;', '&lt;SECRET&gt;','TSVWithNames')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This is appropriate for one-off accesses or in cases where credentials can easily be rotated. However, this is not recommended as a long-term solution for repeated access or where credentials are sensitive. In this case, we recommend users rely on role-based access.</p>
+<p>Role-based access for S3 in ClickHouse Cloud is documented <a href="/docs/cloud/data-sources/secure-s3">here</a>.</p>
+<p>Once configured, a <code>roleARN</code> can be passed to the s3 function via an <code>extra_credentials</code> parameter. For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count() FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv','CSVWithNames',extra_credentials(role_arn = 'arn:aws:iam::111111111111:role/ClickHouseAccessRole-001'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Further examples can be found <a href="/docs/cloud/data-sources/secure-s3#access-your-s3-bucket-with-the-clickhouseaccess-role">here</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="working-with-archives">Working with archives<a aria-label="Direct link to Working with archives" class="hash-link" href="#working-with-archives" title="Direct link to Working with archives">​</a></h2>
+<p>Suppose that we have several archive files with following URIs on S3:</p>
+<ul class="custom-ul">
+<li class="custom-li">'<a href="https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-10.csv.zip" rel="noopener noreferrer" target="_blank">https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-10.csv.zip</a>'</li>
+<li class="custom-li">'<a href="https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-11.csv.zip" rel="noopener noreferrer" target="_blank">https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-11.csv.zip</a>'</li>
+<li class="custom-li">'<a href="https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-12.csv.zip" rel="noopener noreferrer" target="_blank">https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-12.csv.zip</a>'</li>
+</ul>
+<p>Extracting data from these archives is possible using ::. Globs can be used both in the url part as well as in the part after :: (responsible for the name of a file inside the archive).</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM s3(
+   'https://s3-us-west-1.amazonaws.com/umbrella-static/top-1m-2018-01-1{0..2}.csv.zip :: *.csv'
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>ClickHouse supports three archive formats:
+ZIP
+TAR
+7Z
+While ZIP and TAR archives can be accessed from any supported storage location, 7Z archives can only be read from the local filesystem where ClickHouse is installed.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-data">Inserting Data<a aria-label="Direct link to Inserting Data" class="hash-link" href="#inserting-data" title="Direct link to Inserting Data">​</a></h2>
+<p>Note that rows can only be inserted into new files. There are no merge cycles or file split operations. Once a file is written, subsequent inserts will fail. See more details <a href="/docs/integrations/s3#inserting-data">here</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="virtual-columns">Virtual Columns<a aria-label="Direct link to Virtual Columns" class="hash-link" href="#virtual-columns" title="Direct link to Virtual Columns">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><code>_path</code> — Path to the file. Type: <code>LowCardinality(String)</code>. In case of archive, shows path in a format: <code>"{path_to_archive}::{path_to_file_inside_archive}"</code></li>
+<li class="custom-li"><code>_file</code> — Name of the file. Type: <code>LowCardinality(String)</code>. In case of archive shows name of the file inside the archive.</li>
+<li class="custom-li"><code>_size</code> — Size of the file in bytes. Type: <code>Nullable(UInt64)</code>. If the file size is unknown, the value is <code>NULL</code>. In case of archive shows uncompressed file size of the file inside the archive.</li>
+<li class="custom-li"><code>_time</code> — Last modified time of the file. Type: <code>Nullable(DateTime)</code>. If the time is unknown, the value is <code>NULL</code>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="hive-style-partitioning">use_hive_partitioning setting<a aria-label="Direct link to use_hive_partitioning setting" class="hash-link" href="#hive-style-partitioning" title="Direct link to use_hive_partitioning setting">​</a></h2>
+<p>This is a hint for ClickHouse to parse hive style partitioned files upon reading time. It has no effect on writing. For symmetrical reads and writes, use the <code>partition_strategy</code> argument.</p>
+<p>When setting <code>use_hive_partitioning</code> is set to 1, ClickHouse will detect Hive-style partitioning in the path (<code>/name=value/</code>) and will allow to use partition columns as virtual columns in the query. These virtual columns will have the same names as in the partitioned path.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM s3('s3://data/path/date=*/country=*/code=*/*.parquet') WHERE date &gt; '2020-01-01' AND country = 'Netherlands' AND code = 42;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="accessing-requester-pays-buckets">Accessing requester-pays buckets<a aria-label="Direct link to Accessing requester-pays buckets" class="hash-link" href="#accessing-requester-pays-buckets" title="Direct link to Accessing requester-pays buckets">​</a></h2>
+<p>To access a requester-pays bucket, a header <code>x-amz-request-payer = requester</code> must be passed in any requests. This is achieved by passing the parameter <code>headers('x-amz-request-payer' = 'requester')</code> to the s3 function. For example:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    count() AS num_rows,
+    uniqExact(_file) AS num_files
+FROM s3('https://coiled-datasets-rp.s3.us-east-1.amazonaws.com/1trc/measurements-100*.parquet', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', headers('x-amz-request-payer' = 'requester'))
+
+┌───num_rows─┬─num_files─┐
+│ 1110000000 │       111 │
+└────────────┴───────────┘
+
+1 row in set. Elapsed: 3.089 sec. Processed 1.09 billion rows, 0.00 B (353.55 million rows/s., 0.00 B/s.)
+Peak memory usage: 192.27 KiB.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="storage-settings">Storage Settings<a aria-label="Direct link to Storage Settings" class="hash-link" href="#storage-settings" title="Direct link to Storage Settings">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#s3_truncate_on_insert">s3_truncate_on_insert</a> - allows to truncate file before insert into it. Disabled by default.</li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#s3_create_new_file_on_insert">s3_create_new_file_on_insert</a> - allows to create a new file on each insert if format has suffix. Disabled by default.</li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#s3_skip_empty_files">s3_skip_empty_files</a> - allows to skip empty files while reading. Enabled by default.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="nested-avro-schemas">Nested Avro Schemas<a aria-label="Direct link to Nested Avro Schemas" class="hash-link" href="#nested-avro-schemas" title="Direct link to Nested Avro Schemas">​</a></h2>
+<p>When reading Avro files that contain <strong>nested records</strong> which diverge across files (for example, some files have an extra field inside a nested object), ClickHouse may return an error such as:</p>
+<blockquote>
+<p>The number of leaves in record doesn't match the number of elements in tuple...</p>
+</blockquote>
+<p>This happens because ClickHouse expects all nested record structures to match the same schema.<br/>
+<!-- -->To handle this scenario, you can:</p>
+<ul class="custom-ul">
+<li class="custom-li">Use <code>schema_inference_mode='union'</code> to merge different nested record schemas, or</li>
+<li class="custom-li">Manually align your nested structures and enable<br/>
+<code>use_structure_from_insertion_table_in_table_functions=1</code>.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Performance note</div><p><code>schema_inference_mode='union'</code> may take longer on very large S3 datasets because it must scan each file to infer the schema.</p></div></div>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO data_stage
+SELECT
+    id,
+    data
+FROM s3('https://bucket-name/*.avro', 'Avro')
+SETTINGS schema_inference_mode='union';
+
+## Related \{#related}
+
+- [S3 engine](../../engines/table-engines/integrations/s3.md)
+- [Integrating S3 with ClickHouse](/integrations/s3)
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/remote"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">remote</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/s3Cluster"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">s3Cluster</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#returned_value">Returned value</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#usage">Usage</a><li><a class="table-of-contents__link toc-highlight" href="#partitioned-write">Partitioned Write</a><ul><li><a class="table-of-contents__link toc-highlight" href="#partition-strategy">Partition Strategy</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#accessing-public-buckets">Accessing public buckets</a><li><a class="table-of-contents__link toc-highlight" href="#using-s3-credentials-clickhouse-cloud">Using S3 credentials (ClickHouse Cloud)</a><li><a class="table-of-contents__link toc-highlight" href="#working-with-archives">Working with archives</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-data">Inserting Data</a><li><a class="table-of-contents__link toc-highlight" href="#virtual-columns">Virtual Columns</a><li><a class="table-of-contents__link toc-highlight" href="#hive-style-partitioning">use_hive_partitioning setting</a><li><a class="table-of-contents__link toc-highlight" href="#accessing-requester-pays-buckets">Accessing requester-pays buckets</a><li><a class="table-of-contents__link toc-highlight" href="#storage-settings">Storage Settings</a><li><a class="table-of-contents__link toc-highlight" href="#nested-avro-schemas">Nested Avro Schemas</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

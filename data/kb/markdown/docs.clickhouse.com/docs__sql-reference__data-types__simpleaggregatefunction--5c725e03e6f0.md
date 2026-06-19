@@ -1,0 +1,101 @@
+# SimpleAggregateFunction Type \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Data types](/docs/sql-reference/data-types)- SimpleAggregateFunction
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/data-types/simpleaggregatefunction.md)# SimpleAggregateFunction Type
+
+## Description[​](#description "Direct link to Description")
+
+
+The `SimpleAggregateFunction` data type stores the intermediate state of an
+aggregate function, but not its full state as the [`AggregateFunction`](/docs/sql-reference/data-types/aggregatefunction)
+type does.
+
+
+This optimization can be applied to functions for which the following property
+holds:
+
+
+
+> the result of applying a function `f` to a row set `S1 UNION ALL S2` can
+> be obtained by applying `f` to parts of the row set separately, and then again
+> applying `f` to the results: `f(S1 UNION ALL S2) = f(f(S1) UNION ALL f(S2))`.
+
+
+This property guarantees that partial aggregation results are enough to compute
+the combined one, so we do not have to store and process any extra data. For
+example, the result of the `min` or `max` functions require no extra steps to
+calculate the final result from the intermediate steps, whereas the `avg` function
+requires keeping track of a sum and a count, which will be divided to get the
+average in a final `Merge` step which combines the intermediate states.
+
+
+Aggregate function values are commonly produced by calling an aggregate function
+with the [`-SimpleState`](/docs/sql-reference/aggregate-functions/combinators#-simplestate) combinator appended to the function name.
+
+
+## Syntax[​](#syntax "Direct link to Syntax")
+
+
+
+```
+SimpleAggregateFunction(aggregate_function_name, types_of_arguments...)
+
+```
+
+**Parameters**
+
+
+- `aggregate_function_name` \- The name of an aggregate function.
+- `Type` \- Types of the aggregate function arguments.
+
+
+## Supported functions[​](#supported-functions "Direct link to Supported functions")
+
+
+The following aggregate functions are supported:
+
+
+- [`any`](/docs/sql-reference/aggregate-functions/reference/any)
+- [`any_respect_nulls`](/docs/sql-reference/aggregate-functions/reference/any)
+- [`anyLast`](/docs/sql-reference/aggregate-functions/reference/anylast)
+- [`anyLast_respect_nulls`](/docs/sql-reference/aggregate-functions/reference/anylast)
+- [`min`](/docs/sql-reference/aggregate-functions/reference/min)
+- [`max`](/docs/sql-reference/aggregate-functions/reference/max)
+- [`sum`](/docs/sql-reference/aggregate-functions/reference/sum)
+- [`sumWithOverflow`](/docs/sql-reference/aggregate-functions/reference/sumwithoverflow)
+- [`groupBitAnd`](/docs/sql-reference/aggregate-functions/reference/groupbitand)
+- [`groupBitOr`](/docs/sql-reference/aggregate-functions/reference/groupbitor)
+- [`groupBitXor`](/docs/sql-reference/aggregate-functions/reference/groupbitxor)
+- [`groupArrayArray`](/docs/sql-reference/aggregate-functions/reference/grouparrayarray)
+- [`groupUniqArrayArray`](/docs/sql-reference/aggregate-functions/reference/groupuniqarray)
+- [`groupUniqArrayArrayMap`](/docs/sql-reference/aggregate-functions/combinators#-map)
+- [`sumMap` (`sumMappedArrays`)](/docs/sql-reference/aggregate-functions/reference/summap)
+- [`minMap` (`minMappedArrays`)](/docs/sql-reference/aggregate-functions/reference/minmap)
+- [`maxMap` (`maxMappedArrays`)](/docs/sql-reference/aggregate-functions/reference/maxmap)
+
+
+NoteValues of the `SimpleAggregateFunction(func, Type)` have the same `Type`,
+so unlike with the `AggregateFunction` type there is no need to apply
+`-Merge`/`-State` combinators.The `SimpleAggregateFunction` type has better performance than the `AggregateFunction`
+for the same aggregate functions.
+
+
+
+
+## Example[​](#example "Direct link to Example")
+
+
+
+```
+CREATE TABLE simple (id UInt64, val SimpleAggregateFunction(sum, Double)) ENGINE=AggregatingMergeTree ORDER BY id;
+
+```
+
+## Related Content[​](#related-content "Direct link to Related Content")
+
+
+- Blog: [Using Aggregate Combinators in ClickHouse](https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states) \- Blog: [Using Aggregate Combinators in ClickHouse](https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states)
+- [AggregateFunction](/docs/sql-reference/data-types/aggregatefunction) type.
+[PreviousAggregateFunction](/docs/sql-reference/data-types/aggregatefunction)[NextGeo](/docs/sql-reference/data-types/geo)- [Description](#description)- [Syntax](#syntax)- [Supported functions](#supported-functions)- [Example](#example)- [Related Content](#related-content)
+Was this page helpful?

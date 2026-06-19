@@ -1,0 +1,32 @@
+id: D-002
+name: cross_join_risk
+tier: detector
+category: join_safety
+status: proposed
+statement: JOIN с пустым ON или ON без equality
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: high
+detection_method:
+  ast_pattern: JOIN с пустым ON или ON без equality
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"JOIN между {t1} и {t2} не содержит условий равенства. Декартово
+  произведение."'
+false_positives:
+- намеренный CROSS JOIN с explicit syntax

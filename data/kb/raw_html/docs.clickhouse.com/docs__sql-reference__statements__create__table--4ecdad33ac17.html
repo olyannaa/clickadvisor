@@ -1,0 +1,482 @@
+<h1>CREATE TABLE | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/create" itemprop="item"><span itemprop="name">CREATE</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">TABLE</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/create/table.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>CREATE TABLE</h1></header><p>Creates a new table. This query can have various syntax forms depending on a use case.</p>
+<p>By default, tables are created only on the current server. Distributed DDL queries are implemented as <code>ON CLUSTER</code> clause, which is <a href="/docs/sql-reference/distributed-ddl">described separately</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax-forms">Syntax Forms<a aria-label="Direct link to Syntax Forms" class="hash-link" href="#syntax-forms" title="Direct link to Syntax Forms">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="with-explicit-schema">With Explicit Schema<a aria-label="Direct link to With Explicit Schema" class="hash-link" href="#with-explicit-schema" title="Direct link to With Explicit Schema">​</a></h3>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [NULL|NOT NULL] [DEFAULT|MATERIALIZED|EPHEMERAL|ALIAS expr1] [COMMENT 'comment for column'] [compression_codec] [TTL expr1],
+    name2 [type2] [NULL|NOT NULL] [DEFAULT|MATERIALIZED|EPHEMERAL|ALIAS expr2] [COMMENT 'comment for column'] [compression_codec] [TTL expr2],
+    ...
+) ENGINE = engine
+  [COMMENT 'comment for table']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Creates a table named <code>table_name</code> in the <code>db</code> database or the current database if <code>db</code> is not set, with the structure specified in brackets and the <code>engine</code> engine.
+The structure of the table is a list of column descriptions, secondary indexes, projections and constraints . If <a href="#primary-key">primary key</a> is supported by the engine, it will be indicated as parameter for the table engine.</p>
+<p>A column description is <code>name type</code> in the simplest case. Example: <code>RegionID UInt32</code>.</p>
+<p>Expressions can also be defined for default values (see below).</p>
+<p>If necessary, primary key can be specified, with one or more key expressions.</p>
+<p>Comments can be added for columns and for the table.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="with-a-schema-similar-to-other-table">With Schema of Existing Table<a aria-label="Direct link to With Schema of Existing Table" class="hash-link" href="#with-a-schema-similar-to-other-table" title="Direct link to With Schema of Existing Table">​</a></h3>
+<p>ClickHouse supports the ability to copy the schema and data of an existing table.</p>
+<p>For replicating the schema of an existing table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db2.]table_clone AS [db.]table [ENGINE = engine]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This creates a table with the same structure as another table.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="with-a-schema-and-data-cloned-from-another-table">With Schema and Data of Existing Table<a aria-label="Direct link to With Schema and Data of Existing Table" class="hash-link" href="#with-a-schema-and-data-cloned-from-another-table" title="Direct link to With Schema and Data of Existing Table">​</a></h3>
+<p>For replicating the schema and data of an existing table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db2.]table_clone CLONE AS [db.]table [ENGINE = engine]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This creates a table with the same schema and data as an existing table.  After the new table is created, all partitions from <code>db.table</code> are attached to it. In other words, the data of <code>db.table</code> is cloned into <code>db2.table_clone</code> upon creation. This query is equivalent to the following:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db2.]table_clone AS [db.]table [ENGINE = engine];
+ALTER TABLE [db2.]table_clone ATTACH PARTITION ALL FROM [db.]table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For both features, you can specify a different engine for the table. If the engine is not specified, the same engine will be used as for the original table (<code>db.table</code>).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="from-a-table-function">From a Table Function<a aria-label="Direct link to From a Table Function" class="hash-link" href="#from-a-table-function" title="Direct link to From a Table Function">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name AS table_function()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Creates a table with the same result as that of the <a href="/docs/sql-reference/table-functions">table function</a> specified. The created table will also work in the same way as the corresponding table function that was specified.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="from-select-query">From SELECT query<a aria-label="Direct link to From SELECT query" class="hash-link" href="#from-select-query" title="Direct link to From SELECT query">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name[(name1 [type1], name2 [type2], ...)] ENGINE = engine AS SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Creates a table with a structure like the result of the <code>SELECT</code> query, with the <code>engine</code> engine, and fills it with data from <code>SELECT</code>. Also you can explicitly specify columns description.</p>
+<p>If the table already exists and <code>IF NOT EXISTS</code> is specified, the query won't do anything.</p>
+<p>There can be other clauses after the <code>ENGINE</code> clause in the query. See detailed documentation on how to create tables in the descriptions of <a href="/docs/engines/table-engines">table engines</a>.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t1 (x String) ENGINE = Memory AS SELECT 1;
+SELECT x, toTypeName(x) FROM t1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─x─┬─toTypeName(x)─┐
+│ 1 │ String        │
+└───┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="null-or-not-null-modifiers">NULL Or NOT NULL Modifiers<a aria-label="Direct link to NULL Or NOT NULL Modifiers" class="hash-link" href="#null-or-not-null-modifiers" title="Direct link to NULL Or NOT NULL Modifiers">​</a></h2>
+<p><code>NULL</code> and <code>NOT NULL</code> modifiers after data type in column definition allow or do not allow it to be <a href="/docs/sql-reference/data-types/nullable">Nullable</a>.</p>
+<p>If the type is not <code>Nullable</code> and if <code>NULL</code> is specified, it will be treated as <code>Nullable</code>; if <code>NOT NULL</code> is specified, then no. For example, <code>INT NULL</code> is the same as <code>Nullable(INT)</code>. If the type is <code>Nullable</code> and <code>NULL</code> or <code>NOT NULL</code> modifiers are specified, the exception will be thrown.</p>
+<p>See also <a href="/docs/operations/settings/settings#data_type_default_nullable">data_type_default_nullable</a> setting.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="default_values">Default Values<a aria-label="Direct link to Default Values" class="hash-link" href="#default_values" title="Direct link to Default Values">​</a></h2>
+<p>The column description can specify a default value expression in the form of <code>DEFAULT expr</code>, <code>MATERIALIZED expr</code>, or <code>ALIAS expr</code>. Example: <code>URLDomain String DEFAULT domain(URL)</code>.</p>
+<p>The expression <code>expr</code> is optional. If it is omitted, the column type must be specified explicitly and the default value will be <code>0</code> for numeric columns, <code>''</code> (the empty string) for string columns, <code>[]</code> (the empty array) for array columns, <code>1970-01-01</code> for date columns, or <code>NULL</code> for nullable columns.</p>
+<p>The column type of a default value column can be omitted in which case it is inferred from <code>expr</code>'s type. For example the type of column <code>EventDate DEFAULT toDate(EventTime)</code> will be date.</p>
+<p>If both a data type and a default value expression are specified, an implicit type casting function inserted which converts the expression to the specified type. Example: <code>Hits UInt32 DEFAULT 0</code> is internally represented as <code>Hits UInt32 DEFAULT toUInt32(0)</code>.</p>
+<p>A default value expression <code>expr</code> may reference arbitrary table columns and constants. ClickHouse checks that changes of the table structure do not introduce loops in the expression calculation. For INSERT, it checks that expressions are resolvable – that all columns they can be calculated from have been passed.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="default">DEFAULT<a aria-label="Direct link to DEFAULT" class="hash-link" href="#default" title="Direct link to DEFAULT">​</a></h3>
+<p><code>DEFAULT expr</code></p>
+<p>Normal default value. If the value of such a column is not specified in an INSERT query, it is computed from <code>expr</code>.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE test
+(
+    id UInt64,
+    updated_at DateTime DEFAULT now(),
+    updated_at_date Date DEFAULT toDate(updated_at)
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+INSERT INTO test (id) VALUES (1);
+
+SELECT * FROM test;
+┌─id─┬──────────updated_at─┬─updated_at_date─┐
+│  1 │ 2023-02-24 17:06:46 │      2023-02-24 │
+└────┴─────────────────────┴─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialized">MATERIALIZED<a aria-label="Direct link to MATERIALIZED" class="hash-link" href="#materialized" title="Direct link to MATERIALIZED">​</a></h3>
+<p><code>MATERIALIZED expr</code></p>
+<p>Materialized expression. Values of such columns are automatically calculated according to the specified materialized expression when rows are inserted. Values cannot be explicitly specified during <code>INSERT</code>s.</p>
+<p>Also, default value columns of this type are not included in the result of <code>SELECT *</code>. This is to preserve the invariant that the result of a <code>SELECT *</code> can always be inserted back into the table using <code>INSERT</code>. This behavior can be disabled with setting <code>asterisk_include_materialized_columns</code>.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE test
+(
+    id UInt64,
+    updated_at DateTime MATERIALIZED now(),
+    updated_at_date Date MATERIALIZED toDate(updated_at)
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+INSERT INTO test VALUES (1);
+
+SELECT * FROM test;
+┌─id─┐
+│  1 │
+└────┘
+
+SELECT id, updated_at, updated_at_date FROM test;
+┌─id─┬──────────updated_at─┬─updated_at_date─┐
+│  1 │ 2023-02-24 17:08:08 │      2023-02-24 │
+└────┴─────────────────────┴─────────────────┘
+
+SELECT * FROM test SETTINGS asterisk_include_materialized_columns=1;
+┌─id─┬──────────updated_at─┬─updated_at_date─┐
+│  1 │ 2023-02-24 17:08:08 │      2023-02-24 │
+└────┴─────────────────────┴─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="ephemeral">EPHEMERAL<a aria-label="Direct link to EPHEMERAL" class="hash-link" href="#ephemeral" title="Direct link to EPHEMERAL">​</a></h3>
+<p><code>EPHEMERAL [expr]</code></p>
+<p>Ephemeral column. Columns of this type are not stored in the table and it is not possible to SELECT from them. The only purpose of ephemeral columns is to build default value expressions of other columns from them.</p>
+<p>An insert without explicitly specified columns will skip columns of this type. This is to preserve the invariant that the result of a <code>SELECT *</code> can always be inserted back into the table using <code>INSERT</code>.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:433.55px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE test
+(
+    id UInt64,
+    unhexed String EPHEMERAL,
+    hexed FixedString(4) DEFAULT unhex(unhexed)
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+INSERT INTO test (id, unhexed) VALUES (1, '5a90b714');
+
+SELECT
+    id,
+    hexed,
+    hex(hexed)
+FROM test
+FORMAT Vertical;
+
+Row 1:
+──────
+id:         1
+hexed:      Z��
+hex(hexed): 5A90B714
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="alias">ALIAS<a aria-label="Direct link to ALIAS" class="hash-link" href="#alias" title="Direct link to ALIAS">​</a></h3>
+<p><code>ALIAS expr</code></p>
+<p>Calculated columns (synonym). Column of this type are not stored in the table and it is not possible to INSERT values into them.</p>
+<p>When SELECT queries explicitly reference columns of this type, the value is computed at query time from <code>expr</code>. By default, <code>SELECT *</code> excludes ALIAS columns. This behavior can be disabled with setting <code>asterisk_include_alias_columns</code>.</p>
+<p>When using the ALTER query to add new columns, old data for these columns is not written. Instead, when reading old data that does not have values for the new columns, expressions are computed on the fly by default. However, if running the expressions requires different columns that are not indicated in the query, these columns will additionally be read, but only for the blocks of data that need it.</p>
+<p>If you add a new column to a table but later change its default expression, the values used for old data will change (for data where values were not stored on the disk). Note that when running background merges, data for columns that are missing in one of the merging parts is written to the merged part.</p>
+<p>It is not possible to set default values for elements in nested data structures.</p>
+<div class="wrapper_EBtA" style="height:377px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE test
+(
+    id UInt64,
+    size_bytes Int64,
+    size String ALIAS formatReadableSize(size_bytes)
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+INSERT INTO test VALUES (1, 4678899);
+
+SELECT id, size_bytes, size FROM test;
+┌─id─┬─size_bytes─┬─size─────┐
+│  1 │    4678899 │ 4.46 MiB │
+└────┴────────────┴──────────┘
+
+SELECT * FROM test SETTINGS asterisk_include_alias_columns=1;
+┌─id─┬─size_bytes─┬─size─────┐
+│  1 │    4678899 │ 4.46 MiB │
+└────┴────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="primary-key">Primary Key<a aria-label="Direct link to Primary Key" class="hash-link" href="#primary-key" title="Direct link to Primary Key">​</a></h2>
+<p>You can define a <a href="/docs/engines/table-engines/mergetree-family/mergetree#primary-keys-and-indexes-in-queries">primary key</a> when creating a table. Primary key can be specified in two ways:</p>
+<ul class="custom-ul">
+<li class="custom-li">Inside the column list</li>
+</ul>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [db.]table_name
+(
+    name1 type1, name2 type2, ...,
+    PRIMARY KEY(expr1[, expr2,...])
+)
+ENGINE = engine;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Outside the column list</li>
+</ul>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [db.]table_name
+(
+    name1 type1, name2 type2, ...
+)
+ENGINE = engine
+PRIMARY KEY(expr1[, expr2,...]);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>You can't combine both ways in one query.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="constraints">Constraints<a aria-label="Direct link to Constraints" class="hash-link" href="#constraints" title="Direct link to Constraints">​</a></h2>
+<p>Along with columns descriptions constraints could be defined:</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="constraint">CONSTRAINT<a aria-label="Direct link to CONSTRAINT" class="hash-link" href="#constraint" title="Direct link to CONSTRAINT">​</a></h3>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1] [compression_codec] [TTL expr1],
+    ...
+    CONSTRAINT constraint_name_1 CHECK boolean_expr_1,
+    ...
+) ENGINE = engine
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>boolean_expr_1</code> could by any boolean expression. If constraints are defined for the table, each of them will be checked for every row in <code>INSERT</code> query. If any constraint is not satisfied — server will raise an exception with constraint name and checking expression.</p>
+<p>Adding large amount of constraints can negatively affect performance of big <code>INSERT</code> queries.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="assume">ASSUME<a aria-label="Direct link to ASSUME" class="hash-link" href="#assume" title="Direct link to ASSUME">​</a></h3>
+<p>The <code>ASSUME</code> clause is used to define a <code>CONSTRAINT</code> on a table that is assumed to be true. This constraint can then be used by the optimizer to enhance the performance of SQL queries.</p>
+<p>Take this example where <code>ASSUME CONSTRAINT</code> is used in the creation of the <code>users_a</code> table:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE users_a (
+    uid Int16, 
+    name String, 
+    age Int16, 
+    name_len UInt8 MATERIALIZED length(name), 
+    CONSTRAINT c1 ASSUME length(name) = name_len
+) 
+ENGINE=MergeTree 
+ORDER BY (name_len, name);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Here, <code>ASSUME CONSTRAINT</code> is used to assert that the <code>length(name)</code> function always equals the value of the <code>name_len</code> column. This means that whenever <code>length(name)</code> is called in a query, ClickHouse can replace it with <code>name_len</code>, which should be faster because it avoids calling the <code>length()</code> function.</p>
+<p>Then, when executing the query <code>SELECT name FROM users_a WHERE length(name) &lt; 5;</code>, ClickHouse can optimize it to <code>SELECT name FROM users_a WHERE name_len &lt; 5</code>; because of the <code>ASSUME CONSTRAINT</code>. This can make the query run faster because it avoids calculating the length of <code>name</code> for each row.</p>
+<p><code>ASSUME CONSTRAINT</code> <strong>does not enforce the constraint</strong>, it merely informs the optimizer that the constraint holds true. If the constraint is not actually true, the results of the queries may be incorrect. Therefore, you should only use <code>ASSUME CONSTRAINT</code> if you are sure that the constraint is true.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ttl-expression">TTL Expression<a aria-label="Direct link to TTL Expression" class="hash-link" href="#ttl-expression" title="Direct link to TTL Expression">​</a></h2>
+<p>Defines storage time for values. Can be specified only for MergeTree-family tables. For the detailed description, see <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-ttl">TTL for columns and tables</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="column_compression_codec">Column Compression Codecs<a aria-label="Direct link to Column Compression Codecs" class="hash-link" href="#column_compression_codec" title="Direct link to Column Compression Codecs">​</a></h2>
+<p>By default, ClickHouse applies <code>lz4</code> compression in the self-managed version, and <code>zstd</code> in ClickHouse Cloud.</p>
+<p>For <code>MergeTree</code>-engine family you can change the default compression method in the <a href="/docs/operations/server-configuration-parameters/settings#compression">compression</a> section of a server configuration.</p>
+<p>You can also define the compression method for each individual column in the <code>CREATE TABLE</code> query.</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE codec_example
+(
+    dt Date CODEC(ZSTD),
+    ts DateTime CODEC(LZ4HC),
+    float_value Float32 CODEC(NONE),
+    double_value Float64 CODEC(LZ4HC(9)),
+    value Float32 CODEC(Delta, ZSTD)
+)
+ENGINE = &lt;Engine&gt;
+...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>Default</code> codec can be specified to reference default compression which may depend on different settings (and properties of data) in runtime.
+Example: <code>value UInt64 CODEC(Default)</code> — the same as lack of codec specification.</p>
+<p>Also you can remove current CODEC from the column and use default compression from config.xml:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE codec_example MODIFY COLUMN float_value CODEC(Default);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Codecs can be combined in a pipeline, for example, <code>CODEC(Delta, Default)</code>.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>You can't decompress ClickHouse database files with external utilities like <code>lz4</code>. Instead, use the special <a href="https://github.com/ClickHouse/ClickHouse/tree/master/programs/compressor" rel="noopener noreferrer" target="_blank">clickhouse-compressor</a> utility.</p></div></div>
+<p>Compression is supported for the following table engines:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> family. Supports column compression codecs and selecting the default compression method by <a href="/docs/operations/server-configuration-parameters/settings#compression">compression</a> settings.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/log-family">Log</a> family. Uses the <code>lz4</code> compression method by default and supports column compression codecs.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/special/set">Set</a>. Only supported the default compression.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/special/join">Join</a>. Only supported the default compression.</li>
+</ul>
+<p>ClickHouse supports general purpose codecs and specialized codecs.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="general-purpose-codecs">General Purpose Codecs<a aria-label="Direct link to General Purpose Codecs" class="hash-link" href="#general-purpose-codecs" title="Direct link to General Purpose Codecs">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="none">NONE<a aria-label="Direct link to NONE" class="hash-link" href="#none" title="Direct link to NONE">​</a></h4>
+<p><code>NONE</code> — No compression.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="lz4">LZ4<a aria-label="Direct link to LZ4" class="hash-link" href="#lz4" title="Direct link to LZ4">​</a></h4>
+<p><code>LZ4</code> — Lossless <a href="https://github.com/lz4/lz4" rel="noopener noreferrer" target="_blank">data compression algorithm</a> used by default. Applies LZ4 fast compression.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="lz4hc">LZ4HC<a aria-label="Direct link to LZ4HC" class="hash-link" href="#lz4hc" title="Direct link to LZ4HC">​</a></h4>
+<p><code>LZ4HC[(level)]</code> — LZ4 HC (high compression) algorithm with configurable level. Default level: 9. Setting <code>level &lt;= 0</code> applies the default level. Possible levels: [1, 12]. Recommended level range: [4, 9].</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="zstd">ZSTD<a aria-label="Direct link to ZSTD" class="hash-link" href="#zstd" title="Direct link to ZSTD">​</a></h4>
+<p><code>ZSTD[(level)]</code> — <a href="https://en.wikipedia.org/wiki/Zstandard" rel="noopener noreferrer" target="_blank">ZSTD compression algorithm</a> with configurable <code>level</code>. Possible levels: [1, 22]. Default level: 1.</p>
+<p>High compression levels are useful for asymmetric scenarios, like compress once, decompress repeatedly. Higher levels mean better compression and higher CPU usage.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="zstd_qat">Obsolete: ZSTD_QAT<a aria-label="Direct link to Obsolete: ZSTD_QAT" class="hash-link" href="#zstd_qat" title="Direct link to Obsolete: ZSTD_QAT">​</a></h4>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="deflate_qpl">Obsolete: DEFLATE_QPL<a aria-label="Direct link to Obsolete: DEFLATE_QPL" class="hash-link" href="#deflate_qpl" title="Direct link to Obsolete: DEFLATE_QPL">​</a></h4>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="specialized-codecs">Specialized Codecs<a aria-label="Direct link to Specialized Codecs" class="hash-link" href="#specialized-codecs" title="Direct link to Specialized Codecs">​</a></h3>
+<p>These codecs are designed to make compression more effective by exploiting specific features of the data. Some of these codecs do not compress data themselves, they instead preprocess the data such that a second compression stage using a general-purpose codec can achieve a higher data compression rate.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="delta">Delta<a aria-label="Direct link to Delta" class="hash-link" href="#delta" title="Direct link to Delta">​</a></h4>
+<p><code>Delta(delta_bytes)</code> — Compression approach in which raw values are replaced by the difference of two neighboring values, except for the first value that stays unchanged. <code>delta_bytes</code> is the maximum size of raw values, the default value is <code>sizeof(type)</code>. Specifying <code>delta_bytes</code> as an argument is deprecated and support will be removed in a future release. Delta is a data preparation codec, i.e. it cannot be used stand-alone.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="doubledelta">DoubleDelta<a aria-label="Direct link to DoubleDelta" class="hash-link" href="#doubledelta" title="Direct link to DoubleDelta">​</a></h4>
+<p><code>DoubleDelta(bytes_size)</code> — Calculates delta of deltas and writes it in compact binary form. The <code>bytes_size</code> has a similar meaning than <code>delta_bytes</code> in <a href="#delta">Delta</a> codec. Specifying <code>bytes_size</code> as an argument is deprecated and support will be removed in a future release. Optimal compression rates are achieved for monotonic sequences with a constant stride, such as time series data. Can be used with any numeric type. Implements the algorithm used in Gorilla TSDB, extending it to support 64-bit types. Uses 1 extra bit for 32-bit deltas: 5-bit prefixes instead of 4-bit prefixes. For additional information, see Compressing Time Stamps in <a href="http://www.vldb.org/pvldb/vol8/p1816-teller.pdf" rel="noopener noreferrer" target="_blank">Gorilla: A Fast, Scalable, In-Memory Time Series Database</a>. DoubleDelta is a data preparation codec, i.e. it cannot be used stand-alone.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="gcd">GCD<a aria-label="Direct link to GCD" class="hash-link" href="#gcd" title="Direct link to GCD">​</a></h4>
+<p><code>GCD()</code> - - Calculates the greatest common denominator (GCD) of the values in the column, then divides each value by the GCD. Can be used with integer, decimal and date/time columns. The codec is well suited for columns with values that change (increase or decrease) in multiples of the GCD, e.g. 24, 28, 16, 24, 8, 24 (GCD = 4). GCD is a data preparation codec, i.e. it cannot be used stand-alone.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="gorilla">Gorilla<a aria-label="Direct link to Gorilla" class="hash-link" href="#gorilla" title="Direct link to Gorilla">​</a></h4>
+<p><code>Gorilla(bytes_size)</code> — Calculates XOR between current and previous floating point value and writes it in compact binary form. The smaller the difference between consecutive values is, i.e. the slower the values of the series changes, the better the compression rate. Implements the algorithm used in Gorilla TSDB, extending it to support 64-bit types. Possible <code>bytes_size</code> values: 1, 2, 4, 8, the default value is <code>sizeof(type)</code> if equal to 1, 2, 4, or 8. In all other cases, it's 1. For additional information, see section 4.1 in <a href="https://doi.org/10.14778/2824032.2824078" rel="noopener noreferrer" target="_blank">Gorilla: A Fast, Scalable, In-Memory Time Series Database</a>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="alp">ALP<a aria-label="Direct link to ALP" class="hash-link" href="#alp" title="Direct link to ALP">​</a></h4>
+<div class="experimentalBadge_YmgE"><div class="experimentalIcon_rfgE" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 2H10.5" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M9.50015 2V6.19625L13.4283 12.7425C13.4738 12.8183 13.4985 12.9049 13.4996 12.9934C13.5008 13.0818 13.4785 13.169 13.435 13.246C13.3914 13.323 13.3283 13.3871 13.2519 13.4317C13.1755 13.4764 13.0886 13.4999 13.0002 13.5H3.00015C2.91164 13.5 2.8247 13.4766 2.74822 13.432C2.67174 13.3874 2.60847 13.3233 2.56487 13.2463C2.52126 13.1693 2.49889 13.082 2.50004 12.9935C2.50119 12.905 2.52582 12.8184 2.5714 12.7425L6.50015 6.19625V2" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M4.47656 9.56754C5.30344 9.41254 6.47656 9.47942 7.99969 10.25C10.0153 11.2707 11.4216 11.0569 12.2184 10.7282" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path></svg></div>Experimental feature. <u><a href="/docs/beta-and-experimental-features#experimental-features">Learn more.</a></u></div>
+<p><code>ALP()</code> — Adaptive lossless compression for floating-point data based on decimal scaling. ALP attempts to represent each value as an exact scaled integer using decimal powers, then compresses the resulting integers with Frame-of-Reference and bit-packing. Values that cannot be represented exactly are stored as raw exceptions. Works best for numbers originating from decimals (e.g., measurements, currency). Supports <code>Float32</code> and <code>Float64</code>. For details, see <a href="https://ir.cwi.nl/pub/33334" rel="noopener noreferrer" target="_blank">ALP: Adaptive lossless floating-point compression</a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This codec is experimental and requires <code>SET allow_experimental_codecs = 1</code> to use.</p></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="fpc">FPC<a aria-label="Direct link to FPC" class="hash-link" href="#fpc" title="Direct link to FPC">​</a></h4>
+<p><code>FPC(level, float_size)</code> - Repeatedly predicts the next floating point value in the sequence using the better of two predictors, then XORs the actual with the predicted value, and leading-zero compresses the result. Similar to Gorilla, this is efficient when storing a series of floating point values that change slowly. For 64-bit values (double), FPC is faster than Gorilla, for 32-bit values your mileage may vary. Possible <code>level</code> values: 1-28, the default value is 12.  Possible <code>float_size</code> values: 4, 8, the default value is <code>sizeof(type)</code> if type is Float. In all other cases, it's 4. For a detailed description of the algorithm see <a href="https://userweb.cs.txstate.edu/~burtscher/papers/dcc07a.pdf" rel="noopener noreferrer" target="_blank">High Throughput Compression of Double-Precision Floating-Point Data</a>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="t64">T64<a aria-label="Direct link to T64" class="hash-link" href="#t64" title="Direct link to T64">​</a></h4>
+<p><code>T64</code> — Compression approach that crops unused high bits of values in integer data types (including <code>Enum</code>, <code>Date</code> and <code>DateTime</code>). At each step of its algorithm, codec takes a block of 64 values, puts them into 64x64 bit matrix, transposes it, crops the unused bits of values and returns the rest as a sequence. Unused bits are the bits, that do not differ between maximum and minimum values in the whole data part for which the compression is used.</p>
+<p><code>DoubleDelta</code> and <code>Gorilla</code> codecs are used in Gorilla TSDB as the components of its compressing algorithm. Gorilla approach is effective in scenarios when there is a sequence of slowly changing values with their timestamps. Timestamps are effectively compressed by the <code>DoubleDelta</code> codec, and values are effectively compressed by the <code>Gorilla</code> codec. For example, to get an effectively stored table, you can create it in the following configuration:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE codec_example
+(
+    timestamp DateTime CODEC(DoubleDelta),
+    slow_values Float32 CODEC(Gorilla)
+)
+ENGINE = MergeTree()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="encryption-codecs">Encryption Codecs<a aria-label="Direct link to Encryption Codecs" class="hash-link" href="#encryption-codecs" title="Direct link to Encryption Codecs">​</a></h3>
+<p>These codecs don't actually compress data, but instead encrypt data on disk. These are only available when an encryption key is specified by <a href="/docs/operations/server-configuration-parameters/settings#encryption">encryption</a> settings. Note that encryption only makes sense at the end of codec pipelines, because encrypted data usually can't be compressed in any meaningful way.</p>
+<p>Encryption codecs:</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="aes_128_gcm_siv">AES_128_GCM_SIV<a aria-label="Direct link to AES_128_GCM_SIV" class="hash-link" href="#aes_128_gcm_siv" title="Direct link to AES_128_GCM_SIV">​</a></h4>
+<p><code>CODEC('AES-128-GCM-SIV')</code> — Encrypts data with AES-128 in <a href="https://tools.ietf.org/html/rfc8452" rel="noopener noreferrer" target="_blank">RFC 8452</a> GCM-SIV mode.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="aes-256-gcm-siv">AES-256-GCM-SIV<a aria-label="Direct link to AES-256-GCM-SIV" class="hash-link" href="#aes-256-gcm-siv" title="Direct link to AES-256-GCM-SIV">​</a></h4>
+<p><code>CODEC('AES-256-GCM-SIV')</code> — Encrypts data with AES-256 in GCM-SIV mode.</p>
+<p>These codecs use a fixed nonce and encryption is therefore deterministic. This makes it compatible with deduplicating engines such as <a href="/docs/engines/table-engines/mergetree-family/replication">ReplicatedMergeTree</a> but has a weakness: when the same data block is encrypted twice, the resulting ciphertext will be exactly the same so an adversary who can read the disk can see this equivalence (although only the equivalence, without getting its content).</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Most engines including the "*MergeTree" family create index files on disk without applying codecs. This means plaintext will appear on disk if an encrypted column is indexed.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If you perform a SELECT query mentioning a specific value in an encrypted column (such as in its WHERE clause), the value may appear in <a href="/docs/operations/system-tables/query_log">system.query_log</a>. You may want to disable the logging.</p></div></div>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE mytable
+(
+    x String CODEC(AES_128_GCM_SIV)
+)
+ENGINE = MergeTree ORDER BY x;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If compression needs to be applied, it must be explicitly specified. Otherwise, only encryption will be applied to data.</p></div></div>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE mytable
+(
+    x String CODEC(Delta, LZ4, AES_128_GCM_SIV)
+)
+ENGINE = MergeTree ORDER BY x;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="temporary-tables">Temporary Tables<a aria-label="Direct link to Temporary Tables" class="hash-link" href="#temporary-tables" title="Direct link to Temporary Tables">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Please note that temporary tables are not replicated. As a result, there is no guarantee that data inserted into a temporary table will be available in other replicas. The primary use case where temporary tables can be useful is for querying or joining small external datasets during a single session.</p></div></div>
+<p>ClickHouse supports temporary tables which have the following characteristics:</p>
+<ul class="custom-ul">
+<li class="custom-li">Temporary tables disappear when the session ends, including if the connection is lost.</li>
+<li class="custom-li">A temporary table uses the Memory table engine when engine is not specified and it may use any table engine except Replicated and <code>KeeperMap</code> engines.</li>
+<li class="custom-li">The DB can't be specified for a temporary table. It is created outside of databases.</li>
+<li class="custom-li">Impossible to create a temporary table with distributed DDL query on all cluster servers (by using <code>ON CLUSTER</code>): this table exists only in the current session.</li>
+<li class="custom-li">If a temporary table has the same name as another one and a query specifies the table name without specifying the DB, the temporary table will be used.</li>
+<li class="custom-li">For distributed query processing, temporary tables with Memory engine used in a query are passed to remote servers.</li>
+</ul>
+<p>To create a temporary table, use the following syntax:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE [OR REPLACE] TEMPORARY TABLE [IF NOT EXISTS] table_name
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) [ENGINE = engine]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In most cases, temporary tables are not created manually, but when using external data for a query, or for distributed <code>(GLOBAL) IN</code>. For more information, see the appropriate sections</p>
+<p>It's possible to use tables with <a href="/docs/engines/table-engines/special/memory">ENGINE = Memory</a> instead of temporary tables.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replace-table">REPLACE TABLE<a aria-label="Direct link to REPLACE TABLE" class="hash-link" href="#replace-table" title="Direct link to REPLACE TABLE">​</a></h2>
+<p>The <code>REPLACE</code> statement allows you to update a table <a href="/docs/concepts/glossary#atomicity">atomically</a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This statement is supported for the <a href="/docs/engines/database-engines/atomic"><code>Atomic</code></a> and <a href="/docs/engines/database-engines/replicated"><code>Replicated</code></a> database engines,
+which are the default database engines for ClickHouse and ClickHouse Cloud respectively.</p></div></div>
+<p>Ordinarily, if you need to delete some data from a table,
+you can create a new table and fill it with a <code>SELECT</code> statement that does not retrieve unwanted data,
+then drop the old table and rename the new one.
+This approach is demonstrated in the example below:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE myNewTable AS myOldTable;
+
+INSERT INTO myNewTable
+SELECT * FROM myOldTable 
+WHERE CounterID &lt;12345;
+
+DROP TABLE myOldTable;
+
+RENAME TABLE myNewTable TO myOldTable;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Instead of the approach above, it is also possible to use <code>REPLACE</code> (given you are using the default database engines) to achieve the same result:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">REPLACE TABLE myOldTable
+ENGINE = MergeTree()
+ORDER BY CounterID 
+AS
+SELECT * FROM myOldTable
+WHERE CounterID &lt;12345;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">{CREATE [OR REPLACE] | REPLACE} TABLE [db.]table_name
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>All syntax forms for the <code>CREATE</code> statement also work for this statement. Invoking <code>REPLACE</code> for a non-existent table will cause an error.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples:<a aria-label="Direct link to Examples:" class="hash-link" href="#examples" title="Direct link to Examples:">​</a></h3>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">Local<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">Cloud</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>Consider the following table:<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE DATABASE base 
+ENGINE = Atomic;
+
+CREATE OR REPLACE TABLE base.t1
+(
+    n UInt64,
+    s String
+)
+ENGINE = MergeTree
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (1, 'test');
+
+SELECT * FROM base.t1;
+
+┌─n─┬─s────┐
+│ 1 │ test │
+└───┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div><p>We can use the <code>REPLACE</code> statement to clear all the data:<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE base.t1 
+(
+    n UInt64,
+    s Nullable(String)
+)
+ENGINE = MergeTree
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (2, null);
+
+SELECT * FROM base.t1;
+
+┌─n─┬─s──┐
+│ 2 │ \N │
+└───┴────┘
+</code></pre></div><div class="activity_PoTP"></div></div><p>Or we can use the <code>REPLACE</code> statement to change the table structure:<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">REPLACE TABLE base.t1 (n UInt64) 
+ENGINE = MergeTree 
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (3);
+
+SELECT * FROM base.t1;
+
+┌─n─┐
+│ 3 │
+└───┘
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>Consider the following table on ClickHouse Cloud:<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE DATABASE base;
+
+CREATE OR REPLACE TABLE base.t1 
+(
+    n UInt64,
+    s String
+)
+ENGINE = MergeTree
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (1, 'test');
+
+SELECT * FROM base.t1;
+
+1    test
+</code></pre></div><div class="activity_PoTP"></div></div><p>We can use the <code>REPLACE</code> statement to clear all the data:<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE OR REPLACE TABLE base.t1 
+(
+    n UInt64, 
+    s Nullable(String)
+)
+ENGINE = MergeTree
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (2, null);
+
+SELECT * FROM base.t1;
+
+2    
+</code></pre></div><div class="activity_PoTP"></div></div><p>Or we can use the <code>REPLACE</code> statement to change the table structure:<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">REPLACE TABLE base.t1 (n UInt64) 
+ENGINE = MergeTree 
+ORDER BY n;
+
+INSERT INTO base.t1 VALUES (3);
+
+SELECT * FROM base.t1;
+
+3
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></p></div></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="comment-clause">COMMENT Clause<a aria-label="Direct link to COMMENT Clause" class="hash-link" href="#comment-clause" title="Direct link to COMMENT Clause">​</a></h2>
+<p>You can add a comment to the table when creating it.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [db.]table_name
+(
+    name1 type1, name2 type2, ...
+)
+ENGINE = engine
+COMMENT 'Comment'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The <code>COMMENT</code> clause must be specified <strong>after</strong> any storage-specific clauses such as <code>PARTITION BY</code>, <code>ORDER BY</code>, and storage-specific <code>SETTINGS</code>.<p>After the <code>COMMENT</code> clause, only query-specific <code>SETTINGS</code> (like <code>max_threads</code>, etc.) will be parsed, not storage-related settings.<p>This means the correct clause order is:<ul class="custom-ul">
+<li class="custom-li"><code>ENGINE</code></li>
+<li class="custom-li">storage clauses</li>
+<li class="custom-li"><code>COMMENT</code></li>
+<li class="custom-li">query settings (if any)</li>
+</ul></p></p></p></div></div>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t1 (x String) ENGINE = Memory COMMENT 'The temporary table';
+SELECT name, comment FROM system.tables WHERE name = 't1';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─name─┬─comment─────────────┐
+│ t1   │ The temporary table │
+└──────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related content<a aria-label="Direct link to Related content" class="hash-link" href="#related-content" title="Direct link to Related content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/optimize-clickhouse-codecs-compression-schema" rel="noopener noreferrer" target="_blank">Optimizing ClickHouse with Schemas and Codecs</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/working-with-time-series-data-and-functions-ClickHouse" rel="noopener noreferrer" target="_blank">Working with time series data in ClickHouse</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/database"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">DATABASE</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/view"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">VIEW</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax-forms">Syntax Forms</a><ul><li><a class="table-of-contents__link toc-highlight" href="#with-explicit-schema">With Explicit Schema</a><li><a class="table-of-contents__link toc-highlight" href="#with-a-schema-similar-to-other-table">With Schema of Existing Table</a><li><a class="table-of-contents__link toc-highlight" href="#with-a-schema-and-data-cloned-from-another-table">With Schema and Data of Existing Table</a><li><a class="table-of-contents__link toc-highlight" href="#from-a-table-function">From a Table Function</a><li><a class="table-of-contents__link toc-highlight" href="#from-select-query">From SELECT query</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#null-or-not-null-modifiers">NULL Or NOT NULL Modifiers</a><li><a class="table-of-contents__link toc-highlight" href="#default_values">Default Values</a><ul><li><a class="table-of-contents__link toc-highlight" href="#default">DEFAULT</a><li><a class="table-of-contents__link toc-highlight" href="#materialized">MATERIALIZED</a><li><a class="table-of-contents__link toc-highlight" href="#ephemeral">EPHEMERAL</a><li><a class="table-of-contents__link toc-highlight" href="#alias">ALIAS</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#primary-key">Primary Key</a><li><a class="table-of-contents__link toc-highlight" href="#constraints">Constraints</a><ul><li><a class="table-of-contents__link toc-highlight" href="#constraint">CONSTRAINT</a><li><a class="table-of-contents__link toc-highlight" href="#assume">ASSUME</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#ttl-expression">TTL Expression</a><li><a class="table-of-contents__link toc-highlight" href="#column_compression_codec">Column Compression Codecs</a><ul><li><a class="table-of-contents__link toc-highlight" href="#general-purpose-codecs">General Purpose Codecs</a><li><a class="table-of-contents__link toc-highlight" href="#specialized-codecs">Specialized Codecs</a><li><a class="table-of-contents__link toc-highlight" href="#encryption-codecs">Encryption Codecs</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#temporary-tables">Temporary Tables</a><li><a class="table-of-contents__link toc-highlight" href="#replace-table">REPLACE TABLE</a><ul><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples:</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#comment-clause">COMMENT Clause</a><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related content</a></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

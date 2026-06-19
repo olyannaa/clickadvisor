@@ -1,0 +1,28 @@
+id: R-011
+name: having_without_aggregate_to_where
+tier: 1C
+category: predicate_canonicalization
+status: proposed
+statement: Перенести часть HAVING-условия, не содержащую агрегатов, в WHERE.
+preconditions:
+  syntactic:
+  - HAVING — конъюнкция
+  - Хотя бы один конъюнкт не содержит agg-функций
+  semantic: []
+  data: []
+proof: 'WHERE применяется до GROUP BY, HAVING — после. Условие без агрегатов
+
+  даёт идентичный результат на любом этапе.'
+explain_template: 'В ClickHouse WHERE применяется до GROUP BY и может использовать primary key index для пропуска granules. HAVING применяется после агрегации — когда все строки уже прочитаны. Условие без агрегатных функций в HAVING — это лишняя работа: данные читаются, агрегируются, и только потом фильтруются.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: '... GROUP BY user_id HAVING country = ''RU'' AND COUNT(*) > 100'
+example_after: '... WHERE country = ''RU'' GROUP BY user_id HAVING COUNT(*) > 100'
+expected_speedup:
+  estimate: 5-50×
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

@@ -1,0 +1,20 @@
+case_id: synthetic_04
+source: synthetic
+sql: |
+  SELECT COUNT(*) FROM (
+      SELECT DISTINCT user_id FROM events
+  )
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: count_star_in_distinct_subquery_collapse
+  detected_by_rule: R-004
+  severity: high
+  description: COUNT(*) поверх SELECT DISTINCT user_id можно схлопнуть в прямой distinct count.
+expected_rules_to_fire:
+- R-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-004.
+expected_findings_count: 1
+status: validated

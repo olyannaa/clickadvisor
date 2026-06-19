@@ -1,0 +1,31 @@
+id: D-008
+name: sample_without_sample_by
+tier: detector
+category: ch_antipattern
+status: proposed
+statement: SAMPLE в запросе; CREATE TABLE без SAMPLE BY
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: low
+detection_method:
+  ast_pattern: SAMPLE в запросе; CREATE TABLE без SAMPLE BY
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"SAMPLE без SAMPLE BY игнорируется. Используйте WHERE rand()
+  % N = 0."'
+false_positives: []

@@ -1,0 +1,28 @@
+{
+  "statement_id": "main",
+  "explain_kind": "PLAN",
+  "generated_at": "2026-05-25T11:22:00Z",
+  "clickhouse_version": "25.3.2.5",
+  "payload": {
+    "Plan": {
+      "Node Type": "Join",
+      "Description": "INNER JOIN",
+      "Plans": [
+        {
+          "Node Type": "ReadFromMergeTree",
+          "Description": "analytics.events",
+          "Estimate": {
+            "rows": 210000000
+          }
+        },
+        {
+          "Node Type": "ReadFromMergeTree",
+          "Description": "dim.user_segments",
+          "Estimate": {
+            "rows": 980000000
+          }
+        }
+      ]
+    }
+  }
+}

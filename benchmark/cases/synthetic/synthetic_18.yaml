@@ -1,0 +1,20 @@
+case_id: synthetic_18
+source: synthetic
+sql: |
+  SELECT user_id FROM events_2023
+  UNION
+  SELECT user_id FROM events_2024
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: union_to_union_all_advisory
+  detected_by_rule: R-018
+  severity: medium
+  description: UNION без ALL может быть advisory-кандидатом на UNION ALL при непересекающихся множествах.
+expected_rules_to_fire:
+- R-018
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-018.
+expected_findings_count: 1
+status: validated

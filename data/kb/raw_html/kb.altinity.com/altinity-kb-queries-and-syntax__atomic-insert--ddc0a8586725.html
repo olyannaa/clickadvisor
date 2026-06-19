@@ -1,0 +1,94 @@
+<h1>Atomic insert | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-queries-and-syntax/">Queries &amp; Syntax</a></li><li aria-current="page" class="breadcrumb-item active">Atomic insert</li></ol></nav><div class="td-content"><h1>Atomic insert</h1><div class="lead"></div><p>An insert is atomic if it creates only one part.</p><p>An insert will create one part if:</p><ul><li>Data is inserted directly into a MergeTree table</li><li>Data is inserted into a single partition.</li><li>Smaller blocks are properly squashed up to the configured block size (<code>min_insert_block_size_rows</code> and <code>min_insert_block_size_bytes</code>)</li><li>For INSERT FORMAT:<ul><li>Number of rows is less than <code>max_insert_block_size</code> (default is <code>1048545</code>)</li><li>Parallel formatting is disabled (For TSV, TSKV, CSV, and JSONEachRow formats setting <code>input_format_parallel_parsing=0</code> is set).</li></ul></li><li>For INSERT SELECT (including all variants with table functions), data for insert should be created fully deterministically.<ul><li>non-deterministic functions there like rand() not used in SELECT</li><li>Number of rows/bytes is less than <code>min_insert_block_size_rows</code> and <code>min_insert_block_size_bytes</code></li><li>And one of:<ul><li>setting max_threads to 1</li><li>adding ORDER BY to the table’s DDL (not ordering by tuple)</li><li>There is some ORDER BY inside SELECT</li></ul></li><li>See <a href="https://fiddle.clickhouse.com/48d38d3d-668d-4513-ba21-e595276b3136" rel="nofollow" target="_blank">example</a></li></ul></li><li>The MergeTree table doesn’t have Materialized Views (there is no atomicity Table &lt;&gt; MV)</li></ul><p><a href="https://github.com/ClickHouse/ClickHouse/issues/9195#issuecomment-587500824" target="_blank">https://github.com/ClickHouse/ClickHouse/issues/9195#issuecomment-587500824</a>
+<a href="https://github.com/ClickHouse/ClickHouse/issues/5148#issuecomment-487757235" target="_blank">https://github.com/ClickHouse/ClickHouse/issues/5148#issuecomment-487757235</a></p><h2 id="example-how-to-make-a-large-insert-atomically">Example how to make a large insert atomically</h2><h3 id="generate-test-data-in-native-and-tsv-format--100-millions-rows-">Generate test data in Native and TSV format ( 100 millions rows )</h3><p>Text formats and Native format require different set of settings, here I want to find / demonstrate mandatory minimum of settings for any case.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>clickhouse-client -q <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>     <span style="color:#4e9a06">'SELECT toInt64(number) A, toString(number) S FROM numbers(100000000) FORMAT Native'</span> &gt; t.native
+</span></span><span style="display:flex"><span>clickhouse-client -q <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>     <span style="color:#4e9a06">'SELECT toInt64(number) A, toString(number) S FROM numbers(100000000) FORMAT TSV'</span> &gt; t.tsv
+</span></span></code></pre></div><h3 id="insert-with-default-settings-not-atomic">Insert with default settings (not atomic)</h3><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>DROP TABLE IF EXISTS trg<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>CREATE TABLE trg<span style="color:#ce5c00;font-weight:700">(</span>A Int64, S String<span style="color:#ce5c00;font-weight:700">)</span> <span style="color:#000">Engine</span><span style="color:#ce5c00;font-weight:700">=</span>MergeTree ORDER BY A<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Load data in Native format
+</span></span><span style="display:flex"><span>clickhouse-client  -q <span style="color:#4e9a06">'INSERT INTO trg FORMAT Native'</span> &lt;t.native
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Check how many parts is created
+</span></span><span style="display:flex"><span>SELECT 
+</span></span><span style="display:flex"><span>    count<span style="color:#ce5c00;font-weight:700">()</span>,
+</span></span><span style="display:flex"><span>    min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>FROM system.parts
+</span></span><span style="display:flex"><span>WHERE <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">level</span> <span style="color:#ce5c00;font-weight:700">=</span> 0<span style="color:#ce5c00;font-weight:700">)</span> AND <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">table</span> <span style="color:#ce5c00;font-weight:700">=</span> <span style="color:#4e9a06">'trg'</span><span style="color:#ce5c00;font-weight:700">)</span><span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>┌─count<span style="color:#ce5c00;font-weight:700">()</span>─┬─min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┐
+</span></span><span style="display:flex"><span>│      <span style="color:#0000cf;font-weight:700">90</span> │    <span style="color:#0000cf;font-weight:700">890935</span> │   <span style="color:#0000cf;font-weight:700">1113585</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │
+</span></span><span style="display:flex"><span>└─────────┴───────────┴───────────┴───────────┘
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>--- <span style="color:#0000cf;font-weight:700">90</span> parts! was created - not atomic
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>DROP TABLE IF EXISTS trg<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>CREATE TABLE trg<span style="color:#ce5c00;font-weight:700">(</span>A Int64, S String<span style="color:#ce5c00;font-weight:700">)</span> <span style="color:#000">Engine</span><span style="color:#ce5c00;font-weight:700">=</span>MergeTree ORDER BY A<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Load data in TSV format
+</span></span><span style="display:flex"><span>clickhouse-client  -q <span style="color:#4e9a06">'INSERT INTO trg FORMAT TSV'</span> &lt;t.tsv
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Check how many parts is created
+</span></span><span style="display:flex"><span>SELECT 
+</span></span><span style="display:flex"><span>    count<span style="color:#ce5c00;font-weight:700">()</span>,
+</span></span><span style="display:flex"><span>    min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>FROM system.parts
+</span></span><span style="display:flex"><span>WHERE <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">level</span> <span style="color:#ce5c00;font-weight:700">=</span> 0<span style="color:#ce5c00;font-weight:700">)</span> AND <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">table</span> <span style="color:#ce5c00;font-weight:700">=</span> <span style="color:#4e9a06">'trg'</span><span style="color:#ce5c00;font-weight:700">)</span><span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>┌─count<span style="color:#ce5c00;font-weight:700">()</span>─┬─min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┐
+</span></span><span style="display:flex"><span>│      <span style="color:#0000cf;font-weight:700">85</span> │    <span style="color:#0000cf;font-weight:700">898207</span> │   <span style="color:#0000cf;font-weight:700">1449610</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │
+</span></span><span style="display:flex"><span>└─────────┴───────────┴───────────┴───────────┘
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>--- <span style="color:#0000cf;font-weight:700">85</span> parts! was created - not atomic
+</span></span></code></pre></div><h3 id="insert-with-adjusted-settings-atomic">Insert with adjusted settings (atomic)</h3><p>Atomic insert use more memory because it needs 100 millions rows in memory.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span>DROP TABLE IF EXISTS trg<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>CREATE TABLE trg<span style="color:#ce5c00;font-weight:700">(</span>A Int64, S String<span style="color:#ce5c00;font-weight:700">)</span> <span style="color:#000">Engine</span><span style="color:#ce5c00;font-weight:700">=</span>MergeTree ORDER BY A<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>clickhouse-client --input_format_parallel_parsing<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">0</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  --min_insert_block_size_bytes<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">0</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  --min_insert_block_size_rows<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">1000000000</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  -q <span style="color:#4e9a06">'INSERT INTO trg FORMAT Native'</span> &lt;t.native
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Check that only one part is created
+</span></span><span style="display:flex"><span>SELECT
+</span></span><span style="display:flex"><span>    count<span style="color:#ce5c00;font-weight:700">()</span>,
+</span></span><span style="display:flex"><span>    min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>FROM system.parts
+</span></span><span style="display:flex"><span>WHERE <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">level</span> <span style="color:#ce5c00;font-weight:700">=</span> 0<span style="color:#ce5c00;font-weight:700">)</span> AND <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">table</span> <span style="color:#ce5c00;font-weight:700">=</span> <span style="color:#4e9a06">'trg'</span><span style="color:#ce5c00;font-weight:700">)</span><span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>┌─count<span style="color:#ce5c00;font-weight:700">()</span>─┬─min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┐
+</span></span><span style="display:flex"><span>│       <span style="color:#0000cf;font-weight:700">1</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │
+</span></span><span style="display:flex"><span>└─────────┴───────────┴───────────┴───────────┘
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- <span style="color:#0000cf;font-weight:700">1</span> part, success.
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>DROP TABLE IF EXISTS trg<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>CREATE TABLE trg<span style="color:#ce5c00;font-weight:700">(</span>A Int64, S String<span style="color:#ce5c00;font-weight:700">)</span> <span style="color:#000">Engine</span><span style="color:#ce5c00;font-weight:700">=</span>MergeTree ORDER BY A<span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Load data in TSV format
+</span></span><span style="display:flex"><span>clickhouse-client --input_format_parallel_parsing<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">0</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  --min_insert_block_size_bytes<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">0</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  --min_insert_block_size_rows<span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">1000000000</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex"><span><span style="color:#4e9a06"></span>                  -q <span style="color:#4e9a06">'INSERT INTO trg FORMAT TSV'</span> &lt;t.tsv
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- Check that only one part is created
+</span></span><span style="display:flex"><span>SELECT 
+</span></span><span style="display:flex"><span>    count<span style="color:#ce5c00;font-weight:700">()</span>,
+</span></span><span style="display:flex"><span>    min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>,
+</span></span><span style="display:flex"><span>    sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>FROM system.parts
+</span></span><span style="display:flex"><span>WHERE <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">level</span> <span style="color:#ce5c00;font-weight:700">=</span> 0<span style="color:#ce5c00;font-weight:700">)</span> AND <span style="color:#ce5c00;font-weight:700">(</span><span style="color:#000">table</span> <span style="color:#ce5c00;font-weight:700">=</span> <span style="color:#4e9a06">'trg'</span><span style="color:#ce5c00;font-weight:700">)</span><span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>┌─count<span style="color:#ce5c00;font-weight:700">()</span>─┬─min<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─max<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┬─sum<span style="color:#ce5c00;font-weight:700">(</span>rows<span style="color:#ce5c00;font-weight:700">)</span>─┐
+</span></span><span style="display:flex"><span>│       <span style="color:#0000cf;font-weight:700">1</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │ <span style="color:#0000cf;font-weight:700">100000000</span> │
+</span></span><span style="display:flex"><span>└─────────┴───────────┴───────────┴───────────┘
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span>-- <span style="color:#0000cf;font-weight:700">1</span> part, success.
+</span></span></code></pre></div><div class="td-page-meta__lastmod">Last modified 2024.11.19: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4b71b0f9fc60b5b47ca5cf77f29721fe96e028a">insert select clarifications (a4b71b0)</a></div></div></main>

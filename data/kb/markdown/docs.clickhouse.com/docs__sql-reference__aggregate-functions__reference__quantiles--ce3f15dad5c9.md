@@ -1,0 +1,73 @@
+# quantiles Functions \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- quantiles Functions
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/quantiles.md)# quantiles Functions
+
+## quantiles[​](#quantiles "Direct link to quantiles")
+
+
+Introduced in: v1\.1\.0
+
+
+Computes multiple approximate [quantiles](https://en.wikipedia.org/wiki/Quantile) of a numeric data sequence at different levels simultaneously.
+
+
+This function applies [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling) with a reservoir size up to 8192 and a random number generator for sampling.
+The result is non\-deterministic.
+
+
+Using `quantiles` is more efficient than calling multiple individual `quantile` functions when you need multiple quantile values, as all quantiles are calculated in a single pass through the data.
+
+
+**Syntax**
+
+
+
+```
+quantiles(level1, level2, ...)(expr)
+
+```
+
+**Parameters**
+
+
+- `level` — Levels of quantiles. One or more constant floating\-point numbers from 0 to 1\. We recommend using `level` values in the range of `[0.01, 0.99]`. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Arguments**
+
+
+- `expr` — Expression over the column values resulting in numeric data types, Date or DateTime. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal) or [`Date`](/docs/sql-reference/data-types/date) or [`DateTime`](/docs/sql-reference/data-types/datetime)
+
+
+**Returned value**
+
+
+Array of approximate quantiles of the specified levels in the same order as the levels were specified. [`Array(Float64)`](/docs/sql-reference/data-types/array) or [`Array(Date)`](/docs/sql-reference/data-types/array) or [`Array(DateTime)`](/docs/sql-reference/data-types/array)
+
+
+**Examples**
+
+
+**Computing multiple quantiles efficiently**
+
+
+
+```
+CREATE TABLE t (val UInt32) ENGINE = Memory;
+INSERT INTO t VALUES (1), (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
+
+SELECT quantiles(0.25, 0.5, 0.75, 0.9)(val) FROM t;
+
+```
+
+
+```
+┌─quantiles(0.25, 0.5, 0.75, 0.9)(val)─┐
+│ [3, 5.5, 8, 9.5]                     │
+└──────────────────────────────────────┘
+
+```
+[PreviousquantileTimingWeighted](/docs/sql-reference/aggregate-functions/reference/quantiletimingweighted)[NextquantilesExactExclusive](/docs/sql-reference/aggregate-functions/reference/quantilesExactExclusive)- [quantiles](#quantiles)
+Was this page helpful?

@@ -1,0 +1,13 @@
+\x1b[1mClickAdvisor report\x1b[0m
+
+\x1b[32m[1A]\x1b[0m R-010 disjunction_chain_to_in
+\x1b[32m[1A]\x1b[0m R-015 distinct_after_groupby_removal
+\x1b[32m[1A]\x1b[0m R-009 in_singleton_to_equality
+\x1b[32m[1A]\x1b[0m R-001 count_distinct_to_uniqExact
+\x1b[32m[1A]\x1b[0m R-005 to_date_eq_to_datetime_range
+\x1b[35m[3]\x1b[0m Advisory: evaluate PREWHERE-friendly projection
+
+Summary:
+  findings_total = 6
+  tiers = 1A:5, 3:1
+  estimated impact = high

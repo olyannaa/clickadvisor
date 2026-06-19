@@ -1,0 +1,112 @@
+<h1>clickhouse-keeper-initd | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/altinity-kb-zookeeper/">ZooKeeper</a></li><li aria-current="page" class="breadcrumb-item active">clickhouse-keeper-initd</li></ol></nav><div class="td-content"><h1>clickhouse-keeper-initd</h1><div class="lead"></div><h2 id="clickhouse-keeper-initd">clickhouse-keeper-initd</h2><p>An init.d script for clickhouse-keeper.
+This example is based on zkServer.sh</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-bash" data-lang="bash"><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">#!/bin/bash
+</span></span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#8f5902;font-style:italic">### BEGIN INIT INFO</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Provides:          clickhouse-keeper</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Default-Start:     2 3 4 5</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Default-Stop:      0 1 6</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Required-Start:</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Required-Stop:</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Short-Description: Start keeper daemon</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># Description: Start keeper daemon</span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">### END INIT INFO</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#000">NAME</span><span style="color:#ce5c00;font-weight:700">=</span>clickhouse-keeper
+</span></span><span style="display:flex"><span><span style="color:#000">ZOOCFGDIR</span><span style="color:#ce5c00;font-weight:700">=</span>/etc/<span style="color:#000">$NAME</span>
+</span></span><span style="display:flex"><span><span style="color:#000">ZOOCFG</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">"</span><span style="color:#000">$ZOOCFGDIR</span><span style="color:#4e9a06">/keeper.xml"</span>
+</span></span><span style="display:flex"><span><span style="color:#000">ZOO_LOG_DIR</span><span style="color:#ce5c00;font-weight:700">=</span>/var/log/<span style="color:#000">$NAME</span>
+</span></span><span style="display:flex"><span><span style="color:#000">USER</span><span style="color:#ce5c00;font-weight:700">=</span>clickhouse
+</span></span><span style="display:flex"><span><span style="color:#000">GROUP</span><span style="color:#ce5c00;font-weight:700">=</span>clickhouse
+</span></span><span style="display:flex"><span><span style="color:#000">ZOOPIDDIR</span><span style="color:#ce5c00;font-weight:700">=</span>/var/run/<span style="color:#000">$NAME</span>
+</span></span><span style="display:flex"><span><span style="color:#000">ZOOPIDFILE</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#000">$ZOOPIDDIR</span>/<span style="color:#000">$NAME</span>.pid
+</span></span><span style="display:flex"><span><span style="color:#000">SCRIPTNAME</span><span style="color:#ce5c00;font-weight:700">=</span>/etc/init.d/<span style="color:#000">$NAME</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">#echo "Using config: $ZOOCFG" &gt;&amp;2</span>
+</span></span><span style="display:flex"><span><span style="color:#000">ZOOCMD</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">"clickhouse-keeper -C </span><span style="color:#4e9a06">${</span><span style="color:#000">ZOOCFG</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06"> start --daemon"</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic"># ensure PIDDIR exists, otw stop will fail</span>
+</span></span><span style="display:flex"><span>mkdir -p <span style="color:#4e9a06">"</span><span style="color:#204a87;font-weight:700">$(</span>dirname <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span><span style="color:#204a87;font-weight:700">)</span><span style="color:#4e9a06">"</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> ! -w <span style="color:#4e9a06">"</span><span style="color:#000">$ZOO_LOG_DIR</span><span style="color:#4e9a06">"</span> <span style="color:#ce5c00;font-weight:700">]</span> <span style="color:#000;font-weight:700">;</span> <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>mkdir -p <span style="color:#4e9a06">"</span><span style="color:#000">$ZOO_LOG_DIR</span><span style="color:#4e9a06">"</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">case</span> <span style="color:#000">$1</span> in
+</span></span><span style="display:flex"><span>start<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">echo</span> -n <span style="color:#4e9a06">"Starting keeper ... "</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> -f <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span> <span style="color:#ce5c00;font-weight:700">]</span><span style="color:#000;font-weight:700">;</span> <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">if</span> <span style="color:#204a87">kill</span> -0 <span style="color:#4e9a06">`</span>cat <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span><span style="color:#4e9a06">`</span> &gt; /dev/null 2&gt;<span style="color:#000;font-weight:700">&amp;</span>1<span style="color:#000;font-weight:700">;</span> <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>         <span style="color:#204a87">echo</span> already running as process <span style="color:#4e9a06">`</span>cat <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span><span style="color:#4e9a06">`</span>.
+</span></span><span style="display:flex"><span>         <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">0</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    sudo -u clickhouse <span style="color:#4e9a06">`</span><span style="color:#204a87">echo</span> <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOCMD</span><span style="color:#4e9a06">"</span><span style="color:#4e9a06">`</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> <span style="color:#000">$?</span> -eq <span style="color:#0000cf;font-weight:700">0</span> <span style="color:#ce5c00;font-weight:700">]</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>      pgrep -f <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOCMD</span><span style="color:#4e9a06">"</span> &gt; <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">echo</span> <span style="color:#4e9a06">"PID:"</span> <span style="color:#4e9a06">`</span>cat <span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">`</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> <span style="color:#000">$?</span> -eq <span style="color:#0000cf;font-weight:700">0</span> <span style="color:#ce5c00;font-weight:700">]</span><span style="color:#000;font-weight:700">;</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>        sleep <span style="color:#0000cf;font-weight:700">1</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">echo</span> STARTED
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">else</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">echo</span> FAILED TO WRITE PID
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">1</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">else</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">echo</span> SERVER DID NOT START
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">1</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>start-foreground<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    sudo -u clickhouse clickhouse-keeper -C <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOCFG</span><span style="color:#4e9a06">"</span> start
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>print-cmd<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">echo</span> <span style="color:#4e9a06">"sudo -u clickhouse </span><span style="color:#4e9a06">${</span><span style="color:#000">ZOOCMD</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">"</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>stop<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">echo</span> -n <span style="color:#4e9a06">"Stopping keeper ... "</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> ! -f <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span> <span style="color:#ce5c00;font-weight:700">]</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">echo</span> <span style="color:#4e9a06">"no keeper to stop (could not find file </span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">)"</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">else</span>
+</span></span><span style="display:flex"><span>      <span style="color:#000">ZOOPID</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#204a87;font-weight:700">$(</span>cat <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span><span style="color:#204a87;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">echo</span> <span style="color:#000">$ZOOPID</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">kill</span> <span style="color:#000">$ZOOPID</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">while</span> true<span style="color:#000;font-weight:700">;</span> <span style="color:#204a87;font-weight:700">do</span>
+</span></span><span style="display:flex"><span>         sleep <span style="color:#0000cf;font-weight:700">3</span>
+</span></span><span style="display:flex"><span>         <span style="color:#204a87;font-weight:700">if</span> <span style="color:#204a87">kill</span> -0 <span style="color:#000">$ZOOPID</span> &gt; /dev/null 2&gt;<span style="color:#000;font-weight:700">&amp;</span>1<span style="color:#000;font-weight:700">;</span> <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87">echo</span> <span style="color:#000">$ZOOPID</span> is still running
+</span></span><span style="display:flex"><span>         <span style="color:#204a87;font-weight:700">else</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87">break</span>
+</span></span><span style="display:flex"><span>         <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87;font-weight:700">done</span>
+</span></span><span style="display:flex"><span>      rm <span style="color:#4e9a06">"</span><span style="color:#000">$ZOOPIDFILE</span><span style="color:#4e9a06">"</span>
+</span></span><span style="display:flex"><span>      <span style="color:#204a87">echo</span> STOPPED
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">0</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>restart<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">shift</span>
+</span></span><span style="display:flex"><span>    <span style="color:#4e9a06">"</span><span style="color:#000">$0</span><span style="color:#4e9a06">"</span> stop <span style="color:#4e9a06">${</span><span style="color:#000;font-weight:700">@</span><span style="color:#4e9a06">}</span>
+</span></span><span style="display:flex"><span>    sleep <span style="color:#0000cf;font-weight:700">3</span>
+</span></span><span style="display:flex"><span>    <span style="color:#4e9a06">"</span><span style="color:#000">$0</span><span style="color:#4e9a06">"</span> start <span style="color:#4e9a06">${</span><span style="color:#000;font-weight:700">@</span><span style="color:#4e9a06">}</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>status<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000">clientPortAddress</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">"localhost"</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000">clientPort</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#0000cf;font-weight:700">2181</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000">STAT</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">`</span><span style="color:#204a87">echo</span> srvr <span style="color:#000;font-weight:700">|</span> nc <span style="color:#000">$clientPortAddress</span> <span style="color:#000">$clientPort</span> 2&gt; /dev/null <span style="color:#000;font-weight:700">|</span> grep Mode<span style="color:#4e9a06">`</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">if</span> <span style="color:#ce5c00;font-weight:700">[</span> <span style="color:#4e9a06">"x</span><span style="color:#000">$STAT</span><span style="color:#4e9a06">"</span> <span style="color:#ce5c00;font-weight:700">=</span> <span style="color:#4e9a06">"x"</span> <span style="color:#ce5c00;font-weight:700">]</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">then</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">echo</span> <span style="color:#4e9a06">"Error contacting service. It is probably not running."</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">1</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">else</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">echo</span> <span style="color:#000">$STAT</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87">exit</span> <span style="color:#0000cf;font-weight:700">0</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">fi</span>
+</span></span><span style="display:flex"><span>    <span style="color:#000;font-weight:700">;;</span>
+</span></span><span style="display:flex"><span>*<span style="color:#ce5c00;font-weight:700">)</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87">echo</span> <span style="color:#4e9a06">"Usage: </span><span style="color:#000">$0</span><span style="color:#4e9a06"> {start|start-foreground|stop|restart|status|print-cmd}"</span> &gt;<span style="color:#000;font-weight:700">&amp;</span><span style="color:#0000cf;font-weight:700">2</span>
+</span></span><span style="display:flex"><span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">esac</span>
+</span></span></code></pre></div><div class="td-page-meta__lastmod">Last modified 2023.07.22: <a href="https://github.com/Altinity/altinityknowledgebase/commit/ce4c637f4c7ce249e8ec3d2cfc94eeeff2c2ee02">Create clickhouse-keeper-initd.md (ce4c637)</a></div></div></main>

@@ -1,0 +1,43 @@
+id: R-014
+name: groupby_long_string_to_hash
+tier: 1B
+category: string_operations
+status: proposed
+statement: 'GROUP BY long_string_col →
+
+  GROUP BY cityHash64(long_string_col),
+
+  с восстановлением через any(long_string_col) в SELECT.'
+preconditions:
+  syntactic:
+  - GROUP BY содержит выражение типа String
+  semantic: []
+  data:
+  - Средняя длина строк >20-30 символов
+  user:
+  - opt-in на риск коллизий
+proof: 'cityHash64 даёт UInt64. Вероятность коллизии по birthday paradox:
+
+  P ≈ N² / (2 · 2^64).
+
+  ВАЖНО: при N=10^9 P ≈ 2.7% — это неприемлемо для строгих задач.
+
+  Правило применяется только при N < 10^7 (P < 0.003%) или
+
+  явном согласии пользователя на approximate.
+
+  Требует ресёрча: clickhouse.com/blog (поиск "cityHash").'
+explain_template: Группировка по длинным строкам дороже, потому что движку приходится часто сравнивать и хешировать большие ключи. Если использовать компактный hash от строки, состояние агрегатора становится меньше и дешевле в обработке. Это правило advisory, потому что выигрыш зависит от длины строк и допустимости риска коллизий.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT url, COUNT(*) FROM logs GROUP BY url
+example_after: SELECT any(url) AS url, COUNT(*) FROM logs GROUP BY cityHash64(url)
+expected_speedup:
+  estimate: 5-10× для строк >20 символов
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks:
+- Коллизии хеша → объединение разных групп при N > 10^7
+opt_in: true
+references: []

@@ -1,0 +1,169 @@
+<h1>AI Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">AI</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/ai-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>AI Functions</h1></header><p>AI Functions are built-in functions in ClickHouse that you can use to call AI or generate embeddings to work with your data, extract information, classify data, etc...</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>AI functions can return unpredictable outputs. The result will highly depend on the quality of the prompt and the model used.</p></div></div>
+<p>All functions are sharing a common infrastructure that provides:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Quota enforcement</strong>: Per-query limits on tokens (<a href="/docs/operations/settings/settings#ai_function_max_input_tokens_per_query"><code>ai_function_max_input_tokens_per_query</code></a>, <a href="/docs/operations/settings/settings#ai_function_max_output_tokens_per_query"><code>ai_function_max_output_tokens_per_query</code></a>) and API calls (<a href="/docs/operations/settings/settings#ai_function_max_api_calls_per_query"><code>ai_function_max_api_calls_per_query</code></a>).</li>
+<li class="custom-li"><strong>Retry with backoff</strong>: Transient failures are retried (<a href="/docs/operations/settings/settings#ai_function_max_retries"><code>ai_function_max_retries</code></a>) with exponential backoff (<a href="/docs/operations/settings/settings#ai_function_retry_initial_delay_ms"><code>ai_function_retry_initial_delay_ms</code></a>).</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="configuration">Configuration<a aria-label="Direct link to Configuration" class="hash-link" href="#configuration" title="Direct link to Configuration">​</a></h2>
+<p>AI functions reference a <strong>named collection</strong> that stores provider credentials and configuration. The first argument to each function is the name of this collection.</p>
+<p>Example statement to create a named collection with provider credentials:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE NAMED COLLECTION ai_credentials AS
+    provider = 'openai',
+    endpoint = 'https://api.openai.com/v1/chat/completions',
+    model = 'gpt-4o-mini',
+    api_key = 'sk-...';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="named-collection-parameters">Named collection parameters<a aria-label="Direct link to Named collection parameters" class="hash-link" href="#named-collection-parameters" title="Direct link to Named collection parameters">​</a></h3>
+<table><thead><tr><th>Parameter<th>Type<th>Default<th>Description<tbody><tr><td><code>provider</code><td>String<td>—<td>Model provider. Supported: <code>'openai'</code>, <code>'anthropic'</code>. See note below.<tr><td><code>endpoint</code><td>String<td>—<td>API endpoint URL.<tr><td><code>model</code><td>String<td>—<td>Model name (e.g. <code>'gpt-4o-mini'</code>, <code>'text-embedding-3-small'</code>).<tr><td><code>api_key</code><td>String<td>—<td>Authentication key for the provider.<tr><td><code>max_tokens</code><td>UInt64<td><code>1024</code><td>Maximum number of output tokens per API call.<tr><td><code>api_version</code><td>String<td>—<td>API version string. Used by Anthropic (<code>'2023-06-01'</code>).</td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Any OpenAI-compatible API (e.g. vLLM, Ollama, LiteLLM) can be used by setting <code>provider = 'openai'</code> and pointing the <code>endpoint</code> to your service.</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="query-level-settings">Query-level settings<a aria-label="Direct link to Query-level settings" class="hash-link" href="#query-level-settings" title="Direct link to Query-level settings">​</a></h3>
+<p>All AI-related settings are listed in <a href="/docs/operations/settings/settings">Settings</a> under the <code>ai_function_</code> prefix.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="restricting-endpoint-hosts">Restricting endpoint hosts<a aria-label="Direct link to Restricting endpoint hosts" class="hash-link" href="#restricting-endpoint-hosts" title="Direct link to Restricting endpoint hosts">​</a></h3>
+<p>The <code>endpoint</code> URL in an AI named collection is an outbound destination the server connects to under its own identity, carrying the named collection's <code>api_key</code> in the request headers. By default, ClickHouse permits any host. To restrict functions to a specific set of providers, configure <a href="/docs/operations/server-configuration-parameters/settings#remote_url_allow_hosts"><code>remote_url_allow_hosts</code></a> in the server config, e.g.:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;remote_url_allow_hosts&gt;
+    &lt;host&gt;api.openai.com&lt;/host&gt;
+    &lt;host&gt;api.anthropic.com&lt;/host&gt;
+&lt;/remote_url_allow_hosts&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that this setting is server-wide and applies to all HTTP-using features.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="supported-providers">Supported providers<a aria-label="Direct link to Supported providers" class="hash-link" href="#supported-providers" title="Direct link to Supported providers">​</a></h2>
+<table><thead><tr><th>Provider<th><code>provider</code> value<th>Chat functions<th>Notes<tbody><tr><td>OpenAI<td><code>'openai'</code><td>Yes<td>Default provider.<tr><td>Anthropic<td><code>'anthropic'</code><td>Yes<td>Uses <code>/v1/messages</code> endpoint.</td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="observability">Observability<a aria-label="Direct link to Observability" class="hash-link" href="#observability" title="Direct link to Observability">​</a></h2>
+<p>AI function activity is tracked through ClickHouse <a href="/docs/operations/system-tables/query_log">ProfileEvents</a>:</p>
+<table><thead><tr><th>ProfileEvent<th>Description<tbody><tr><td><code>AIAPICalls</code><td>Number of HTTP requests made to the AI provider.<tr><td><code>AIInputTokens</code><td>Total input tokens consumed.<tr><td><code>AIOutputTokens</code><td>Total output tokens consumed.<tr><td><code>AIRowsProcessed</code><td>Number of rows that received a result.<tr><td><code>AIRowsSkipped</code><td>Number of rows skipped (quota exceeded, or error with <code>ai_function_throw_on_error = 0</code>).</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>Query these events:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    ProfileEvents['AIAPICalls'] AS api_calls,
+    ProfileEvents['AIInputTokens'] AS input_tokens,
+    ProfileEvents['AIOutputTokens'] AS output_tokens
+FROM system.query_log
+WHERE query_id = 'query_id'
+AND type = 'QueryFinish'
+ORDER BY event_time DESC;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aiClassify">aiClassify<a aria-label="Direct link to aiClassify" class="hash-link" href="#aiClassify" title="Direct link to aiClassify">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Classifies the given text into one of the provided categories using an LLM provider.</p>
+<p>The function sends the text together with a fixed classification prompt and a JSON-schema response format
+constraining the model to return exactly one of the supplied labels. When the response is returned as a JSON
+object of the form <code>{"category": "..."}</code>, the label is unwrapped and the label string is returned.</p>
+<p>The first argument is a named collection that specifies the provider, model, endpoint, and API key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aiClassify(collection, text, categories[, temperature])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>AIClassify</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>collection</code> — Name of a named collection containing provider credentials and configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>text</code> — Text to classify. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>categories</code> — Constant list of candidate category labels. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+<li class="custom-li"><code>temperature</code> — Sampling temperature controlling randomness. Default: <code>0.0</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>One of the provided category labels, or the default value for the column type (empty string) if the request failed and <code>ai_function_throw_on_error</code> is disabled. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Classify sentiment</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiClassify('ai_credentials', 'I love this product!', ['positive', 'negative', 'neutral'])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">positive
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Classify a column</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT body, aiClassify('ai_credentials', body, ['bug', 'question', 'feature']) AS kind FROM issues LIMIT 5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aiExtract">aiExtract<a aria-label="Direct link to aiExtract" class="hash-link" href="#aiExtract" title="Direct link to aiExtract">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Extracts structured information from unstructured text using an LLM provider.</p>
+<p>The third argument may be either a free-form natural-language instruction (e.g. <code>'the main complaint'</code>) or a
+JSON-encoded schema of the form <code>'{"field_a": "description of field a", "field_b": "description of field b"}'</code>.</p>
+<p>In instruction mode, the function returns the extracted value as a plain string, or an empty string if nothing was found.
+In schema mode, the function returns a JSON object string whose keys match the requested schema; missing fields are <code>null</code>.</p>
+<p>The first argument is a named collection that specifies the provider, model, endpoint, and API key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aiExtract(collection, text, instruction_or_schema[, temperature])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>AIExtract</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>collection</code> — Name of a named collection containing provider credentials and configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>text</code> — Text to extract information from. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>instruction_or_schema</code> — Free-form extraction instruction, or a constant JSON object describing the fields to extract. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>temperature</code> — Sampling temperature controlling randomness. Default: <code>0.0</code>. <a href="/docs/sql-reference/data-types/float"><code>const Float64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A single extracted value (instruction mode) or a JSON object string (schema mode). Returns the default value for the column type (empty string) if the request failed and <code>ai_function_throw_on_error</code> is disabled. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Free-form instruction</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiExtract('ai_credentials', 'The package arrived late and was damaged.', 'the main complaint')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">late and damaged package
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Schema extraction</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiExtract('ai_credentials', review, '{"sentiment": "positive, negative or neutral", "topic": "main topic of the review"}') FROM reviews LIMIT 5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aiGenerate">aiGenerate<a aria-label="Direct link to aiGenerate" class="hash-link" href="#aiGenerate" title="Direct link to aiGenerate">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Generates free-form text content from a prompt using an LLM provider.</p>
+<p>The function sends the prompt to the configured AI provider and returns the generated text.
+An optional system prompt can be provided to guide the model's behavior (e.g. tone, format, role).
+If no system prompt is given, the default system prompt is: <code>You are a helpful assistant. Provide a clear and concise response.</code></p>
+<p>The first argument is a named collection that specifies the provider, model, endpoint, and API key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aiGenerate(collection, prompt[, system_prompt[, temperature]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>AIGenerate</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>collection</code> — Name of a named collection containing provider credentials and configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>prompt</code> — The user prompt or question to send to the model. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>system_prompt</code> — Optional constant system-level instruction that guides the model's behavior (e.g. persona, output format), sent along with each prompt. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>temperature</code> — Sampling temperature controlling randomness. Default: <code>0.7</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The generated text response, or the default value for the column type (empty string) if the request failed and <code>ai_function_throw_on_error</code> is disabled. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Simple question</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiGenerate('ai_credentials', 'What is 2 + 2? Reply with just the number.')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">4
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With system prompt</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiGenerate('ai_credentials', 'Explain ClickHouse', 'You are a database expert. Be concise.')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Summarize column values</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT article_title, aiGenerate('ai_credentials', concat('Summarize in one sentence: ', article_body)) AS summary FROM articles LIMIT 5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aiTranslate">aiTranslate<a aria-label="Direct link to aiTranslate" class="hash-link" href="#aiTranslate" title="Direct link to aiTranslate">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Translates the given text into the specified target language using an LLM provider.</p>
+<p>Additional style or dialect instructions may be passed as a fourth argument (e.g. <code>'keep technical terms untranslated'</code>).</p>
+<p>The first argument is a named collection that specifies the provider, model, endpoint, and API key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">aiTranslate(collection, text, target_language[, instructions[, temperature]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>AITranslate</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>collection</code> — Name of a named collection containing provider credentials and configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>text</code> — Text to translate. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>target_language</code> — Target language name or BCP-47 code (e.g. <code>'French'</code>, <code>'es-MX'</code>). <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>instructions</code> — Optional constant additional instructions for the translator. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>temperature</code> — Sampling temperature controlling randomness. Default: <code>0.3</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The translated text, or the default value for the column type (empty string) if the request failed and <code>ai_function_throw_on_error</code> is disabled. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Translate to French</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiTranslate('ai_credentials', 'Hello, world!', 'French')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Bonjour le monde!
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Translate to Japanese with style instructions</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT aiTranslate('ai_credentials', body, 'Japanese', 'Use polite form (desu/masu)') FROM articles LIMIT 5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/overview"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Overview</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/arithmetic-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Arithmetic</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#configuration">Configuration</a><ul><li><a class="table-of-contents__link toc-highlight" href="#named-collection-parameters">Named collection parameters</a><li><a class="table-of-contents__link toc-highlight" href="#query-level-settings">Query-level settings</a><li><a class="table-of-contents__link toc-highlight" href="#restricting-endpoint-hosts">Restricting endpoint hosts</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#supported-providers">Supported providers</a><li><a class="table-of-contents__link toc-highlight" href="#observability">Observability</a><li><a class="table-of-contents__link toc-highlight" href="#aiClassify">aiClassify</a><li><a class="table-of-contents__link toc-highlight" href="#aiExtract">aiExtract</a><li><a class="table-of-contents__link toc-highlight" href="#aiGenerate">aiGenerate</a><li><a class="table-of-contents__link toc-highlight" href="#aiTranslate">aiTranslate</a></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

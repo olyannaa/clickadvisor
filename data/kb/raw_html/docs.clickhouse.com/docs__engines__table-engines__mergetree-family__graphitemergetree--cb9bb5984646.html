@@ -1,0 +1,219 @@
+<h1>GraphiteMergeTree table engine | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">GraphiteMergeTree</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/graphitemergetree.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>GraphiteMergeTree table engine</h1></header><p>This engine is designed for thinning and aggregating/averaging (rollup) <a href="http://graphite.readthedocs.io/en/latest/index.html" rel="noopener noreferrer" target="_blank">Graphite</a> data. It may be helpful to developers who want to use ClickHouse as a data store for Graphite.</p>
+<p>You can use any ClickHouse table engine to store the Graphite data if you do not need rollup, but if you need a rollup use <code>GraphiteMergeTree</code>. The engine reduces the volume of storage and increases the efficiency of queries from Graphite.</p>
+<p>The engine inherits properties from <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="creating-table">Creating a table<a aria-label="Direct link to Creating a table" class="hash-link" href="#creating-table" title="Direct link to Creating a table">​</a></h2>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    Path String,
+    Time DateTime,
+    Value Float64,
+    Version &lt;Numeric_type&gt;
+    ...
+) ENGINE = GraphiteMergeTree(config_section)
+[PARTITION BY expr]
+[ORDER BY expr]
+[SAMPLE BY expr]
+[SETTINGS name=value, ...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See a detailed description of the <a href="/docs/sql-reference/statements/create/table">CREATE TABLE</a> query.</p>
+<p>A table for the Graphite data should have the following columns for the following data:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Metric name (Graphite sensor). Data type: <code>String</code>.</p>
+</li>
+<li class="custom-li">
+<p>Time of measuring the metric. Data type: <code>DateTime</code>.</p>
+</li>
+<li class="custom-li">
+<p>Value of the metric. Data type: <code>Float64</code>.</p>
+</li>
+<li class="custom-li">
+<p>Version of the metric. Data type: any numeric (ClickHouse saves the rows with the highest version or the last written if versions are the same. Other rows are deleted during the merge of data parts).</p>
+</li>
+</ul>
+<p>The names of these columns should be set in the rollup configuration.</p>
+<p><strong>GraphiteMergeTree parameters</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>config_section</code> — Name of the section in the configuration file, where are the rules of rollup set.</li>
+</ul>
+<p><strong>Query clauses</strong></p>
+<p>When creating a <code>GraphiteMergeTree</code> table, the same <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-creating-a-table">clauses</a> are required, as when creating a <code>MergeTree</code> table.</p>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true" markdown="1"><summary>Deprecated Method for Creating a Table</summary><div><div class="collapsibleContent_i85q"><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Do not use this method in new projects and, if possible, switch old projects to the method described above.</p></div></div><div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    EventDate Date,
+    Path String,
+    Time DateTime,
+    Value Float64,
+    Version &lt;Numeric_type&gt;
+    ...
+) ENGINE [=] GraphiteMergeTree(date-column [, sampling_expression], (primary, key), index_granularity, config_section)
+</code></pre></div><div class="activity_PoTP"></div></div><p>All of the parameters excepting <code>config_section</code> have the same meaning as in <code>MergeTree</code>.<ul class="custom-ul">
+<li class="custom-li"><code>config_section</code> — Name of the section in the configuration file, where are the rules of rollup set.</li>
+</ul></p></div></div></details>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="rollup-configuration">Rollup configuration<a aria-label="Direct link to Rollup configuration" class="hash-link" href="#rollup-configuration" title="Direct link to Rollup configuration">​</a></h2>
+<p>The settings for rollup are defined by the <a href="/docs/operations/server-configuration-parameters/settings#graphite">graphite_rollup</a> parameter in the server configuration. The name of the parameter could be any. You can create several configurations and use them for different tables.</p>
+<p>Rollup configuration structure:</p>
+<p>required-columns
+patterns</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="required-columns">Required columns<a aria-label="Direct link to Required columns" class="hash-link" href="#required-columns" title="Direct link to Required columns">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="path_column_name"><code>path_column_name</code><a aria-label="Direct link to path_column_name" class="hash-link" href="#path_column_name" title="Direct link to path_column_name">​</a></h4>
+<p><code>path_column_name</code> — The name of the column storing the metric name (Graphite sensor). Default value: <code>Path</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="time_column_name"><code>time_column_name</code><a aria-label="Direct link to time_column_name" class="hash-link" href="#time_column_name" title="Direct link to time_column_name">​</a></h4>
+<p><code>time_column_name</code> — The name of the column storing the time of measuring the metric. Default value: <code>Time</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="value_column_name"><code>value_column_name</code><a aria-label="Direct link to value_column_name" class="hash-link" href="#value_column_name" title="Direct link to value_column_name">​</a></h4>
+<p><code>value_column_name</code> — The name of the column storing the value of the metric at the time set in <code>time_column_name</code>. Default value: <code>Value</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="version_column_name"><code>version_column_name</code><a aria-label="Direct link to version_column_name" class="hash-link" href="#version_column_name" title="Direct link to version_column_name">​</a></h4>
+<p><code>version_column_name</code> — The name of the column storing the version of the metric. Default value: <code>Timestamp</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="patterns">Patterns<a aria-label="Direct link to Patterns" class="hash-link" href="#patterns" title="Direct link to Patterns">​</a></h3>
+<p>Structure of the <code>patterns</code> section:</p>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">pattern
+    rule_type
+    regexp
+    function
+pattern
+    rule_type
+    regexp
+    age + precision
+    ...
+pattern
+    rule_type
+    regexp
+    function
+    age + precision
+    ...
+pattern
+    ...
+default
+    function
+    age + precision
+    ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-important alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>Patterns must be strictly ordered:<ol class="custom-ol">
+<li class="custom-li">Patterns without <code>function</code> or <code>retention</code>.</li>
+<li class="custom-li">Patterns with both <code>function</code> and <code>retention</code>.</li>
+<li class="custom-li">Pattern <code>default</code>.</li>
+</ol></p></div></div>
+<p>When processing a row, ClickHouse checks the rules in the <code>pattern</code> sections. Each of <code>pattern</code> (including <code>default</code>) sections can contain <code>function</code> parameter for aggregation, <code>retention</code> parameters or both. If the metric name matches the <code>regexp</code>, the rules from the <code>pattern</code> section (or sections) are applied; otherwise, the rules from the <code>default</code> section are used.</p>
+<p>Fields for <code>pattern</code> and <code>default</code> sections:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>rule_type</code> - a rule's type. It's applied only to a particular metrics. The engine use it to separate plain and tagged metrics. Optional parameter. Default value: <code>all</code>.
+It's unnecessary when performance is not critical, or only one metrics type is used, e.g. plain metrics. By default only one type of rules set is created. Otherwise, if any of special types is defined, two different sets are created. One for plain metrics (root.branch.leaf) and one for tagged metrics (root.branch.leaf;tag1=value1).
+The default rules are ended up in both sets.
+Valid values:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>all</code> (default) - a universal rule, used when <code>rule_type</code> is omitted.</li>
+<li class="custom-li"><code>plain</code> - a rule for plain metrics. The field <code>regexp</code> is processed as regular expression.</li>
+<li class="custom-li"><code>tagged</code> - a rule for tagged metrics (metrics are stored in DB in the format of <code>someName?tag1=value1&amp;tag2=value2&amp;tag3=value3</code>). Regular expression must be sorted by tags' names, first tag must be <code>__name__</code> if exists. The field <code>regexp</code> is processed as regular expression.</li>
+<li class="custom-li"><code>tag_list</code> - a rule for tagged metrics, a simple DSL for easier metric description in graphite format <code>someName;tag1=value1;tag2=value2</code>, <code>someName</code>, or <code>tag1=value1;tag2=value2</code>. The field <code>regexp</code> is translated into a <code>tagged</code> rule. The sorting by tags' names is unnecessary, ti will be done automatically. A tag's value (but not a name) can be set as a regular expression, e.g. <code>env=(dev|staging)</code>.</li>
+</ul>
+</li>
+<li class="custom-li"><code>regexp</code> – A pattern for the metric name (a regular or DSL).</li>
+<li class="custom-li"><code>age</code> – The minimum age of the data in seconds.</li>
+<li class="custom-li"><code>precision</code>– How precisely to define the age of the data in seconds. Should be a divisor for 86400 (seconds in a day).</li>
+<li class="custom-li"><code>function</code> – The name of the aggregating function to apply to data whose age falls within the range <code>[age, age + precision]</code>. Accepted functions: min / max / any / avg. The average is calculated imprecisely, like the average of the averages.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="configuration-example">Configuration Example without rules types<a aria-label="Direct link to Configuration Example without rules types" class="hash-link" href="#configuration-example" title="Direct link to Configuration Example without rules types">​</a></h3>
+<div class="wrapper_EBtA" style="height:565.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;graphite_rollup&gt;
+    &lt;version_column_name&gt;Version&lt;/version_column_name&gt;
+    &lt;pattern&gt;
+        &lt;regexp&gt;click_cost&lt;/regexp&gt;
+        &lt;function&gt;any&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;5&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/pattern&gt;
+    &lt;default&gt;
+        &lt;function&gt;max&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;3600&lt;/age&gt;
+            &lt;precision&gt;300&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;3600&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/default&gt;
+&lt;/graphite_rollup&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="configuration-typed-example">Configuration Example with rules types<a aria-label="Direct link to Configuration Example with rules types" class="hash-link" href="#configuration-typed-example" title="Direct link to Configuration Example with rules types">​</a></h3>
+<div class="wrapper_EBtA" style="height:1300.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;graphite_rollup&gt;
+    &lt;version_column_name&gt;Version&lt;/version_column_name&gt;
+    &lt;pattern&gt;
+        &lt;rule_type&gt;plain&lt;/rule_type&gt;
+        &lt;regexp&gt;click_cost&lt;/regexp&gt;
+        &lt;function&gt;any&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;5&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/pattern&gt;
+    &lt;pattern&gt;
+        &lt;rule_type&gt;tagged&lt;/rule_type&gt;
+        &lt;regexp&gt;^((.*)|.)min\?&lt;/regexp&gt;
+        &lt;function&gt;min&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;5&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/pattern&gt;
+    &lt;pattern&gt;
+        &lt;rule_type&gt;tagged&lt;/rule_type&gt;
+        &lt;regexp&gt;&lt;![CDATA[^someName\?(.*&amp;)*tag1=value1(&amp;|$)]]&gt;&lt;/regexp&gt;
+        &lt;function&gt;min&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;5&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/pattern&gt;
+    &lt;pattern&gt;
+        &lt;rule_type&gt;tag_list&lt;/rule_type&gt;
+        &lt;regexp&gt;someName;tag2=value2&lt;/regexp&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;5&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/pattern&gt;
+    &lt;default&gt;
+        &lt;function&gt;max&lt;/function&gt;
+        &lt;retention&gt;
+            &lt;age&gt;0&lt;/age&gt;
+            &lt;precision&gt;60&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;3600&lt;/age&gt;
+            &lt;precision&gt;300&lt;/precision&gt;
+        &lt;/retention&gt;
+        &lt;retention&gt;
+            &lt;age&gt;86400&lt;/age&gt;
+            &lt;precision&gt;3600&lt;/precision&gt;
+        &lt;/retention&gt;
+    &lt;/default&gt;
+&lt;/graphite_rollup&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Data rollup is performed during merges. Usually, for old partitions, merges are not started, so for rollup it is necessary to trigger an unscheduled merge using <a href="/docs/sql-reference/statements/optimize">optimize</a>. Or use additional tools, for example <a href="https://github.com/innogames/graphite-ch-optimizer" rel="noopener noreferrer" target="_blank">graphite-ch-optimizer</a>.</p></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/versionedcollapsingmergetree"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">VersionedCollapsingMergeTree</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/annindexes"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Exact and Approximate Vector Search</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#creating-table">Creating a table</a><li><a class="table-of-contents__link toc-highlight" href="#rollup-configuration">Rollup configuration</a><ul><li><a class="table-of-contents__link toc-highlight" href="#required-columns">Required columns</a><li><a class="table-of-contents__link toc-highlight" href="#patterns">Patterns</a><li><a class="table-of-contents__link toc-highlight" href="#configuration-example">Configuration Example without rules types</a><li><a class="table-of-contents__link toc-highlight" href="#configuration-typed-example">Configuration Example with rules types</a></li></li></li></li></ul></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

@@ -1,0 +1,92 @@
+<h1>Moving a table to another device | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">Moving a table to another device</li></ol></nav><div class="td-content"><h1>Moving a table to another device</h1><div class="lead">Moving a table to another device.</div><p>Suppose we mount a new device at path <code>/mnt/disk_1</code> and want to move <code>table_4</code> to it.</p><ol><li>Create directory on new device for ClickHouse® data. /in shell <code>mkdir /mnt/disk_1/clickhouse</code></li><li>Change ownership of created directory to ClickHouse user. /in shell <code>chown -R clickhouse:clickhouse /mnt/disk_1/clickhouse</code></li><li>Create a special storage policy which should include both disks: old and new. /in shell</li></ol><pre tabindex="0"><code class="language-markup" data-lang="markup">nano /etc/clickhouse-server/config.d/storage.xml
+###################/etc/clickhouse-server/config.d/storage.xml###########################
+&lt;yandex&gt;
+  &lt;storage_configuration&gt;
+    &lt;disks&gt;
+      &lt;!--
+          default disk is special, it always
+          exists even if not explicitly
+          configured here, but you can't change
+          it's path here (you should use &lt;path&gt;
+          on top level config instead)
+      --&gt;
+      &lt;default&gt;
+         &lt;!--
+             You can reserve some amount of free space
+             on any disk (including default) by adding
+             keep_free_space_bytes tag
+         --&gt;
+      &lt;/default&gt;
+      &lt;disk_1&gt; &lt;!-- disk name --&gt;
+          &lt;path&gt;/mnt/disk_1/clickhouse/&lt;/path&gt;
+      &lt;/disk_1&gt;
+    &lt;/disks&gt;
+    &lt;policies&gt;
+      &lt;move_from_default_to_disk_1&gt; &lt;!-- name for new storage policy --&gt;
+        &lt;volumes&gt;
+          &lt;default&gt;
+            &lt;disk&gt;default&lt;/disk&gt;
+            &lt;max_data_part_size_bytes&gt;10000000&lt;/max_data_part_size_bytes&gt;
+          &lt;/default&gt;
+          &lt;disk_1_vol&gt; &lt;!-- name of volume --&gt;
+            &lt;!--
+                we have only one disk in that volume
+                and we reference here the name of disk
+                as configured above in &lt;disks&gt; section
+            --&gt;
+            &lt;disk&gt;disk_1&lt;/disk&gt;
+          &lt;/disk_1_vol&gt;
+        &lt;/volumes&gt;
+        &lt;move_factor&gt;0.99&lt;/move_factor&gt;
+      &lt;/move_from_default_to_disk_1&gt;
+    &lt;/policies&gt;
+  &lt;/storage_configuration&gt;
+&lt;/yandex&gt;
+#########################################################################################
+</code></pre><ol><li>Update storage_policy setting of tables to new policy.</li></ol><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">ALTER</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TABLE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">table_4</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">MODIFY</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">SETTING</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">storage_policy</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">'move_from_default_to_disk_1'</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><ol><li>Wait till all parts of tables change their disk_name to new disk.</li></ol><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">name</span><span style="color:#000;font-weight:700">,</span><span style="color:#000">disk_name</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">path</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">from</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">parts</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">WHERE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">table</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">'table_4'</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">and</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">active</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">disk_name</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">path</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">sum</span><span style="color:#000;font-weight:700">(</span><span style="color:#204a87;font-weight:700">rows</span><span style="color:#000;font-weight:700">),</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">sum</span><span style="color:#000;font-weight:700">(</span><span style="color:#000">bytes_on_disk</span><span style="color:#000;font-weight:700">),</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">uniq</span><span style="color:#000;font-weight:700">(</span><span style="color:#000">partition</span><span style="color:#000;font-weight:700">),</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">count</span><span style="color:#000;font-weight:700">()</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FROM</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">parts</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">WHERE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">table</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">'table_4'</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">and</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">active</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">GROUP</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">BY</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">disk_name</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">path</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">ORDER</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">BY</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">disk_name</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">path</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><ol><li>Remove ‘default’ disk from new storage policy. In server shell:</li></ol><pre tabindex="0"><code class="language-markup" data-lang="markup">nano /etc/clickhouse-server/config.d/storage.xml
+###################/etc/clickhouse-server/config.d/storage.xml###########################
+&lt;yandex&gt;
+  &lt;storage_configuration&gt;
+    &lt;disks&gt;
+      &lt;!--
+          default disk is special, it always
+          exists even if not explicitly
+          configured here, but you can't change
+          it's path here (you should use &lt;path&gt;
+          on top level config instead)
+      --&gt;
+      &lt;default&gt;
+         &lt;!--
+             You can reserve some amount of free space
+             on any disk (including default) by adding
+             keep_free_space_bytes tag
+         --&gt;
+      &lt;/default&gt;
+      &lt;disk_1&gt; &lt;!-- disk name --&gt;
+          &lt;path&gt;/mnt/disk_1/clickhouse/&lt;/path&gt;
+      &lt;/disk_1&gt;
+    &lt;/disks&gt;
+    &lt;policies&gt;
+      &lt;move_from_default_to_disk_1&gt; &lt;!-- name for new storage policy --&gt;
+        &lt;volumes&gt;
+          &lt;disk_1_vol&gt; &lt;!-- name of volume --&gt;
+            &lt;!--
+                we have only one disk in that volume
+                and we reference here the name of disk
+                as configured above in &lt;disks&gt; section
+            --&gt;
+            &lt;disk&gt;disk_1&lt;/disk&gt;
+          &lt;/disk_1_vol&gt;
+        &lt;/volumes&gt;
+        &lt;move_factor&gt;0.99&lt;/move_factor&gt;
+      &lt;/move_from_default_to_disk_1&gt;
+    &lt;/policies&gt;
+  &lt;/storage_configuration&gt;
+&lt;/yandex&gt;
+#########################################################################################
+</code></pre><p>ClickHouse wouldn’t auto reload config, because we removed some disks from storage policy, so we need to restart it by hand.</p><ol><li>Restart ClickHouse server.</li><li>Make sure that storage policy uses the right disks.</li></ol><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">*</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FROM</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">storage_policies</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">WHERE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">policy_name</span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#4e9a06">'move_from_default_to_disk_1'</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><div class="td-page-meta__lastmod">Last modified 2024.07.30: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4a96398d6e97ac2935110b426947487e2e202d9">Site cleanup, mostly minor changes (a4a9639)</a></div></div></main>

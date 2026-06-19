@@ -1,0 +1,33 @@
+{
+  "statement_id": "main",
+  "explain_kind": "ESTIMATE",
+  "generated_at": "2026-05-25T10:20:30Z",
+  "clickhouse_version": "25.3.2.5",
+  "payload": {
+    "Plan": {
+      "Node Type": "Expression",
+      "Plans": [
+        {
+          "Node Type": "Aggregating",
+          "Description": "count(DISTINCT user_id)",
+          "Plans": [
+            {
+              "Node Type": "ReadFromMergeTree",
+              "Description": "analytics.events",
+              "Indexes": [
+                {
+                  "Type": "Partition",
+                  "Keys": ["event_date"]
+                }
+              ],
+              "Estimate": {
+                "rows": 18200000,
+                "marks": 2210
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

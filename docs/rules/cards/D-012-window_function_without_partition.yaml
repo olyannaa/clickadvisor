@@ -1,0 +1,30 @@
+id: D-012
+name: window_function_without_partition
+tier: detector
+category: memory_risk
+status: proposed
+statement: OVER () без PARTITION BY
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '21.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: medium
+detection_method:
+  ast_pattern: OVER () без PARTITION BY
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"Window без PARTITION BY требует O(N) памяти. Добавьте partition-ключ."'
+false_positives: []

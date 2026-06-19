@@ -1,0 +1,15 @@
+# index \& column files \| Altinity® Knowledge Base for ClickHouse®
+
+
+1. [Engines](/engines/)
+2. [MergeTree table engine family](/engines/mergetree-table-engine-family/)
+3. index \& column files
+# index \& column files
+
+![Key Condition](/assets/2021-04-20_10-50.png)
+
+![Links](/assets/2021-04-20_10-54.png)
+
+[https://github.com/ClickHouse/clickhouse\-presentations/blob/master/meetup27/adaptive\_index\_granularity.pdf](https://github.com/ClickHouse/clickhouse-presentations/blob/master/meetup27/adaptive_index_granularity.pdf)
+
+Last modified 2021\.08\.24: [Format corrections and spell checks. (c865e00\)](https://github.com/Altinity/altinityknowledgebase/commit/c865e00c9976c80fb48234e9f1d09992e654a557)

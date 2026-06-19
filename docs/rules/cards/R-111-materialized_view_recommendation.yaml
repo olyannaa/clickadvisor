@@ -1,0 +1,32 @@
+id: R-111
+name: materialized_view_recommendation
+tier: '2'
+category: query_plan
+status: proposed
+statement: Создать MV для повторяющегося aggregation-pattern
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - pattern повторяется >50 раз/час
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: ''
+  baseline: ''
+  projected: ''
+ddl_template: '`CREATE MATERIALIZED VIEW mv ENGINE = AggregatingMergeTree AS SELECT
+  ...`'

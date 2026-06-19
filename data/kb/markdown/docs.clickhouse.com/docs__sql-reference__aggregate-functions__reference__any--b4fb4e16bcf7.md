@@ -1,0 +1,87 @@
+# any \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- any
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/any.md)# any
+
+## any[​](#any "Direct link to any")
+
+
+Introduced in: v1\.1\.0
+
+
+Selects the first encountered value of a column.
+
+
+NoteAs a query can be executed in arbitrary order, the result of this function is non\-deterministic. If you need an arbitrary but deterministic result, use functions min or max.
+
+
+By default, the function never returns NULL, i.e. ignores NULL values in the input column.
+However, if the function is used with the `RESPECT NULLS` modifier, it returns the first value reads no matter if NULL or not.
+
+
+**Implementation details**
+
+
+In some cases, you can rely on the order of execution.
+This applies to cases when `SELECT` comes from a subquery that uses `ORDER BY`.
+
+
+When a `SELECT` query has the `GROUP BY` clause or at least one aggregate function, ClickHouse (in contrast to MySQL) requires that all expressions in the `SELECT`, `HAVING`, and `ORDER BY` clauses be calculated from keys or from aggregate functions.
+In other words, each column selected from the table must be used either in keys or inside aggregate functions.
+To get behavior like in MySQL, you can put the other columns in the `any` aggregate function.
+
+
+NoteThe return type of the function is the same as the input, except for LowCardinality which is discarded.
+This means that given no rows as input it will return the default value of that type (0 for integers, or Null for a Nullable() column).
+You might use the \-OrNull combinator to modify this behaviour.
+
+
+**Syntax**
+
+
+
+```
+any(column)[ RESPECT NULLS]
+
+```
+
+**Aliases**: `any_value`, `first_value`
+
+
+**Arguments**
+
+
+- `column` — The column name. [`Any`](/docs/sql-reference/data-types)
+
+
+**Returned value**
+
+
+Returns the first value encountered.
+[`Any`](/docs/sql-reference/data-types)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+CREATE TABLE tab (city Nullable(String)) ENGINE=Memory;
+INSERT INTO tab (city) VALUES (NULL), ('Amsterdam'), ('New York'), ('Tokyo'), ('Valencia'), (NULL);
+SELECT any(city), anyRespectNulls(city) FROM tab;
+
+```
+
+
+```
+┌─any(city)─┬─anyRespectNulls(city)─┐
+│ Amsterdam │ ᴺᵁᴸᴸ                  │
+└───────────┴───────────────────────┘
+
+```
+[PreviousanalysisOfVariance](/docs/sql-reference/aggregate-functions/reference/analysis_of_variance)[NextanyHeavy](/docs/sql-reference/aggregate-functions/reference/anyheavy)- [any](#any)
+Was this page helpful?

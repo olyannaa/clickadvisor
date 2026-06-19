@@ -1,0 +1,76 @@
+# corrStable \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- corrStable
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/corrStable.md)# corrStable
+
+## corrStable[​](#corrStable "Direct link to corrStable")
+
+
+Introduced in: v1\.1\.0
+
+
+Calculates the [Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient):
+
+
+Σ(x−xˉ)(y−yˉ)Σ(x−xˉ)2∗Σ(y−yˉ)2\\frac{\\Sigma{(x \- \\bar{x})(y \- \\bar{y})}}{\\sqrt{\\Sigma{(x \- \\bar{x})^2} \* \\Sigma{(y \- \\bar{y})^2}}}Σ(x−xˉ)2∗Σ(y−yˉ​)2​Σ(x−xˉ)(y−yˉ​)​
+  
+
+Similar to the [`corr`](/docs/sql-reference/aggregate-functions/reference/corr) function, but uses a numerically stable algorithm.
+As a result, `corrStable` is slower than `corr` but produces a more accurate result.
+
+
+**Syntax**
+
+
+
+```
+corrStable(x, y)
+
+```
+
+**Arguments**
+
+
+- `x` — First variable. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal`](/docs/sql-reference/data-types/decimal)
+- `y` — Second variable. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the Pearson correlation coefficient. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Basic correlation calculation with stable algorithm**
+
+
+
+```
+DROP TABLE IF EXISTS series;
+CREATE TABLE series
+(
+    i UInt32,
+    x_value Float64,
+    y_value Float64
+)
+ENGINE = Memory;
+INSERT INTO series(i, x_value, y_value) VALUES (1, 5.6, -4.4),(2, -9.6, 3),(3, -1.3, -4),(4, 5.3, 9.7),(5, 4.4, 0.037),(6, -8.6, -7.8),(7, 5.1, 9.3),(8, 7.9, -3.6),(9, -8.2, 0.62),(10, -3, 7.3);
+
+SELECT corrStable(x_value, y_value)
+FROM series
+
+```
+
+
+```
+┌─corrStable(x_value, y_value)─┐
+│          0.17302657554532558 │
+└──────────────────────────────┘
+
+```
+[PreviouscorrMatrix](/docs/sql-reference/aggregate-functions/reference/corrmatrix)[Nextcount](/docs/sql-reference/aggregate-functions/reference/count)- [corrStable](#corrStable)
+Was this page helpful?

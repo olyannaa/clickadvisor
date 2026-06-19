@@ -1,0 +1,202 @@
+<h1>Aggregate Function Combinators | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/aggregate-functions" itemprop="item"><span itemprop="name">Aggregate functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Combinators</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/combinators.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Aggregate Function Combinators</h1></header><p>The name of an aggregate function can have a suffix appended to it. This changes the way the aggregate function works.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-if">-If<a aria-label="Direct link to -If" class="hash-link" href="#-if" title="Direct link to -If">​</a></h2>
+<p>The suffix -If can be appended to the name of any aggregate function. In this case, the aggregate function accepts an extra argument – a condition (Uint8 type). The aggregate function processes only the rows that trigger the condition. If the condition was not triggered even once, it returns a default value (usually zeros or empty strings).</p>
+<p>Examples: <code>sumIf(column, cond)</code>, <code>countIf(cond)</code>, <code>avgIf(x, cond)</code>, <code>quantilesTimingIf(level1, level2)(x, cond)</code>, <code>argMinIf(arg, val, cond)</code> and so on.</p>
+<p>With conditional aggregate functions, you can calculate aggregates for several conditions at once, without using subqueries and <code>JOIN</code>s. For example, conditional aggregate functions can be used to implement the segment comparison functionality.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-array">-Array<a aria-label="Direct link to -Array" class="hash-link" href="#-array" title="Direct link to -Array">​</a></h2>
+<p>The -Array suffix can be appended to any aggregate function. In this case, the aggregate function takes arguments of the 'Array(T)' type (arrays) instead of 'T' type arguments. If the aggregate function accepts multiple arguments, this must be arrays of equal lengths. When processing arrays, the aggregate function works like the original aggregate function across all array elements.</p>
+<p>Example 1: <code>sumArray(arr)</code> - Totals all the elements of all 'arr' arrays. In this example, it could have been written more simply: <code>sum(arraySum(arr))</code>.</p>
+<p>Example 2: <code>uniqArray(arr)</code> – Counts the number of unique elements in all 'arr' arrays. This could be done an easier way: <code>uniq(arrayJoin(arr))</code>, but it's not always possible to add 'arrayJoin' to a query.</p>
+<p>-If and -Array can be combined. However, 'Array' must come first, then 'If'. Examples: <code>uniqArrayIf(arr, cond)</code>, <code>quantilesTimingArrayIf(level1, level2)(arr, cond)</code>. Due to this order, the 'cond' argument won't be an array.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-map">-Map<a aria-label="Direct link to -Map" class="hash-link" href="#-map" title="Direct link to -Map">​</a></h2>
+<p>The -Map suffix can be appended to any aggregate function. This will create an aggregate function which gets Map type as an argument, and aggregates values of each key of the map separately using the specified aggregate function. The result is also of a Map type.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE map_map(
+    date Date,
+    timeslot DateTime,
+    status Map(String, UInt64)
+) ENGINE = MergeTree
+ORDER BY ();
+
+INSERT INTO map_map VALUES
+    ('2000-01-01', '2000-01-01 00:00:00', (['a', 'b', 'c'], [10, 10, 10])),
+    ('2000-01-01', '2000-01-01 00:00:00', (['c', 'd', 'e'], [10, 10, 10])),
+    ('2000-01-01', '2000-01-01 00:01:00', (['d', 'e', 'f'], [10, 10, 10])),
+    ('2000-01-01', '2000-01-01 00:01:00', (['f', 'g', 'g'], [10, 10, 10]));
+
+SELECT
+    timeslot,
+    sumMap(status),
+    avgMap(status),
+    minMap(status)
+FROM map_map
+GROUP BY timeslot;
+
+┌────────────timeslot─┬─sumMap(status)───────────────────────┬─avgMap(status)───────────────────────┬─minMap(status)───────────────────────┐
+│ 2000-01-01 00:00:00 │ {'a':10,'b':10,'c':20,'d':10,'e':10} │ {'a':10,'b':10,'c':10,'d':10,'e':10} │ {'a':10,'b':10,'c':10,'d':10,'e':10} │
+│ 2000-01-01 00:01:00 │ {'d':10,'e':10,'f':20,'g':20}        │ {'d':10,'e':10,'f':10,'g':10}        │ {'d':10,'e':10,'f':10,'g':10}        │
+└─────────────────────┴──────────────────────────────────────┴──────────────────────────────────────┴──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-simplestate">-SimpleState<a aria-label="Direct link to -SimpleState" class="hash-link" href="#-simplestate" title="Direct link to -SimpleState">​</a></h2>
+<p>If you apply this combinator, the aggregate function returns the same value but with a different type. This is a <a href="/docs/sql-reference/data-types/simpleaggregatefunction">SimpleAggregateFunction(...)</a> that can be stored in a table to work with <a href="/docs/engines/table-engines/mergetree-family/aggregatingmergetree">AggregatingMergeTree</a> tables.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;aggFunction&gt;SimpleState(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Aggregate function parameters.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<p>The value of an aggregate function with the <code>SimpleAggregateFunction(...)</code> type.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH anySimpleState(number) AS c SELECT toTypeName(c), c FROM numbers(1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─toTypeName(c)────────────────────────┬─c─┐
+│ SimpleAggregateFunction(any, UInt64) │ 0 │
+└──────────────────────────────────────┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-state">-State<a aria-label="Direct link to -State" class="hash-link" href="#-state" title="Direct link to -State">​</a></h2>
+<p>If you apply this combinator, the aggregate function does not return the resulting value (such as the number of unique values for the <a href="/docs/sql-reference/aggregate-functions/reference/uniq">uniq</a> function), but an intermediate state of the aggregation (for <code>uniq</code>, this is the hash table for calculating the number of unique values). This is an <code>AggregateFunction(...)</code> that can be used for further processing or stored in a table to finish aggregating later.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Please notice, that -MapState is not an invariant for the same data due to the fact that order of data in intermediate state can change, though it doesn't impact ingestion of this data.</p></div></div>
+<p>To work with these states, use:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/aggregatingmergetree">AggregatingMergeTree</a> table engine.</li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/other-functions#finalizeAggregation">finalizeAggregation</a> function.</li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/other-functions#runningAccumulate">runningAccumulate</a> function.</li>
+<li class="custom-li"><a href="#-merge">-Merge</a> combinator.</li>
+<li class="custom-li"><a href="#-mergestate">-MergeState</a> combinator.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-merge">-Merge<a aria-label="Direct link to -Merge" class="hash-link" href="#-merge" title="Direct link to -Merge">​</a></h2>
+<p>If you apply this combinator, the aggregate function takes the intermediate aggregation state as an argument, combines the states to finish aggregation, and returns the resulting value.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-mergestate">-MergeState<a aria-label="Direct link to -MergeState" class="hash-link" href="#-mergestate" title="Direct link to -MergeState">​</a></h2>
+<p>Merges the intermediate aggregation states in the same way as the -Merge combinator. However, it does not return the resulting value, but an intermediate aggregation state, similar to the -State combinator.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-foreach">-ForEach<a aria-label="Direct link to -ForEach" class="hash-link" href="#-foreach" title="Direct link to -ForEach">​</a></h2>
+<p>Converts an aggregate function for tables into an aggregate function for arrays that aggregates the corresponding array items and returns an array of results. For example, <code>sumForEach</code> for the arrays <code>[1, 2]</code>, <code>[3, 4, 5]</code>and<code>[6, 7]</code>returns the result <code>[10, 13, 5]</code> after adding together the corresponding array items.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-distinct">-Distinct<a aria-label="Direct link to -Distinct" class="hash-link" href="#-distinct" title="Direct link to -Distinct">​</a></h2>
+<p>Every unique combination of arguments will be aggregated only once. Repeating values are ignored.
+Examples: <code>sum(DISTINCT x)</code> (or <code>sumDistinct(x)</code>), <code>groupArray(DISTINCT x)</code> (or <code>groupArrayDistinct(x)</code>), <code>corrStable(DISTINCT x, y)</code> (or <code>corrStableDistinct(x, y)</code>) and so on.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-ordefault">-OrDefault<a aria-label="Direct link to -OrDefault" class="hash-link" href="#-ordefault" title="Direct link to -OrDefault">​</a></h2>
+<p>Changes behavior of an aggregate function.</p>
+<p>If an aggregate function does not have input values, with this combinator it returns the default value for its return data type. Applies to the aggregate functions that can take empty input data.</p>
+<p><code>-OrDefault</code> can be used with other combinators.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;aggFunction&gt;OrDefault(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Aggregate function parameters.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<p>Returns the default value of an aggregate function's return type if there is nothing to aggregate.</p>
+<p>Type depends on the aggregate function used.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg(number), avgOrDefault(number) FROM numbers(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─avg(number)─┬─avgOrDefault(number)─┐
+│         nan │                    0 │
+└─────────────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Also <code>-OrDefault</code> can be used with another combinators. It is useful when the aggregate function does not accept the empty input.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avgOrDefaultIf(x, x &gt; 10)
+FROM
+(
+    SELECT toDecimal32(1.23, 2) AS x
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─avgOrDefaultIf(x, greater(x, 10))─┐
+│                              0.00 │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-ornull">-OrNull<a aria-label="Direct link to -OrNull" class="hash-link" href="#-ornull" title="Direct link to -OrNull">​</a></h2>
+<p>Changes behavior of an aggregate function.</p>
+<p>This combinator converts a result of an aggregate function to the <a href="/docs/sql-reference/data-types/nullable">Nullable</a> data type. If the aggregate function does not have values to calculate it returns <a href="/docs/operations/settings/formats#input_format_null_as_default">NULL</a>.</p>
+<p><code>-OrNull</code> can be used with other combinators.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;aggFunction&gt;OrNull(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Aggregate function parameters.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">The result of the aggregate function, converted to the <code>Nullable</code> data type.</li>
+<li class="custom-li"><code>NULL</code>, if there is nothing to aggregate.</li>
+</ul>
+<p>Type: <code>Nullable(aggregate function return type)</code>.</p>
+<p><strong>Example</strong></p>
+<p>Add <code>-orNull</code> to the end of aggregate function.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sumOrNull(number), toTypeName(sumOrNull(number)) FROM numbers(10) WHERE number &gt; 10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─sumOrNull(number)─┬─toTypeName(sumOrNull(number))─┐
+│              ᴺᵁᴸᴸ │ Nullable(UInt64)              │
+└───────────────────┴───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Also <code>-OrNull</code> can be used with another combinators. It is useful when the aggregate function does not accept the empty input.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avgOrNullIf(x, x &gt; 10)
+FROM
+(
+    SELECT toDecimal32(1.23, 2) AS x
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─avgOrNullIf(x, greater(x, 10))─┐
+│                           ᴺᵁᴸᴸ │
+└────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-resample">-Resample<a aria-label="Direct link to -Resample" class="hash-link" href="#-resample" title="Direct link to -Resample">​</a></h2>
+<p>Lets you divide data into groups, and then separately aggregates the data in those groups. Groups are created by splitting the values from one column into intervals.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;aggFunction&gt;Resample(start, end, step)(&lt;aggFunction_params&gt;, resampling_key)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>start</code> — Starting value of the whole required interval for <code>resampling_key</code> values.</li>
+<li class="custom-li"><code>stop</code> — Ending value of the whole required interval for <code>resampling_key</code> values. The whole interval does not include the <code>stop</code> value <code>[start, stop)</code>.</li>
+<li class="custom-li"><code>step</code> — Step for separating the whole interval into subintervals. The <code>aggFunction</code> is executed over each of those subintervals independently.</li>
+<li class="custom-li"><code>resampling_key</code> — Column whose values are used for separating data into intervals.</li>
+<li class="custom-li"><code>aggFunction_params</code> — <code>aggFunction</code> parameters.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of <code>aggFunction</code> results for each subinterval.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>Consider the <code>people</code> table with the following data:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─name───┬─age─┬─wage─┐
+│ John   │  16 │   10 │
+│ Alice  │  30 │   15 │
+│ Mary   │  35 │    8 │
+│ Evelyn │  48 │ 11.5 │
+│ David  │  62 │  9.9 │
+│ Brian  │  60 │   16 │
+└────────┴─────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's get the names of the people whose age lies in the intervals of <code>[30,60)</code> and <code>[60,75)</code>. Since we use integer representation for age, we get ages in the <code>[30, 59]</code> and <code>[60,74]</code> intervals.</p>
+<p>To aggregate names in an array, we use the <a href="/docs/sql-reference/aggregate-functions/reference/grouparray">groupArray</a> aggregate function. It takes one argument. In our case, it's the <code>name</code> column. The <code>groupArrayResample</code> function should use the <code>age</code> column to aggregate names by age. To define the required intervals, we pass the <code>30, 75, 30</code> arguments into the <code>groupArrayResample</code> function.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT groupArrayResample(30, 75, 30)(name, age) FROM people
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─groupArrayResample(30, 75, 30)(name, age)─────┐
+│ [['Alice','Mary','Evelyn'],['David','Brian']] │
+└───────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Consider the results.</p>
+<p><code>John</code> is out of the sample because he's too young. Other people are distributed according to the specified age intervals.</p>
+<p>Now let's count the total number of people and their average wage in the specified age intervals.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    countResample(30, 75, 30)(name, age) AS amount,
+    avgResample(30, 75, 30)(wage, age) AS avg_wage
+FROM people
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─amount─┬─avg_wage──────────────────┐
+│ [3,2]  │ [11.5,12.949999809265137] │
+└────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-argmin">-ArgMin<a aria-label="Direct link to -ArgMin" class="hash-link" href="#-argmin" title="Direct link to -ArgMin">​</a></h2>
+<p>The suffix -ArgMin can be appended to the name of any aggregate function. In this case, the aggregate function accepts an additional argument, which should be any comparable expression. The aggregate function processes only the rows that have the minimum value for the specified extra expression.</p>
+<p>Examples: <code>sumArgMin(column, expr)</code>, <code>countArgMin(expr)</code>, <code>avgArgMin(x, expr)</code> and so on.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="-argmax">-ArgMax<a aria-label="Direct link to -ArgMax" class="hash-link" href="#-argmax" title="Direct link to -ArgMax">​</a></h2>
+<p>Similar to suffix -ArgMin but processes only the rows that have the maximum value for the specified extra expression.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related Content<a aria-label="Direct link to Related Content" class="hash-link" href="#related-content" title="Direct link to Related Content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states" rel="noopener noreferrer" target="_blank">Using Aggregate Combinators in ClickHouse</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/aggregate-functions/reference/welchttest"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">welchTTest</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/aggregate-functions/parametric-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Parametric</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#-if">-If</a><li><a class="table-of-contents__link toc-highlight" href="#-array">-Array</a><li><a class="table-of-contents__link toc-highlight" href="#-map">-Map</a><li><a class="table-of-contents__link toc-highlight" href="#-simplestate">-SimpleState</a><li><a class="table-of-contents__link toc-highlight" href="#-state">-State</a><li><a class="table-of-contents__link toc-highlight" href="#-merge">-Merge</a><li><a class="table-of-contents__link toc-highlight" href="#-mergestate">-MergeState</a><li><a class="table-of-contents__link toc-highlight" href="#-foreach">-ForEach</a><li><a class="table-of-contents__link toc-highlight" href="#-distinct">-Distinct</a><li><a class="table-of-contents__link toc-highlight" href="#-ordefault">-OrDefault</a><li><a class="table-of-contents__link toc-highlight" href="#-ornull">-OrNull</a><li><a class="table-of-contents__link toc-highlight" href="#-resample">-Resample</a><li><a class="table-of-contents__link toc-highlight" href="#-argmin">-ArgMin</a><li><a class="table-of-contents__link toc-highlight" href="#-argmax">-ArgMax</a><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related Content</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

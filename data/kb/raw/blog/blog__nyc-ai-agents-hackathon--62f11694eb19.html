@@ -1,0 +1,233 @@
+<h1>ClickHouse at the NYC AI Agents Hackathon: Building Agentic AI on Real‑Time Data</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=community">Community</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">ClickHouse at the NYC AI Agents Hackathon: Building Agentic AI on Real‑Time Data</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Fspeaker_zoe_steinkamp_4c38a288ff.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fspeaker_zoe_steinkamp_4c38a288ff.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fspeaker_zoe_steinkamp_4c38a288ff.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/zoe-steinkamp">Zoe Steinkamp</a></div><div class="text-sm text-neutral-300">Dec 8, 2025 · 9 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="summary" level="3"><strong>Summary</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#summary">#</a></span></h3>
+<ul>
+<li>
+<p>130+ builders packed Datadog’s New York office on a Saturday to ship autonomous AI agents on real data.</p>
+</li>
+<li>
+<p>ClickHouse showed up as the only database sponsor and became the default choice for data‑intensive agent stacks.</p>
+</li>
+<li>
+<p>Two standout ClickHouse‑powered projects, <strong>VitalSignal</strong> and <strong>RedBot</strong>, took home top prizes for tackling global health alerts and chatbot security.</p>
+</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="why-we-showed-up" level="3"><strong>Why we showed up</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#why-we-showed-up">#</a></span></h3>
+<p>Agentic AI is at its best when it can see <strong>fresh data</strong>, reason over it, and act quickly. That’s exactly the kind of workload ClickHouse is built for.</p>
+<p>When the organizers of the NYC AI Agents Hackathon invited us to sponsor, we saw a perfect match:</p>
+<ul>
+<li>
+<p><strong>The format:</strong> A focused Saturday event at Datadog’s NYC office with ~135 attendees and a hard timebox. That meant serious builders: roughly half the room were working software engineers, alongside ambitious students and indie hackers.</p>
+</li>
+<li>
+<p><strong>The challenge:</strong> Build autonomous agents that interact with live data and real‑world APIs.</p>
+</li>
+<li>
+<p><strong>The rules:</strong> Every team had to use at least three sponsor technologies in their stack, an ideal way to show how ClickHouse pairs with AI agents, LLMs, and orchestration tools.</p>
+</li>
+</ul>
+<p>We brought a small but mighty crew, <strong>Kevin Zhang, Nataly Merezhuk, and Zoe Steinkamp</strong>, to help teams design schemas, model event streams, and wire ClickHouse into their agents. Being the <strong>only database sponsor</strong> gave participants a clear, opinionated path for anything data‑intensive: logs, events, user profiles, vector‑like analytics, you name it.</p>
+<p>By the end of the day, roughly 20 projects were submitted, and a large share of them chose ClickHouse as their real‑time backbone.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="1.jpg" loading="lazy" src="/uploads/1_105ae81507.jpg"/></span>
+<span class="relative mb-9 flex w-full justify-center"><img alt="2.jpg" loading="lazy" src="/uploads/2_92880a2537.jpg"/></span>
+<div class="my-6"><div class="rounded-lg bg-white/10 p-4"><div class="rich_content"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="getstartedtoday" level="3">Get started today</h3>
+<p>Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.</p></div><a class="w-full" href="https://clickhouse.cloud/signUp?loc=blog-global-cta&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog" target="_self"><button class="styles_button__3smpn mt-6 w-full font-medium" data-type="primary"><span class="flex items-center whitespace-nowrap">Sign up</span></button></a></div></div>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="first-place---vitalsignal" level="3"><strong>First Place - VitalSignal</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#first-place---vitalsignal">#</a></span></h3>
+<p><strong>What they built</strong></p>
+<p><strong>VitalSignal</strong> is an autonomous AI agent that delivers <strong>personalized global disease outbreak alerts</strong>. It continuously monitors health‑related signals, runs multi‑factor risk analysis by region and user profile, and pushes timely, tailored alerts to people who might be affected.</p>
+<p>The core problem: in a world of constant health crises, it’s hard to know <strong>what matters to you and your loved ones</strong> until it’s already mainstream news, often too late.</p>
+<p><strong>How it works</strong></p>
+<p>ClickHouse sits at the <strong>center of the architecture</strong>, storing:</p>
+<ul>
+<li>
+<p>User profiles and preferences</p>
+</li>
+<li>
+<p>Scraped and streamed JSON alerts</p>
+</li>
+<li>
+<p>Metadata from other tools (e.g., images and structured outputs)</p>
+</li>
+<li>
+<p>Sponsor tools like <strong>Airia</strong>, <strong>Structify</strong>, and <strong>PhenoML</strong> help extract and structure signals before they land in ClickHouse.</p>
+</li>
+<li>
+<p>An autonomous agent layer continuously evaluates new events, calculates risk scores, and triggers notifications.</p>
+</li>
+</ul>
+<p>Because ClickHouse can ingest diverse data types and query them in real time, the builder could experiment quickly without worrying about infrastructure limits.</p>
+<p><strong>Inspiration</strong></p>
+<p>The idea came from a mix of the hackathon prompt and a deeply personal frustration:</p>
+<p>“I have family in different parts of the world and often find out about health crises in their area only once it hits mainstream news. I wanted an agent that makes this information accessible sooner, in a way that’s actually personalized.”</p>
+<p>Health as a “live data source that’s critically important but overwhelming” turned out to be the perfect canvas for an agentic build.</p>
+<p><strong>Build approach</strong></p>
+<p>The VitalSignal creator treated the hackathon like a deployment day, not a brainstorming session:</p>
+<p><strong>Decisions first, hacking second</strong>:</p>
+<ul>
+<li>Chose ClickHouse as the database early.</li>
+<li>Pre‑created accounts and API keys for sponsor tools.</li>
+</ul>
+<p><strong>Docs‑driven development</strong>:</p>
+<ul>
+<li>Used an LLM for a quick overview of each tool.</li>
+<li>Relied on official docs for actual implementation details.</li>
+</ul>
+<p><strong>Stable core, then integrations</strong>:</p>
+<ul>
+<li>Built the simplest end‑to‑end workflow first.</li>
+<li>Iteratively layered in more tools and features once the base was solid.</li>
+</ul>
+<p><strong>The hardest part (and how they solved it)</strong></p>
+<p>The real challenge wasn’t just technical; it was orchestration of both tools and time:</p>
+<ul>
+<li>
+<p>Technically, orchestrating <strong>six new platforms</strong> under a 5.5‑hour deadline was intense. Having a fast, reliable database at the core meant every new data type “just worked” when added to ClickHouse.</p>
+</li>
+<li>
+<p>Personally, the biggest struggle was <strong>knowing when to stop</strong>. With everything running smoothly, it was tempting to keep adding “just one more feature.”</p>
+</li>
+</ul>
+<p>The key lesson: in a time‑boxed hackathon, the hardest skill is recognizing when you have a <strong>“good enough” end‑to‑end solution</strong> and having the discipline to ship it.</p>
+<p><strong>Why ClickHouse mattered</strong></p>
+<p>For VitalSignal, ClickHouse was a multiplier:</p>
+<p>“I never once had to worry about database limitations. Whether I was storing user profiles, scraped JSON alerts, or image metadata, I knew ClickHouse could handle it and that queries would be lightning‑fast. That confidence let me stay ambitious and build the features that made the project a winner.”</p>
+<p><strong>What’s next</strong></p>
+<p>The plan is to use sponsor credits to turn VitalSignal from prototype into a full‑scale project:</p>
+<ul>
+<li>
+<p>Refine the architecture for long‑term reliability and scalability.</p>
+</li>
+<li>
+<p>Get an initial set of real users to test and shape the experience.</p>
+</li>
+<li>
+<p>Explore how to keep the app <strong>accessible and free</strong> for the people who need it most.</p>
+</li>
+</ul>
+<p><strong>Advice to future hackers</strong></p>
+<ul>
+<li>
+<p>Be <strong>strategic with tools</strong>, don’t integrate everything, integrate the <em>right</em> things.</p>
+</li>
+<li>
+<p>Make your <strong>core architectural decisions early</strong>.</p>
+</li>
+<li>
+<p>Define your MVP ruthlessly and build an end‑to‑end experience that actually works.</p>
+</li>
+<li>
+<p>A small, polished project beats an ambitious, half‑broken one every time.</p>
+</li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="3.jpg" loading="lazy" src="/uploads/3_e752d8d93d.jpg"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="second-place---redbot" level="3"><strong>Second Place - RedBot</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#second-place---redbot">#</a></span></h3>
+<p><strong>What they built</strong></p>
+<p><strong>RedBot</strong> is an autonomous AI agent that <strong>attacks chatbot endpoints</strong> on your behalf, safely.</p>
+<p>It probes your deployed chatbots, looks for vulnerabilities (prompt injection, data leakage, misconfigurations), and then generates <strong>prescriptive remediation plans</strong>, complete with <strong>ROI‑aware recommendations</strong> so teams know which fixes matter most.</p>
+<p>As more companies embed chatbots into websites, from car dealerships to marketplaces, security often lags behind adoption. RedBot aims to close that gap.</p>
+<p><strong>How it works</strong></p>
+<p>The team splits responsibilities across:</p>
+<ul>
+<li><strong>Data ingestion:</strong> Crawling chatbot endpoints and collecting responses.</li>
+<li><strong>Agent design:</strong> Crafting attack strategies and analysis loops.</li>
+<li><strong>UI:</strong> A simple interface where users can point RedBot at their own bots and review findings.</li>
+</ul>
+<p>ClickHouse handles the <strong>large datasets</strong> generated by repeated attacks and tests:</p>
+<ul>
+<li>Storing prompts, responses, and vulnerability signals.</li>
+<li>Powering fast queries to slice results by endpoint, attack type, severity, and more.</li>
+</ul>
+<p>The result is a system where teams can run many tests, then quickly zoom in on the riskiest behavior.</p>
+<p><strong>Inspiration</strong></p>
+<p>The starting point was a simple observation:</p>
+<p>AI chatbots are everywhere on production websites, but security is often an afterthought.</p>
+<p>The team wanted a tool that any developer or security engineer could use to <strong>self‑assess</strong> their own chatbot, no red‑team background required.</p>
+<p><strong>Build approach</strong></p>
+<p>With limited time, the team optimized for a <strong>functional prototype</strong>:</p>
+<ul>
+<li>
+<p>Clear division of labor: one person on ingestion, one on agent logic, one on UI.</p>
+</li>
+<li>
+<p>Early decision to use ClickHouse for speed and scalability, so they wouldn’t hit a wall as data volumes grew.</p>
+</li>
+<li>
+<p>Ruthless prioritization of core flows over “nice‑to‑have” features.</p>
+</li>
+</ul>
+<p>Integrating all the moving parts under hackathon pressure was the toughest challenge. The team stayed unblocked through <strong>tight communication</strong> and fast iteration cycles.</p>
+<p><strong>What’s next</strong></p>
+<ul>
+<li>
+<p>Refining the UI to make results even easier to interpret.</p>
+</li>
+<li>
+<p>Adding more advanced testing modes and integrations with other platforms.</p>
+</li>
+<li>
+<p>Incorporating user feedback to expand coverage of common chatbot architectures and frameworks.</p>
+</li>
+</ul>
+<p><strong>Advice to future hackers</strong></p>
+<ul>
+<li>
+<p>Start with a <strong>project that clearly delivers user value</strong>.</p>
+</li>
+<li>
+<p>Focus on a <strong>Minimum Viable Product</strong> that you can actually demo end‑to‑end.</p>
+</li>
+<li>
+<p>Lean into your teammates’ strengths and <strong>don’t hesitate to ask mentors for help</strong>, especially on architecture and stack choices.</p>
+</li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="4.jpg" loading="lazy" src="/uploads/4_9f0f746d9b.jpg"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="what-we-saw-across-teams" level="3"><strong>What we saw across teams</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#what-we-saw-across-teams">#</a></span></h3>
+<p>Stepping back from the winners, a few patterns stood out across the room:</p>
+<p><strong>Agents + real‑time data = default pattern</strong></p>
+<p>Teams weren’t just calling LLMs, they were building loops: ingest data → store in ClickHouse → compute features → let agents act. ClickHouse became the natural “source of truth” for events, logs, and metrics.</p>
+<p><strong>Weekends attract serious builders</strong></p>
+<p>Running the hackathon on a Saturday shifted the mix toward working engineers who were there to <strong>learn fast, build hard, and (hopefully) win prizes</strong>, alongside motivated students.</p>
+<p><strong>Stacks built around sponsor tech</strong></p>
+<p>Because teams had to use three sponsor technologies, we saw a common pattern: one AI‑agent platform + an LLM API + ClickHouse for analytics and state.</p>
+<p><strong>In‑person mentorship really matters</strong></p>
+<p>Sponsors that showed up in person and stayed active throughout the day saw significantly more adoption. Having multiple ClickHouse engineers on site let us:</p>
+<ul>
+<li>
+<p>Pair program on schema design and queries</p>
+</li>
+<li>
+<p>Help debug integrations quickly</p>
+</li>
+<li>
+<p>Suggest patterns that turned “it sort of works” into “this feels production‑grade”</p>
+</li>
+<li>
+<p>Meaningful prizes drive exploration</p>
+</li>
+</ul>
+<p>Offering a strong ClickHouse‑specific prize made it easier for teams to justify building something <strong>data‑intensive</strong> rather than a minimal demo. It’s a simple signal: if you invest in real‑time analytics, we’ll invest in you.</p>
+<p><strong>MVPs over grand visions</strong></p>
+<p>The most successful teams narrowed their scope aggressively:
+Picked a real problem (health alerts, chatbot security)</p>
+<ul>
+<li>Shipped a narrow but usable loop</li>
+<li>Used ClickHouse so they wouldn’t get blocked by performance or schema changes mid‑build</li>
+</ul>
+<p>For us, the big takeaway: <strong>agentic AI + real‑time analytics is already a natural pairing</strong> for builders. Hackathons like this just make that visible in one intense, high‑energy day.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="5.jpg" loading="lazy" src="/uploads/5_29742634de.jpg"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="thank-you" level="3"><strong>Thank you</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/nyc-ai-agents-hackathon#thank-you">#</a></span></h3>
+<p>Huge thanks to:</p>
+<ul>
+<li>
+<p><strong>The organizers and Datadog</strong> for hosting a packed, high‑energy event in New York.</p>
+</li>
+<li>
+<p><strong>Every hacker, engineer, and student</strong> who spent their Saturday experimenting with agentic AI and pushing ClickHouse in creative ways.</p>
+</li>
+<li>
+<p>Our fellow sponsors and mentors who helped shape ambitious ideas into working demos.</p>
+</li>
+</ul>
+<p>We’re excited to keep showing up where builders are, especially at hackathons focused on <strong>AI agents, live data, and real‑time decision‑making</strong>.</p>
+<p>If you’re organizing an AI or data‑focused hackathon and want ClickHouse involved as a sponsor, mentor, or technical partner. We’d love to hear from you.</p>
+<div class="my-6"><div class="rounded-lg bg-white/10 p-4"><div class="rich_content"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="getstartedtoday" level="3">Get started today</h3>
+<p>Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.</p></div><a class="w-full" href="https://clickhouse.cloud/signUp?loc=blog-global-cta&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog" target="_self"><button class="styles_button__3smpn mt-6 w-full font-medium" data-type="primary"><span class="flex items-center whitespace-nowrap">Sign up</span></button></a></div></div></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

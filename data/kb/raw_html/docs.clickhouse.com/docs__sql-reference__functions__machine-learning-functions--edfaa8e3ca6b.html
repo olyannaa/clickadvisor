@@ -1,0 +1,129 @@
+<h1>Machine Learning Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Machine Learning</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/machine-learning-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Machine Learning Functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="evalmlmethod">evalMLMethod<a aria-label="Direct link to evalMLMethod" class="hash-link" href="#evalmlmethod" title="Direct link to evalMLMethod">​</a></h2>
+<p>Prediction using fitted regression models uses <code>evalMLMethod</code> function. See link in <code>linearRegression</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="stochasticlinearregression">stochasticLinearRegression<a aria-label="Direct link to stochasticLinearRegression" class="hash-link" href="#stochasticlinearregression" title="Direct link to stochasticLinearRegression">​</a></h2>
+<p>The <a href="/docs/sql-reference/aggregate-functions/reference/stochasticlinearregression">stochasticLinearRegression</a> aggregate function implements stochastic gradient descent method using linear model and MSE loss function. Uses <code>evalMLMethod</code> to predict on new data.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="stochasticlogisticregression">stochasticLogisticRegression<a aria-label="Direct link to stochasticLogisticRegression" class="hash-link" href="#stochasticlogisticregression" title="Direct link to stochasticLogisticRegression">​</a></h2>
+<p>The <a href="/docs/sql-reference/aggregate-functions/reference/stochasticlogisticregression">stochasticLogisticRegression</a> aggregate function implements stochastic gradient descent method for binary classification problem. Uses <code>evalMLMethod</code> to predict on new data.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="naivebayesclassifier">naiveBayesClassifier<a aria-label="Direct link to naiveBayesClassifier" class="hash-link" href="#naivebayesclassifier" title="Direct link to naiveBayesClassifier">​</a></h2>
+<p>Classifies input text using a Naive Bayes model with n-grams and Laplace smoothing. The model must be configured in ClickHouse before use.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">naiveBayesClassifier(model_name, input_text);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>model_name</code> — Name of the pre-configured model. <a href="/docs/sql-reference/data-types/string">String</a>
+The model must be defined in ClickHouse's configuration files (see below).</li>
+<li class="custom-li"><code>input_text</code> — Text to classify. <a href="/docs/sql-reference/data-types/string">String</a>
+Input is processed exactly as provided (case/punctuation preserved).</li>
+</ul>
+<p><strong>Returned Value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Predicted class ID as an unsigned integer. <a href="/docs/sql-reference/data-types/int-uint">UInt32</a>
+Class IDs correspond to categories defined during model construction.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>Classify text with a language detection model:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT naiveBayesClassifier('language', 'How are you?');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─naiveBayesClassifier('language', 'How are you?')─┐
+│ 0                                                │
+└──────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><em>Result <code>0</code> might represent English, while <code>1</code> could indicate French - class meanings depend on your training data.</em></p>
+<hr/>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="implementation-details">Implementation Details<a aria-label="Direct link to Implementation Details" class="hash-link" href="#implementation-details" title="Direct link to Implementation Details">​</a></h3>
+<p><strong>Algorithm</strong>
+Uses Naive Bayes classification algorithm with <a href="https://en.wikipedia.org/wiki/Additive_smoothing" rel="noopener noreferrer" target="_blank">Laplace smoothing</a> to handle unseen n-grams based on n-gram probabilities based on <a href="https://web.stanford.edu/~jurafsky/slp3/4.pdf" rel="noopener noreferrer" target="_blank">this</a>.</p>
+<p><strong>Key Features</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Supports n-grams of any size</li>
+<li class="custom-li">Three tokenization modes:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>byte</code>: Operates on raw bytes. Each byte is one token.</li>
+<li class="custom-li"><code>codepoint</code>: Operates on Unicode scalar values decoded from UTF‑8. Each codepoint is one token.</li>
+<li class="custom-li"><code>token</code>: Splits on runs of Unicode whitespace (regex \s+). Tokens are substrings of non‑whitespace; punctuation is part of the token if adjacent (e.g., "you?" is one token).</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="model-configuration">Model Configuration<a aria-label="Direct link to Model Configuration" class="hash-link" href="#model-configuration" title="Direct link to Model Configuration">​</a></h3>
+<p>You can find sample source code for creating a Naive Bayes model for language detection <a href="https://github.com/nihalzp/ClickHouse-NaiveBayesClassifier-Models" rel="noopener noreferrer" target="_blank">here</a>.</p>
+<p>Additionally, sample models and their associated config files are available <a href="https://github.com/nihalzp/ClickHouse-NaiveBayesClassifier-Models/tree/main/models" rel="noopener noreferrer" target="_blank">here</a>.</p>
+<p>Here is an example configuration for a naive Bayes model in ClickHouse:</p>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;nb_models&gt;
+        &lt;model&gt;
+            &lt;name&gt;sentiment&lt;/name&gt;
+            &lt;path&gt;/etc/clickhouse-server/config.d/sentiment.bin&lt;/path&gt;
+            &lt;n&gt;2&lt;/n&gt;
+            &lt;mode&gt;token&lt;/mode&gt;
+            &lt;alpha&gt;1.0&lt;/alpha&gt;
+            &lt;priors&gt;
+                &lt;prior&gt;
+                    &lt;class&gt;0&lt;/class&gt;
+                    &lt;value&gt;0.6&lt;/value&gt;
+                &lt;/prior&gt;
+                &lt;prior&gt;
+                    &lt;class&gt;1&lt;/class&gt;
+                    &lt;value&gt;0.4&lt;/value&gt;
+                &lt;/prior&gt;
+            &lt;/priors&gt;
+        &lt;/model&gt;
+    &lt;/nb_models&gt;
+&lt;/clickhouse&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Configuration Parameters</strong></p>
+<table><thead><tr><th>Parameter<th>Description<th>Example<th>Default<tbody><tr><td><strong>name</strong><td>Unique model identifier<td><code>language_detection</code><td><em>Required</em><tr><td><strong>path</strong><td>Full path to model binary<td><code>/etc/clickhouse-server/config.d/language_detection.bin</code><td><em>Required</em><tr><td><strong>mode</strong><td>Tokenization method:<br/>- <code>byte</code>: Byte sequences<br/>- <code>codepoint</code>: Unicode characters<br/>- <code>token</code>: Word tokens<td><code>token</code><td><em>Required</em><tr><td><strong>n</strong><td>N-gram size (<code>token</code> mode):<br/>- <code>1</code>=single word<br/>- <code>2</code>=word pairs<br/>- <code>3</code>=word triplets<td><code>2</code><td><em>Required</em><tr><td><strong>alpha</strong><td>Laplace smoothing factor used during classification to address n-grams that do not appear in the model<td><code>0.5</code><td><code>1.0</code><tr><td><strong>priors</strong><td>Class probabilities (% of the documents belonging to a class)<td>60% class 0, 40% class 1<td>Equal distribution</td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<p><strong>Model Training Guide</strong></p>
+<p><strong>File Format</strong>
+In human-readable format, for <code>n=1</code> and <code>token</code> mode, the model might look like this:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">&lt;class_id&gt; &lt;n-gram&gt; &lt;count&gt;
+0 excellent 15
+1 refund 28
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For <code>n=3</code> and <code>codepoint</code> mode, it might look like:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">&lt;class_id&gt; &lt;n-gram&gt; &lt;count&gt;
+0 exc 15
+1 ref 28
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Human-readable format is not used by ClickHouse directly; it must be converted to the binary format described below.</p>
+<p><strong>Binary Format Details</strong>
+Each n-gram stored as:</p>
+<ol class="custom-ol">
+<li class="custom-li">4-byte <code>class_id</code> (UInt, little-endian)</li>
+<li class="custom-li">4-byte <code>n-gram</code> bytes length (UInt, little-endian)</li>
+<li class="custom-li">Raw <code>n-gram</code> bytes</li>
+<li class="custom-li">4-byte <code>count</code> (UInt, little-endian)</li>
+</ol>
+<p><strong>Preprocessing Requirements</strong>
+Before the model is being created from the document corpus, the documents must be preprocessed to extract n-grams according to the specified <code>mode</code> and <code>n</code>. The following steps outline the preprocessing:</p>
+<ol class="custom-ol">
+<li class="custom-li">
+<p><strong>Add boundary markers at the start and end of each document based on tokenization mode:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Byte</strong>: <code>0x01</code> (start), <code>0xFF</code> (end)</li>
+<li class="custom-li"><strong>Codepoint</strong>: <code>U+10FFFE</code> (start), <code>U+10FFFF</code> (end)</li>
+<li class="custom-li"><strong>Token</strong>: <code>&lt;s&gt;</code> (start), <code>&lt;/s&gt;</code> (end)</li>
+</ul>
+<p><em>Note:</em> <code>(n - 1)</code> tokens are added at both the beginning and the end of the document.</p>
+</li>
+<li class="custom-li">
+<p><strong>Example for <code>n=3</code> in <code>token</code> mode:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Document:</strong> <code>"ClickHouse is fast"</code></li>
+<li class="custom-li"><strong>Processed as:</strong> <code>&lt;s&gt; &lt;s&gt; ClickHouse is fast &lt;/s&gt; &lt;/s&gt;</code></li>
+<li class="custom-li"><strong>Generated trigrams:</strong>
+<ul class="custom-ul">
+<li class="custom-li"><code>&lt;s&gt; &lt;s&gt; ClickHouse</code></li>
+<li class="custom-li"><code>&lt;s&gt; ClickHouse is</code></li>
+<li class="custom-li"><code>ClickHouse is fast</code></li>
+<li class="custom-li"><code>is fast &lt;/s&gt;</code></li>
+<li class="custom-li"><code>fast &lt;/s&gt; &lt;/s&gt;</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>To simplify model creation for <code>byte</code> and <code>codepoint</code> modes, it may be convenient to first tokenize the document into tokens (a list of <code>byte</code>s for <code>byte</code> mode and a list of <code>codepoint</code>s for <code>codepoint</code> mode). Then, append <code>n - 1</code> start tokens at the beginning and <code>n - 1</code> end tokens at the end of the document. Finally, generate the n-grams and write them to the serialized file.</p>
+<hr/></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/logical-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Logical</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/math-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Mathematical</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#evalmlmethod">evalMLMethod</a><li><a class="table-of-contents__link toc-highlight" href="#stochasticlinearregression">stochasticLinearRegression</a><li><a class="table-of-contents__link toc-highlight" href="#stochasticlogisticregression">stochasticLogisticRegression</a><li><a class="table-of-contents__link toc-highlight" href="#naivebayesclassifier">naiveBayesClassifier</a><ul><li><a class="table-of-contents__link toc-highlight" href="#implementation-details">Implementation Details</a><li><a class="table-of-contents__link toc-highlight" href="#model-configuration">Model Configuration</a></li></li></ul></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

@@ -1,0 +1,69 @@
+<h1>ClickHouseが管理するPostgresがベータ版で提供開始</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p><strong>TL;DR:</strong> ClickHouse Cloud ユーザーは、ローカル NVMe を活用してトランザクションを最大 10 倍高速化するフルマネージドの Postgres サービスを利用できるようになりました。リアルタイム分析向けに ClickHouse へのネイティブ CDC、さらに pg_clickhouse による統一クエリレイヤーも備えています。2026 年 6 月 15 日まで無料で、それ以降はベータ期間中 50% 割引でご利用いただけます。CDC と pg_clickhouse は追加料金なしで含まれます。</p>
+<p>ClickHouse Cloud ユーザーは、ローカル NVMe ストレージを活用したフルマネージドの Postgres サービスを、ClickHouse とネイティブに統合された形でプロビジョニングできるようになりました。すべての ClickHouse Cloud ユーザーが、ローカル NVMe ストレージを基盤とし、ClickHouse とネイティブに統合されたエンタープライズグレードのフルマネージド Postgres サービスを利用できます。私たちは、トランザクション (OLTP) ワークロード向けの Postgres と、分析 (OLAP) ワークロード向けの ClickHouse を組み合わせた <strong>ベスト・オブ・ブリードのデータスタック</strong> を提供します。これにより、別々のシステムを組み合わせる従来の複雑さを排除し、リアルタイムおよび AI ネイティブなアプリケーションに不可欠な基盤を提供します。</p>
+<blockquote>
+<p><a href="https://console.clickhouse.cloud/signUp?intent=PG">今すぐ ClickHouse Cloud にサインアップして、ClickHouse 管理の Postgres を始めましょう</a></p>
+</blockquote>
+<p>ローカル NVMe を活用した高性能な Postgres サービスにより、トランザクション性能が最大 <a href="">10 倍高速</a> になります。ネイティブ CDC を使えば、わずか数クリックで Postgres から ClickHouse にデータを同期し、<a href="https://benchmark.clickhouse.com/">100 倍高速な分析</a> を実現できます。<a href="https://clickhouse.com/blog/introducing-pg_clickhouse">pg_clickhouse</a> 拡張による統一クエリレイヤーを使えば、別々のシステムを管理することなく、トランザクションと分析を組み合わせたアプリケーションを構築できます。そしてこれらすべてが費用対効果の高い価格で提供されるため、アプリ構築のための高速かつ信頼性の高いデータ基盤について妥協する必要はありません。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="ai-needs-the-best-of-breed-data-stack" level="2">AI には「ベスト・オブ・ブリード」なデータスタックが必要<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#ai-needs-the-best-of-breed-data-stack">#</a></span></h2>
+<p><a href="https://clickhouse.com/blog/ai-redrawing-database-market#real-time_analytics">AI ワークロードは、トランザクションデータベースと分析データベースの伝統的な境界を崩しつつあります。</a> かつて予測可能でハードコーディングされたクエリを実行していたアプリケーションは、今やスタックの両側から回答を必要とする、エージェント駆動の予測不可能なリクエストのバーストを生成しています。同時に、データ量、同時実行性、パフォーマンスへの期待は指数関数的に増大しており、セキュリティと信頼性はかつてないほど重要になっています。</p>
+<p>だからこそ、ベスト・オブ・ブリードがこれまで以上に重要なのです。OLTP には Postgres、OLAP には ClickHouse。何千もの AI ネイティブ企業がすでにこのアーキテクチャに集約している理由もここにあります。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="postgres_beta_may2026_image1.png" loading="lazy" src="/uploads/postgres_beta_may2026_image1_4ffdd4d2c0.png"/></span>
+<p>ClickHouse 管理の Postgres に対する私たちのビジョンはシンプルです。Postgres と ClickHouse を外部パイプライン、カスタムアプリケーションロジック、運用上の複雑さで繋ぎ合わせるオーバーヘッドを排除し、開発者が統一されたデータスタック上で AI ネイティブなアプリケーションを簡単に構築できるようにすることです。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="customers" level="2">お客様<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#customers">#</a></span></h2>
+<p>今年初めに ClickHouse 管理の Postgres のプライベートプレビューを発表したところ、すでに数千社がウェイトリストに登録し、多くがマルチテラバイト規模のミッションクリティカルな本番ワークロードを稼働させています。</p>
+<p>お客様は RDS、Aurora、CloudSQL、Neon、PlanetScale Postgres などから移行しており、また AI ネイティブな新しいアプリケーションを一から構築している企業もあります。これらのワークロードは、サイバーセキュリティ、フィンテック、リテール、不動産、ソーシャルメディアなど多岐にわたり、いずれも Postgres と ClickHouse によって OLTP と OLAP を統合した、深く統合されたプラットフォームを基盤としています。</p>
+<p>以下は、リファレンスカスタマーから寄せられた率直な声の一部です。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="physical-intelligence" level="3"><strong>Physical Intelligence</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#physical-intelligence">#</a></span></h3>
+<p><em>AI ワークロードとアノテーションパイプラインのスケーリング、RDS から移行</em></p>
+<p>「ClickHouse は、私たちが RDS から脱却し、成長する AI ワークロードを支えるデータプラットフォームを構築するのに役立ちました。ClickHouse Cloud プラットフォーム内で OLTP には Postgres、OLAP には ClickHouse を使用しており、研究者、トレーニングパイプライン、エージェントが同じデータ基盤に高速にアクセスできるようになっています…アノテーション量が 10 倍に増加し、数十億件のアノテーションへと向かう中、ClickHouse はスケーリングを続けるためのプラットフォーム上の余裕を提供してくれます…」</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="sterling-labs" level="3"><strong>Sterling Labs</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#sterling-labs">#</a></span></h3>
+<p><em>Aurora から移行し、NVMe 上で 8.5 TB のホットな Postgres データを運用</em></p>
+<p>「ClickHouse 管理の Postgres は、Aurora から移行し本番ワークロードをスケールする上で、私たちにとって素晴らしくフィットしました…現在、Postgres で約 8.5 TB のホットデータを実行しており、NVMe ドライブが提供する超低レイテンシを享受しています…パフォーマンスはまさに圧巻です…」</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="quinto-andar" level="3"><strong>Quinto Andar</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#quinto-andar">#</a></span></h3>
+<p><em>分析のための汎用インターフェースとして Postgres を活用</em></p>
+<p>「pg_clickhouse があれば、ClickHouse は事実上あらゆるサードパーティツールにとってのプラグアンドプレイなデータベースになります…Hightouch のような統合のためだけに BigQuery や Snowflake のオーバーヘッドを強いられる代わりに、主要なデータセットを Postgres 経由で直接公開できるようになりました…ClickHouse の生のパフォーマンスと Postgres の遍在する互換性の両方を備えた、両方の世界の良いとこ取りです。」</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="docontrol" level="3"><strong>DoControl</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#docontrol">#</a></span></h3>
+<p><em>大規模なサイバーセキュリティデータパイプラインの簡素化</em></p>
+<p>「ClickHouse チームの手厚いサポートを受けて、複数のマルチテラバイト規模のワークロードを RDS と Aurora から ClickHouse 管理の Postgres へ移行しました。私たちのサイバーセキュリティデータソースの規模と複雑さを考えると、信頼性とコストパフォーマンスは極めて重要でした…ClickHouse 管理の Postgres により、Postgres ワークロードをより簡単に移行し、ClickPipes を活用し、当初予想していた運用上の複雑さなしでデータを ClickHouse に取り込めるようになりました。」</p>
+<p>その他のリファレンスカスタマーとして特筆したいのは、Trainy.ai や EndClose といった Y Combinator 企業、Mpathic のような AI セーフティ企業、Prediko のような AI ネイティブな在庫管理企業など、ClickHouse 管理の Postgres 上で次世代の AI ネイティブアプリケーションを支える数多くの企業です。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="product" level="2"><strong>製品</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#product">#</a></span></h2>
+<p>ClickHouse 管理の Postgres は、高性能な OLTP とリアルタイム OLAP を、深く統合された単一のプラットフォームに統合します。プラットフォームの中核には、3 つの基盤的な機能があります:</p>
+<ul>
+<li><strong>NVMe 基盤の Postgres</strong> によりトランザクション性能を最大 10 倍高速化</li>
+<li><strong>ClickHouse へのネイティブ CDC</strong> により外部パイプラインなしでリアルタイム分析を実現</li>
+<li><strong>pg_clickhouse</strong>、アプリケーションがトランザクションと分析にまたがれる統一クエリレイヤー</li>
+</ul>
+<p>これらの機能が組み合わさることで、Postgres と分析インフラを手作業で繋ぎ合わせる運用上の複雑さが解消され、リアルタイムおよび AI ネイティブなアプリケーションをよりシンプルに構築できるようになります。</p></div><div class="group relative flex items-center overflow-hidden rounded-lg bg-neutral-900"><div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-neutral-800"><div class="flex flex-col items-center gap-2 text-neutral-400"><svg class="lucide lucide-play size-6" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg><span class="text-sm">Loading video...</span></div></div><video autoplay="" class="h-auto w-full" loop="" muted="" playsinline=""><source src="uploads/open2_compressed_5863ec1cce.mp4" type="video/mp4"/></video></div><div class="rich_content rich-text-content leading-6"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="fully-managed-migrations-with-clickpipes" level="3"><strong>ClickPipesによるフルマネージドな移行</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#fully-managed-migrations-with-clickpipes">#</a></span></h3>
+<p>本番環境のPostgresワークロードを移行することは、新しいプラットフォームを導入するうえで最も困難な作業の1つです。<a href="https://clickhouse.com/docs/cloud/managed-postgres/migrations/clickpipes">ClickPipes</a>を活用したフルマネージドの移行ワークフローにより、お客様はRDS、Aurora、CloudSQL、Neonなどの各種プロバイダーから、最小限のダウンタイムと運用負荷でワークロードを移行できます。</p>
+<p>リアルタイムでデータを継続的にレプリケーションし、カットオーバーをシンプル化し、独自の移行インフラを構築する必要をなくすことができます。これは、本番ワークロードを運用しているお客様の間で、すでに最も支持されている機能の1つとなっています。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="enterprise-grade-postgres-for-production-workloads" level="3"><strong>本番ワークロード向けのエンタープライズグレードPostgres</strong> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#enterprise-grade-postgres-for-production-workloads">#</a></span></h3>
+<p>ClickHouseが管理するPostgresには、ミッションクリティカルなアプリケーションを大規模に運用するためにお客様が期待する運用機能が含まれています。たとえば次のようなものです。</p>
+<ul>
+<li>最大2つのスタンバイによる高可用性</li>
+<li>ポイントインタイムリカバリとデータベースブランチング</li>
+<li>読み取り負荷の高いワークロードをスケールさせるリードレプリカ</li>
+<li>90以上のPostgreSQL拡張機能</li>
+<li>Private Linkによるエンタープライズグレードのセキュリティ</li>
+<li>統合されたモニタリング、ログ、および<a href="https://clickhouse.com/blog/postgres-query-insights-clickhouse-cloud">Query Insights</a></li>
+<li>Prometheus互換のメトリクス</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">clickhousectl</code>によるエージェントベースのアクセス</li>
+<li>OpenAPIによるInfrastructure as Code</li>
+<li>その他多数!</li>
+</ul>
+<p>そして、これはまだ始まりに過ぎません。私たちは、リアルタイムおよびAIネイティブのアプリケーション向けに、運用系と分析系を完全に統合したデータプラットフォームの構築を目指しています。</p>
+<p>上記の機能に関する詳細なドキュメントは、<a href="https://clickhouse.com/docs/cloud/managed-postgres">こちら</a>の公式ドキュメントをご参照ください。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="pricing" level="2">料金<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#pricing">#</a></span></h2>
+<p>ClickHouseが管理するPostgresは、コスト効率を重視して設計されており、開発者はPostgresとClickHouseによる高速で信頼性の高いデータ基盤を妥協なく利用できます。本サービスは、他のマネージドPostgresサービスと比較しても非常に競争力のある価格設定となっています。これには、ローカルNVMeストレージによる価格性能上のメリットは含まれていません。</p>
+<p>本サービスは、2026年6月15日に利用量メータリングが開始されるまで無料です。Beta期間中は、早期にご利用いただくお客様への感謝の意を込めて、すべてのプランで50%の割引が適用されます。</p>
+<blockquote>
+<p>正確な料金については、<a href="https://clickhouse.com/pricing?service=postgres#pricing-calculator">料金計算ツール</a>にアクセスして、ワークロードに最適な構成と料金をご確認ください。</p>
+</blockquote>
+<p>ClickPipesによるネイティブCDCおよびpg_clickhouse拡張機能は追加料金なしで提供され、PostgresとClickHouseによる統合OLTP + OLAPプラットフォームというビジョンに沿ったものとなっています。</p>
+<p>本プラットフォームは、1 vCPU / 8 GB RAM / 59 GB NVMe(月額約32ドルから)の構成から、96 vCPU / 768 GB RAM / 60 TB NVMeストレージのクラスタまで、50を超えるローカルNVMeバックアップ型のVM構成をサポートします。これにより、軽量な開発者向けワークロードから、コンピューティング集約型およびストレージ集約型の本番デプロイメントまで、柔軟に対応できます。</p>
+<p>Beta期間中は、バックアップとネットワーク送信(egress)も追加料金なしで提供されます。</p>
+<p>一般提供(General Availability)に向けて、料金やパッケージは変更される可能性があります。詳細および免責事項については、料金<a href="https://clickhouse.com/docs/cloud/managed-postgres/pricing">ドキュメント</a>をご参照ください。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="get-started" level="2">はじめる<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/postgres-managed-by-clickhouse-beta-jp#get-started">#</a></span></h2>
+<p>ClickHouseが管理するPostgresは、本日よりClickHouse CloudでBeta提供を開始しました!</p></div><div class="rounded-lg bg-white/10 p-4 toc-ignore" id="blog-cta-736-sign-up"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">今すぐ始める</h3><div class="text-neutral-200 text-sm font-medium">ClickHouse Cloud にサインアップして、最初の NVMe ベース Postgres サービスをプロビジョニングし、ClickHouse へのネイティブ CDC をセットアップして、pg_clickhouse で両者をまたいだクエリを開始しましょう。
+
+新規アカウントにはすべて $300 分の無料クレジットが含まれます。</div><a class="w-full" href="https://console.clickhouse.cloud/signUp?loc=blog-cta-736-sign-up&amp;utm_blogctaid=736"><button class="styles_button__3smpn mt-6 w-full font-medium" data-type="primary"><span class="flex items-center whitespace-nowrap">Sign up</span></button></a></div><div class="rich_content rich-text-content leading-6"><p>詳細については <a href="https://clickhouse.com/cloud/postgres">ClickHouse によるマネージド Postgres ページ</a> をご覧いただくか、<a href="https://clickhouse.com/docs/cloud/managed-postgres">ドキュメント</a> を参照して構築を始めてください。</p></div></div></article>

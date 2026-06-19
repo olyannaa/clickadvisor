@@ -1,0 +1,120 @@
+<h1>Custom Partitioning Key | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Custom Partitioning Key</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/custom-partitioning-key.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Custom Partitioning Key</h1></header><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In most cases you do not need a partition key, and in most other cases you do not need a partition key more granular than by month, unless targeting an observability use case where partitioning by day is common.<p>You should never use too granular of partitioning. Don't partition your data by client identifiers or names. Instead, make a client identifier or name the first column in the ORDER BY expression.</p></p></div></div>
+<p>Partitioning is available for the <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree family tables</a>, including <a href="/docs/engines/table-engines/mergetree-family/replication">replicated tables</a> and <a href="/docs/sql-reference/statements/create/view#materialized-view">materialized views</a>.</p>
+<p>A partition is a logical combination of records in a table by a specified criterion. You can set a partition by an arbitrary criterion, such as by month, by day, or by event type. Each partition is stored separately to simplify manipulations of this data. When accessing the data, ClickHouse uses the smallest subset of partitions possible. Partitions improve performance for queries containing a partitioning key because ClickHouse will filter for that partition before selecting the parts and granules within the partition.</p>
+<p>The partition is specified in the <code>PARTITION BY expr</code> clause when <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-creating-a-table">creating a table</a>. The partition key can be any expression from the table columns. For example, to specify partitioning by month, use the expression <code>toYYYYMM(date_column)</code>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE visits
+(
+    VisitDate Date,
+    Hour UInt8,
+    ClientID UUID
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(VisitDate)
+ORDER BY Hour;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The partition key can also be a tuple of expressions (similar to the <a href="/docs/engines/table-engines/mergetree-family/mergetree#primary-keys-and-indexes-in-queries">primary key</a>). For example:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = ReplicatedCollapsingMergeTree('/clickhouse/tables/name', 'replica1', Sign)
+PARTITION BY (toMonday(StartDate), EventType)
+ORDER BY (CounterID, StartDate, intHash32(UserID));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this example, we set partitioning by the event types that occurred during the current week.</p>
+<p>By default, the floating-point partition key is not supported. To use it enable the setting <a href="/docs/operations/settings/merge-tree-settings#allow_floating_point_partition_key">allow_floating_point_partition_key</a>.</p>
+<p>When inserting new data to a table, this data is stored as a separate part (chunk) sorted by the primary key. In 10-15 minutes after inserting, the parts of the same partition are merged into the entire part.</p>
+<div class="theme-admonition theme-admonition-info alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>A merge only works for data parts that have the same value for the partitioning expression. This means <strong>you shouldn't make overly granular partitions</strong> (more than about a thousand partitions). Otherwise, the <code>SELECT</code> query performs poorly because of an unreasonably large number of files in the file system and open file descriptors.</p></div></div>
+<p>Use the <a href="/docs/operations/system-tables/parts">system.parts</a> table to view the table parts and partitions. For example, let's assume that we have a <code>visits</code> table with partitioning by month. Let's perform the <code>SELECT</code> query for the <code>system.parts</code> table:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    partition,
+    name,
+    active
+FROM system.parts
+WHERE table = 'visits'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─partition─┬─name──────────────┬─active─┐
+│ 201901    │ 201901_1_3_1      │      0 │
+│ 201901    │ 201901_1_9_2_11   │      1 │
+│ 201901    │ 201901_8_8_0      │      0 │
+│ 201901    │ 201901_9_9_0      │      0 │
+│ 201902    │ 201902_4_6_1_11   │      1 │
+│ 201902    │ 201902_10_10_0_11 │      1 │
+│ 201902    │ 201902_11_11_0_11 │      1 │
+└───────────┴───────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>partition</code> column contains the names of the partitions. There are two partitions in this example: <code>201901</code> and <code>201902</code>. You can use this column value to specify the partition name in <a href="/docs/sql-reference/statements/alter/partition">ALTER ... PARTITION</a> queries.</p>
+<p>The <code>name</code> column contains the names of the partition data parts. You can use this column to specify the name of the part in the <a href="/docs/sql-reference/statements/alter/partition#attach-partitionpart">ALTER ATTACH PART</a> query.</p>
+<p>Let's break down the name of the part: <code>201901_1_9_2_11</code>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>201901</code> is the partition name.</li>
+<li class="custom-li"><code>1</code> is the minimum number of the data block.</li>
+<li class="custom-li"><code>9</code> is the maximum number of the data block.</li>
+<li class="custom-li"><code>2</code> is the chunk level (the depth of the merge tree it is formed from).</li>
+<li class="custom-li"><code>11</code> is the mutation version (if a part mutated)</li>
+</ul>
+<div class="theme-admonition theme-admonition-info alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>The parts of old-type tables have the name: <code>20190117_20190123_2_2_0</code> (minimum date - maximum date - minimum block number - maximum block number - level).</p></div></div>
+<p>The <code>active</code> column shows the status of the part. <code>1</code> is active; <code>0</code> is inactive. The inactive parts are, for example, source parts remaining after merging to a larger part. The corrupted data parts are also indicated as inactive.</p>
+<p>As you can see in the example, there are several separated parts of the same partition (for example, <code>201901_1_3_1</code> and <code>201901_1_9_2</code>). This means that these parts are not merged yet. ClickHouse merges the inserted parts of data periodically, approximately 15 minutes after inserting. In addition, you can perform a non-scheduled merge using the <a href="/docs/sql-reference/statements/optimize">OPTIMIZE</a> query. Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">OPTIMIZE TABLE visits PARTITION 201902;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─partition─┬─name─────────────┬─active─┐
+│ 201901    │ 201901_1_3_1     │      0 │
+│ 201901    │ 201901_1_9_2_11  │      1 │
+│ 201901    │ 201901_8_8_0     │      0 │
+│ 201901    │ 201901_9_9_0     │      0 │
+│ 201902    │ 201902_4_6_1     │      0 │
+│ 201902    │ 201902_4_11_2_11 │      1 │
+│ 201902    │ 201902_10_10_0   │      0 │
+│ 201902    │ 201902_11_11_0   │      0 │
+└───────────┴──────────────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Inactive parts will be deleted approximately 10 minutes after merging.</p>
+<p>Another way to view a set of parts and partitions is to go into the directory of the table: <code>/var/lib/clickhouse/data/&lt;database&gt;/&lt;table&gt;/</code>. For example:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">/var/lib/clickhouse/data/default/visits$ ls -l
+total 40
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  1 16:48 201901_1_3_1
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 16:17 201901_1_9_2_11
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 15:52 201901_8_8_0
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 15:52 201901_9_9_0
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 16:17 201902_10_10_0
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 16:17 201902_11_11_0
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 16:19 201902_4_11_2_11
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  5 12:09 201902_4_6_1
+drwxr-xr-x 2 clickhouse clickhouse 4096 Feb  1 16:48 detached
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The folders '201901_1_1_0', '201901_1_7_1' and so on are the directories of the parts. Each part relates to a corresponding partition and contains data just for a certain month (the table in this example has partitioning by month).</p>
+<p>The <code>detached</code> directory contains parts that were detached from the table using the <a href="/docs/sql-reference/statements/detach">DETACH</a> query. The corrupted parts are also moved to this directory, instead of being deleted. The server does not use the parts from the <code>detached</code> directory. You can add, delete, or modify the data in this directory at any time – the server will not know about this until you run the <a href="/docs/sql-reference/statements/alter/partition#attach-partitionpart">ATTACH</a> query.</p>
+<p>Note that on the operating server, you cannot manually change the set of parts or their data on the file system, since the server will not know about it. For non-replicated tables, you can do this when the server is stopped, but it isn't recommended. For replicated tables, the set of parts cannot be changed in any case.</p>
+<p>ClickHouse allows you to perform operations with the partitions: delete them, copy from one table to another, or create a backup. See the list of all operations in the section <a href="/docs/sql-reference/statements/alter/partition">Manipulations With Partitions and Parts</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="group-by-optimisation-using-partition-key">Group By optimisation using partition key<a aria-label="Direct link to Group By optimisation using partition key" class="hash-link" href="#group-by-optimisation-using-partition-key" title="Direct link to Group By optimisation using partition key">​</a></h2>
+<p>For some combinations of table's partition key and query's group by key it might be possible to execute aggregation for each partition independently.
+Then we'll not have to merge partially aggregated data from all execution threads at the end,
+because we provided with the guarantee that each group by key value cannot appear in working sets of two different threads.</p>
+<p>The typical example is:</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE session_log
+(
+    UserID UInt64,
+    SessionID UUID
+)
+ENGINE = MergeTree
+PARTITION BY sipHash64(UserID) % 16
+ORDER BY tuple();
+
+SELECT
+    UserID,
+    COUNT()
+FROM session_log
+GROUP BY UserID;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Performance of such a query heavily depends on the table layout. Because of that the optimisation is not enabled by default.</p></div></div>
+<p>The key factors for a good performance:</p>
+<ul class="custom-ul">
+<li class="custom-li">number of partitions involved in the query should be sufficiently large (more than <code>max_threads / 2</code>), otherwise query will under-utilize the machine</li>
+<li class="custom-li">partitions shouldn't be too small, so batch processing won't degenerate into row-by-row processing</li>
+<li class="custom-li">partitions should be comparable in size, so all threads will do roughly the same amount of work</li>
+</ul>
+<div class="theme-admonition theme-admonition-info alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>It's recommended to apply some hash function to columns in <code>partition by</code> clause in order to distribute data evenly between partitions.</p></div></div>
+<p>Relevant settings are:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>allow_aggregate_partitions_independently</code> - controls if the use of optimisation is enabled</li>
+<li class="custom-li"><code>force_aggregate_partitions_independently</code> - forces its use when it's applicable from the correctness standpoint, but getting disabled by internal logic that estimates its expediency</li>
+<li class="custom-li"><code>max_number_of_partitions_for_independent_aggregation</code> - hard limit on the maximal number of partitions table could have</li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/replication"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Replicated*</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/replacingmergetree"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">ReplacingMergeTree</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#group-by-optimisation-using-partition-key">Group By optimisation using partition key</a></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

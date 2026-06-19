@@ -1,0 +1,117 @@
+---
+source: kb.altinity.com
+url: http://s3.us-east-1.amazonaws.com/BUCKET_NAME/test_s3_disk/</endpoint>
+topic: setup-maintenance-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '98.091'
+last_updated: '2026-06-12'
+chunk_index: 47
+total_chunks_in_doc: 186
+---
+
+stop that quickly if needed) clickhouse-local --path=. --query "SELECT count() FROM numbers(100) WHERE sleepEachRow(0.1) SETTINGS max_block_size=1" ls -la data/local/test/ clickhouse-local --path=. --query "SELECT _part,* FROM local.test ORDER BY id" ``` # 23 \- Recovery after complete data loss
+
+When disaster strikes## Atomic \& Ordinary databases.
+
+srv1 – good replica
+
+srv2 – lost replica / we will restore it from srv1
+
+## test data (3 tables (atomic \& ordinary databases))
+
+srv1
+
+```
+create database testatomic on cluster '{cluster}' engine=Atomic;
+create table testatomic.test on cluster '{cluster}' (A Int64, D Date, s String)
+Engine = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}','{replica}')
+partition by toYYYYMM(D)
+order by A;
+insert into testatomic.test select number, today(), '' from numbers(1000000);
+
+
+create database testordinary on cluster '{cluster}' engine=Ordinary;
+create table testordinary.test on cluster '{cluster}' (A Int64, D Date, s String)
+Engine = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}','{replica}')
+partition by toYYYYMM(D)
+order by A;
+insert into testordinary.test select number, today(), '' from numbers(1000000);
+
+
+create table default.test on cluster '{cluster}' (A Int64, D Date, s String)
+Engine = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}','{replica}')
+partition by toYYYYMM(D)
+order by A;
+insert into default.test select number, today(), '' from numbers(1000000);
+
+```
+## destroy srv2
+
+srv2
+
+```
+/etc/init.d/clickhouse-server stop
+rm -rf /var/lib/clickhouse/*
+
+```
+## generate script to re\-create databases (create\_database.sql).
+
+srv1
+
+```
+$ cat /home/ubuntu/generate_schema.sql
+SELECT concat('CREATE DATABASE "', name, '" ENGINE = ', engine, ' COMMENT \'', comment, '\';')
+FROM system.databases
+WHERE name NOT IN ('INFORMATION_SCHEMA', 'information_schema', 'system', 'default');
+
+clickhouse-client < /home/ubuntu/generate_schema.sql > create_database.sql
+
+```
+check the result
+
+```
+$ cat create_database.sql
+CREATE DATABASE "testatomic" ENGINE = Atomic COMMENT '';
+CREATE DATABASE "testordinary" ENGINE = Ordinary COMMENT '';
+
+```
+transfer this create\_database.sql to srv2 (scp / rsync)
+
+## make a copy of schema sql files (metadata\_schema.tar)
+
+srv1
+
+```
+cd /var/lib/clickhouse/
+tar -cvhf /home/ubuntu/metadata_schema.tar metadata
+
+```
+`-h` \- is important! (\-h, –dereference Follow symlinks; archive and dump the files they point to.)
+
+transfer this metadata\_schema.tar to srv2 (scp / rsync)
+
+## create databases at srv2
+
+srv2
+
+```
+/etc/init.d/clickhouse-server start
+clickhouse-client < create_database.sql
+/etc/init.d/clickhouse-server stop
+
+```
+## create tables at srv2
+
+srv2
+
+```
+cd /var/lib/clickhouse/
+tar xkfv /home/ubuntu/metadata_schema.tar
+sudo -u clickhouse touch /var/lib/clickhouse/flags/force_restore_data
+/etc/init.d/clickhouse-server start
+
+```
+`tar xkfv` `-k` is important! To save folders/symlinks created with create database ( \-k, –keep\-old\-files Don’t replace existing files when extracting )
+
+## check a recovery
+
+srv2

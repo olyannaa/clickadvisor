@@ -1,0 +1,125 @@
+---
+source: kb.altinity.com
+url: http://s3.us-east-1.amazonaws.com/BUCKET_NAME/test_s3_disk/</endpoint>
+topic: setup-maintenance-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '98.091'
+last_updated: '2026-06-12'
+chunk_index: 181
+total_chunks_in_doc: 186
+---
+
+<raft_configuration> <server> <id>1</id> <hostname>hostname1</hostname> <port>9444</port> </server> <server> <id>2</id> <hostname>hostname2</hostname> <port>9444</port> </server> <server> <id>3</id> <hostname>hostname3</hostname> <port>9444</port> </server> </raft_configuration> </keeper_server> <distributed_ddl> <path>/clickhouse/testcluster/task_queue/ddl</path> </distributed_ddl> </clickhouse> $ cat /etc/clickhouse-server/config.d/macros.xml <?xml version="1.0" ?> <clickhouse> <macros> <cluster>testcluster</cluster> <replica>replica2</replica> <shard>1</shard> </macros> </clickhouse> ``` ### hostname3
+
+```
+$ cat /etc/clickhouse-keeper/keeper_config.xml
+
+<?xml version="1.0" ?>
+<clickhouse>
+    <keeper_server>
+        <tcp_port>2181</tcp_port>
+        <server_id>3</server_id>
+        <log_storage_path>/var/lib/clickhouse/coordination/log</log_storage_path>
+        <snapshot_storage_path>/var/lib/clickhouse/coordination/snapshots</snapshot_storage_path>
+
+        <coordination_settings>
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <session_timeout_ms>30000</session_timeout_ms>
+            <raft_logs_level>trace</raft_logs_level>
+            <rotate_log_storage_interval>10000</rotate_log_storage_interval>
+        </coordination_settings>
+
+        <raft_configuration>
+            <server>
+                <id>1</id>
+                <hostname>hostname1</hostname>
+                <port>9444</port>
+            </server>
+            <server>
+                <id>2</id>
+                <hostname>hostname2</hostname>
+                <port>9444</port>
+            </server>
+            <server>
+                <id>3</id>
+                <hostname>hostname3</hostname>
+                <port>9444</port>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+</clickhouse>
+
+$ clickhouse-keeper --config /etc/clickhouse-keeper/keeper_config.xml
+
+```
+### on both ClickHouse nodes
+
+```
+$ cat /etc/clickhouse-server/config.d/clusters.xml
+
+<?xml version="1.0" ?>
+<clickhouse>
+    <remote_servers>
+        <testcluster>
+            <shard>
+                <replica>
+                    <host>hostname1</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>hostname2</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </testcluster>
+    </remote_servers>
+</clickhouse>
+
+```
+Then create a table
+
+```
+create table test on cluster '{cluster}'   ( A Int64, S String)
+Engine = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}','{replica}')
+Order by A;
+
+insert into test select number, '' from numbers(100000000);
+
+-- on both nodes:
+select count() from test;
+
+```
+## Useful references
+
+- Official Keeper guide:
+[https://clickhouse.com/docs/en/guides/sre/keeper/clickhouse\-keeper/](https://clickhouse.com/docs/en/guides/sre/keeper/clickhouse-keeper/)
+- `clickhouse-keeper-client`:
+[https://clickhouse.com/docs/en/operations/utilities/clickhouse\-keeper\-client](https://clickhouse.com/docs/en/operations/utilities/clickhouse-keeper-client)
+- Keeper HTTP API and dashboard (`26.1+`):
+[https://clickhouse.com/docs/operations/utilities/clickhouse\-keeper\-http\-api](https://clickhouse.com/docs/operations/utilities/clickhouse-keeper-http-api)
+- `system.zookeeper`:
+[https://clickhouse.com/docs/operations/system\-tables/zookeeper](https://clickhouse.com/docs/operations/system-tables/zookeeper)
+- `system.zookeeper_connection`:
+[https://clickhouse.com/docs/operations/system\-tables/zookeeper\_connection](https://clickhouse.com/docs/operations/system-tables/zookeeper_connection)
+- `system.zookeeper_connection_log`:
+[https://clickhouse.com/docs/operations/system\-tables/zookeeper\_connection\_log](https://clickhouse.com/docs/operations/system-tables/zookeeper_connection_log)
+- `system.zookeeper_info` (`26.1+`):
+[https://clickhouse.com/docs/operations/system\-tables/zookeeper\_info](https://clickhouse.com/docs/operations/system-tables/zookeeper_info)
+- `system.zookeeper_log`:
+[https://clickhouse.com/docs/operations/system\-tables/zookeeper\_log](https://clickhouse.com/docs/operations/system-tables/zookeeper_log)
+- `aggregated_zookeeper_log` upstream PR:
+resubmit <https://github.com/ClickHouse/ClickHouse/pull/87208>
+- Altinity operator CHK examples:
+[https://github.com/Altinity/clickhouse\-operator/tree/master/docs/chk\-examples](https://github.com/Altinity/clickhouse-operator/tree/master/docs/chk-examples)
+- Altinity operator Keeper dashboard JSON:
+[https://github.com/Altinity/clickhouse\-operator/blob/master/grafana\-dashboard/ClickHouseKeeper\_dashboard.json](https://github.com/Altinity/clickhouse-operator/blob/master/grafana-dashboard/ClickHouseKeeper_dashboard.json)
+- Altinity operator Keeper alert rules:
+[https://github.com/Altinity/clickhouse\-operator/blob/master/deploy/prometheus/prometheus\-alert\-rules\-chkeeper.yaml](https://github.com/Altinity/clickhouse-operator/blob/master/deploy/prometheus/prometheus-alert-rules-chkeeper.yaml)
+# 67\.9 \- ZooKeeper backup
+
+ZooKeeper backupQuestion: Do I need to backup Zookeeper Database, because it’s pretty important for ClickHouse®?
+
+TLDR answer: **NO, just backup ClickHouse data itself, and do SYSTEM RESTORE REPLICA during recovery to recreate zookeeper data**
+
+Details:
+
+Zookeeper does not store any data, it stores the STATE of the distributed system (“that replica have those parts”, “still need 2 merges to do”, “alter is being applied” etc). That state always changes, and you can not capture / backup / and recover that state in a safe manner. So even backup from few seconds ago is representing some ‘old state from the past’ which is INCONSISTENT with actual state of the data.

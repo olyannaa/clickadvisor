@@ -1,0 +1,15 @@
+case_id: clickbench_q37
+source: clickbench
+sql: 'SELECT URL, COUNT(*) AS PageViews FROM hits WHERE CounterID = 62 AND EventDate
+  >= ''2013-07-01'' AND EventDate <= ''2013-07-31'' AND DontCountHits = 0 AND IsRefresh
+  = 0 AND URL <> '''' GROUP BY URL ORDER BY PageViews DESC LIMIT 10;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

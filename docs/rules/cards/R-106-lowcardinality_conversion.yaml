@@ -1,0 +1,31 @@
+id: R-106
+name: lowcardinality_conversion
+tier: '2'
+category: storage_layout
+status: proposed
+statement: String → LowCardinality(String) при низкой cardinality
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - uniqExact(col)/count() < 0.1 OR uniqExact < 10^5
+proof: ''
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: ''
+  baseline: ''
+  projected: ''
+ddl_template: '`ALTER TABLE t MODIFY COLUMN col LowCardinality(String)`'

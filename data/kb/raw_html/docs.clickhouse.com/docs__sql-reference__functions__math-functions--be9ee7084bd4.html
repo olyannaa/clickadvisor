@@ -1,0 +1,843 @@
+<h1>Mathematical functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Mathematical</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/math-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Mathematical functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="acos">acos<a aria-label="Direct link to acos" class="hash-link" href="#acos" title="Direct link to acos">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the arc cosine of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">acos(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value for which to find arc cosine of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the arc cosine of x <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT acos(0.5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1.0471975511965979
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="acosh">acosh<a aria-label="Direct link to acosh" class="hash-link" href="#acosh" title="Direct link to acosh">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the inverse hyperbolic cosine.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">acosh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Hyperbolic cosine of angle. Values from the interval: <code>1 ≤ x &lt; +∞</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the angle, in radians. Values from the interval: <code>0 ≤ acosh(x) &lt; +∞</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT acosh(1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="asin">asin<a aria-label="Direct link to asin" class="hash-link" href="#asin" title="Direct link to asin">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the arcsine of the provided argument.
+For arguments in the range <code>[-1, 1]</code> it returns the value in the range of <code>[-pi() / 2, pi() / 2]</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">asin(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Argument for which to calculate arcsine of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the arcsine value of the provided argument <code>x</code> <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>inverse</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT asin(1.0) = pi() / 2, sin(asin(1)), asin(sin(1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1 1 1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>float32</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toTypeName(asin(1.0::Float32))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Float64
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>nan</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT asin(1.1), asin(-2), asin(inf), asin(nan)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">nan nan nan nan
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="asinh">asinh<a aria-label="Direct link to asinh" class="hash-link" href="#asinh" title="Direct link to asinh">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the inverse hyperbolic sine.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">asinh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Hyperbolic sine of angle. Values from the interval: <code>-∞ &lt; x &lt; +∞</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the angle, in radians. Values from the interval: <code>-∞ &lt; asinh(x) &lt; +∞</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT asinh(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="atan">atan<a aria-label="Direct link to atan" class="hash-link" href="#atan" title="Direct link to atan">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the arc tangent of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">atan(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value for which to find arc tangent of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the arc tangent of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT atan(1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0.7853981633974483
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="atan2">atan2<a aria-label="Direct link to atan2" class="hash-link" href="#atan2" title="Direct link to atan2">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the atan2 as the angle in the Euclidean plane, given in radians, between the positive x axis and the ray to the point <code>(x, y) ≠ (0, 0)</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">atan2(y, x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>y</code> — y-coordinate of the point through which the ray passes. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+<li class="custom-li"><code>x</code> — x-coordinate of the point through which the ray passes. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the angle <code>θ</code> such that <code>-π &lt; θ ≤ π</code>, in radians <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT atan2(1, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0.7853981633974483
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="atanh">atanh<a aria-label="Direct link to atanh" class="hash-link" href="#atanh" title="Direct link to atanh">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the inverse hyperbolic tangent.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">atanh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Hyperbolic tangent of angle. Values from the interval: -1 &lt; x &lt; 1. <code>(U)Int*</code>, <code>Float*</code> or <code>Decimal*</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the angle, in radians. Values from the interval: -∞ &lt; atanh(x) &lt; +∞ <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT atanh(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cbrt">cbrt<a aria-label="Direct link to cbrt" class="hash-link" href="#cbrt" title="Direct link to cbrt">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the cubic root of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cbrt(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value for which to find the cubic root of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the cubic root of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cbrt(8);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cos">cos<a aria-label="Direct link to cos" class="hash-link" href="#cos" title="Direct link to cos">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the cosine of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cos(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The angle in radians. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the cosine of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cos(0);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cosh">cosh<a aria-label="Direct link to cosh" class="hash-link" href="#cosh" title="Direct link to cosh">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the hyperbolic cosine of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cosh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The angle, in radians. Values from the interval: <code>-∞ &lt; x &lt; +∞</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values from the interval: <code>1 ≤ cosh(x) &lt; +∞</code> <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cosh(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="degrees">degrees<a aria-label="Direct link to degrees" class="hash-link" href="#degrees" title="Direct link to degrees">​</a></h2>
+<p>Introduced in: v22.2.0</p>
+<p>Converts radians to degrees.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">degrees(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Input in radians. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value of <code>x</code> in degrees. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT degrees(3.141592653589793)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">180
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="e">e<a aria-label="Direct link to e" class="hash-link" href="#e" title="Direct link to e">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns Euler's constant (e).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">e()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns Euler's constant <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT e();
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2.718281828459045
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="erf">erf<a aria-label="Direct link to erf" class="hash-link" href="#erf" title="Direct link to erf">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>If <code>x</code> is non-negative, then <code>erf(x/(σ√2))</code> is the probability that a random variable having a normal distribution with standard deviation <code>σ</code> takes the value that is separated from the expected value by more than <code>x</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">erf(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value for which to compute the error function value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the error function value <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Three sigma rule</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT erf(3 / sqrt(2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─erf(divide(3, sqrt(2)))─┐
+│      0.9973002039367398 │
+└─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="erfc">erfc<a aria-label="Direct link to erfc" class="hash-link" href="#erfc" title="Direct link to erfc">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns a number close to <code>1-erf(x)</code> without loss of precision for large <code>x</code> values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">erfc(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value for which to find the error function value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the complementary error function value <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT erfc(0);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="exp">exp<a aria-label="Direct link to exp" class="hash-link" href="#exp" title="Direct link to exp">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns e raised to the power of <code>x</code>, where <code>x</code> is the given argument to the function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">exp(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>e^x</code> <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT round(exp(-1), 4)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─round(exp(-1), 4)─┐
+│            0.3679 │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="exp10">exp10<a aria-label="Direct link to exp10" class="hash-link" href="#exp10" title="Direct link to exp10">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns 10 to the power of the given argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">exp10(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns 10^x <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT exp10(2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">100
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="exp2">exp2<a aria-label="Direct link to exp2" class="hash-link" href="#exp2" title="Direct link to exp2">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns 2 to the power of the given argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">exp2(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns 2^x <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT exp2(3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">8
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="factorial">factorial<a aria-label="Direct link to factorial" class="hash-link" href="#factorial" title="Direct link to factorial">​</a></h2>
+<p>Introduced in: v22.11.0</p>
+<p>Computes the factorial of an integer value.
+The factorial of 0 is 1. Likewise, the <code>factorial()</code> function returns <code>1</code> for any negative value.
+The maximum positive value for the input argument is <code>20</code>, a value of <code>21</code> or greater will cause an exception.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">factorial(n)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>n</code> — Integer value for which to calculate the factorial. Maximum value is 20. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the factorial of the input as UInt64. Returns 1 for input 0 or any negative value. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">factorial(10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3628800
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="hypot">hypot<a aria-label="Direct link to hypot" class="hash-link" href="#hypot" title="Direct link to hypot">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the length of the hypotenuse of a right-angle triangle.
+Hypot avoids problems that occur when squaring very large or very small numbers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">hypot(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The first cathetus of a right-angle triangle. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+<li class="custom-li"><code>y</code> — The second cathetus of a right-angle triangle. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the length of the hypotenuse of a right-angle triangle. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT hypot(1, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1.4142135623730951
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intExp10">intExp10<a aria-label="Direct link to intExp10" class="hash-link" href="#intExp10" title="Direct link to intExp10">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Like <a href="#exp10">exp10</a> but returns a <code>UInt64</code> number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intExp10(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>Int*</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns 10^x. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intExp10(2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">100
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intExp2">intExp2<a aria-label="Direct link to intExp2" class="hash-link" href="#intExp2" title="Direct link to intExp2">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Like <a href="#exp2">exp2</a> but returns a <code>UInt64</code> number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intExp2(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>Int*</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns 2^x. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intExp2(3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">8
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isPrime">isPrime<a aria-label="Direct link to isPrime" class="hash-link" href="#isPrime" title="Direct link to isPrime">​</a></h2>
+<p>Introduced in: v26.5.0</p>
+<p>Returns <code>1</code> if the argument is a prime number, otherwise <code>0</code>.</p>
+<p>Uses an exact lookup bitmap for small values and a deterministic <a href="https://en.wikipedia.org/wiki/Miller-Rabin_primality_test" rel="noopener noreferrer" target="_blank">Miller-Rabin test</a>
+for larger values. The result is exact for every supported input type.</p>
+<p>For wider unsigned integer types (<code>UInt128</code>, <code>UInt256</code>), use <a href="/docs/sql-reference/functions/math-functions#isProbablePrime"><code>isProbablePrime</code></a> instead.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isPrime(n)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>n</code> — Unsigned integer to test for primality. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if <code>n</code> is prime, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Prime number</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isPrime(17)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Composite number</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isPrime(18)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Large <code>UInt64</code> prime</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isPrime(18446744073709551557)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Maximum <code>UInt64</code> value</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isPrime(18446744073709551615)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isProbablePrime">isProbablePrime<a aria-label="Direct link to isProbablePrime" class="hash-link" href="#isProbablePrime" title="Direct link to isProbablePrime">​</a></h2>
+<p>Introduced in: v26.5.0</p>
+<p>Returns <code>1</code> if the argument is probably prime, <code>0</code> if it is definitely composite.</p>
+<p>For <code>UInt8</code>, <code>UInt16</code>, <code>UInt32</code>, and <code>UInt64</code>, the result is exact and matches
+<a href="/docs/sql-reference/functions/math-functions#isPrime"><code>isPrime</code></a>. The <code>rounds</code> argument is ignored.</p>
+<p>For <code>UInt128</code> and <code>UInt256</code>, a return value of <code>1</code> is probabilistic. The optional <code>rounds</code> argument controls
+how many <a href="https://en.wikipedia.org/wiki/Miller-Rabin_primality_test" rel="noopener noreferrer" target="_blank">Miller-Rabin</a> rounds are used:
+more rounds reduce the chance of a false positive and increase the running time. With uniformly random
+witnesses, the false-positive rate for a fixed composite is bounded by <code>4^(-rounds)</code>; the default of <code>25</code>
+keeps this bound below <code>10^-15</code>, and the maximum of <code>256</code> keeps it below <code>10^-154</code>.</p>
+<p>The function is deterministic: witnesses are seeded from <code>n</code>, so the same <code>(n, rounds)</code> pair always produces
+the same result. The <code>4^(-rounds)</code> bound is the per-input probability under uniformly random witnesses;
+with our deterministic seeding it instead describes a fraction over inputs — a composite that fools its
+witness sequence will reproducibly return <code>1</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isProbablePrime(n[, rounds])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>n</code> — Unsigned integer to test for primality. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt128</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt256</code></a></li>
+<li class="custom-li"><code>rounds</code> — Optional positive integer constant in <code>[1, 256]</code>. Number of Miller-Rabin rounds for <code>UInt128</code>/<code>UInt256</code> (ignored for narrower types). Default <code>25</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt32</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if <code>n</code> is probably prime, <code>0</code> if it is definitely composite. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Small prime</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(17)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Small composite</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(18)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Largest <code>UInt64</code> prime (exact result)</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(18446744073709551557)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Mersenne prime <code>M_127</code> (<code>UInt128</code>)</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(toUInt128('170141183460469231731687303715884105727'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Curve25519 base field prime <code>2^255 - 19</code> (<code>UInt256</code>)</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(toUInt256('57896044618658097711785492504343953926634992332820282019728792003956564819949'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Faster, lower-confidence check: 5 rounds</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isProbablePrime(toUInt256('57896044618658097711785492504343953926634992332820282019728792003956564819949'), 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="lgamma">lgamma<a aria-label="Direct link to lgamma" class="hash-link" href="#lgamma" title="Direct link to lgamma">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the logarithm of the gamma function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">lgamma(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number for which to compute the logarithm of the gamma function. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the logarithm of the gamma function of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT lgamma(5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3.1780538303479458
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="log">log<a aria-label="Direct link to log" class="hash-link" href="#log" title="Direct link to log">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the natural logarithm of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">log(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>ln</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number for which to compute the natural logarithm of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the natural logarithm of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT log(10);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2.302585092994046
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="log10">log10<a aria-label="Direct link to log10" class="hash-link" href="#log10" title="Direct link to log10">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the decimal logarithm of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">log10(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Number for which to compute the decimal logarithm of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the decimal logarithm of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT log10(100);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="log1p">log1p<a aria-label="Direct link to log1p" class="hash-link" href="#log1p" title="Direct link to log1p">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Calculates log(1+x).
+The calculation log1p(x) is more accurate than log(1+x) for small values of <code>x</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">log1p(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Values from the interval: <code>-1 &lt; x &lt; +∞</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values from the interval: -∞ &lt; log1p(x) &lt; +∞ <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT log1p(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="log2">log2<a aria-label="Direct link to log2" class="hash-link" href="#log2" title="Direct link to log2">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the binary logarithm of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">log2(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number for which to compute the binary logarithm of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the binary logarithm of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT log2(8);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="pi">pi<a aria-label="Direct link to pi" class="hash-link" href="#pi" title="Direct link to pi">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns pi (π).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">pi()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns pi <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT pi();
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3.141592653589793
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="pow">pow<a aria-label="Direct link to pow" class="hash-link" href="#pow" title="Direct link to pow">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns x raised to the power of y.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">pow(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>power</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The base. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+<li class="custom-li"><code>y</code> — The exponent. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns x^y <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT pow(2, 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">8
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="proportionsZTest">proportionsZTest<a aria-label="Direct link to proportionsZTest" class="hash-link" href="#proportionsZTest" title="Direct link to proportionsZTest">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>Returns test statistics for the two proportion Z-test - a statistical test for comparing the proportions from two populations x and y.
+The function supports both pooled and unpooled estimation methods for the standard error.
+In the pooled version, the two proportions are averaged and only one proportion is used to estimate the standard error.
+In the unpooled version, the two proportions are used separately.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">proportionsZTest(successes_x, successes_y, trials_x, trials_y, conf_level, pool_type)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>successes_x</code> — Number of successes in population x. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>successes_y</code> — Number of successes in population y. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>trials_x</code> — Number of trials in population x. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>trials_y</code> — Number of trials in population y. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+<li class="custom-li"><code>conf_level</code> — Confidence level for the test. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></li>
+<li class="custom-li"><code>pool_type</code> — Selection of pooling method for standard error estimation. Can be either 'unpooled' or 'pooled'. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing: <code>z_stat</code> (Z statistic), <code>p_val</code> (P value), <code>ci_low</code> (lower confidence interval), <code>ci_high</code> (upper confidence interval). <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float64, Float64, Float64, Float64)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled')───────────────────────────────┐
+│ (-0.20656724435948853,0.8363478437079654,-0.09345975390115283,0.07563797172293502) │
+└────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="radians">radians<a aria-label="Direct link to radians" class="hash-link" href="#radians" title="Direct link to radians">​</a></h2>
+<p>Introduced in: v22.2.0</p>
+<p>Converts degrees to radians.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">radians(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Input in degrees. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns value in radians <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT radians(180)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3.141592653589793
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sigmoid">sigmoid<a aria-label="Direct link to sigmoid" class="hash-link" href="#sigmoid" title="Direct link to sigmoid">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Calculates the sigmoid function: <code>1 / (1 + exp(-x))</code>. The sigmoid function maps any real number to the range (0, 1) and is commonly used in machine learning.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sigmoid(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The input value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the sigmoid of the input value, in the range (0, 1). <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sigmoid(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0.5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sign">sign<a aria-label="Direct link to sign" class="hash-link" href="#sign" title="Direct link to sign">​</a></h2>
+<p>Introduced in: v21.2.0</p>
+<p>Returns the sign of a real number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sign(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Values from -∞ to +∞. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>-1</code> for <code>x &lt; 0</code>, <code>0</code> for <code>x = 0</code>, <code>1</code> for <code>x &gt; 0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Sign for zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sign(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Sign for positive</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sign(1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Sign for negative</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sign(-1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sin">sin<a aria-label="Direct link to sin" class="hash-link" href="#sin" title="Direct link to sin">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the sine of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sin(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number whose sine will be returned. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the sine of x.</p>
+<p><strong>Examples</strong></p>
+<p><strong>simple</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sin(1.23)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0.9424888019316975
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sinh">sinh<a aria-label="Direct link to sinh" class="hash-link" href="#sinh" title="Direct link to sinh">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the hyperbolic sine.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sinh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The angle, in radians. Values from the interval: -∞ &lt; x &lt; +∞. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values from the interval: -∞ &lt; sinh(x) &lt; +∞ <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sinh(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sqrt">sqrt<a aria-label="Direct link to sqrt" class="hash-link" href="#sqrt" title="Direct link to sqrt">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the square root of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">sqrt(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number for which to find the square root of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the square root of x <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT sqrt(16);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">4
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tan">tan<a aria-label="Direct link to tan" class="hash-link" href="#tan" title="Direct link to tan">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the tangent of the argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tan(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The angle in radians. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the tangent of <code>x</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tan(0);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tanh">tanh<a aria-label="Direct link to tanh" class="hash-link" href="#tanh" title="Direct link to tanh">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Returns the hyperbolic tangent.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tanh(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The angle in radians. Values from the interval: -∞ &lt; x &lt; +∞. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns values from the interval: -1 &lt; tanh(x) &lt; 1 <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tanh(0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tgamma">tgamma<a aria-label="Direct link to tgamma" class="hash-link" href="#tgamma" title="Direct link to tgamma">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the gamma function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tgamma(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The number for which to compute the gamma function of. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the gamma function value <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tgamma(5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">24
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="widthBucket">widthBucket<a aria-label="Direct link to widthBucket" class="hash-link" href="#widthBucket" title="Direct link to widthBucket">​</a></h2>
+<p>Introduced in: v23.3.0</p>
+<p>Returns the number of the bucket in which parameter <code>operand</code> falls in a histogram having count equal-width buckets spanning the range <code>low</code> to <code>high</code>. Returns 0 if <code>operand</code> is less than <code>low</code>, and returns <code>count</code>+1 if <code>operand</code> is greater than or equal to <code>high</code>.
+There is also a case insensitive alias called <code>WIDTH_BUCKET</code> to provide compatibility with other databases.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">widthBucket(operand, low, high, count)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>width_bucket</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>operand</code> — The value for which to determine the bucket. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>low</code> — The lower bound of the histogram range. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>high</code> — The upper bound of the histogram range. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a></li>
+<li class="custom-li"><code>count</code> — The number of equal-width buckets. Cannot be zero. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the bucket number as an integer. Returns 0 if operand &lt; low, returns count+1 if operand &gt;= high. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">widthBucket(10.15, -8.6, 23, 18)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">11
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/machine-learning-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Machine Learning</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/nlp-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">NLP</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#acos">acos</a><li><a class="table-of-contents__link toc-highlight" href="#acosh">acosh</a><li><a class="table-of-contents__link toc-highlight" href="#asin">asin</a><li><a class="table-of-contents__link toc-highlight" href="#asinh">asinh</a><li><a class="table-of-contents__link toc-highlight" href="#atan">atan</a><li><a class="table-of-contents__link toc-highlight" href="#atan2">atan2</a><li><a class="table-of-contents__link toc-highlight" href="#atanh">atanh</a><li><a class="table-of-contents__link toc-highlight" href="#cbrt">cbrt</a><li><a class="table-of-contents__link toc-highlight" href="#cos">cos</a><li><a class="table-of-contents__link toc-highlight" href="#cosh">cosh</a><li><a class="table-of-contents__link toc-highlight" href="#degrees">degrees</a><li><a class="table-of-contents__link toc-highlight" href="#e">e</a><li><a class="table-of-contents__link toc-highlight" href="#erf">erf</a><li><a class="table-of-contents__link toc-highlight" href="#erfc">erfc</a><li><a class="table-of-contents__link toc-highlight" href="#exp">exp</a><li><a class="table-of-contents__link toc-highlight" href="#exp10">exp10</a><li><a class="table-of-contents__link toc-highlight" href="#exp2">exp2</a><li><a class="table-of-contents__link toc-highlight" href="#factorial">factorial</a><li><a class="table-of-contents__link toc-highlight" href="#hypot">hypot</a><li><a class="table-of-contents__link toc-highlight" href="#intExp10">intExp10</a><li><a class="table-of-contents__link toc-highlight" href="#intExp2">intExp2</a><li><a class="table-of-contents__link toc-highlight" href="#isPrime">isPrime</a><li><a class="table-of-contents__link toc-highlight" href="#isProbablePrime">isProbablePrime</a><li><a class="table-of-contents__link toc-highlight" href="#lgamma">lgamma</a><li><a class="table-of-contents__link toc-highlight" href="#log">log</a><li><a class="table-of-contents__link toc-highlight" href="#log10">log10</a><li><a class="table-of-contents__link toc-highlight" href="#log1p">log1p</a><li><a class="table-of-contents__link toc-highlight" href="#log2">log2</a><li><a class="table-of-contents__link toc-highlight" href="#pi">pi</a><li><a class="table-of-contents__link toc-highlight" href="#pow">pow</a><li><a class="table-of-contents__link toc-highlight" href="#proportionsZTest">proportionsZTest</a><li><a class="table-of-contents__link toc-highlight" href="#radians">radians</a><li><a class="table-of-contents__link toc-highlight" href="#sigmoid">sigmoid</a><li><a class="table-of-contents__link toc-highlight" href="#sign">sign</a><li><a class="table-of-contents__link toc-highlight" href="#sin">sin</a><li><a class="table-of-contents__link toc-highlight" href="#sinh">sinh</a><li><a class="table-of-contents__link toc-highlight" href="#sqrt">sqrt</a><li><a class="table-of-contents__link toc-highlight" href="#tan">tan</a><li><a class="table-of-contents__link toc-highlight" href="#tanh">tanh</a><li><a class="table-of-contents__link toc-highlight" href="#tgamma">tgamma</a><li><a class="table-of-contents__link toc-highlight" href="#widthBucket">widthBucket</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

@@ -1,0 +1,32 @@
+id: R-103
+name: projection_recommendation
+tier: '2'
+category: index_design
+status: proposed
+statement: Добавить projection для иного sort order или предагрегации
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - повторяющийся pattern в query_log; не использует текущий ORDER BY
+proof: ''
+ch_version:
+  introduced: '21.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks:
+- storage overhead 1.2-2×
+opt_in: true
+references: []
+cost_model:
+  metric: rows_to_read с projection vs без
+  formula: ''
+  baseline: ''
+  projected: ''
+ddl_template: '`ALTER TABLE t ADD PROJECTION name (SELECT ... ORDER BY ...)`'

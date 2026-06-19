@@ -1,0 +1,186 @@
+<h1>How ClickHouse executes a query in parallel | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/operations/overview" itemprop="item"><span itemprop="name">Performance and optimizations</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Query parallelism</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/guides/best-practices/query-parallelism.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>How ClickHouse executes a query in parallel</h1></header>
+<p>ClickHouse is <a href="/docs/concepts/why-clickhouse-is-so-fast">built for speed</a>. It executes queries in a highly parallel fashion, using all available CPU cores, distributing data across processing lanes, and often pushing hardware close to its limits.</p>
+<p>This guide walks through how query parallelism works in ClickHouse and how you can tune or monitor it to improve performance on large workloads.</p>
+<p>We use an aggregation query on the <a href="/docs/parts">uk_price_paid_simple</a> dataset to illustrate key concepts.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="step-by-step-how-clickHouse-parallelizes-an-aggregation-query">Step-by-step: How ClickHouse parallelizes an aggregation query<a aria-label="Direct link to Step-by-step: How ClickHouse parallelizes an aggregation query" class="hash-link" href="#step-by-step-how-clickHouse-parallelizes-an-aggregation-query" title="Direct link to Step-by-step: How ClickHouse parallelizes an aggregation query">​</a></h2>
+<p>When ClickHouse ① runs an aggregation query with a filter on the table's primary key, it ② loads the primary index into memory to ③ identify which granules need to be processed, and which can be safely skipped:</p>
+<div style="position:relative;display:flex"><img alt="Index analysis" src="/docs/assets/images/query-parallelism_01-04167e71e6fb8ce3a9b12a2c11256d4a.gif" style="max-width:600px;width:auto;height:auto;margin:0 auto;display:block;box-shadow:none"/></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="distributing-work-across-processing-lanes">Distributing work across processing lanes<a aria-label="Direct link to Distributing work across processing lanes" class="hash-link" href="#distributing-work-across-processing-lanes" title="Direct link to Distributing work across processing lanes">​</a></h3>
+<p>The selected data is then <a href="#load-balancing-across-processing-lanes">dynamically</a> distributed across <code>n</code> parallel <a href="/docs/academic_overview#4-2-multi-core-parallelization">processing lanes</a>, which stream and process the data <a href="/docs/development/architecture#block">block</a> by block into the final result:</p>
+<div style="position:relative;display:flex"><img alt="4 parallel processing lanes" src="/docs/assets/images/query-parallelism_02-82fba4a0fd87b980b12a61b59f4533f4.gif" style="max-width:600px;width:auto;height:auto;margin:0 auto;display:block;box-shadow:none"/></div>
+<br/>
+<br/>
+<p>The number of <code>n</code> parallel processing lanes is controlled by the <a href="/docs/operations/settings/settings#max_threads"><code>max_threads</code></a> setting, which by default matches the number of cores (threads) of a single CPU available to ClickHouse on the server. In the example above, we assume <code>4</code> cores.</p>
+<p>On a machine with <code>8</code> cores, query processing throughput would roughly double (but memory usage would also increase accordingly), as more lanes process data in parallel:</p>
+<div style="position:relative;display:flex"><img alt="8 parallel processing lanes" src="/docs/assets/images/query-parallelism_03-2120da7d58c366bd09295e0bc6bc9b20.gif" style="max-width:600px;width:auto;height:auto;margin:0 auto;display:block;box-shadow:none"/></div>
+<br/>
+<br/>
+<p>Efficient lane distribution is key to maximizing CPU utilization and reducing total query time.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="processing-queries-on-sharded-tables">Processing queries on sharded tables<a aria-label="Direct link to Processing queries on sharded tables" class="hash-link" href="#processing-queries-on-sharded-tables" title="Direct link to Processing queries on sharded tables">​</a></h3>
+<p>When table data is distributed across multiple servers as <a href="/docs/shards">shards</a>, each server processes its shard in parallel. Within each server, the local data is handled using parallel processing lanes, just as described above:</p>
+<div style="position:relative;display:flex"><img alt="Distributed lanes" src="/docs/assets/images/query-parallelism_04-fdd68c179689c7410287062a72440de8.gif" style="max-width:600px;width:auto;height:auto;margin:0 auto;display:block;box-shadow:none"/></div>
+<br/>
+<br/>
+<p>The server that initially receives the query collects all sub-results from the shards and combines them into the final global result.</p>
+<p>Distributing query load across shards allows horizontal scaling of parallelism, especially for high-throughput environments.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">ClickHouse Cloud uses parallel replicas instead of shards</div><p>In ClickHouse Cloud, this same parallelism is achieved through <a href="https://clickhouse.com/docs/deployment-guides/parallel-replicas" rel="noopener noreferrer" target="_blank">parallel replicas</a>, which function similarly to shards in shared-nothing clusters. Each ClickHouse Cloud replica—a stateless compute node—processes a portion of the data in parallel and contributes to the final result, just like an independent shard would.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="monitoring-query-parallelism">Monitoring query parallelism<a aria-label="Direct link to Monitoring query parallelism" class="hash-link" href="#monitoring-query-parallelism" title="Direct link to Monitoring query parallelism">​</a></h2>
+<p>Use these tools to verify that your query fully utilizes available CPU resources and to diagnose when it doesn't.</p>
+<p>We're running this on a test server with 59 CPU cores, which allows ClickHouse to fully showcase its query parallelism.</p>
+<p>To observe how the example query is executed, we can instruct the ClickHouse server to return all trace-level log entries during the aggregation query. For this demonstration, we removed the query's predicate—otherwise, only 3 granules would be processed, which isn't enough data for ClickHouse to make use of more than a few parallel processing lanes:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple
+SETTINGS send_logs_level='trace';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">① &lt;Debug&gt; ...: 3609 marks to read from 3 ranges
+② &lt;Trace&gt; ...: Spreading mark ranges among streams
+② &lt;Debug&gt; ...: Reading approx. 29564928 rows with 59 streams
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can see that</p>
+<ul class="custom-ul">
+<li class="custom-li">① ClickHouse needs to read 3,609 granules (indicated as marks in the trace logs) across 3 data ranges.</li>
+<li class="custom-li">② With 59 CPU cores, it distributes this work across 59 parallel processing streams—one per lane.</li>
+</ul>
+<p>Alternatively, we can use the <a href="/docs/sql-reference/statements/explain#explain-pipeline">EXPLAIN</a> clause to inspect the <a href="/docs/academic_overview#4-2-multi-core-parallelization">physical operator plan</a>—also known as the "query pipeline"—for the aggregation query:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN PIPELINE
+SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">    ┌─explain───────────────────────────────────────────────────────────────────────────┐
+ 1. │ (Expression)                                                                      │
+ 2. │ ExpressionTransform × 59                                                          │
+ 3. │   (Aggregating)                                                                   │
+ 4. │   Resize 59 → 59                                                                  │
+ 5. │     AggregatingTransform × 59                                                     │
+ 6. │       StrictResize 59 → 59                                                        │
+ 7. │         (Expression)                                                              │
+ 8. │         ExpressionTransform × 59                                                  │
+ 9. │           (ReadFromMergeTree)                                                     │
+10. │           MergeTreeSelect(pool: PrefetchedReadPool, algorithm: Thread) × 59 0 → 1 │
+    └───────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: Read the operator plan above from bottom to top. Each line represents a stage in the physical execution plan, starting with reading data from storage at the bottom and ending with the final processing steps at the top. Operators marked with <code>× 59</code> are executed concurrently on non-overlapping data regions across 59 parallel processing lanes. This reflects the value of <code>max_threads</code> and illustrates how each stage of the query is parallelized across CPU cores.</p>
+<p>ClickHouse's <a href="/docs/interfaces/http">embedded web UI</a> (available at the <code>/play</code> endpoint) can render the physical plan from above as a graphical visualization. In this example, we set <code>max_threads</code> to <code>4</code> to keep the visualization compact, showing just 4 parallel processing lanes:</p>
+<div style="position:relative;margin-bottom:16px;margin-top:16px"><div style="cursor:default"><div style='background-size:cover;background-repeat:no-repeat;position:relative;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAYAAACqPZ51AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAT0lEQVR4nG3KOw6AIBBAQWQRUBMBWfzE+5/zmWi0sphuzHFu9GHAiPzqrCA+YOZ9Z6orsSjj0gjlpdi54pLismJ8UmJp+Kx38B9F8sOmygXYDSHoZACmwgAAAABJRU5ErkJggg==");width:undefinedpx;margin:0 auto;display:block;box-shadow:none'><svg height="512" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px" width="2048"></svg><noscript><img alt="Query pipeline" height="512" src="/docs/assets/ideal-img/query-parallelism_05.5eb5f14.48.png" srcset="/docs/assets/ideal-img/query-parallelism_05.5eb5f14.48.png 48w,/docs/assets/ideal-img/query-parallelism_05.8f00c0e.300.png 300w,/docs/assets/ideal-img/query-parallelism_05.1c0e63a.600.png 600w,/docs/assets/ideal-img/query-parallelism_05.cb32de6.1024.png 1024w,/docs/assets/ideal-img/query-parallelism_05.33f8380.2048.png 2048w" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px;position:absolute;top:0;left:0" width="2048"/></noscript></div></div></div>
+<p>Note: Read the visualization from left to right. Each row represents a parallel processing lane that streams data block by block, applying transformations such as filtering, aggregation, and final processing stages. In this example, you can see four parallel lanes corresponding to the <code>max_threads = 4</code> setting.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="load-balancing-across-processing-lanes">Load balancing across processing lanes<a aria-label="Direct link to Load balancing across processing lanes" class="hash-link" href="#load-balancing-across-processing-lanes" title="Direct link to Load balancing across processing lanes">​</a></h3>
+<p>Note that the <code>Resize</code> operators in the physical plan above <a href="/docs/academic_overview#4-2-multi-core-parallelization">repartition and redistribute</a> data block streams across processing lanes to keep them evenly utilized. This rebalancing is especially important when data ranges vary in how many rows match the query predicates, otherwise, some lanes may become overloaded while others sit idle. By redistributing the work, faster lanes effectively help out slower ones, optimizing overall query runtime.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-max-threads-isnt-always-respected">Why max_threads isn't always respected<a aria-label="Direct link to Why max_threads isn't always respected" class="hash-link" href="#why-max-threads-isnt-always-respected" title="Direct link to Why max_threads isn't always respected">​</a></h2>
+<p>As mentioned above, the number of <code>n</code> parallel processing lanes is controlled by the <code>max_threads</code> setting, which by default matches the number of CPU cores available to ClickHouse on the server:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT getSetting('max_threads');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">   ┌─getSetting('max_threads')─┐
+1. │                        59 │
+   └───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>However, the <code>max_threads</code> value may be ignored depending on the amount of data selected for processing:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN PIPELINE
+SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple
+WHERE town = 'LONDON';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">...   
+(ReadFromMergeTree)
+MergeTreeSelect(pool: PrefetchedReadPool, algorithm: Thread) × 30
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As shown in the operator plan extract above, even though <code>max_threads</code> is set to <code>59</code>, ClickHouse uses only <strong>30</strong> concurrent streams to scan the data.</p>
+<p>Now let's run the query:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple
+WHERE town = 'LONDON';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">   ┌─max(price)─┐
+1. │  594300000 │ -- 594.30 million
+   └────────────┘
+   
+1 row in set. Elapsed: 0.013 sec. Processed 2.31 million rows, 13.66 MB (173.12 million rows/s., 1.02 GB/s.)
+Peak memory usage: 27.24 MiB.   
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As shown in the output above, the query processed 2.31 million rows and read 13.66MB of data. This is because, during the index analysis phase, ClickHouse selected <strong>282 granules</strong> for processing, each containing 8,192 rows, totaling approximately 2.31 million rows:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1
+SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple
+WHERE town = 'LONDON';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">    ┌─explain───────────────────────────────────────────────┐
+ 1. │ Expression ((Project names + Projection))             │
+ 2. │   Aggregating                                         │
+ 3. │     Expression (Before GROUP BY)                      │
+ 4. │       Expression                                      │
+ 5. │         ReadFromMergeTree (uk.uk_price_paid_simple)   │
+ 6. │         Indexes:                                      │
+ 7. │           PrimaryKey                                  │
+ 8. │             Keys:                                     │
+ 9. │               town                                    │
+10. │             Condition: (town in ['LONDON', 'LONDON']) │
+11. │             Parts: 3/3                                │
+12. │             Granules: 282/3609                        │
+    └───────────────────────────────────────────────────────┘  
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Regardless of the configured <code>max_threads</code> value, ClickHouse only allocates additional parallel processing lanes when there's enough data to justify them. The "max" in <code>max_threads</code> refers to an upper limit, not a guaranteed number of threads used.</p>
+<p>What "enough data" means is primarily determined by two settings, which define the minimum number of rows (163,840 by default) and the minimum number of bytes (2,097,152 by default) that each processing lane should handle:</p>
+<p>For shared-nothing clusters:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_rows_for_concurrent_read" rel="noopener noreferrer" target="_blank">merge_tree_min_rows_for_concurrent_read</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_bytes_for_concurrent_read" rel="noopener noreferrer" target="_blank">merge_tree_min_bytes_for_concurrent_read</a></li>
+</ul>
+<p>For clusters with shared storage (e.g. ClickHouse Cloud):</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_rows_for_concurrent_read_for_remote_filesystem" rel="noopener noreferrer" target="_blank">merge_tree_min_rows_for_concurrent_read_for_remote_filesystem</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_bytes_for_concurrent_read_for_remote_filesystem" rel="noopener noreferrer" target="_blank">merge_tree_min_bytes_for_concurrent_read_for_remote_filesystem</a></li>
+</ul>
+<p>Additionally, there's a hard lower limit for read task size, controlled by:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_read_task_size" rel="noopener noreferrer" target="_blank">Merge_tree_min_read_task_size</a> + <a href="https://clickhouse.com/docs/operations/settings/settings#merge_tree_min_bytes_per_task_for_remote_reading" rel="noopener noreferrer" target="_blank">merge_tree_min_bytes_per_task_for_remote_reading</a></li>
+</ul>
+<div class="theme-admonition theme-admonition-warning alert alert--warning admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 16 16"><path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Don't modify these settings</div><p>We don't recommend modifying these settings in production. They're shown here solely to illustrate why <code>max_threads</code> doesn't always determine the actual level of parallelism.</p></div></div>
+<p>For demonstration purposes, let's inspect the physical plan with these settings overridden to force maximum concurrency:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN PIPELINE
+SELECT
+   max(price)
+FROM
+   uk.uk_price_paid_simple
+WHERE town = 'LONDON'
+SETTINGS
+  max_threads = 59,
+  merge_tree_min_read_task_size = 0,
+  merge_tree_min_rows_for_concurrent_read_for_remote_filesystem = 0, 
+  merge_tree_min_bytes_for_concurrent_read_for_remote_filesystem = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-txt"><code class="language-txt">...   
+(ReadFromMergeTree)
+MergeTreeSelect(pool: PrefetchedReadPool, algorithm: Thread) × 59
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Now ClickHouse uses 59 concurrent streams to scan the data, fully respecting the configured <code>max_threads</code>.</p>
+<p>This demonstrates that for queries on small datasets, ClickHouse will intentionally limit concurrency. Use setting overrides only for testing—not in production—as they can lead to inefficient execution or resource contention.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="key-takeaways">Key takeaways<a aria-label="Direct link to Key takeaways" class="hash-link" href="#key-takeaways" title="Direct link to Key takeaways">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">ClickHouse parallelizes queries using processing lanes tied to <code>max_threads</code>.</li>
+<li class="custom-li">The actual number of lanes depends on the size of data selected for processing.</li>
+<li class="custom-li">Use <code>EXPLAIN PIPELINE</code> and trace logs to analyze lane usage.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="where-to-find-more-information">Where to find more information<a aria-label="Direct link to Where to find more information" class="hash-link" href="#where-to-find-more-information" title="Direct link to Where to find more information">​</a></h2>
+<p>If you'd like to dive deeper into how ClickHouse executes queries in parallel and how it achieves high performance at scale, explore the following resources:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><a href="/docs/academic_overview#4-query-processing-layer">Query Processing Layer – VLDB 2024 Paper (Web Edition)</a> - A detailed breakdown of ClickHouse's internal execution model, including scheduling, pipelining, and operator design.</p>
+</li>
+<li class="custom-li">
+<p><a href="https://clickhouse.com/blog/clickhouse_vs_elasticsearch_mechanics_of_count_aggregations#-multi-core-parallelization" rel="noopener noreferrer" target="_blank">Partial aggregation states explained</a> - A technical deep dive into how partial aggregation states enable efficient parallel execution across processing lanes.</p>
+</li>
+<li class="custom-li">
+<p>A video tutorial walking in detail through all ClickHouse query processing steps:</p>
+</li>
+</ul>
+<iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" frameborder="0" height="576" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/hP6G2Nlz_cA?si=Imd_i427J_kZOXHe" title="YouTube video player" width="1024"></iframe></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/guides/best-practices/sparse-primary-indexes"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Primary indexes</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/optimize/partitioning-key"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Partitioning key</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#step-by-step-how-clickHouse-parallelizes-an-aggregation-query">Step-by-step: How ClickHouse parallelizes an aggregation query</a><ul><li><a class="table-of-contents__link toc-highlight" href="#distributing-work-across-processing-lanes">Distributing work across processing lanes</a><li><a class="table-of-contents__link toc-highlight" href="#processing-queries-on-sharded-tables">Processing queries on sharded tables</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#monitoring-query-parallelism">Monitoring query parallelism</a><ul><li><a class="table-of-contents__link toc-highlight" href="#load-balancing-across-processing-lanes">Load balancing across processing lanes</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#why-max-threads-isnt-always-respected">Why max_threads isn't always respected</a><li><a class="table-of-contents__link toc-highlight" href="#key-takeaways">Key takeaways</a><li><a class="table-of-contents__link toc-highlight" href="#where-to-find-more-information">Where to find more information</a></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

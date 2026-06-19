@@ -1,0 +1,80 @@
+# varSampStable \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- varSampStable
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/varSampStable.md)# varSampStable
+
+## varSampStable[​](#varSampStable "Direct link to varSampStable")
+
+
+Introduced in: v1\.1\.0
+
+
+Calculate the sample variance of a data set. Unlike [`varSamp`](/docs/sql-reference/aggregate-functions/reference/varSamp), this function uses a [numerically stable](https://en.wikipedia.org/wiki/Numerical_stability) algorithm. It works slower but provides a lower computational error.
+
+
+The sample variance is calculated using the same formula as [`varSamp`](/docs/sql-reference/aggregate-functions/reference/varSamp):
+
+
+Σ(x−xˉ)2n−1\\frac{\\Sigma{(x \- \\bar{x})^2}}{n\-1}n−1Σ(x−xˉ)2​
+  
+
+Where:
+
+
+- xxx is each individual data point in the data set
+- xˉ\\bar{x}xˉ is the arithmetic mean of the data set
+- nnn is the number of data points in the data set
+
+
+**Syntax**
+
+
+
+```
+varSampStable(x)
+
+```
+
+**Arguments**
+
+
+- `x` — The population for which you want to calculate the sample variance. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the sample variance of the input data set. [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**Computing stable sample variance**
+
+
+
+```
+DROP TABLE IF EXISTS test_data;
+CREATE TABLE test_data
+(
+    x Float64
+)
+ENGINE = Memory;
+
+INSERT INTO test_data VALUES (10.5), (12.3), (9.8), (11.2), (10.7);
+
+SELECT round(varSampStable(x),3) AS var_samp_stable FROM test_data;
+
+```
+
+
+```
+┌─var_samp_stable─┐
+│           0.865 │
+└─────────────────┘
+
+```
+[PreviousvarSamp](/docs/sql-reference/aggregate-functions/reference/varSamp)[NextwelchTTest](/docs/sql-reference/aggregate-functions/reference/welchttest)- [varSampStable](#varSampStable)
+Was this page helpful?

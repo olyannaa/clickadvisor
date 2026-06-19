@@ -1,0 +1,287 @@
+<h1>WHERE clause | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/select" itemprop="item"><span itemprop="name">SELECT</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">WHERE</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/where.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>WHERE clause</h1></header><p>The <code>WHERE</code> clause allows you to filter the data that comes from the<a href="/docs/sql-reference/statements/select/from"><code>FROM</code></a> clause of <code>SELECT</code>.</p>
+<p>If there is a <code>WHERE</code> clause, it must be followed by an expression of type <code>UInt8</code>.
+Rows where this expression evaluates to <code>0</code> are excluded from further transformations or the result.</p>
+<p>The expression following the <code>WHERE</code> clause is often used with <a href="/docs/sql-reference/operators#comparison-operators">comparison</a> and <a href="/docs/sql-reference/operators#operators-for-working-with-data-sets">logical operators</a>, or one of the many <a href="/docs/sql-reference/functions/regular-functions">regular functions</a>.</p>
+<p>The <code>WHERE</code> expression is evaluated on the ability to use indexes and partition pruning, if the underlying table engine supports that.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">PREWHERE</div><p>There is also a filtering optimization called <a href="/docs/sql-reference/statements/select/prewhere"><code>PREWHERE</code></a>.
+Prewhere is an optimization to apply filtering more efficiently.
+It is enabled by default even if <code>PREWHERE</code> clause is not specified explicitly.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="testing-for-null">Testing for <code>NULL</code><a aria-label="Direct link to testing-for-null" class="hash-link" href="#testing-for-null" title="Direct link to testing-for-null">​</a></h2>
+<p>If you need to test a value for <a href="/docs/sql-reference/syntax#null"><code>NULL</code></a>, use:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/operators#is_null"><code>IS NULL</code></a> or <a href="/docs/sql-reference/functions/functions-for-nulls#isNull"><code>isNull</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/operators#is_not_null"><code>IS NOT NULL</code></a>   or <a href="/docs/sql-reference/functions/functions-for-nulls#isNotNull"><code>isNotNull</code></a></li>
+</ul>
+<p>An expression with <code>NULL</code> will otherwise never pass.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="filtering-data-with-logical-operators">Filtering data with logical operators<a aria-label="Direct link to Filtering data with logical operators" class="hash-link" href="#filtering-data-with-logical-operators" title="Direct link to Filtering data with logical operators">​</a></h2>
+<p>You can use the following <a href="/docs/sql-reference/functions/logical-functions#and">logical functions</a> together with the <code>WHERE</code> clause for combining multiple conditions:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/functions/logical-functions#and"><code>and()</code></a> or <code>AND</code></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/logical-functions#not"><code>not()</code></a> or <code>NOT</code></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/logical-functions#or"><code>or()</code></a> or <code>NOT</code></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/logical-functions#xor"><code>xor()</code></a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="using-uint8-columns-as-a-condition">Using UInt8 columns as a condition<a aria-label="Direct link to Using UInt8 columns as a condition" class="hash-link" href="#using-uint8-columns-as-a-condition" title="Direct link to Using UInt8 columns as a condition">​</a></h2>
+<p>In ClickHouse, <code>UInt8</code> columns can be used directly as boolean conditions, where <code>0</code> is <code>false</code> and any non-zero value (typically <code>1</code>) is <code>true</code>.
+An example of this is given in the section <a href="#example-uint8-column-as-condition">below</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="using-comparison-operators">Using comparison operators<a aria-label="Direct link to Using comparison operators" class="hash-link" href="#using-comparison-operators" title="Direct link to Using comparison operators">​</a></h2>
+<p>The following <a href="/docs/sql-reference/operators#comparison-operators">comparison operators</a> can be used:</p>
+<table><thead><tr><th>Operator<th>Function<th>Description<th>Example<tbody><tr><td><code>a = b</code><td><code>equals(a, b)</code><td>Equal to<td><code>price = 100</code><tr><td><code>a == b</code><td><code>equals(a, b)</code><td>Equal to (alternative syntax)<td><code>price == 100</code><tr><td><code>a != b</code><td><code>notEquals(a, b)</code><td>Not equal to<td><code>category != 'Electronics'</code><tr><td><code>a &lt;&gt; b</code><td><code>notEquals(a, b)</code><td>Not equal to (alternative syntax)<td><code>category &lt;&gt; 'Electronics'</code><tr><td><code>a &lt; b</code><td><code>less(a, b)</code><td>Less than<td><code>price &lt; 200</code><tr><td><code>a &lt;= b</code><td><code>lessOrEquals(a, b)</code><td>Less than or equal to<td><code>price &lt;= 200</code><tr><td><code>a &gt; b</code><td><code>greater(a, b)</code><td>Greater than<td><code>price &gt; 500</code><tr><td><code>a &gt;= b</code><td><code>greaterOrEquals(a, b)</code><td>Greater than or equal to<td><code>price &gt;= 500</code><tr><td><code>a LIKE s</code><td><code>like(a, b)</code><td>Pattern matching (case-sensitive)<td><code>name LIKE '%top%'</code><tr><td><code>a NOT LIKE s</code><td><code>notLike(a, b)</code><td>Pattern not matching (case-sensitive)<td><code>name NOT LIKE '%top%'</code><tr><td><code>a ILIKE s</code><td><code>ilike(a, b)</code><td>Pattern matching (case-insensitive)<td><code>name ILIKE '%LAPTOP%'</code><tr><td><code>a BETWEEN b AND c</code><td><code>a &gt;= b AND a &lt;= c</code><td>Range check (inclusive)<td><code>price BETWEEN 100 AND 500</code><tr><td><code>a NOT BETWEEN b AND c</code><td><code>a &lt; b OR a &gt; c</code><td>Outside range check<td><code>price NOT BETWEEN 100 AND 500</code></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="pattern-matching-and-conditional-expressions">Pattern matching and conditional expressions<a aria-label="Direct link to Pattern matching and conditional expressions" class="hash-link" href="#pattern-matching-and-conditional-expressions" title="Direct link to Pattern matching and conditional expressions">​</a></h2>
+<p>Beyond comparison operators, you can use pattern matching and conditional expressions in the <code>WHERE</code> clause.</p>
+<table><thead><tr><th>Feature<th>Syntax<th>Case-Sensitive<th>Performance<th>Best For<tbody><tr><td><code>LIKE</code><td><code>col LIKE '%pattern%'</code><td>Yes<td>Fast<td>Exact case pattern matching<tr><td><code>ILIKE</code><td><code>col ILIKE '%pattern%'</code><td>No<td>Slower<td>Case-insensitive searching<tr><td><code>if()</code><td><code>if(cond, a, b)</code><td>N/A<td>Fast<td>Simple binary conditions<tr><td><code>multiIf()</code><td><code>multiIf(c1, r1, c2, r2, def)</code><td>N/A<td>Fast<td>Multiple conditions<tr><td><code>CASE</code><td><code>CASE WHEN ... THEN ... END</code><td>N/A<td>Fast<td>SQL-standard conditional logic</td></td></td></td></td></tr></td></td></td></td></td></tr></td></td></td></td></td></tr></td></td></td></td></td></tr></td></td></td></td></td></tr></tbody></th></th></th></th></th></tr></thead></table>
+<p>See <a href="#examples-pattern-matching-and-conditional-expressions">"Pattern matching and conditional expressions"</a> for usage examples.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="expressions-with-literals-columns-subqueries">Expression with literals, columns or subqueries<a aria-label="Direct link to Expression with literals, columns or subqueries" class="hash-link" href="#expressions-with-literals-columns-subqueries" title="Direct link to Expression with literals, columns or subqueries">​</a></h2>
+<p>The expression following the <code>WHERE</code> clause can also include <a href="/docs/sql-reference/syntax#literals">literals</a>, columns or subqueries, which are nested <code>SELECT</code> statements that return values used in conditions.</p>
+<table><thead><tr><th>Type<th>Definition<th>Evaluation<th>Performance<th>Example<tbody><tr><td><strong>Literal</strong><td>Fixed constant value<td>Query write time<td>Fastest<td><code>WHERE price &gt; 100</code><tr><td><strong>Column</strong><td>Table data reference<td>Per row<td>Fast<td><code>WHERE price &gt; cost</code><tr><td><strong>Subquery</strong><td>Nested SELECT<td>Query execution time<td>Varies<td><code>WHERE id IN (SELECT ...)</code></td></td></td></td></td></tr></td></td></td></td></td></tr></td></td></td></td></td></tr></tbody></th></th></th></th></th></tr></thead></table>
+<p>You can mix literals, columns, and subqueries in complex conditions:</p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Literal + Column
+WHERE price &gt; 100 AND category = 'Electronics'
+
+-- Column + Subquery
+WHERE price &gt; (SELECT AVG(price) FROM products) AND in_stock = true
+
+-- Literal + Column + Subquery
+WHERE category = 'Electronics' 
+  AND price &lt; 500
+  AND id IN (SELECT product_id FROM bestsellers)
+
+-- All three with logical operators
+WHERE (price &gt; 100 OR category IN (SELECT category FROM featured))
+  AND in_stock = true
+  AND name LIKE '%Special%'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="examples-testing-for-null">Testing for <code>NULL</code><a aria-label="Direct link to examples-testing-for-null" class="hash-link" href="#examples-testing-for-null" title="Direct link to examples-testing-for-null">​</a></h3>
+<p>Queries with <code>NULL</code> values:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t_null(x Int8, y Nullable(Int8)) ENGINE=MergeTree() ORDER BY x;
+INSERT INTO t_null VALUES (1, NULL), (2, 3);
+
+SELECT * FROM t_null WHERE y IS NULL;
+SELECT * FROM t_null WHERE y != 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─x─┬────y─┐
+│ 1 │ ᴺᵁᴸᴸ │
+└───┴──────┘
+┌─x─┬─y─┐
+│ 2 │ 3 │
+└───┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-filtering-with-logical-operators">Filtering data with logical operators<a aria-label="Direct link to Filtering data with logical operators" class="hash-link" href="#example-filtering-with-logical-operators" title="Direct link to Filtering data with logical operators">​</a></h3>
+<p>Given the following table and data:</p>
+<div class="wrapper_EBtA" style="height:301.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE products (
+    id UInt32,
+    name String,
+    price Float32,
+    category String,
+    in_stock Bool
+) ENGINE = MergeTree()
+ORDER BY id;
+
+INSERT INTO products VALUES
+(1, 'Laptop', 999.99, 'Electronics', true),
+(2, 'Mouse', 25.50, 'Electronics', true),
+(3, 'Desk', 299.00, 'Furniture', false),
+(4, 'Chair', 150.00, 'Furniture', true),
+(5, 'Monitor', 350.00, 'Electronics', true),
+(6, 'Lamp', 45.00, 'Furniture', false);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>1. <code>AND</code> - both conditions must be true:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE category = 'Electronics' AND price &lt; 500;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name────┬─price─┬─category────┬─in_stock─┐
+1. │  2 │ Mouse   │  25.5 │ Electronics │ true     │
+2. │  5 │ Monitor │   350 │ Electronics │ true     │
+   └────┴─────────┴───────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>2. <code>OR</code> - at least one condition must be true:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE category = 'Furniture' OR price &gt; 500;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name───┬──price─┬─category────┬─in_stock─┐
+1. │  1 │ Laptop │ 999.99 │ Electronics │ true     │
+2. │  3 │ Desk   │    299 │ Furniture   │ false    │
+3. │  4 │ Chair  │    150 │ Furniture   │ true     │
+4. │  6 │ Lamp   │     45 │ Furniture   │ false    │
+   └────┴────────┴────────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>3. <code>NOT</code> - Negates a condition:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE NOT in_stock;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name─┬─price─┬─category──┬─in_stock─┐
+1. │  3 │ Desk │   299 │ Furniture │ false    │
+2. │  6 │ Lamp │    45 │ Furniture │ false    │
+   └────┴──────┴───────┴───────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>4. <code>XOR</code> - Exactly one condition must be true (not both):</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM products
+WHERE xor(price &gt; 200, category = 'Electronics')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name──┬─price─┬─category────┬─in_stock─┐
+1. │  2 │ Mouse │  25.5 │ Electronics │ true     │
+2. │  3 │ Desk  │   299 │ Furniture   │ false    │
+   └────┴───────┴───────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>5. Combining multiple operators:</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE (category = 'Electronics' OR category = 'Furniture')
+  AND in_stock = true
+  AND price &lt; 400;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name────┬─price─┬─category────┬─in_stock─┐
+1. │  2 │ Mouse   │  25.5 │ Electronics │ true     │
+2. │  4 │ Chair   │   150 │ Furniture   │ true     │
+3. │  5 │ Monitor │   350 │ Electronics │ true     │
+   └────┴─────────┴───────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>6. Using function syntax:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE and(or(category = 'Electronics', price &gt; 100), in_stock);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name────┬──price─┬─category────┬─in_stock─┐
+1. │  1 │ Laptop  │ 999.99 │ Electronics │ true     │
+2. │  2 │ Mouse   │   25.5 │ Electronics │ true     │
+3. │  4 │ Chair   │    150 │ Furniture   │ true     │
+4. │  5 │ Monitor │    350 │ Electronics │ true     │
+   └────┴─────────┴────────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The SQL keyword syntax (<code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>XOR</code>) is generally more readable, but the function syntax can be useful in complex expressions or when building dynamic queries.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-uint8-column-as-condition">Using UInt8 columns as a condition<a aria-label="Direct link to Using UInt8 columns as a condition" class="hash-link" href="#example-uint8-column-as-condition" title="Direct link to Using UInt8 columns as a condition">​</a></h3>
+<p>Taking the table from a <a href="#example-filtering-with-logical-operators">previous example</a>, you can use a column name directly as a condition:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─id─┬─name────┬──price─┬─category────┬─in_stock─┐
+1. │  1 │ Laptop  │ 999.99 │ Electronics │ true     │
+2. │  2 │ Mouse   │   25.5 │ Electronics │ true     │
+3. │  4 │ Chair   │    150 │ Furniture   │ true     │
+4. │  5 │ Monitor │    350 │ Electronics │ true     │
+   └────┴─────────┴────────┴─────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-using-comparison-operators">Using comparison operators<a aria-label="Direct link to Using comparison operators" class="hash-link" href="#example-using-comparison-operators" title="Direct link to Using comparison operators">​</a></h3>
+<p>The examples below use the table and data from the <a href="#example-filtering-with-logical-operators">example</a> above. Results are omitted for sake of brevity.</p>
+<p><strong>1. Explicit equality with true (<code>= 1</code> or <code>= true</code>):</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock = true;
+-- or
+WHERE in_stock = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>2. Explicit equality with false (<code>= 0</code> or <code>= false</code>):</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock = false;
+-- or
+WHERE in_stock = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>3. Inequality (<code>!= 0</code> or <code>!= false</code>):</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock != false;
+-- or
+WHERE in_stock != 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>4. Greater than:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock &gt; 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>5. Less than or equal:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock &lt;= 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>6. Combining with other conditions:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock AND price &lt; 400;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>7. Using the <code>IN</code> operator:</strong></p>
+<p>In the example below <code>(1, true)</code> is a <a href="/docs/sql-reference/data-types/tuple">tuple</a>.</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock IN (1, true);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can also use an <a href="/docs/sql-reference/data-types/array">array</a> to do this:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE in_stock IN [1, true];
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>8. Mixing comparison styles:</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM products
+WHERE category = 'Electronics' AND in_stock = true;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="examples-pattern-matching-and-conditional-expressions">Pattern matching and conditional expressions<a aria-label="Direct link to Pattern matching and conditional expressions" class="hash-link" href="#examples-pattern-matching-and-conditional-expressions" title="Direct link to Pattern matching and conditional expressions">​</a></h3>
+<p>The examples below use the table and data from the <a href="#example-filtering-with-logical-operators">example</a> above. Results are omitted for sake of brevity.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="like-examples">LIKE examples<a aria-label="Direct link to LIKE examples" class="hash-link" href="#like-examples" title="Direct link to LIKE examples">​</a></h4>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Find products with 'o' in the name
+SELECT * FROM products WHERE name LIKE '%o%';
+-- Result: Laptop, Monitor
+
+-- Find products starting with 'L'
+SELECT * FROM products WHERE name LIKE 'L%';
+-- Result: Laptop, Lamp
+
+-- Find products with exactly 4 characters
+SELECT * FROM products WHERE name LIKE '____';
+-- Result: Desk, Lamp
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="ilike-examples">ILIKE examples<a aria-label="Direct link to ILIKE examples" class="hash-link" href="#ilike-examples" title="Direct link to ILIKE examples">​</a></h4>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Case-insensitive search for 'LAPTOP'
+SELECT * FROM products WHERE name ILIKE '%laptop%';
+-- Result: Laptop
+
+-- Case-insensitive prefix match
+SELECT * FROM products WHERE name ILIKE 'l%';
+-- Result: Laptop, Lamp
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="if-examples">IF examples<a aria-label="Direct link to IF examples" class="hash-link" href="#if-examples" title="Direct link to IF examples">​</a></h4>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Different price thresholds by category
+SELECT * FROM products
+WHERE if(category = 'Electronics', price &lt; 500, price &lt; 200);
+-- Result: Mouse, Chair, Monitor
+-- (Electronics under $500 OR Furniture under $200)
+
+-- Filter based on stock status
+SELECT * FROM products
+WHERE if(in_stock, price &gt; 100, true);
+-- Result: Laptop, Chair, Monitor, Desk, Lamp
+-- (In stock items over $100 OR all out-of-stock items)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="multiif-examples">multiIf examples<a aria-label="Direct link to multiIf examples" class="hash-link" href="#multiif-examples" title="Direct link to multiIf examples">​</a></h4>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Multiple category-based conditions
+SELECT * FROM products
+WHERE multiIf(
+    category = 'Electronics', price &lt; 600,
+    category = 'Furniture', in_stock = true,
+    false
+);
+-- Result: Mouse, Monitor, Chair
+-- (Electronics &lt; $600 OR in-stock Furniture)
+
+-- Tiered filtering
+SELECT * FROM products
+WHERE multiIf(
+    price &gt; 500, category = 'Electronics',
+    price &gt; 100, in_stock = true,
+    true
+);
+-- Result: Laptop, Chair, Monitor, Lamp
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="case-examples">CASE examples<a aria-label="Direct link to CASE examples" class="hash-link" href="#case-examples" title="Direct link to CASE examples">​</a></h4>
+<p><strong>Simple CASE:</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Different rules per category
+SELECT * FROM products
+WHERE CASE category
+    WHEN 'Electronics' THEN price &lt; 400
+    WHEN 'Furniture' THEN in_stock = true
+    ELSE false
+END;
+-- Result: Mouse, Monitor, Chair
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Searched CASE:</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Price-based tiered logic
+SELECT * FROM products
+WHERE CASE
+    WHEN price &gt; 500 THEN in_stock = true
+    WHEN price &gt; 100 THEN category = 'Electronics'
+    ELSE true
+END;
+-- Result: Laptop, Monitor, Mouse, Lamp
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/union"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">UNION</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/with"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">WITH</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#testing-for-null">Testing for <code>NULL</code></a><li><a class="table-of-contents__link toc-highlight" href="#filtering-data-with-logical-operators">Filtering data with logical operators</a><li><a class="table-of-contents__link toc-highlight" href="#using-uint8-columns-as-a-condition">Using UInt8 columns as a condition</a><li><a class="table-of-contents__link toc-highlight" href="#using-comparison-operators">Using comparison operators</a><li><a class="table-of-contents__link toc-highlight" href="#pattern-matching-and-conditional-expressions">Pattern matching and conditional expressions</a><li><a class="table-of-contents__link toc-highlight" href="#expressions-with-literals-columns-subqueries">Expression with literals, columns or subqueries</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#examples-testing-for-null">Testing for <code>NULL</code></a><li><a class="table-of-contents__link toc-highlight" href="#example-filtering-with-logical-operators">Filtering data with logical operators</a><li><a class="table-of-contents__link toc-highlight" href="#example-uint8-column-as-condition">Using UInt8 columns as a condition</a><li><a class="table-of-contents__link toc-highlight" href="#example-using-comparison-operators">Using comparison operators</a><li><a class="table-of-contents__link toc-highlight" href="#examples-pattern-matching-and-conditional-expressions">Pattern matching and conditional expressions</a></li></li></li></li></li></ul></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

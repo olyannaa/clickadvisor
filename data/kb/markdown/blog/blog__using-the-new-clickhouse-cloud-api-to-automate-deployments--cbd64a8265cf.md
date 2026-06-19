@@ -1,0 +1,89 @@
+# Using the New ClickHouse Cloud API to Automate Deployments
+
+
+\-\>Scroll to topBack- [Blog](/blog)
+- /
+- [Product](/blog?category=product)
+
+Copy pageCopied!More actions- ![View as Markdown](/_next/static/media/icon-markdown.c048adbf.svg)**View as Markdown** Open this page in Markdown
+- ![Open in ChatGPT](/_next/static/media/icon-chatgpt.f6a7ebb4.svg)**Open in ChatGPT** Ask questions about this page
+- ![Open in Claude](/_next/static/media/icon-claude.18912ab9.svg)**Open in Claude** Ask questions about this page
+- ![Open in v0](/_next/static/media/icon-v0.2caf962b.svg)**Open in v0** Ask questions about this page
+# Using the New ClickHouse Cloud API to Automate Deployments
+
+![](/_next/image?url=%2Fuploads%2Fkrithika_Balagurunathan_29c89c536d.jpeg&w=96&q=75)[Krithika Balagurunathan](/authors/krithika-balagurunathan)May 30, 2023 · 4 minutes read[Get started](https://clickhouse.cloud/signUp?loc=blog-cta-header&utm_source=clickhouse&utm_medium=web&utm_campaign=blog) with ClickHouse Cloud today and receive $300 in credits. To learn more about our volume\-based discounts, [contact us](/company/contact?loc=blog-cta-header) or visit our [pricing page](/pricing?loc=blog-cta-header).
+
+We are thrilled to announce API support for ClickHouse Cloud that lets you manage your services programmatically.
+
+
+Modern DevOps frameworks are centered around APIs that automate and streamline deployments. With the newly introduced ClickHouse Cloud API support, you can effortlessly manage your ClickHouse Cloud services within your existing CI/CD pipeline and programmatically perform operations, such as service provisioning, configuration, and scaling.
+
+
+Common use cases for ClickHouse Cloud API include:
+
+
+- **Automated provisioning and deprovisioning** – The ClickHouse Cloud API enables automation of various tasks, including programmatically provisioning, configuring, and managing services. This automation saves time and effort by eliminating manual processes, reducing the risk of human errors, and ensuring consistency across environments.
+- **Scheduled scaling** – The ClickHouse Cloud API allows you to override auto scaling controls, either scheduled or unscheduled. By adjusting the resource allocation, you can ensure optimal performance and cost efficiency.
+- **Flexible configuration management** – You can leverage tools like Ansible, Chef, and Puppet to automate deployments quickly.
+
+
+ClickHouse Cloud API support includes the ability to:
+
+
+- Perform lifecycle operations on ClickHouse services, such as launching, starting, and stopping services.
+- Configure advanced scaling policies, including minimum and maximum size and idling.
+- Manage user access, API keys, and IP Access Lists
+- Monitor backup operational status.
+- List and update organizational details, including invitations
+
+
+## To get started with ClickHouse Cloud API [\#](/blog/using-the-new-clickhouse-cloud-api-to-automate-deployments#to-get-started-with-clickhouse-cloud-api)
+
+
+Create an account or login with [ClickHouse Cloud](https://clickhouse.cloud/signUp?utm_source=clickhouse&utm_medium=website&utm_campaign=blog-api). We offer a 30\-day trial with $300 in usage credits for new users. Navigate to the API Keys tab, and follow the prompts for generating a key and setting your policy. For more information, please see our documentation [here](https://clickhouse.com/docs/en/cloud/manage/openapi).
+
+
+![01-create-api-key.png](/uploads/01_create_api_key_4f3856f476.png)
+We take measures to secure your API key, secret, and connection. Only the last four characters of your key are stored in our database and are visible after setup so you can identify them in the activity log. Both the key and secret are generated using a cryptographically secure random character generator and stored using a strong hashing algorithm with salt. A web application firewall protects the API endpoint to prevent abuse.
+
+
+Refer to the REST [API specification](https://clickhouse.com/docs/en/cloud/manage/api/swagger) for the detailed list of supported operations:
+
+
+![02-api-spec.png](/uploads/02_api_spec_d1c6931697.png)
+If you are a Postman user, you can simply import the spec to get set up. API operations are limited to 10 requests every 10 seconds.
+
+
+![03-postman.png](/uploads/03_postman_372e070398.png)
+## What's Next? [\#](/blog/using-the-new-clickhouse-cloud-api-to-automate-deployments#whats-next)
+
+
+We are excited to continue to develop the ClickHouse Cloud API and make it a powerful tool for developers. In the next weeks and months, we are working to:
+
+
+- Add more methods to the specification, including the ability to:
+	- View usage and billing information, including a breakdown of costs by unit and service.
+	- View metrics, such as storage, memory allocation, and query stats.
+- Develop a Terraform provider to further improve the tooling by allowing developers to automate the creation and management of ClickHouse Cloud services.
+- Introduce API support for database operations, such as managing databases, tables, and users.
+- Support advanced authentication methods, including Hash\-based Message Authentication Code (HMAC).
+
+
+## Get started today [\#](/blog/using-the-new-clickhouse-cloud-api-to-automate-deployments#get-started-today)
+
+
+If you are already a ClickHouse Cloud user, you can log into your service to start using the API. If you are not yet a user, you can [start a ClickHouse Cloud trial today](https://clickhouse.cloud/signUp?utm_source=clickhouse&utm_medium=website&utm_campaign=blog-api) and receive $300 of free credit to get going with your real\-time analytics use case!
+
+Share this postCopy URLShare on Y CombinatorShare on TwitterShare on BlueSkyShare on FacebookShare on LinkedIn### Subscribe to our newsletter
+
+Stay informed on feature releases, product roadmap, support, and cloud offerings!Loading form...## Recent posts
+
+[View all Blogs](/blog)![](/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&w=828&q=75)Product### [Agents can now provision ClickHouse and Postgres on ClickHouse Cloud](/blog/stripe-projects)
+
+Chloé Carasso dit Carson · Jun 10, 2026![](/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&w=828&q=75)Product### [Datadog and ClickHouse partner to bring full\-fidelity data to modern observability](/blog/datadog-and-clickhouse-partner)
+
+ClickHouse · Jun 10, 2026![](/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&w=828&q=75)Product### [ClickHouse Agents: Claude\-powered agentic analytics, now in public beta](/blog/clickhouse-agents-beta)
+
+Ryadh Dahimene · Jun 9, 2026![](/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&w=828&q=75)User stories### [How QRT powers real\-time research and risk management at petabyte scale](/blog/qrt)
+
+ClickHouse · Jun 9, 2026Follow us[![X](/socials/x.svg)X](https://x.com/ClickhouseDB "X")[![Bluesky](/socials/bluesky.svg)Bluesky](https://bsky.app/profile/clickhouse.com "Bluesky")[![Slack](/socials/slack.svg)Slack](/slack "Slack")[![GitHub](/socials/github.svg)GitHub](https://github.com/ClickHouse/ClickHouse "GitHub")[![Telegram](/socials/telegram.svg)Telegram](https://telegram.me/clickhouse_en "Telegram")[![Meetup](/socials/meetup.svg)Meetup](https://www.meetup.com/pro/clickhouse "Meetup")[![Rss](/socials/rss.svg)Rss](/rss.xml "Rss")

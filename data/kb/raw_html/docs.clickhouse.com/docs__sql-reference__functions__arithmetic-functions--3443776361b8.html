@@ -1,0 +1,784 @@
+<h1>Arithmetic Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Arithmetic</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/arithmetic-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Arithmetic Functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a aria-label="Direct link to Overview" class="hash-link" href="#overview" title="Direct link to Overview">​</a></h2>
+<p>Arithmetic functions work for any two operands of type <code>UInt8</code>, <code>UInt16</code>, <code>UInt32</code>, <code>UInt64</code>, <code>Int8</code>, <code>Int16</code>, <code>Int32</code>, <code>Int64</code>, <code>Float32</code>, or <code>Float64</code>.</p>
+<p>Before performing the operation, both operands are cast to the result type. The result type is determined as follows (unless specified
+differently in the function documentation below):</p>
+<ul class="custom-ul">
+<li class="custom-li">If both operands are up to 32 bits wide, the size of the result type will be the size of the next bigger type following the bigger of the
+two operands (integer size promotion). For example, <code>UInt8 + UInt16 = UInt32</code> or <code>Float32 * Float32 = Float64</code>.</li>
+<li class="custom-li">If one of the operands has 64 or more bits, the size of the result type will be the same size as the bigger of the two operands. For
+example, <code>UInt32 + UInt128 = UInt128</code> or <code>Float32 * Float64 = Float64</code>.</li>
+<li class="custom-li">If one of the operands is signed, the result type will also be signed, otherwise it will be unsigned. For example, <code>UInt32 * Int32 = Int64</code> or <code>UInt32 * UInt32 = UInt64</code>.</li>
+</ul>
+<p>These rules make sure that the result type will be the smallest type which can represent all possible results. While this introduces a risk
+of overflows around the value range boundary, it ensures that calculations are performed quickly using the maximum native integer width of
+64 bit. This behavior also guarantees compatibility with many other databases which provide 64 bit integers (BIGINT) as the biggest integer
+type.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toTypeName(0), toTypeName(0 + 0), toTypeName(0 + 0 + 0), toTypeName(0 + 0 + 0 + 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─toTypeName(0)─┬─toTypeName(plus(0, 0))─┬─toTypeName(plus(plus(0, 0), 0))─┬─toTypeName(plus(plus(plus(0, 0), 0), 0))─┐
+│ UInt8         │ UInt16                 │ UInt32                          │ UInt64                                   │
+└───────────────┴────────────────────────┴─────────────────────────────────┴──────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Overflows are produced the same way as in C++.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="abs">abs<a aria-label="Direct link to abs" class="hash-link" href="#abs" title="Direct link to abs">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the absolute value of <code>x</code>. Has no effect if <code>x</code> is of an unsigned type. If <code>x</code> is of a signed type, it returns an unsigned number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">abs(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Value to get the absolute value of</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The absolute value of <code>x</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT abs(-0.5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0.5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="avg2">avg2<a aria-label="Direct link to avg2" class="hash-link" href="#avg2" title="Direct link to avg2">​</a></h2>
+<p>Introduced in: v25.11.0</p>
+<p>Computes and returns the average value of the provided arguments.
+Supports numerical and temporal types.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">avg2(x1, x2])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x1, x2]</code> — Accepts two values for averaging.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the average value of the provided arguments, promoted to the largest compatible type.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Numeric types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg2(toUInt8(3), 1.0) AS result, toTypeName(result) AS type;
+-- The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type────┐
+│      2 │ Float64 │
+└────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Decimal types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg2(toDecimal32(1, 2), 2) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type──────────┐
+│    1.5 │ Decimal(9, 2) │
+└────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Date types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg2(toDate('2025-01-01'), toDate('2025-01-05')) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────result─┬─type─┐
+│ 2025-01-03 │ Date │
+└────────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>DateTime types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg2(toDateTime('2025-01-01 00:00:00'), toDateTime('2025-01-03 12:00:00')) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────────result─┬─type─────┐
+│ 2025-01-02 06:00:00 │ DateTime │
+└─────────────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Time64 types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT avg2(toTime64('12:00:00', 0), toTime64('14:00:00', 0)) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───result─┬─type──────┐
+│ 13:00:00 │ Time64(0) │
+└──────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="byteSwap">byteSwap<a aria-label="Direct link to byteSwap" class="hash-link" href="#byteSwap" title="Direct link to byteSwap">​</a></h2>
+<p>Introduced in: v23.10.0</p>
+<p>Reverses the bytes of an integer, i.e. changes its <a href="https://en.wikipedia.org/wiki/Endianness" rel="noopener noreferrer" target="_blank">endianness</a>.</p>
+<p>The below example can be worked out in the following manner:</p>
+<ol class="custom-ol">
+<li class="custom-li">Convert the base-10 integer to its equivalent hexadecimal format in big-endian format, i.e. 3351772109 -&gt; C7 C7 FB CD (4 bytes)</li>
+<li class="custom-li">Reverse the bytes, i.e. C7 C7 FB CD -&gt; CD FB C7 C7</li>
+<li class="custom-li">Convert the result back to an integer assuming big-endian, i.e. CD FB C7 C7 -&gt; 3455829959
+One use case of this function is reversing IPv4s:</li>
+</ol>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">┌─toIPv4(byteSwap(toUInt32(toIPv4('205.251.199.199'))))─┐
+│ 199.199.251.205                                       │
+└───────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">byteSwap(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — An integer value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>x</code> with bytes reversed. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT byteSwap(3351772109)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3455829959
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>8-bit</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT byteSwap(54)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">54
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>16-bit</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT byteSwap(4135)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">10000
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>32-bit</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT byteSwap(3351772109)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">3455829959
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>64-bit</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT byteSwap(123294967295)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">18439412204227788800
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="divide">divide<a aria-label="Direct link to divide" class="hash-link" href="#divide" title="Direct link to divide">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the quotient of two values <code>a</code> and <code>b</code>. The result type is always <a href="/docs/sql-reference/data-types/float">Float64</a>.
+Integer division is provided by the <code>intDiv</code> function.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Division by <code>0</code> returns <code>inf</code>, <code>-inf</code>, or <code>nan</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">divide(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Dividend - <code>y</code> — Divisor</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The quotient of x and y</p>
+<p><strong>Examples</strong></p>
+<p><strong>Dividing two numbers</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT divide(25,5) AS quotient, toTypeName(quotient)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">5 Float64
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Dividing by zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT divide(25,0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">inf
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="divideDecimal">divideDecimal<a aria-label="Direct link to divideDecimal" class="hash-link" href="#divideDecimal" title="Direct link to divideDecimal">​</a></h2>
+<p>Introduced in: v22.12.0</p>
+<p>Performs division on two decimals. Result value will be of type <a href="/docs/sql-reference/data-types/decimal">Decimal256</a>.
+Result scale can be explicitly specified by <code>result_scale</code> argument (const Integer in range <code>[0, 76]</code>). If not specified, the result scale is the max scale of given arguments.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>These function work significantly slower than usual <code>divide</code>.
+In case you don't really need controlled precision and/or need fast computation, consider using <a href="#divide">divide</a>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">divideDecimal(x, y[, result_scale])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First value: <a href="/docs/sql-reference/data-types/decimal">Decimal</a>. - <code>y</code> — Second value: <a href="/docs/sql-reference/data-types/decimal">Decimal</a>. - <code>result_scale</code> — Scale of result. Type <a href="/docs/sql-reference/data-types/int-uint">Int/UInt</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The result of division with given scale. <a href="/docs/sql-reference/data-types/decimal"><code>Decimal256</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Example 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">divideDecimal(toDecimal256(-12, 0), toDecimal32(2.1, 1), 10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─divideDecimal(toDecimal256(-12, 0), toDecimal32(2.1, 1), 10)─┐
+│                                                -5.7142857142 │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example 2</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toDecimal64(-12, 1) / toDecimal32(2.1, 1);
+SELECT toDecimal64(-12, 1) as a, toDecimal32(2.1, 1) as b, divideDecimal(a, b, 1), divideDecimal(a, b, 5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─divide(toDecimal64(-12, 1), toDecimal32(2.1, 1))─┐
+│                                             -5.7 │
+└──────────────────────────────────────────────────┘
+┌───a─┬───b─┬─divideDecimal(toDecimal64(-12, 1), toDecimal32(2.1, 1), 1)─┬─divideDecimal(toDecimal64(-12, 1), toDecimal32(2.1, 1), 5)─┐
+│ -12 │ 2.1 │                                                       -5.7 │                                                   -5.71428 │
+└─────┴─────┴────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="divideOrNull">divideOrNull<a aria-label="Direct link to divideOrNull" class="hash-link" href="#divideOrNull" title="Direct link to divideOrNull">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Same as <code>divide</code> but returns NULL when dividing by zero.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">divideOrNull(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Dividend - <code>y</code> — Divisor</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The quotient of x and y, or NULL.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Dividing by zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT divideOrNull(25, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\N
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="gcd">gcd<a aria-label="Direct link to gcd" class="hash-link" href="#gcd" title="Direct link to gcd">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the greatest common divisor of two values a and b.</p>
+<p>An exception is thrown when dividing by zero or when dividing a minimal
+negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">gcd(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First integer - <code>y</code> — Second integer</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The greatest common divisor of <code>x</code> and <code>y</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT gcd(12, 18)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">6
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ifNotFinite">ifNotFinite<a aria-label="Direct link to ifNotFinite" class="hash-link" href="#ifNotFinite" title="Direct link to ifNotFinite">​</a></h2>
+<p>Introduced in: v20.3.0</p>
+<p>Checks whether a floating point value is finite.</p>
+<p>You can get a similar result by using the <a href="/docs/sql-reference/functions/conditional-functions#if">ternary operator</a>: <code>isFinite(x) ? x : y</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ifNotFinite(x,y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Value to check if infinite. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>y</code> — Fallback value. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> if <code>x</code> is finite.</li>
+<li class="custom-li"><code>y</code> if <code>x</code> is not finite.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT 1/0 AS infimum, ifNotFinite(infimum,42)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">inf  42
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intDiv">intDiv<a aria-label="Direct link to intDiv" class="hash-link" href="#intDiv" title="Direct link to intDiv">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Performs an integer division of two values <code>x</code> by <code>y</code>. In other words it
+computes the quotient rounded down to the next smallest integer.</p>
+<p>The result has the same width as the dividend (the first parameter).</p>
+<p>An exception is thrown when dividing by zero, when the quotient does not fit
+in the range of the dividend, or when dividing a minimal negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intDiv(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Left hand operand. - <code>y</code> — Right hand operand.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Result of integer division of <code>x</code> and <code>y</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Integer division of two floats</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intDiv(toFloat64(1), 0.001) AS res, toTypeName(res)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──res─┬─toTypeName(intDiv(toFloat64(1), 0.001))─┐
+│ 1000 │ Int64                                   │
+└──────┴─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Quotient does not fit in the range of the dividend</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+intDiv(1, 0.001) AS res,
+toTypeName(res)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Received exception from server (version 23.2.1):
+Code: 153. DB::Exception: Received from localhost:9000. DB::Exception:
+Cannot perform integer division, because it will produce infinite or too
+large number: While processing intDiv(1, 0.001) AS res, toTypeName(res).
+(ILLEGAL_DIVISION)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intDivOrNull">intDivOrNull<a aria-label="Direct link to intDivOrNull" class="hash-link" href="#intDivOrNull" title="Direct link to intDivOrNull">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Same as <code>intDiv</code> but returns NULL when dividing by zero or when dividing a
+minimal negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intDivOrNull(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Left hand operand. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>y</code> — Right hand operand. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Result of integer division of <code>x</code> and <code>y</code>, or NULL.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Integer division by zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intDivOrNull(1, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\N
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Dividing a minimal negative number by minus 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intDivOrNull(-9223372036854775808, -1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\N
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="intDivOrZero">intDivOrZero<a aria-label="Direct link to intDivOrZero" class="hash-link" href="#intDivOrZero" title="Direct link to intDivOrZero">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Same as <code>intDiv</code> but returns zero when dividing by zero or when dividing a
+minimal negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">intDivOrZero(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — Left hand operand. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>b</code> — Right hand operand. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Result of integer division of a and b, or zero.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Integer division by zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intDivOrZero(1, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Dividing a minimal negative number by minus 1</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT intDivOrZero(0.05, -1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isFinite">isFinite<a aria-label="Direct link to isFinite" class="hash-link" href="#isFinite" title="Direct link to isFinite">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns <code>1</code> if the Float32 or Float64 argument not infinite and not a <code>NaN</code>,
+otherwise this function returns <code>0</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isFinite(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Number to check for finiteness. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><code>1</code> if x is not infinite and not <code>NaN</code>, otherwise <code>0</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Test if a number is finite</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isFinite(inf)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isInfinite">isInfinite<a aria-label="Direct link to isInfinite" class="hash-link" href="#isInfinite" title="Direct link to isInfinite">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns <code>1</code> if the Float32 or Float64 argument is infinite, otherwise this function returns <code>0</code>.
+Note that <code>0</code> is returned for a <code>NaN</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isInfinite(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Number to check for infiniteness. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><code>1</code> if x is infinite, otherwise <code>0</code> (including for <code>NaN</code>).</p>
+<p><strong>Examples</strong></p>
+<p><strong>Test if a number is infinite</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isInfinite(inf), isInfinite(NaN), isInfinite(10))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1 0 0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isNaN">isNaN<a aria-label="Direct link to isNaN" class="hash-link" href="#isNaN" title="Direct link to isNaN">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns <code>1</code> if the Float32 and Float64 argument is <code>NaN</code>, otherwise returns <code>0</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isNaN(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Argument to evaluate for if it is <code>NaN</code>. <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><code>1</code> if <code>NaN</code>, otherwise <code>0</code></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT isNaN(NaN)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="lcm">lcm<a aria-label="Direct link to lcm" class="hash-link" href="#lcm" title="Direct link to lcm">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the least common multiple of two values <code>x</code> and <code>y</code>.</p>
+<p>An exception is thrown when dividing by zero or when dividing a minimal negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">lcm(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First integer. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>y</code> — Second integer. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the least common multiple of <code>x</code> and <code>y</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT lcm(6, 8)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">24
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="max2">max2<a aria-label="Direct link to max2" class="hash-link" href="#max2" title="Direct link to max2">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Returns the bigger of two numeric values <code>x</code> and <code>y</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">max2(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First value <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>y</code> — Second value <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the bigger value of <code>x</code> and <code>y</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT max2(-1, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="midpoint">midpoint<a aria-label="Direct link to midpoint" class="hash-link" href="#midpoint" title="Direct link to midpoint">​</a></h2>
+<p>Introduced in: v25.11.0</p>
+<p>Computes and returns the average value of the provided arguments.
+Supports numerical and temporal types.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">midpoint(x1[, x2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x1[, x2, ...]</code> — Accepts a single value or multiple values for averaging.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the average value of the provided arguments, promoted to the largest compatible type.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Numeric types</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT midpoint(1, toUInt8(3), 0.5) AS result, toTypeName(result) AS type;
+-- The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type────┐
+│    1.5 │ Float64 │
+└────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Decimal types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT midpoint(toDecimal32(1.5, 2), toDecimal32(1, 1), 2) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─result─┬─type──────────┐
+│    1.5 │ Decimal(9, 2) │
+└────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Date types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT midpoint(toDate('2025-01-01'), toDate('2025-01-05')) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────result─┬─type─┐
+│ 2025-01-03 │ Date │
+└────────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>DateTime types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT midpoint(toDateTime('2025-01-01 00:00:00'), toDateTime('2025-01-03 12:00:00')) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌──────────────result─┬─type─────┐
+│ 2025-01-02 06:00:00 │ DateTime │
+└─────────────────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Time64 types</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT midpoint(toTime64('12:00:00', 0), toTime64('14:00:00', 0)) AS result, toTypeName(result) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌───result─┬─type──────┐
+│ 13:00:00 │ Time64(0) │
+└──────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="min2">min2<a aria-label="Direct link to min2" class="hash-link" href="#min2" title="Direct link to min2">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Returns the smaller of two numeric values <code>x</code> and <code>y</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">min2(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — First value <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>y</code> — Second value <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int8/16/32/64</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the smaller value of <code>x</code> and <code>y</code>. <a href="/docs/sql-reference/data-types/float"><code>Float64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT min2(-1, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="minus">minus<a aria-label="Direct link to minus" class="hash-link" href="#minus" title="Direct link to minus">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the difference of two values <code>a</code> and <code>b</code>. The result is always signed.
+Similar to plus, it is possible to subtract an integer from a date or date with time.
+Additionally, subtraction between date with time is supported, resulting in the time difference between them.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">minus(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Minuend. - <code>y</code> — Subtrahend.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>x minus y</p>
+<p><strong>Examples</strong></p>
+<p><strong>Subtracting two numbers</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT minus(10, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">5
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Subtracting an integer and a date</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT minus(toDate('2025-01-01'),5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2024-12-27
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="modulo">modulo<a aria-label="Direct link to modulo" class="hash-link" href="#modulo" title="Direct link to modulo">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the remainder of the division of two values a by b.</p>
+<p>The result type is an integer if both inputs are integers. If one of the
+inputs is a floating-point number, the result type is Float64.</p>
+<p>The remainder is computed like in C++. Truncated division is used for
+negative numbers.</p>
+<p>An exception is thrown when dividing by zero or when dividing a minimal
+negative number by minus one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">modulo(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>mod</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — The dividend - <code>b</code> — The divisor (modulus)</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The remainder of a % b</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT modulo(5, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="moduloLegacy">moduloLegacy<a aria-label="Direct link to moduloLegacy" class="hash-link" href="#moduloLegacy" title="Direct link to moduloLegacy">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the remainder of a division. This is the legacy modulo implementation that uses the C++ <code>%</code> operator, which may produce negative results for negative arguments. This function exists for backward compatibility with old table partitioning logic. Use <code>modulo</code> or <code>positiveModulo</code> for standard behavior.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">moduloLegacy(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — The dividend. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>b</code> — The divisor. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the remainder of the division. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT moduloLegacy(10, 3)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="moduloOrNull">moduloOrNull<a aria-label="Direct link to moduloOrNull" class="hash-link" href="#moduloOrNull" title="Direct link to moduloOrNull">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Calculates the remainder when dividing <code>a</code> by <code>b</code>. Similar to function <code>modulo</code> except that <code>moduloOrNull</code> will return NULL
+if the right argument is 0.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">moduloOrNull(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>modOrNull</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The dividend. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>y</code> — The divisor (modulus). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the remainder of the division of <code>x</code> by <code>y</code>, or null when the divisor is zero.</p>
+<p><strong>Examples</strong></p>
+<p><strong>moduloOrNull by zero</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT moduloOrNull(5, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\N
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="moduloOrZero">moduloOrZero<a aria-label="Direct link to moduloOrZero" class="hash-link" href="#moduloOrZero" title="Direct link to moduloOrZero">​</a></h2>
+<p>Introduced in: v20.3.0</p>
+<p>Like modulo but returns zero when the divisor is zero, as opposed to an
+exception with the modulo function.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">moduloOrZero(a, b)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — The dividend. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+<li class="custom-li"><code>b</code> — The divisor (modulus). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the remainder of a % b, or <code>0</code> when the divisor is <code>0</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT moduloOrZero(5, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="multiply">multiply<a aria-label="Direct link to multiply" class="hash-link" href="#multiply" title="Direct link to multiply">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the product of two values <code>x</code> and <code>y</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">multiply(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — factor. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>y</code> — factor. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the product of x and y</p>
+<p><strong>Examples</strong></p>
+<p><strong>Multiplying two numbers</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT multiply(5,5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">25
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="multiplyDecimal">multiplyDecimal<a aria-label="Direct link to multiplyDecimal" class="hash-link" href="#multiplyDecimal" title="Direct link to multiplyDecimal">​</a></h2>
+<p>Introduced in: v22.12.0</p>
+<p>Performs multiplication on two decimals. Result value will be of type <a href="/docs/sql-reference/data-types/decimal">Decimal256</a>.
+Result scale can be explicitly specified by <code>result_scale</code> argument (const Integer in range <code>[0, 76]</code>). If not specified, the result scale is the max scale of given arguments.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>These functions work significantly slower than usual <code>multiply</code>.
+In case you don't really need controlled precision and/or need fast computation, consider using <a href="#multiply">multiply</a></p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">multiplyDecimal(a, b[, result_scale])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>a</code> — First value. <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>b</code> — Second value. <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>result_scale</code> — Scale of result. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>The result of multiplication with the given scale. Type: <a href="/docs/sql-reference/data-types/decimal"><code>Decimal256</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT multiplyDecimal(toDecimal256(-12, 0), toDecimal32(-2.1, 1), 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">25.2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Difference with regular multiplication</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT multiplyDecimal(toDecimal256(-12, 0), toDecimal32(-2.1, 1), 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─multiply(toDecimal64(-12.647, 3), toDecimal32(2.1239, 4))─┐
+│                                               -26.8609633 │
+└───────────────────────────────────────────────────────────┘
+┌─multiplyDecimal(toDecimal64(-12.647, 3), toDecimal32(2.1239, 4))─┐
+│                                                         -26.8609 │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Decimal overflow</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    toDecimal64(-12.647987876, 9) AS a,
+    toDecimal64(123.967645643, 9) AS b,
+    multiplyDecimal(a, b);
+SELECT
+    toDecimal64(-12.647987876, 9) AS a,
+    toDecimal64(123.967645643, 9) AS b,
+    a * b;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─────────────a─┬─────────────b─┬─multiplyDecimal(toDecimal64(-12.647987876, 9), toDecimal64(123.967645643, 9))─┐
+│ -12.647987876 │ 123.967645643 │                                                               -1567.941279108 │
+└───────────────┴───────────────┴───────────────────────────────────────────────────────────────────────────────┘
+Received exception from server (version 22.11.1):
+Code: 407. DB::Exception: Received from localhost:9000. DB::Exception: Decimal math overflow:
+While processing toDecimal64(-12.647987876, 9) AS a, toDecimal64(123.967645643, 9) AS b, a * b. (DECIMAL_OVERFLOW)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="negate">negate<a aria-label="Direct link to negate" class="hash-link" href="#negate" title="Direct link to negate">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Negates the argument <code>x</code>. The result is always signed.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">negate(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The value to negate.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns -x from x</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT negate(10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="plus">plus<a aria-label="Direct link to plus" class="hash-link" href="#plus" title="Direct link to plus">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Calculates the sum of two values <code>x</code> and <code>y</code>. Alias: <code>x + y</code> (operator).
+It is possible to add an integer and a date or date with time. The former
+operation increments the number of days in the date, the latter operation
+increments the number of seconds in the date with time.
+It is also possible to add a date and a time. Adding a <code>Date</code> and a <code>Time</code>
+produces a <code>DateTime</code>. Adding a <code>Date</code> and a <code>Time64</code>, or a <code>Date32</code> and
+a <code>Time</code> or <code>Time64</code>, produces a <code>DateTime64</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">plus(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — Left hand operand. - <code>y</code> — Right hand operand.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the sum of x and y</p>
+<p><strong>Examples</strong></p>
+<p><strong>Adding two numbers</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT plus(5,5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Adding an integer and a date</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT plus(toDate('2025-01-01'),5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2025-01-06
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Adding a date and time</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toDate('2025-01-01') + CAST('14:30:25', 'Time')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2025-01-01 14:30:25
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="positiveModulo">positiveModulo<a aria-label="Direct link to positiveModulo" class="hash-link" href="#positiveModulo" title="Direct link to positiveModulo">​</a></h2>
+<p>Introduced in: v22.11.0</p>
+<p>Calculates the remainder when dividing <code>x</code> by <code>y</code>. Similar to function
+<code>modulo</code> except that <code>positiveModulo</code> always return non-negative number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">positiveModulo(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>positive_modulo</code>, <code>pmod</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The dividend. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+<li class="custom-li"><code>y</code> — The divisor (modulus). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the difference between <code>x</code> and the nearest integer not greater than
+<code>x</code> divisible by <code>y</code>.</p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT positiveModulo(-1, 10)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">9
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="positiveModuloOrNull">positiveModuloOrNull<a aria-label="Direct link to positiveModuloOrNull" class="hash-link" href="#positiveModuloOrNull" title="Direct link to positiveModuloOrNull">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Calculates the remainder when dividing <code>a</code> by <code>b</code>. Similar to function <code>positiveModulo</code> except that <code>positiveModuloOrNull</code> will return NULL
+if the right argument is 0.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">positiveModuloOrNull(x, y)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>positive_modulo_or_null</code>, <code>pmodOrNull</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — The dividend. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a>/<a href="/docs/sql-reference/data-types/float"><code>Float32/64</code></a>. - <code>x</code> — The divisor (modulus). <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a>/<a href="/docs/sql-reference/data-types/float"><code>Float32/64</code></a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the difference between <code>x</code> and the nearest integer not greater than
+<code>x</code> divisible by <code>y</code>, <code>null</code> when the divisor is zero.</p>
+<p><strong>Examples</strong></p>
+<p><strong>positiveModuloOrNull</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT positiveModuloOrNull(5, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">\N
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/ai-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">AI</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/array-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Arrays</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview</a><li><a class="table-of-contents__link toc-highlight" href="#abs">abs</a><li><a class="table-of-contents__link toc-highlight" href="#avg2">avg2</a><li><a class="table-of-contents__link toc-highlight" href="#byteSwap">byteSwap</a><li><a class="table-of-contents__link toc-highlight" href="#divide">divide</a><li><a class="table-of-contents__link toc-highlight" href="#divideDecimal">divideDecimal</a><li><a class="table-of-contents__link toc-highlight" href="#divideOrNull">divideOrNull</a><li><a class="table-of-contents__link toc-highlight" href="#gcd">gcd</a><li><a class="table-of-contents__link toc-highlight" href="#ifNotFinite">ifNotFinite</a><li><a class="table-of-contents__link toc-highlight" href="#intDiv">intDiv</a><li><a class="table-of-contents__link toc-highlight" href="#intDivOrNull">intDivOrNull</a><li><a class="table-of-contents__link toc-highlight" href="#intDivOrZero">intDivOrZero</a><li><a class="table-of-contents__link toc-highlight" href="#isFinite">isFinite</a><li><a class="table-of-contents__link toc-highlight" href="#isInfinite">isInfinite</a><li><a class="table-of-contents__link toc-highlight" href="#isNaN">isNaN</a><li><a class="table-of-contents__link toc-highlight" href="#lcm">lcm</a><li><a class="table-of-contents__link toc-highlight" href="#max2">max2</a><li><a class="table-of-contents__link toc-highlight" href="#midpoint">midpoint</a><li><a class="table-of-contents__link toc-highlight" href="#min2">min2</a><li><a class="table-of-contents__link toc-highlight" href="#minus">minus</a><li><a class="table-of-contents__link toc-highlight" href="#modulo">modulo</a><li><a class="table-of-contents__link toc-highlight" href="#moduloLegacy">moduloLegacy</a><li><a class="table-of-contents__link toc-highlight" href="#moduloOrNull">moduloOrNull</a><li><a class="table-of-contents__link toc-highlight" href="#moduloOrZero">moduloOrZero</a><li><a class="table-of-contents__link toc-highlight" href="#multiply">multiply</a><li><a class="table-of-contents__link toc-highlight" href="#multiplyDecimal">multiplyDecimal</a><li><a class="table-of-contents__link toc-highlight" href="#negate">negate</a><li><a class="table-of-contents__link toc-highlight" href="#plus">plus</a><li><a class="table-of-contents__link toc-highlight" href="#positiveModulo">positiveModulo</a><li><a class="table-of-contents__link toc-highlight" href="#positiveModuloOrNull">positiveModuloOrNull</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

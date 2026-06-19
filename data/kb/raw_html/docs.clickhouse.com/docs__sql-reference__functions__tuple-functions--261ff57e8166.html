@@ -1,0 +1,587 @@
+<h1>Tuple functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Tuples</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/tuple-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Tuple functions</h1></header><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The documentation below is generated from the <code>system.functions</code> system table.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="dotProduct">dotProduct<a aria-label="Direct link to dotProduct" class="hash-link" href="#dotProduct" title="Direct link to dotProduct">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the <a href="https://en.wikipedia.org/wiki/Dot_product" rel="noopener noreferrer" target="_blank">dot product</a> (scalar product) of two vectors (tuples or arrays of equal size).
+Returns the sum of the products of the corresponding elements.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">dotProduct(vector1, vector2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>scalarProduct</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>vector1</code> — First vector. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+<li class="custom-li"><code>vector2</code> — Second vector. Must be the same size as the first vector. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the dot product of the two vectors. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT dotProduct((1, 2), (3, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">11
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="flattenTuple">flattenTuple<a aria-label="Direct link to flattenTuple" class="hash-link" href="#flattenTuple" title="Direct link to flattenTuple">​</a></h2>
+<p>Introduced in: v22.6.0</p>
+<p>Flattens a named and nested tuple.
+The elements of the returned tuple are the paths of the input tuple.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">flattenTuple(input)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>input</code> — Named and nested tuple to flatten. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(n1 T1[, n2 T2, ... ])</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an output tuple whose elements are paths from the original input. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab(t Tuple(a UInt32, b Tuple(c String, d UInt32))) ENGINE = MergeTree ORDER BY tuple();
+INSERT INTO tab VALUES ((3, ('c', 4)));
+
+SELECT flattenTuple(t) FROM tab;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─flattenTuple(t)┐
+│ (3, 'c', 4)    │
+└────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tuple">tuple<a aria-label="Direct link to tuple" class="hash-link" href="#tuple" title="Direct link to tuple">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns a tuple by grouping input arguments.</p>
+<p>For columns C1, C2, ... with the types T1, T2, ..., it returns a named Tuple(C1 T1, C2 T2, ...) type tuple containing these columns if their names are unique and can be treated as unquoted identifiers, otherwise a Tuple(T1, T2, ...) is returned. There is no cost to execute the function.
+Tuples are normally used as intermediate values for an argument of IN operators, or for creating a list of formal parameters of lambda functions. Tuples can't be written to a table.</p>
+<p>The function implements the operator <code>(x, y, ...)</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tuple([t1[, t2[ ...]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<p><strong>typical</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tuple(1, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(1,2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleConcat">tupleConcat<a aria-label="Direct link to tupleConcat" class="hash-link" href="#tupleConcat" title="Direct link to tupleConcat">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Combines tuples passed as arguments.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleConcat(tuple1[, tuple2, [...]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tupleN</code> — Arbitrary number of arguments of Tuple type. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing all elements from the input tuples. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleConcat((1, 2), ('a',), (true, false))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(1, 2, 'a', true, false)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleDivide">tupleDivide<a aria-label="Direct link to tupleDivide" class="hash-link" href="#tupleDivide" title="Direct link to tupleDivide">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the element-wise division of two or more tuples of the same size, applied left-to-right.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Division by zero will return <code>inf</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleDivide(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing the element-wise quotients. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleDivide((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(0.5, 0.6666666666666666)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleDivide((100.0, 60.0), (5.0, 3.0), (2.0, 4.0))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(10, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleDivideByNumber">tupleDivideByNumber<a aria-label="Direct link to tupleDivideByNumber" class="hash-link" href="#tupleDivideByNumber" title="Direct link to tupleDivideByNumber">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Returns a tuple with all elements divided by a number.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Division by zero will return <code>inf</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleDivideByNumber(tuple, number)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — Tuple to divide. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>number</code> — Divider. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with divided elements. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleDivideByNumber((1, 2), 0.5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(2, 4)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleElement">tupleElement<a aria-label="Direct link to tupleElement" class="hash-link" href="#tupleElement" title="Direct link to tupleElement">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Extracts an element from a tuple by index or name.</p>
+<p>For access by index, an 1-based numeric index is expected.
+For access by name, the element name can be provided as a string (works only for named tuples).</p>
+<p>Negative indexes are supported. In this case, the corresponding element is selected, numbered from the end. For example, <code>tuple.-1</code> is the last element in the tuple.</p>
+<p>An optional third argument specifies a default value which is returned instead of throwing an exception when the accessed element does not exist.
+All arguments must be constants.</p>
+<p>This function has zero runtime cost and implements the operators <code>x.index</code> and <code>x.name</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleElement(tuple, index|name[, default_value])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — A tuple or array of tuples. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(T)</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(T))</code></a></li>
+<li class="custom-li"><code>index</code> — Column index, starting from 1. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8/16/32/64</code></a></li>
+<li class="custom-li"><code>name</code> — Name of the element. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>default_value</code> — Default value returned when index is out of bounds or element doesn't exist. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the element at the specified index or name. <a href="/docs/sql-reference/data-types"><code>Any</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Index access</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleElement((1, 'hello'), 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">hello
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Negative indexing</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleElement((1, 'hello'), -1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">hello
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Named tuple with table</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE example (values Tuple(name String, age UInt32)) ENGINE = Memory;
+INSERT INTO example VALUES (('Alice', 30));
+SELECT tupleElement(values, 'name') FROM example;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Alice
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With default value</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleElement((1, 2), 5, 'not_found')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">not_found
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Operator syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT (1, 'hello').2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">hello
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleHammingDistance">tupleHammingDistance<a aria-label="Direct link to tupleHammingDistance" class="hash-link" href="#tupleHammingDistance" title="Direct link to tupleHammingDistance">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Returns the <a href="https://en.wikipedia.org/wiki/Hamming_distance" rel="noopener noreferrer" target="_blank">Hamming Distance</a> between two tuples of the same size.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The result type is determined the same way it is for <a href="/docs/sql-reference/functions/arithmetic-functions">Arithmetic functions</a>, based on the number of elements in the input tuples.<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    toTypeName(tupleHammingDistance(tuple(0), tuple(0))) AS t1,
+    toTypeName(tupleHammingDistance((0, 0), (0, 0))) AS t2,
+    toTypeName(tupleHammingDistance((0, 0, 0), (0, 0, 0))) AS t3,
+    toTypeName(tupleHammingDistance((0, 0, 0, 0), (0, 0, 0, 0))) AS t4,
+    toTypeName(tupleHammingDistance((0, 0, 0, 0, 0), (0, 0, 0, 0, 0))) AS t5
+</code></pre></div><div class="activity_PoTP"></div></div><div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─t1────┬─t2─────┬─t3─────┬─t4─────┬─t5─────┐
+│ UInt8 │ UInt16 │ UInt32 │ UInt64 │ UInt64 │
+└───────┴────────┴────────┴────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleHammingDistance(t1, t2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(*)</code></a></li>
+<li class="custom-li"><code>t2</code> — Second tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(*)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the Hamming distance. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8/16/32/64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleHammingDistance((1, 2, 3), (3, 2, 1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With MinHash to detect semi-duplicate strings</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleHammingDistance(wordShingleMinHash(string), wordShingleMinHashCaseInsensitive(string)) FROM (SELECT 'ClickHouse is a column-oriented database management system for online analytical processing of queries.' AS string)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleIntDiv">tupleIntDiv<a aria-label="Direct link to tupleIntDiv" class="hash-link" href="#tupleIntDiv" title="Direct link to tupleIntDiv">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Performs element-wise integer division of two or more tuples of the same size, applied left-to-right. Returns a tuple of quotients.
+If any tuple contains non-integer elements, the result is calculated by rounding to the nearest integer for each non-integer numerator or divisor.
+Division by 0 causes an exception to be thrown.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleIntDiv(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of integer quotients. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDiv((15, 10, 5), (5, 5, 5))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(3, 2, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With decimals</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDiv((15, 10, 5), (5.5, 5.5, 5.5))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(2, 1, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDiv((120, 60), (4, 3), (2, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(15, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleIntDivByNumber">tupleIntDivByNumber<a aria-label="Direct link to tupleIntDivByNumber" class="hash-link" href="#tupleIntDivByNumber" title="Direct link to tupleIntDivByNumber">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Performs integer division of a tuple of numerators by a given denominator, and returns a tuple of the quotients.
+If either of the input parameters contain non-integer elements then the result is calculated by rounding to the nearest integer for each non-integer numerator or divisor.
+An error will be thrown for division by 0.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleIntDivByNumber(tuple_num, div)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple_num</code> — Tuple of numerator values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>div</code> — The divisor value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of the quotients. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivByNumber((15, 10, 5), 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(3, 2, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With decimals</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivByNumber((15.2, 10.7, 5.5), 5.8)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(2, 1, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleIntDivOrZero">tupleIntDivOrZero<a aria-label="Direct link to tupleIntDivOrZero" class="hash-link" href="#tupleIntDivOrZero" title="Direct link to tupleIntDivOrZero">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Like <a href="#tupleIntDiv"><code>tupleIntDiv</code></a>, performs element-wise integer division of two or more tuples of the same size, applied left-to-right.
+In case of division by 0, returns 0 for that element instead of throwing an exception.
+If any tuple contains non-integer elements, the result is calculated by rounding to the nearest integer for each non-integer numerator or divisor.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleIntDivOrZero(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of integer quotients, with 0 for any element where the divisor is 0. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>With zero divisors</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivOrZero((5, 10, 15), (0, 0, 0))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(0, 0, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivOrZero((120, 60), (4, 3), (2, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(15, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleIntDivOrZeroByNumber">tupleIntDivOrZeroByNumber<a aria-label="Direct link to tupleIntDivOrZeroByNumber" class="hash-link" href="#tupleIntDivOrZeroByNumber" title="Direct link to tupleIntDivOrZeroByNumber">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Like <a href="#tupleIntDivByNumber"><code>tupleIntDivByNumber</code></a> it does integer division of a tuple of numerators by a given denominator, and returns a tuple of the quotients.
+It does not throw an error for zero divisors, but rather returns the quotient as zero.
+If either the tuple or div contain non-integer elements then the result is calculated by rounding to the nearest integer for each non-integer numerator or divisor.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleIntDivOrZeroByNumber(tuple_num, div)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple_num</code> — Tuple of numerator values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>div</code> — The divisor value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of the quotients with <code>0</code> for quotients where the divisor is <code>0</code>. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivOrZeroByNumber((15, 10, 5), 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(3, 2, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With zero divisor</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleIntDivOrZeroByNumber((15, 10, 5), 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(0, 0, 0)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleMinus">tupleMinus<a aria-label="Direct link to tupleMinus" class="hash-link" href="#tupleMinus" title="Direct link to tupleMinus">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the element-wise difference of two or more tuples of the same size, applied left-to-right.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleMinus(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>vectorDifference</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing the element-wise differences. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleMinus((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(-1, -1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleMinus((10, 10), (3, 4), (2, 1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(5, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleModulo">tupleModulo<a aria-label="Direct link to tupleModulo" class="hash-link" href="#tupleModulo" title="Direct link to tupleModulo">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Returns a tuple of element-wise remainders from dividing two or more tuples of the same size, applied left-to-right.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleModulo(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of element-wise remainders. An exception is thrown for division by zero. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleModulo((15, 10, 5), (5, 3, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(0, 1, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleModulo((10, 20), (7, 9), (3, 5))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(0, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleModuloByNumber">tupleModuloByNumber<a aria-label="Direct link to tupleModuloByNumber" class="hash-link" href="#tupleModuloByNumber" title="Direct link to tupleModuloByNumber">​</a></h2>
+<p>Introduced in: v23.8.0</p>
+<p>Returns a tuple of the moduli (remainders) of division operations of a tuple and a given divisor.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleModuloByNumber(tuple_num, div)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple_num</code> — Tuple of numerator elements. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>div</code> — The divisor value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns tuple of the remainders of division. An error is thrown for division by zero. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleModuloByNumber((15, 10, 5), 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(1, 0, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleMultiply">tupleMultiply<a aria-label="Direct link to tupleMultiply" class="hash-link" href="#tupleMultiply" title="Direct link to tupleMultiply">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the element-wise product of two or more tuples of the same size.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleMultiply(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing the element-wise products. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleMultiply((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(2, 6)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleMultiply((1, 2), (2, 3), (1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(2, 12)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleMultiplyByNumber">tupleMultiplyByNumber<a aria-label="Direct link to tupleMultiplyByNumber" class="hash-link" href="#tupleMultiplyByNumber" title="Direct link to tupleMultiplyByNumber">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Returns a tuple with all elements multiplied by a number.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleMultiplyByNumber(tuple, number)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — Tuple to multiply. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>number</code> — Multiplier. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with multiplied elements. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleMultiplyByNumber((1, 2), -2.1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(-2.1, -4.2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleNames">tupleNames<a aria-label="Direct link to tupleNames" class="hash-link" href="#tupleNames" title="Direct link to tupleNames">​</a></h2>
+<p>Introduced in: v24.8.0</p>
+<p>Converts a tuple into an array of column names. For a tuple in the form <code>Tuple(a T, b T, ...)</code>, it returns an array of strings representing the named columns of the tuple. If the tuple elements do not have explicit names, their indices will be used as the column names instead.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleNames(tuple)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<p><strong>typical</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleNames(tuple(1 as a, 2 as b))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['a','b']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleNegate">tupleNegate<a aria-label="Direct link to tupleNegate" class="hash-link" href="#tupleNegate" title="Direct link to tupleNegate">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the negation of the tuple elements.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleNegate(t)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t</code> — Tuple to negate. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple with the result of negation. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleNegate((1, 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(-1, -2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tuplePlus">tuplePlus<a aria-label="Direct link to tuplePlus" class="hash-link" href="#tuplePlus" title="Direct link to tuplePlus">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Calculates the element-wise sum of two or more tuples of the same size.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tuplePlus(t1, t2[, tN, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>vectorSum</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>t1</code> — First input tuple. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>t2, ..., tN</code> — One or more further input tuples. All tuples must have the same size. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple containing the element-wise sums. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Two tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tuplePlus((1, 2), (2, 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(3, 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Three tuples</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tuplePlus((1, 2), (2, 3), (3, 4))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(6, 9)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tuplePositiveModuloByNumber">tuplePositiveModuloByNumber<a aria-label="Direct link to tuplePositiveModuloByNumber" class="hash-link" href="#tuplePositiveModuloByNumber" title="Direct link to tuplePositiveModuloByNumber">​</a></h2>
+<p>Introduced in: v26.4.0</p>
+<p>Returns a tuple of the positive moduli (remainders) of division operations of a tuple and a given divisor.
+Unlike tupleModuloByNumber, the result is always non-negative.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tuplePositiveModuloByNumber(tuple_num, div)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple_num</code> — Tuple of numerator values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></li>
+<li class="custom-li"><code>div</code> — The divisor value. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a> or <a href="/docs/sql-reference/data-types/float"><code>Float*</code></a> or <a href="/docs/sql-reference/data-types/decimal"><code>Decimal</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a tuple of the non-negative remainders. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple((U)Int*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Float*)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Decimal)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tuplePositiveModuloByNumber((15, 10, 5), 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">(1, 0, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tupleToNameValuePairs">tupleToNameValuePairs<a aria-label="Direct link to tupleToNameValuePairs" class="hash-link" href="#tupleToNameValuePairs" title="Direct link to tupleToNameValuePairs">​</a></h2>
+<p>Introduced in: v21.9.0</p>
+<p>Converts a tuple to an array of <code>(name, value)</code> pairs.
+For example, tuple <code>Tuple(n1 T1, n2 T2, ...)</code> is converted to <code>Array(Tuple('n1', T1), Tuple('n2', T2), ...)</code>.
+All values in the tuple must be of the same type.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tupleToNameValuePairs(tuple)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>tuple</code> — Named tuple with any types of values. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(n1 T1[, n2 T2, ...])</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array with <code>(name, value)</code> pairs. <a href="/docs/sql-reference/data-types/array"><code>Array(Tuple(String, T))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Named tuple</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleToNameValuePairs(tuple(1593 AS user_ID, 2502 AS session_ID))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[('1', 1593), ('2', 2502)]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Unnamed tuple</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tupleToNameValuePairs(tuple(3, 2, 1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[('1', 3), ('2', 2), ('3', 1)]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="untuple">untuple<a aria-label="Direct link to untuple" class="hash-link" href="#untuple" title="Direct link to untuple">​</a></h2>
+<p>Performs syntactic substitution of <a href="/docs/sql-reference/data-types/tuple">tuple</a> elements in the call location.</p>
+<p>The names of the result columns are implementation-specific and subject to change. Do not assume specific column names after <code>untuple</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">untuple(x)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can use the <code>EXCEPT</code> expression to skip columns as a result of the query.</p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>x</code> — A <code>tuple</code> function, column, or tuple of elements. <a href="/docs/sql-reference/data-types/tuple">Tuple</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<p>Input table:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─key─┬─v1─┬─v2─┬─v3─┬─v4─┬─v5─┬─v6────────┐
+│   1 │ 10 │ 20 │ 40 │ 30 │ 15 │ (33,'ab') │
+│   2 │ 25 │ 65 │ 70 │ 40 │  6 │ (44,'cd') │
+│   3 │ 57 │ 30 │ 20 │ 10 │  5 │ (55,'ef') │
+│   4 │ 55 │ 12 │  7 │ 80 │ 90 │ (66,'gh') │
+│   5 │ 30 │ 50 │ 70 │ 25 │ 55 │ (77,'kl') │
+└─────┴────┴────┴────┴────┴────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example of using a <code>Tuple</code>-type column as the <code>untuple</code> function parameter:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT untuple(v6) FROM kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─_ut_1─┬─_ut_2─┐
+│    33 │ ab    │
+│    44 │ cd    │
+│    55 │ ef    │
+│    66 │ gh    │
+│    77 │ kl    │
+└───────┴───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example of using an <code>EXCEPT</code> expression:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT untuple((* EXCEPT (v2, v3),)) FROM kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─key─┬─v1─┬─v4─┬─v5─┬─v6────────┐
+│   1 │ 10 │ 30 │ 15 │ (33,'ab') │
+│   2 │ 25 │ 40 │  6 │ (44,'cd') │
+│   3 │ 57 │ 10 │  5 │ (55,'ef') │
+│   4 │ 55 │ 80 │ 90 │ (66,'gh') │
+│   5 │ 30 │ 25 │ 55 │ (77,'kl') │
+└─────┴────┴────┴────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="distance-functions">Distance functions<a aria-label="Direct link to Distance functions" class="hash-link" href="#distance-functions" title="Direct link to Distance functions">​</a></h2>
+<p>All supported functions are described in <a href="/docs/sql-reference/functions/distance-functions">distance functions documentation</a>.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/time-window-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Time window</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/tuple-map-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Maps</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#dotProduct">dotProduct</a><li><a class="table-of-contents__link toc-highlight" href="#flattenTuple">flattenTuple</a><li><a class="table-of-contents__link toc-highlight" href="#tuple">tuple</a><li><a class="table-of-contents__link toc-highlight" href="#tupleConcat">tupleConcat</a><li><a class="table-of-contents__link toc-highlight" href="#tupleDivide">tupleDivide</a><li><a class="table-of-contents__link toc-highlight" href="#tupleDivideByNumber">tupleDivideByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleElement">tupleElement</a><li><a class="table-of-contents__link toc-highlight" href="#tupleHammingDistance">tupleHammingDistance</a><li><a class="table-of-contents__link toc-highlight" href="#tupleIntDiv">tupleIntDiv</a><li><a class="table-of-contents__link toc-highlight" href="#tupleIntDivByNumber">tupleIntDivByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleIntDivOrZero">tupleIntDivOrZero</a><li><a class="table-of-contents__link toc-highlight" href="#tupleIntDivOrZeroByNumber">tupleIntDivOrZeroByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleMinus">tupleMinus</a><li><a class="table-of-contents__link toc-highlight" href="#tupleModulo">tupleModulo</a><li><a class="table-of-contents__link toc-highlight" href="#tupleModuloByNumber">tupleModuloByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleMultiply">tupleMultiply</a><li><a class="table-of-contents__link toc-highlight" href="#tupleMultiplyByNumber">tupleMultiplyByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleNames">tupleNames</a><li><a class="table-of-contents__link toc-highlight" href="#tupleNegate">tupleNegate</a><li><a class="table-of-contents__link toc-highlight" href="#tuplePlus">tuplePlus</a><li><a class="table-of-contents__link toc-highlight" href="#tuplePositiveModuloByNumber">tuplePositiveModuloByNumber</a><li><a class="table-of-contents__link toc-highlight" href="#tupleToNameValuePairs">tupleToNameValuePairs</a><li><a class="table-of-contents__link toc-highlight" href="#untuple">untuple</a><li><a class="table-of-contents__link toc-highlight" href="#distance-functions">Distance functions</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

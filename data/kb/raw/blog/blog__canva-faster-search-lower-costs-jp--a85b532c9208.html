@@ -1,0 +1,47 @@
+<h1>CanvaがClickHouseで検索速度10倍・コスト70%削減を実現した方法</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="flex overflow-hidden rounded-lg"><div class="w-1 flex-shrink-0 flex-grow-0 bg-primary-300"></div><div class="flex-1 bg-neutral-700 p-4 lg:p-6"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc mb-4 !text-2xl">まとめ</h2><div class="rich_content rich-text-content toc-ignore leading-6"><style>
+div.w-full + p, 
+pre + p,
+span.relative + p {
+  text-align: center;
+  font-style: italic;
+}
+</style>
+<p>Canvaは、ClickHouseを活用して大規模なリアルタイムオブザーバビリティを実現しており、毎秒約300万スパンと300万ログを処理しています。インジェストとストレージを再設計することで、14倍の圧縮率を達成し、インフラコストを約70%削減しました。クエリ最適化とスキーマ改善により、トレース検索のP90を30秒から2.5秒に短縮し、10倍のパフォーマンス向上を実現しています。</p></div></div></div><div class="rich_content rich-text-content leading-6"><p>月間アクティブユーザーが2億4,000万人に達し、彼らが作成、デザイン、公開を行うと、ログは瞬く間に膨れ上がります。<a href="https://www.canva.com/">Canva</a>の規模では、毎秒およそ300万スパン、300万ログにもなります。</p>
+<p>「この数字は急速に伸びています」と、Canvaのソフトウェアエンジニアであるzjan Carlo Turla氏は語ります。「前年比で倍増しており、それに伴ってインフラへの負荷も増加しています」</p>
+<p>このペースに対応するためには、取り込みからストレージ、検索パフォーマンスに至るまで、オブザーバビリティの扱い方そのものを見直す必要がありました。Zjan氏は次のように述べています。「私たちは運用インフラへのアプローチを再考し、需要に応じてスケールできる仕組みを構築する必要がありました」</p>
+<p><a href="https://clickhouse.com/videos/open-house-sydney-canva">シドニーでのOpen House Roadshow</a>において、Zjan氏は、チームがどのように10倍のパフォーマンス向上と70%のコスト削減を達成したかを共有しました。氏はこれを「スキーマ設計から取り込み、そしてClickHouseの上に本当に魅力的な体験を構築するまでの、Canvaの移行ジャーニー」と表現しています。</p>
+<div class="relative styles_responsiveEmbed__qDlEx"><div class="absolute inset-0 flex bg-black"><div class="m-auto aspect-square w-10 animate-spin rounded-full border-4 border-primary-300/20 border-t-primary-300"></div></div><div></div></div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="よりスマートな取り込みで70のコスト削減" level="2">よりスマートな取り込みで、70%のコスト削減<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/canva-faster-search-lower-costs-jp#%E3%82%88%E3%82%8A%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E3%81%AA%E5%8F%96%E3%82%8A%E8%BE%BC%E3%81%BF%E3%81%A770%E3%81%AE%E3%82%B3%E3%82%B9%E3%83%88%E5%89%8A%E6%B8%9B">#</a></span></h2>
+<p>このジャーニーは、トレーシングワークロードをClickHouseに移行することから始まりました。Zjan氏は、最初のステップはインフラを正しく構築することだったと説明します。「私たちは本当にシンプルに保つことに決めました」と彼は言います。</p>
+<p>Canvaの本番クラスターは、標準的なClickHouseのレイアウトに従っています。アベイラビリティゾーンに分散された5シャード×3レプリカ構成で、各ノードはおおよそ60 vCPUと400 GBのRAMを搭載しています。チームはすべてを直接管理しており、デプロイにはArgo CDを、KubernetesマニフェストとClickHouse構成の両方のテンプレート化にはJsonnetを使用しています。スケールアップやスケールアウトはこれらのテンプレートを通じて行われます。ストレージも同様に合理化されており、EBS GP3 SSDのシングルティアで、各ノードに複数ディスク（JBOD経由）を接続しています。</p>
+<p>このセットアップは堅固な基盤となりましたが、Zjan氏が言うように、「ただデプロイするだけでは十分ではありません。はるかに小さなインフラで物事を動かすには、かなりの作業が必要です」</p>
+<p>その作業の多くは、取り込みの最適化に集中しました。トレースはCanvaのアプリケーション内で動作するOpenTelemetryエージェントから始まり、デーモンセットのコレクターを経由して、中央集約のコレクターに送られた後、ClickHouseに到達します。当初、チームは<a href="https://clickhouse.com/docs/engines/table-engines/special/distributed">分散テーブル</a>と<a href="https://clickhouse.com/docs/optimize/asynchronous-inserts">非同期インサート</a>を使用し、ClickHouseがバッチ処理と分散処理を自動的に行えるようにしていました。「まずまずのパフォーマンスは得られました」とZjan氏は語ります。「しかし、私たちはもっと必要としていました」</p>
+<p>ブレークスルーは、そのバッチ処理を上流へ移すことから生まれました。Canvaのコレクターはすでに「相当量のトレースデータをメモリにバッファリング」するように設計されていたため、チームはそれを活かし、約20万スパン（約160 MiB）を1バッチにまとめて、分散テーブルではなくローカルテーブルに直接書き込むようにしました。「バッチ処理をコレクターに移すことで、ClickHouseへのインサートを少なく、かつ大きくでき、ClickHouseがバッチ処理や分散処理を行う必要がなくなりました」とZjan氏は説明します。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Canva Customer User Story Issue 1208 (1).jpg" loading="lazy" src="/uploads/Canva_Customer_User_Story_Issue_1208_1_1b117fd27d.jpg"/></span>
+<p>コレクターはOpenTelemetryトレースをバッチ化・グループ化し、ClickHouseノードに直接挿入します。</p>
+<p>この変更は、彼が「驚くほど優れた標準パフォーマンス」と「本当に素晴らしい圧縮性能」と呼ぶClickHouseの特性と組み合わさり、スパンデータについて14倍の圧縮率を達成し、ストレージコストを約70%削減することにつながりました。Zjan氏は次のように述べています。「本番ワークロードを本当に動かすために必要な取り込みパフォーマンスを得ることができました」</p>
+<p>「そして何よりも」と彼は付け加えます。「クエリパフォーマンスを改善するための余裕が得られました」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="検索の最適化30秒--25秒" level="2">検索の最適化：30秒 → 2.5秒<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/canva-faster-search-lower-costs-jp#%E6%A4%9C%E7%B4%A2%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%9630%E7%A7%92--25%E7%A7%92">#</a></span></h2>
+<p>取り込みが安定し、ストレージが大幅に削減されたところで、チームは次の課題に取り組みました。検索の高速化です。「はるかに小さなインフラへ移行できたこと自体が大きな成果でした」とZjan氏は言います。「しかし、その改善の一部をユーザーにも還元する必要がありました」</p>
+<p>Canvaのエンジニアはjaegerを多用しており、最も一般的な検索（サービス名、スパン名、トレースIDによるフィルタリング）は、数十秒ではなく数秒で結果を返す必要があります。チームはどこから着手すべきかを正確に把握していました。「ClickHouseでトレーシングから良いパフォーマンスを得るには、本当にスキーマ設計から始める必要があります」とZjan氏は語ります。</p>
+<p>彼らのスキーマは、標準的なトレースコンテキスト属性に加え、頻繁にクエリされる少数のスパンおよびリソースフィールドを中心に構成されています。最もトリッキーだったのは、サービスごとに異なるスキーマレス属性のサポートだったとZjan氏は言います。その解決策は、それらを配列のペア（キー用と値用）として保存することでした。「これにより、特定の型に対して任意の数の属性名を保存できるようになります」と彼は言います。<a href="https://clickhouse.com/docs/sql-reference/functions/tuple-map-functions#mapfromarrays">mapFromArrays</a>のようなClickHouseの関数を使えば、クエリ時に簡単に再構築できます。</p>
+<p>そこから、チームはエンジニアが実際にどう検索するかに合わせて最適化を行いました。jaegerはサービス名、スパン名、タイムスタンプを主要なフィルターとして表示するため、Canvaはこれらと同じフィールドをClickHouseのソートキーとして使用しました。「スキャンが必要なパーツの数を減らせるので、クエリが大幅に高速になります」とZjan氏は説明します。</p>
+<p>また、トレースを日付でパーティション化し、14日間のTTLを設定しました。「これにより、1日単位のチャンクでデータをサイクルさせることができ」とZjan氏は言います。「データパーツが大きくなりすぎるのを防げます」</p>
+<p>しかし、トレースIDの検索のように、これらの主要フィルターを完全にスキップする検索もあります。それらに対応するため、CanvaはトレースIDをキーとし、関連するサービス名とスパン名を保存する<a href="https://clickhouse.com/docs/materialized-views">マテリアライズドビュー</a>のルックアップテーブルを構築しました。「トレースIDを検索すれば、本当にヒットさせたいパーツの主キーが得られます」とZjan氏は言います。「このルックアップテーブルと、これまでのスキーマ設計の成果を組み合わせることで、検索が本当に、本当に高速になりました」</p>
+<p>さらに速度を絞り出すため、チームはクライアント側の最適化も追加しました。たとえば、すべてを一度にスキャンするのではなく、必要に応じて時間範囲を拡張するバックオフ機構付きのスライディング検索ウィンドウなどです。Zjan氏は次のように述べています。「少なくともトレースについては、その期間中のすべての結果を表示する必要はありません」</p>
+<p>これらすべてを組み合わせた結果は、数字が物語っています。P90のトレース検索時間は約30秒から2.5秒へと短縮されました。Zjan氏はこれを「パフォーマンス改善で言えば、見事な10倍の倍率」と呼びます。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="ログを高速で柔軟で馴染みのあるものに" level="2">ログを高速で、柔軟で、馴染みのあるものに<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/canva-faster-search-lower-costs-jp#%E3%83%AD%E3%82%B0%E3%82%92%E9%AB%98%E9%80%9F%E3%81%A7%E6%9F%94%E8%BB%9F%E3%81%A7%E9%A6%B4%E6%9F%93%E3%81%BF%E3%81%AE%E3%81%82%E3%82%8B%E3%82%82%E3%81%AE%E3%81%AB">#</a></span></h2>
+<p>トレースがこれまで以上に高速かつ低コストで動作するようになり、ClickHouseは大規模なオブザーバビリティを処理できることをすでに証明していました。「これにより、ロギングインフラの移行を進めるための自信が本当に得られました」とZjan氏は語ります。</p>
+<p>もちろん、ログには独自の課題がありました。Canvaのロギングパイプラインは、データをClickHouseに送るためにKinesis Data StreamsとAWS Lambdaに依存しています。しかし、トレースコレクターとは異なり、Lambdaは大量のバッチをメモリにバッファすることができませんでした。チームはこの課題をClickHouseの<a href="https://clickhouse.com/docs/optimize/asynchronous-inserts">非同期インサート</a>で解決し、データベース側にバッチ処理を任せました。Zjan氏は次のように述べています。「これらの非同期インサートのパラメーターをテーブルごとに調整して、本当に、本当に良いパフォーマンスが得られるよう、たくさんの実験を行いました」適切なチューニングにより、わずか2台のClickHouseノードでログの100%を確実に取り込めるようになり、稼働能力が低下した状態でも取り込みの可用性が確保できました。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Canva Customer User Story Issue 1208.jpg" loading="lazy" src="/uploads/Canva_Customer_User_Story_Issue_1208_163f048922.jpg"/></span>
+<p>Kinesisは小さなログバッチをLambdaに送信し、Lambdaがより大きなペイロードをClickHouseに非同期インサートします。</p>
+<p>より大きなハードルは検索でした。「ロギングについては、作業の大部分はユーザーに良いロギング体験を提供することにありました」とZjan氏は語ります。「それを実現するためには、ClickHouseでフリーテキスト検索を機能させる必要が本当にありました」</p>
+<p>OpenSearchから移行してきたエンジニアたちは、検索ボックスに何でも入力して即座に結果を得ることに慣れていました。その体験を再現するため、チームは各ログオブジェクト（body、resource、metadata）を単一の文字列にフラット化し、ngramの<a href="https://clickhouse.com/docs/optimize/skipping-indexes#bloom-filter-types">Bloom filter</a>を適用しました。これにより、ClickHouseの標準インデックスでは不可能だった、すべてのフィールドにまたがる高速な部分文字列検索が可能になりました。</p>
+<p>残る課題は1つ、開発者体験でした。彼らのスキーマレスアプローチ（キーと値の配列ペア）は強力でしたが、決して人間工学的とは言えませんでした。「うまく動作しますが」とZjan氏は言います。「開発者やユーザーとして扱うのは骨が折れます」</p>
+<p>そこでCanvaは、カスタムDSLをClickHouseクエリに変換するクエリゲートウェイを構築し、Kibanaのようなクエリ機能を提供しました。その上に、クエリビルダー、コード検索、オートコンプリートを備えた完全カスタムのロギングプラットフォームも作成しました。最終的にできあがったのは、よりスリムで高速なスタックの上で動作しながら、エンジニアにとって馴染みのある体験です。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="より少ないリソースでより多くを実現しより多くを保存する" level="2">「より少ないリソースで、より多くを実現し、より多くを保存する」<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/canva-faster-search-lower-costs-jp#%E3%82%88%E3%82%8A%E5%B0%91%E3%81%AA%E3%81%84%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%A7%E3%82%88%E3%82%8A%E5%A4%9A%E3%81%8F%E3%82%92%E5%AE%9F%E7%8F%BE%E3%81%97%E3%82%88%E3%82%8A%E5%A4%9A%E3%81%8F%E3%82%92%E4%BF%9D%E5%AD%98%E3%81%99%E3%82%8B">#</a></span></h2>
+<p>本番環境への完全展開の前に、チームはシステムを堅牢化するために最後の調整をいくつか行いました。クリーンな分離のためにノードを読み書き用と書き込み専用レプリカに分離し、毎時および毎日のS3バックアップを追加し、取り込みがブロックされないよう、データを別テーブルに復元するリカバリジョブを設定しました。また、ARMベースのGravitonプロセッサ上でクラスターをベンチマークし、Graviton3で1.7倍、Graviton4で2倍以上のパフォーマンスを確認しました。</p>
+<p>これらの最後の仕上げによって、単に高速なだけでなく、実戦に耐えうる本番システムが固まりました。今日、Canvaのトレースとログは、ClickHouseの上で並行して稼働しており、以前のシステムが必要としていたリソースのほんの一部で、社内全体のオブザーバビリティを支えています。</p>
+<p>Zjan氏とそのチームにとって、その影響はコスト削減やクエリ速度の向上をはるかに超えています。彼らは、開発者が本当に使うことを楽しめるオブザーバビリティプラットフォームを構築しました。トラブルシューティングを速め、洞察を得やすくし、スケーリングをシンプルにするプラットフォームです。Zjan氏は「ClickHouseの素晴らしいサポートチーム」を称賛し、彼らが「これを本番環境に持ち込む上で本当に重要な役割を果たした」と語ります。</p>
+<p>Zjan氏が言うように、「私たちはより少ないリソースで、より多くを実現し、より多くを保存しています」。創造性を支援することを軸とする企業にとって、このような明快さと効率性は、本当に大きな違いをもたらします。</p></div></div></article>

@@ -1,0 +1,55 @@
+# median \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- median
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/median.md)# median
+
+The `median*` functions are the aliases for the corresponding `quantile*` functions. They calculate median of a numeric data sample.
+
+
+Functions:
+
+
+- `median` — Alias for [quantile](/docs/sql-reference/aggregate-functions/reference/quantile).
+- `medianDeterministic` — Alias for [quantileDeterministic](/docs/sql-reference/aggregate-functions/reference/quantiledeterministic).
+- `medianExact` — Alias for [quantileExact](/docs/sql-reference/aggregate-functions/reference/quantileexact).
+- `medianExactWeighted` — Alias for [quantileExactWeighted](/docs/sql-reference/aggregate-functions/reference/quantileexactweighted).
+- `medianTiming` — Alias for [quantileTiming](/docs/sql-reference/aggregate-functions/reference/quantiletiming).
+- `medianTimingWeighted` — Alias for [quantileTimingWeighted](/docs/sql-reference/aggregate-functions/reference/quantiletimingweighted).
+- `medianTDigest` — Alias for [quantileTDigest](/docs/sql-reference/aggregate-functions/reference/quantiletdigest).
+- `medianTDigestWeighted` — Alias for [quantileTDigestWeighted](/docs/sql-reference/aggregate-functions/reference/quantiletdigestweighted).
+- `medianBFloat16` — Alias for [quantileBFloat16](/docs/sql-reference/aggregate-functions/reference/quantilebfloat16).
+- `medianDD` — Alias for [quantileDD](/docs/sql-reference/aggregate-functions/reference/quantileddsketch).
+
+
+**Example**
+
+
+Input table:
+
+
+
+```
+┌─val─┐
+│   1 │
+│   1 │
+│   2 │
+│   3 │
+└─────┘
+
+```
+
+
+```
+SELECT medianDeterministic(val, 1) FROM t;
+
+```
+
+
+```
+┌─medianDeterministic(val, 1)─┐
+│                         1.5 │
+└─────────────────────────────┘
+
+```
+[PreviousmeanZTest](/docs/sql-reference/aggregate-functions/reference/meanztest)[Nextmin](/docs/sql-reference/aggregate-functions/reference/min)Was this page helpful?

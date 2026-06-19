@@ -1,0 +1,967 @@
+<h1>MergeTree table engine | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">MergeTree</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/mergetree.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>MergeTree table engine</h1></header>
+<p>The <code>MergeTree</code> engine and other engines of the <code>MergeTree</code> family (e.g. <code>ReplacingMergeTree</code>, <code>AggregatingMergeTree</code> ) are the most commonly used and most robust table engines in ClickHouse.</p>
+<p><code>MergeTree</code>-family table engines are designed for high data ingest rates and huge data volumes.
+Insert operations create table parts which are merged by a background process with other table parts.</p>
+<p>Main features of <code>MergeTree</code>-family table engines.</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>The table's primary key determines the sort order within each table part (clustered index). The primary key also does not reference individual rows but blocks of 8192 rows called granules. This makes primary keys of huge data sets small enough to remain loaded in main memory, while still providing fast access to on-disk data.</p>
+</li>
+<li class="custom-li">
+<p>Tables can be partitioned using an arbitrary partition expression. Partition pruning ensures partitions are omitted from reading when the query allows it.</p>
+</li>
+<li class="custom-li">
+<p>Data can be replicated across multiple cluster nodes for high availability, failover, and zero downtime upgrades. See <a href="/docs/engines/table-engines/mergetree-family/replication">Data replication</a>.</p>
+</li>
+<li class="custom-li">
+<p><code>MergeTree</code> table engines support various statistics kinds and sampling methods to help query optimization.</p>
+</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Despite a similar name, the <a href="/docs/engines/table-engines/special/merge">Merge</a> engine is different from <code>*MergeTree</code> engines.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-creating-a-table">Creating tables<a aria-label="Direct link to Creating tables" class="hash-link" href="#table_engine-mergetree-creating-a-table" title="Direct link to Creating tables">​</a></h2>
+<div class="wrapper_EBtA" style="height:377px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [[NOT] NULL] [DEFAULT|MATERIALIZED|ALIAS|EPHEMERAL expr1] [COMMENT ...] [CODEC(codec1)] [STATISTICS(stat1)] [TTL expr1] [PRIMARY KEY] [SETTINGS (name = value, ...)],
+    name2 [type2] [[NOT] NULL] [DEFAULT|MATERIALIZED|ALIAS|EPHEMERAL expr2] [COMMENT ...] [CODEC(codec2)] [STATISTICS(stat2)] [TTL expr2] [PRIMARY KEY] [SETTINGS (name = value, ...)],
+    ...
+    INDEX index_name1 expr1 TYPE type1(...) [GRANULARITY value1],
+    INDEX index_name2 expr2 TYPE type2(...) [GRANULARITY value2],
+    ...
+    PROJECTION projection_name_1 (SELECT &lt;COLUMN LIST EXPR&gt; [GROUP BY] [ORDER BY]),
+    PROJECTION projection_name_2 (SELECT &lt;COLUMN LIST EXPR&gt; [GROUP BY] [ORDER BY])
+) ENGINE = MergeTree()
+ORDER BY expr
+[PARTITION BY expr]
+[PRIMARY KEY expr]
+[SAMPLE BY expr]
+[TTL expr
+    [DELETE|TO DISK 'xxx'|TO VOLUME 'xxx' [, ...] ]
+    [WHERE conditions]
+    [GROUP BY key_expr [SET v1 = aggr_func(v1) [, v2 = aggr_func(v2) ...]] ] ]
+[SETTINGS name = value, ...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For a detailed description of the parameters, see the <a href="/docs/sql-reference/statements/create/table">CREATE TABLE</a> statement</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mergetree-query-clauses">Query clauses<a aria-label="Direct link to Query clauses" class="hash-link" href="#mergetree-query-clauses" title="Direct link to Query clauses">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="engine">ENGINE<a aria-label="Direct link to ENGINE" class="hash-link" href="#engine" title="Direct link to ENGINE">​</a></h4>
+<p><code>ENGINE</code> — Name and parameters of the engine. <code>ENGINE = MergeTree()</code>. The <code>MergeTree</code> engine has no parameters.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="order_by">ORDER BY<a aria-label="Direct link to ORDER BY" class="hash-link" href="#order_by" title="Direct link to ORDER BY">​</a></h4>
+<p><code>ORDER BY</code> — The sorting key.</p>
+<p>A tuple of column names or arbitrary expressions. Example: <code>ORDER BY (CounterID + 1, EventDate)</code>.</p>
+<p>If no primary key is defined (i.e. <code>PRIMARY KEY</code> was not specified), ClickHouse uses the the sorting key as primary key.</p>
+<p>If no sorting is required, you can use syntax <code>ORDER BY tuple()</code>.
+Alternatively, if setting <code>create_table_empty_primary_key_by_default</code> is enabled, <code>ORDER BY ()</code> is implicitly added to <code>CREATE TABLE</code> statements. See <a href="#selecting-a-primary-key">Selecting a Primary Key</a>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="partition-by">PARTITION BY<a aria-label="Direct link to PARTITION BY" class="hash-link" href="#partition-by" title="Direct link to PARTITION BY">​</a></h4>
+<p><code>PARTITION BY</code> — The <a href="/docs/engines/table-engines/mergetree-family/custom-partitioning-key">partitioning key</a>. Optional. In most cases, you don't need a partition key, and if you do need to partition, generally you do not need a partition key more granular than by month. Partitioning does not speed up queries (in contrast to the ORDER BY expression). You should never use too granular partitioning. Don't partition your data by client identifiers or names (instead, make client identifier or name the first column in the ORDER BY expression).</p>
+<p>For partitioning by month, use the <code>toYYYYMM(date_column)</code> expression, where <code>date_column</code> is a column with a date of the type <a href="/docs/sql-reference/data-types/date">Date</a>. The partition names here have the <code>"YYYYMM"</code> format.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="primary-key">PRIMARY KEY<a aria-label="Direct link to PRIMARY KEY" class="hash-link" href="#primary-key" title="Direct link to PRIMARY KEY">​</a></h4>
+<p><code>PRIMARY KEY</code> — The primary key if it <a href="#choosing-a-primary-key-that-differs-from-the-sorting-key">differs from the sorting key</a>. Optional.</p>
+<p>Specifying a sorting key (using <code>ORDER BY</code> clause) implicitly specifies a primary key.
+It is usually not necessary to specify the primary key in addition to the sorting key.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="sample-by">SAMPLE BY<a aria-label="Direct link to SAMPLE BY" class="hash-link" href="#sample-by" title="Direct link to SAMPLE BY">​</a></h4>
+<p><code>SAMPLE BY</code> — A sampling expression. Optional.</p>
+<p>If specified, it must be contained in the primary key.
+The sampling expression must result in an unsigned integer.</p>
+<p>Example: <code>SAMPLE BY intHash32(UserID) ORDER BY (CounterID, EventDate, intHash32(UserID))</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="ttl">TTL<a aria-label="Direct link to TTL" class="hash-link" href="#ttl" title="Direct link to TTL">​</a></h4>
+<p><code>TTL</code> — A list of rules that specify the storage duration of rows and the logic of automatic parts movement <a href="#table_engine-mergetree-multiple-volumes">between disks and volumes</a>. Optional.</p>
+<p>Expression must result in a <code>Date</code> or <code>DateTime</code>, e.g. <code>TTL date + INTERVAL 1 DAY</code>.</p>
+<p>Type of the rule <code>DELETE|TO DISK 'xxx'|TO VOLUME 'xxx'|GROUP BY</code> specifies an action to be done with the part if the expression is satisfied (reaches current time): removal of expired rows, moving a part (if expression is satisfied for all rows in a part) to specified disk (<code>TO DISK 'xxx'</code>) or to volume (<code>TO VOLUME 'xxx'</code>), or aggregating values in expired rows. Default type of the rule is removal (<code>DELETE</code>). List of multiple rules can be specified, but there should be no more than one <code>DELETE</code> rule.</p>
+<p>For more details, see <a href="#table_engine-mergetree-ttl">TTL for columns and tables</a></p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="settings">SETTINGS<a aria-label="Direct link to SETTINGS" class="hash-link" href="#settings" title="Direct link to SETTINGS">​</a></h4>
+<p>See <a href="/docs/operations/settings/merge-tree-settings">MergeTree Settings</a>.</p>
+<p><strong>Example of Sections Setting</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE MergeTree() PARTITION BY toYYYYMM(EventDate) ORDER BY (CounterID, EventDate, intHash32(UserID)) SAMPLE BY intHash32(UserID) SETTINGS index_granularity=8192
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In the example, we set partitioning by month.</p>
+<p>We also set an expression for sampling as a hash by the user ID. This allows you to pseudorandomize the data in the table for each <code>CounterID</code> and <code>EventDate</code>. If you define a <a href="/docs/sql-reference/statements/select/sample">SAMPLE</a> clause when selecting the data, ClickHouse will return an evenly pseudorandom data sample for a subset of users.</p>
+<p>The <code>index_granularity</code> setting can be omitted because 8192 is the default value.</p>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true" markdown="1"><summary>Deprecated Method for Creating a Table</summary><div><div class="collapsibleContent_i85q"><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Do not use this method in new projects. If possible, switch old projects to the method described above.</p></div></div><div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) ENGINE [=] MergeTree(date-column [, sampling_expression], (primary, key), index_granularity)
+</code></pre></div><div class="activity_PoTP"></div></div><p><strong>MergeTree() Parameters</strong><ul class="custom-ul">
+<li class="custom-li"><code>date-column</code> — The name of a column of the <a href="/docs/sql-reference/data-types/date">Date</a> type. ClickHouse automatically creates partitions by month based on this column. The partition names are in the <code>"YYYYMM"</code> format.</li>
+<li class="custom-li"><code>sampling_expression</code> — An expression for sampling.</li>
+<li class="custom-li"><code>(primary, key)</code> — Primary key. Type: <a href="/docs/sql-reference/data-types/tuple">Tuple()</a></li>
+<li class="custom-li"><code>index_granularity</code> — The granularity of an index. The number of data rows between the "marks" of an index. The value 8192 is appropriate for most tasks.</li>
+</ul><p><strong>Example</strong><div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">MergeTree(EventDate, intHash32(UserID), (CounterID, EventDate, intHash32(UserID)), 8192)
+</code></pre></div><div class="activity_PoTP"></div></div><p>The <code>MergeTree</code> engine is configured in the same way as in the example above for the main engine configuration method.</p></p></p></div></div></details>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mergetree-data-storage">Data storage<a aria-label="Direct link to Data storage" class="hash-link" href="#mergetree-data-storage" title="Direct link to Data storage">​</a></h2>
+<p>A table consists of data parts sorted by primary key.</p>
+<p>When data is inserted in a table, separate data parts are created and each of them is lexicographically sorted by primary key. For example, if the primary key is <code>(CounterID, Date)</code>, the data in the part is sorted by <code>CounterID</code>, and within each <code>CounterID</code>, it is ordered by <code>Date</code>.</p>
+<p>Data belonging to different partitions are separated into different parts. In the background, ClickHouse merges data parts for more efficient storage. Parts belonging to different partitions are not merged. The merge mechanism does not guarantee that all rows with the same primary key will be in the same data part.</p>
+<p>Data parts can be stored in <code>Wide</code> or <code>Compact</code> format. In <code>Wide</code> format each column is stored in a separate file in a filesystem, in <code>Compact</code> format all columns are stored in one file. <code>Compact</code> format can be used to increase performance of small and frequent inserts.</p>
+<p>Data storing format is controlled by the <code>min_bytes_for_wide_part</code> and <code>min_rows_for_wide_part</code> settings of the table engine. If the number of bytes or rows in a data part is less then the corresponding setting's value, the part is stored in <code>Compact</code> format. Otherwise it is stored in <code>Wide</code> format. If none of these settings is set, data parts are stored in <code>Wide</code> format.</p>
+<p>Each data part is logically divided into granules. A granule is the smallest indivisible data set that ClickHouse reads when selecting data. ClickHouse does not split rows or values, so each granule always contains an integer number of rows. The first row of a granule is marked with the value of the primary key for the row. For each data part, ClickHouse creates an index file that stores the marks. For each column, whether it's in the primary key or not, ClickHouse also stores the same marks. These marks let you find data directly in column files.</p>
+<p>The granule size is restricted by the <code>index_granularity</code> and <code>index_granularity_bytes</code> settings of the table engine. The number of rows in a granule lays in the <code>[1, index_granularity]</code> range, depending on the size of the rows. The size of a granule can exceed <code>index_granularity_bytes</code> if the size of a single row is greater than the value of the setting. In this case, the size of the granule equals the size of the row.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="primary-keys-and-indexes-in-queries">Primary Keys and Indexes in Queries<a aria-label="Direct link to Primary Keys and Indexes in Queries" class="hash-link" href="#primary-keys-and-indexes-in-queries" title="Direct link to Primary Keys and Indexes in Queries">​</a></h2>
+<p>Take the <code>(CounterID, Date)</code> primary key as an example. In this case, the sorting and index can be illustrated as follows:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Whole data:     [---------------------------------------------]
+CounterID:      [aaaaaaaaaaaaaaaaaabbbbcdeeeeeeeeeeeeefgggggggghhhhhhhhhiiiiiiiiikllllllll]
+Date:           [1111111222222233331233211111222222333211111112122222223111112223311122333]
+Marks:           |      |      |      |      |      |      |      |      |      |      |
+                a,1    a,2    a,3    b,3    e,2    e,3    g,1    h,2    i,1    i,3    l,3
+Marks numbers:   0      1      2      3      4      5      6      7      8      9      10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If the data query specifies:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>CounterID in ('a', 'h')</code>, the server reads the data in the ranges of marks <code>[0, 3)</code> and <code>[6, 8)</code>.</li>
+<li class="custom-li"><code>CounterID IN ('a', 'h') AND Date = 3</code>, the server reads the data in the ranges of marks <code>[1, 3)</code> and <code>[7, 8)</code>.</li>
+<li class="custom-li"><code>Date = 3</code>, the server reads the data in the range of marks <code>[1, 10]</code>.</li>
+</ul>
+<p>The examples above show that it is always more effective to use an index than a full scan.</p>
+<p>A sparse index allows extra data to be read. When reading a single range of the primary key, up to <code>index_granularity * 2</code> extra rows in each data block can be read.</p>
+<p>Sparse indexes allow you to work with a very large number of table rows, because in most cases, such indexes fit in the computer's RAM.</p>
+<p>ClickHouse does not require a unique primary key. You can insert multiple rows with the same primary key.</p>
+<p>You can use <code>Nullable</code>-typed expressions in the <code>PRIMARY KEY</code> and <code>ORDER BY</code> clauses but it is strongly discouraged. To allow this feature, turn on the <a href="/docs/operations/settings/merge-tree-settings#allow_nullable_key">allow_nullable_key</a> setting. The <a href="/docs/sql-reference/statements/select/order-by#sorting-of-special-values">NULLS_LAST</a> principle applies for <code>NULL</code> values in the <code>ORDER BY</code> clause.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="selecting-a-primary-key">Selecting a primary key<a aria-label="Direct link to Selecting a primary key" class="hash-link" href="#selecting-a-primary-key" title="Direct link to Selecting a primary key">​</a></h3>
+<p>The number of columns in the primary key is not explicitly limited. Depending on the data structure, you can include more or fewer columns in the primary key. This may:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Improve the performance of an index.</p>
+<p>If the primary key is <code>(a, b)</code>, then adding another column <code>c</code> will improve the performance if the following conditions are met:</p>
+<ul class="custom-ul">
+<li class="custom-li">There are queries with a condition on column <code>c</code>.</li>
+<li class="custom-li">Long data ranges (several times longer than the <code>index_granularity</code>) with identical values for <code>(a, b)</code> are common. In other words, when adding another column allows you to skip quite long data ranges.</li>
+</ul>
+</li>
+<li class="custom-li">
+<p>Improve data compression.</p>
+<p>ClickHouse sorts data by primary key, so the higher the consistency, the better the compression.</p>
+</li>
+<li class="custom-li">
+<p>Provide additional logic when merging data parts in the <a href="/docs/engines/table-engines/mergetree-family/collapsingmergetree">CollapsingMergeTree</a> and <a href="/docs/engines/table-engines/mergetree-family/summingmergetree">SummingMergeTree</a> engines.</p>
+<p>In this case it makes sense to specify the <em>sorting key</em> that is different from the primary key.</p>
+</li>
+</ul>
+<p>A long primary key will negatively affect the insert performance and memory consumption, but extra columns in the primary key do not affect ClickHouse performance during <code>SELECT</code> queries.</p>
+<p>You can create a table without a primary key using the <code>ORDER BY tuple()</code> syntax. In this case, ClickHouse stores data in the order of inserting. If you want to save data order when inserting data by <code>INSERT ... SELECT</code> queries, set <a href="/docs/operations/settings/settings#max_insert_threads">max_insert_threads = 1</a>.</p>
+<p>To select data in the initial order, use <a href="/docs/operations/settings/settings#max_threads">single-threaded</a> <code>SELECT</code> queries.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="choosing-a-primary-key-that-differs-from-the-sorting-key">Choosing a primary key that differs from the sorting key<a aria-label="Direct link to Choosing a primary key that differs from the sorting key" class="hash-link" href="#choosing-a-primary-key-that-differs-from-the-sorting-key" title="Direct link to Choosing a primary key that differs from the sorting key">​</a></h3>
+<p>It is possible to specify a primary key (an expression with values that are written in the index file for each mark) that is different from the sorting key (an expression for sorting the rows in data parts). In this case the primary key expression tuple must be a prefix of the sorting key expression tuple.</p>
+<p>This feature is helpful when using the <a href="/docs/engines/table-engines/mergetree-family/summingmergetree">SummingMergeTree</a> and
+<a href="/docs/engines/table-engines/mergetree-family/aggregatingmergetree">AggregatingMergeTree</a> table engines. In a common case when using these engines, the table has two types of columns: <em>dimensions</em> and <em>measures</em>. Typical queries aggregate values of measure columns with arbitrary <code>GROUP BY</code> and filtering by dimensions. Because SummingMergeTree and AggregatingMergeTree aggregate rows with the same value of the sorting key, it is natural to add all dimensions to it. As a result, the key expression consists of a long list of columns and this list must be frequently updated with newly added dimensions.</p>
+<p>In this case it makes sense to leave only a few columns in the primary key that will provide efficient range scans and add the remaining dimension columns to the sorting key tuple.</p>
+<p><a href="/docs/sql-reference/statements/alter">ALTER</a> of the sorting key is a lightweight operation because when a new column is simultaneously added to the table and to the sorting key, existing data parts do not need to be changed. Since the old sorting key is a prefix of the new sorting key and there is no data in the newly added column, the data is sorted by both the old and new sorting keys at the moment of table modification.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="use-of-indexes-and-partitions-in-queries">Use of indexes and partitions in queries<a aria-label="Direct link to Use of indexes and partitions in queries" class="hash-link" href="#use-of-indexes-and-partitions-in-queries" title="Direct link to Use of indexes and partitions in queries">​</a></h3>
+<p>For <code>SELECT</code> queries, ClickHouse analyzes whether an index can be used. An index can be used if the <code>WHERE/PREWHERE</code> clause has an expression (as one of the conjunction elements, or entirely) that represents an equality or inequality comparison operation, or if it has <code>IN</code> or <code>LIKE</code> with a fixed prefix on columns or expressions that are in the primary key or partitioning key, or on certain partially repetitive functions of these columns, or logical relationships of these expressions.</p>
+<p>Thus, it is possible to quickly run queries on one or many ranges of the primary key. In this example, queries will be fast when run for a specific tracking tag, for a specific tag and date range, for a specific tag and date, for multiple tags with a date range, and so on.</p>
+<p>Let's look at the engine configured as follows:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE MergeTree()
+PARTITION BY toYYYYMM(EventDate)
+ORDER BY (CounterID, EventDate)
+SETTINGS index_granularity=8192
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this case, in queries:</p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count() FROM table
+WHERE EventDate = toDate(now())
+AND CounterID = 34
+
+SELECT count() FROM table
+WHERE EventDate = toDate(now())
+AND (CounterID = 34 OR CounterID = 42)
+
+SELECT count() FROM table
+WHERE ((EventDate &gt;= toDate('2014-01-01')
+AND EventDate &lt;= toDate('2014-01-31')) OR EventDate = toDate('2014-05-01'))
+AND CounterID IN (101500, 731962, 160656)
+AND (CounterID = 101500 OR EventDate != toDate('2014-05-01'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse will use the primary key index to trim improper data and the monthly partitioning key to trim partitions that are in improper date ranges.</p>
+<p>The queries above show that the index is used even for complex expressions. Reading from the table is organized so that using the index can't be slower than a full scan.</p>
+<p>In the example below, the index can't be used.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count() FROM table WHERE CounterID = 34 OR URL LIKE '%upyachka%'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To check whether ClickHouse can use the index when running a query, use the settings <a href="/docs/operations/settings/settings#force_index_by_date">force_index_by_date</a> and <a href="/docs/operations/settings/settings#force_primary_key">force_primary_key</a>.</p>
+<p>The key for partitioning by month allows reading only those data blocks which contain dates from the proper range. In this case, the data block may contain data for many dates (up to an entire month). Within a block, data is sorted by primary key, which might not contain the date as the first column. Because of this, using a query with only a date condition that does not specify the primary key prefix will cause more data to be read than for a single date.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="use-of-index-for-deterministic-expressions-in-primary-keys">Use of index for deterministic expressions in primary keys<a aria-label="Direct link to Use of index for deterministic expressions in primary keys" class="hash-link" href="#use-of-index-for-deterministic-expressions-in-primary-keys" title="Direct link to Use of index for deterministic expressions in primary keys">​</a></h3>
+<p>The primary key can contain expressions, not only column names. These expressions are not limited to simple function chains: they can be arbitrary expression trees (for example, nested functions and composite expressions), as long as they are deterministic.</p>
+<p>An expression is <strong>deterministic</strong> if it always returns the same result for the same input values (for example: <code>length()</code>, <code>toDate()</code>, <code>lower()</code>, <code>left()</code>, <code>cityHash64()</code>, <code>toUUID()</code>; unlike <code>now()</code> or <code>rand()</code>). If the primary key contains deterministic expressions, ClickHouse can apply them to constant values from the query and use the result to build conditions on the primary key index. This enables data skipping for predicates like <code>=</code>, <code>IN</code>, and <code>has</code>.</p>
+<p>A common use case is to keep the primary key compact (e.g. store a hash instead of a long <code>String</code>), while still allowing predicates on the original column to use the index.</p>
+<p>Example of a deterministic (but non-injective) primary key:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = MergeTree()
+ORDER BY length(user_id)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example predicates that can use the index:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM table WHERE user_id = 'alice';
+SELECT * FROM table WHERE user_id IN ('alice', 'bob');
+SELECT * FROM table WHERE has(['alice', 'bob'], user_id);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In these cases, ClickHouse computes <code>length('alice')</code> (and other constants) once and uses the length values to narrow the ranges in the primary key index. Since length of a string is <strong>not injective</strong>, different <code>user_id</code> strings can share the same length, so the index may read extra granules (false positives). The result remains correct because the original predicate (<code>user_id = ...</code>, <code>IN</code>, etc.) is still applied after reading.</p>
+<p>If the deterministic expression is also <strong>injective</strong> (different inputs cannot produce the same output for the argument types used), additionally ClickHouse can effectively use the index for the negated forms: <code>!=</code>, <code>NOT IN</code>, and <code>NOT has(...)</code>. For example, <code>reverse(p)</code> and <code>hex(p)</code> are injective for <code>String</code>.</p>
+<p>Example of an injective primary key:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = MergeTree()
+ORDER BY hex(p)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>More complex injective expressions are also supported, for example:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = MergeTree()
+ORDER BY reverse(tuple(reverse(p), hex(p)))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example predicates that can use the index:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM table WHERE p != 'abc';
+SELECT * FROM table WHERE p NOT IN ('abc', '12345');
+SELECT * FROM table WHERE NOT has(['abc', '12345'], p);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="use-of-index-for-partially-monotonic-primary-keys">Use of index for partially-monotonic primary keys<a aria-label="Direct link to Use of index for partially-monotonic primary keys" class="hash-link" href="#use-of-index-for-partially-monotonic-primary-keys" title="Direct link to Use of index for partially-monotonic primary keys">​</a></h3>
+<p>Consider, for example, the days of the month. They form a <a href="https://en.wikipedia.org/wiki/Monotonic_function" rel="noopener noreferrer" target="_blank">monotonic sequence</a> for one month, but not monotonic for more extended periods. This is a partially-monotonic sequence. If a user creates the table with partially-monotonic primary key, ClickHouse creates a sparse index as usual. When a user selects data from this kind of table, ClickHouse analyzes the query conditions. If the user wants to get data between two marks of the index and both these marks fall within one month, ClickHouse can use the index in this particular case because it can calculate the distance between the parameters of a query and index marks.</p>
+<p>ClickHouse cannot use an index if the values of the primary key in the query parameter range do not represent a monotonic sequence. In this case, ClickHouse uses the full scan method.</p>
+<p>ClickHouse uses this logic not only for days of the month sequences, but for any primary key that represents a partially-monotonic sequence.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-data_skipping-indexes">Data skipping indexes<a aria-label="Direct link to Data skipping indexes" class="hash-link" href="#table_engine-mergetree-data_skipping-indexes" title="Direct link to Data skipping indexes">​</a></h3>
+<p>The index declaration is in the columns section of the <code>CREATE</code> query.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INDEX index_name expr TYPE type(...) [GRANULARITY granularity_value]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For tables from the <code>*MergeTree</code> family, data skipping indices can be specified.</p>
+<p>These indices aggregate some information about the specified expression on blocks, which consist of <code>granularity_value</code> granules (the size of the granule is specified using the <code>index_granularity</code> setting in the table engine). Then these aggregates are used in <code>SELECT</code> queries for reducing the amount of data to read from the disk by skipping big blocks of data where the <code>where</code> query cannot be satisfied.</p>
+<p>The <code>GRANULARITY</code> clause can be omitted, the default value of <code>granularity_value</code> is 1.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name
+(
+    u64 UInt64,
+    i32 Int32,
+    s String,
+    ...
+    INDEX idx1 u64 TYPE bloom_filter GRANULARITY 3,
+    INDEX idx2 u64 * i32 TYPE minmax GRANULARITY 3,
+    INDEX idx3 u64 * length(s) TYPE set(1000) GRANULARITY 4
+) ENGINE = MergeTree()
+...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Indices from the example can be used by ClickHouse to reduce the amount of data to read from disk in the following queries:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count() FROM table WHERE u64 == 10;
+SELECT count() FROM table WHERE u64 * i32 &gt;= 1234
+SELECT count() FROM table WHERE u64 * length(s) == 1234
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Data skipping indexes can also be created on composite columns:</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- on columns of type Map:
+INDEX map_key_index mapKeys(map_column) TYPE bloom_filter
+INDEX map_value_index mapValues(map_column) TYPE bloom_filter
+
+-- on columns of type JSON:
+INDEX json_paths_index JSONAllPaths(json_column) TYPE bloom_filter
+
+-- on columns of type Tuple:
+INDEX tuple_1_index tuple_column.1 TYPE bloom_filter
+INDEX tuple_2_index tuple_column.2 TYPE bloom_filter
+
+-- on columns of type Nested:
+INDEX nested_1_index col.nested_col1 TYPE bloom_filter
+INDEX nested_2_index col.nested_col2 TYPE bloom_filter
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="skip-index-types">Skip Index Types<a aria-label="Direct link to Skip Index Types" class="hash-link" href="#skip-index-types" title="Direct link to Skip Index Types">​</a></h3>
+<p>The <code>MergeTree</code> table engine supports the following types of skip indexes.
+For more information on how skip indexes can be used for performance optimization
+see <a href="/docs/optimize/skipping-indexes">"Understanding ClickHouse data skipping indexes"</a>.</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#minmax"><code>MinMax</code></a> index</li>
+<li class="custom-li"><a href="#set"><code>Set</code></a> index</li>
+<li class="custom-li"><a href="#bloom-filter"><code>bloom_filter</code></a> index</li>
+<li class="custom-li"><a href="#n-gram-bloom-filter"><code>ngrambf_v1</code></a> index <em>(Deprecated)</em></li>
+<li class="custom-li"><a href="#token-bloom-filter"><code>tokenbf_v1</code></a> index <em>(Deprecated)</em></li>
+<li class="custom-li"><a href="#text"><code>text</code></a> index</li>
+<li class="custom-li"><a href="#vector-similarity"><code>vector_similarity</code></a> index</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="minmax">MinMax skip index<a aria-label="Direct link to MinMax skip index" class="hash-link" href="#minmax" title="Direct link to MinMax skip index">​</a></h4>
+<p>For each index granule, the minimum and maximum values of an expression are stored.
+(If the expression is of type <code>tuple</code>, it stores the minimum and maximum for each tuple element.)</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">minmax
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="set">Set<a aria-label="Direct link to Set" class="hash-link" href="#set" title="Direct link to Set">​</a></h4>
+<p>For each index granule at most <code>max_rows</code> many unique values of the specified expression are stored.
+<code>max_rows = 0</code> means "store all unique values".</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">set(max_rows)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="bloom-filter">Bloom filter<a aria-label="Direct link to Bloom filter" class="hash-link" href="#bloom-filter" title="Direct link to Bloom filter">​</a></h4>
+<p>For each index granule stores a <a href="https://en.wikipedia.org/wiki/Bloom_filter" rel="noopener noreferrer" target="_blank">bloom filter</a> for the specified columns.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">bloom_filter([false_positive_rate])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>false_positive_rate</code> parameter can take on a value between 0 and 1 (by default: <code>0.025</code>) and specifies the probability of generating a positive (which increases the amount of data to be read).</p>
+<p>The following data types are supported:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>(U)Int*</code></li>
+<li class="custom-li"><code>Float*</code></li>
+<li class="custom-li"><code>Enum</code></li>
+<li class="custom-li"><code>Date</code></li>
+<li class="custom-li"><code>DateTime</code></li>
+<li class="custom-li"><code>String</code></li>
+<li class="custom-li"><code>FixedString</code></li>
+<li class="custom-li"><code>Array</code></li>
+<li class="custom-li"><code>LowCardinality</code></li>
+<li class="custom-li"><code>Nullable</code></li>
+<li class="custom-li"><code>UUID</code></li>
+<li class="custom-li"><code>Map</code></li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Map data type: specifying index creation with keys or values</div><p>For the <code>Map</code> data type, the client can specify if the index should be created for keys or for values using the <a href="/docs/sql-reference/functions/tuple-map-functions#mapKeys"><code>mapKeys</code></a> or <a href="/docs/sql-reference/functions/tuple-map-functions#mapValues"><code>mapValues</code></a> functions.</p></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">JSON data type: indexing JSON paths</div><p>For the <a href="/docs/sql-reference/data-types/newjson"><code>JSON</code></a> data type, a bloom filter index can be created on the set of paths using the <a href="/docs/sql-reference/functions/json-functions#JSONAllPaths"><code>JSONAllPaths</code></a> function. This allows skipping granules where a queried JSON path is absent. See <a href="/docs/sql-reference/data-types/newjson#data-skipping-indexes-for-json">Data skipping indexes for JSON</a> for details.</p></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="n-gram-bloom-filter">N-gram bloom filter <em>(Deprecated)</em><a aria-label="Direct link to n-gram-bloom-filter" class="hash-link" href="#n-gram-bloom-filter" title="Direct link to n-gram-bloom-filter">​</a></h4>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>With general availability (GA) of the <code>text</code> index starting from ClickHouse version 26.2, the <code>ngrambf_v1</code> index is no longer recommended for full text search.<p>See page <a href="/docs/engines/table-engines/mergetree-family/textindexes">"Full-text search with text indexes"</a> for details.</p></p></div></div>
+<p>For each index granule stores a <a href="https://en.wikipedia.org/wiki/Bloom_filter" rel="noopener noreferrer" target="_blank">bloom filter</a> for the <a href="https://en.wikipedia.org/wiki/N-gram" rel="noopener noreferrer" target="_blank">n-grams</a> of the specified columns.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">ngrambf_v1(n, size_of_bloom_filter_in_bytes, number_of_hash_functions, random_seed)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<table><thead><tr><th>Parameter<th>Description<tbody><tr><td><code>n</code><td>ngram size<tr><td><code>size_of_bloom_filter_in_bytes</code><td>Bloom filter size in bytes. You can use a large value here, for example, <code>256</code> or <code>512</code>, because it can be compressed well).<tr><td><code>number_of_hash_functions</code><td>The number of hash functions used in the bloom filter.<tr><td><code>random_seed</code><td>Seed for the bloom filter hash functions.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>This index only works with the following data types:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/map"><code>Map</code></a></li>
+</ul>
+<p>To estimate the parameters of <code>ngrambf_v1</code>, you can use the following <a href="/docs/sql-reference/statements/create/function">User Defined Functions (UDFs)</a>.</p>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION bfEstimateFunctions [ON CLUSTER cluster]
+AS
+(total_number_of_all_grams, size_of_bloom_filter_in_bits) -&gt; round((size_of_bloom_filter_in_bits / total_number_of_all_grams) * log(2));
+
+CREATE FUNCTION bfEstimateBmSize [ON CLUSTER cluster]
+AS
+(total_number_of_all_grams,  probability_of_false_positives) -&gt; ceil((total_number_of_all_grams * log(probability_of_false_positives)) / log(1 / pow(2, log(2))));
+
+CREATE FUNCTION bfEstimateFalsePositive [ON CLUSTER cluster]
+AS
+(total_number_of_all_grams, number_of_hash_functions, size_of_bloom_filter_in_bytes) -&gt; pow(1 - exp(-number_of_hash_functions/ (size_of_bloom_filter_in_bytes / total_number_of_all_grams)), number_of_hash_functions);
+
+CREATE FUNCTION bfEstimateGramNumber [ON CLUSTER cluster]
+AS
+(number_of_hash_functions, probability_of_false_positives, size_of_bloom_filter_in_bytes) -&gt; ceil(size_of_bloom_filter_in_bytes / (-number_of_hash_functions / log(1 - exp(log(probability_of_false_positives) / number_of_hash_functions))))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To use these functions, you need to specify at least two parameters:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>total_number_of_all_grams</code></li>
+<li class="custom-li"><code>probability_of_false_positives</code></li>
+</ul>
+<p>For example, there are <code>4300</code> ngrams in the granule and you expect false positives to be less than <code>0.0001</code>.
+The other parameters can then be estimated by executing the following queries:</p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">--- estimate number of bits in the filter
+SELECT bfEstimateBmSize(4300, 0.0001) / 8 AS size_of_bloom_filter_in_bytes;
+
+┌─size_of_bloom_filter_in_bytes─┐
+│                         10304 │
+└───────────────────────────────┘
+
+--- estimate number of hash functions
+SELECT bfEstimateFunctions(4300, bfEstimateBmSize(4300, 0.0001)) as number_of_hash_functions
+
+┌─number_of_hash_functions─┐
+│                       13 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Of course, you can also use those functions to estimate parameters for other conditions.
+The functions above refer to the bloom filter calculator <a href="https://hur.st/bloomfilter" rel="noopener noreferrer" target="_blank">here</a>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="token-bloom-filter">Token bloom filter<a aria-label="Direct link to Token bloom filter" class="hash-link" href="#token-bloom-filter" title="Direct link to Token bloom filter">​</a></h4>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>With general availability (GA) of the <code>text</code> index starting from ClickHouse version 26.2, the <code>tokenbf_v1</code> index is no longer recommended for full text search.<p>See page <a href="/docs/engines/table-engines/mergetree-family/textindexes">"Full-text search with text indexes"</a> for details.</p></p></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">tokenbf_v1(size_of_bloom_filter_in_bytes, number_of_hash_functions, random_seed)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="sparse-grams-bloom-filter">Sparse grams bloom filter<a aria-label="Direct link to Sparse grams bloom filter" class="hash-link" href="#sparse-grams-bloom-filter" title="Direct link to Sparse grams bloom filter">​</a></h4>
+<p>The sparse grams bloom filter is similar to <code>ngrambf_v1</code> but uses <a href="/docs/sql-reference/functions/string-functions#sparseGrams">sparse grams tokens</a> instead of ngrams.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">sparse_grams(min_ngram_length, max_ngram_length, min_cutoff_length, size_of_bloom_filter_in_bytes, number_of_hash_functions, random_seed)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="text">Text index<a aria-label="Direct link to Text index" class="hash-link" href="#text" title="Direct link to Text index">​</a></h3>
+<p>Builds an inverted index over tokenized string data, enabling efficient and deterministic full-text search. See <a href="/docs/engines/table-engines/mergetree-family/textindexes">here</a> for details.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="vector-similarity">Vector similarity<a aria-label="Direct link to Vector similarity" class="hash-link" href="#vector-similarity" title="Direct link to Vector similarity">​</a></h4>
+<p>Supports approximate nearest neighbor search, see <a href="/docs/engines/table-engines/mergetree-family/annindexes">here</a> for details.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="functions-support">Functions support<a aria-label="Direct link to Functions support" class="hash-link" href="#functions-support" title="Direct link to Functions support">​</a></h3>
+<p>Conditions in the <code>WHERE</code> clause contains calls of the functions that operate with columns. If the column is a part of an index, ClickHouse tries to use this index when performing the functions. ClickHouse supports different subsets of functions for using indexes.</p>
+<p>Indexes of type <code>set</code> can be utilized by all functions. The other index types are supported as follows:</p>
+<table><thead><tr><th>Function (operator) / Index<th>primary key<th>minmax<th>ngrambf_v1<th>tokenbf_v1<th>bloom_filter<th>sparse_grams<th>text<tbody><tr><td><a href="/docs/sql-reference/functions/comparison-functions#equals">equals (=, ==)</a><td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/comparison-functions#notEquals">notEquals(!=, &lt;&gt;)</a><td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/string-search-functions#like">like</a><td>✔<td>✔<td>✔<td>✔<td>✗<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/string-search-functions#notLike">notLike</a><td>✔<td>✔<td>✔<td>✔<td>✗<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/string-search-functions#match">match</a><td>✗<td>✗<td>✔<td>✔<td>✗<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/string-functions#startsWith">startsWith</a><td>✔<td>✔<td>✔<td>✔<td>✗<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/string-functions#endsWith">endsWith</a><td>✗<td>✗<td>✔<td>✔<td>✗<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/string-search-functions#multiSearchAny">multiSearchAny</a><td>✗<td>✗<td>✔<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/in-functions">in</a><td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/in-functions">notIn</a><td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/comparison-functions#less">less (<code>&lt;</code>)</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/comparison-functions#greater">greater (<code>&gt;</code>)</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/comparison-functions#lessOrEquals">lessOrEquals (<code>&lt;=</code>)</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/comparison-functions#greaterOrEquals">greaterOrEquals (<code>&gt;=</code>)</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/array-functions#empty">empty</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/array-functions#notEmpty">notEmpty</a><td>✗<td>✔<td>✗<td>✗<td>✗<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/array-functions#has">has</a><td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<td>✔<tr><td><a href="/docs/sql-reference/functions/array-functions#hasAny">hasAny</a><td>✗<td>✗<td>✔<td>✔<td>✔<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/array-functions#hasAll">hasAll</a><td>✗<td>✗<td>✔<td>✔<td>✔<td>✔<td>✗<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasToken">hasToken</a><td>✗<td>✗<td>✗<td>✔<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasTokenOrNull">hasTokenOrNull</a><td>✗<td>✗<td>✗<td>✔<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasTokenCaseInsensitive">hasTokenCaseInsensitive (<code>*</code>)</a><td>✗<td>✗<td>✗<td>✔<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasTokenCaseInsensitiveOrNull">hasTokenCaseInsensitiveOrNull (<code>*</code>)</a><td>✗<td>✗<td>✗<td>✔<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasAnyTokens">hasAnyTokens</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/string-search-functions#hasAllTokens">hasAllTokens</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/geo/coordinates#pointinpolygon">pointInPolygon</a><td>✔<td>✔<td>✗<td>✗<td>✗<td>✗<td>✗<tr><td><a href="/docs/sql-reference/functions/tuple-map-functions#mapContainsKey">mapContains (mapContainsKey)</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/tuple-map-functions#mapContainsKeyLike">mapContainsKeyLike</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/tuple-map-functions#mapContainsValue">mapContainsValue</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔<tr><td><a href="/docs/sql-reference/functions/tuple-map-functions#mapContainsValueLike">mapContainsValueLike</a><td>✗<td>✗<td>✗<td>✗<td>✗<td>✗<td>✔</td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></td></tr></tbody></th></th></th></th></th></th></th></th></tr></thead></table>
+<p>Functions with a constant argument that is less than ngram size can't be used by <code>ngrambf_v1</code> for query optimization.</p>
+<p>(*) For <code>hasTokenCaseInsensitive</code> and <code>hasTokenCaseInsensitiveOrNull</code> to be effective, the <code>tokenbf_v1</code> index must be created on lowercased data, for example <code>INDEX idx (lower(str_col)) TYPE tokenbf_v1(512, 3, 0)</code>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Bloom filters can have false positive matches, so the <code>ngrambf_v1</code>, <code>tokenbf_v1</code>, <code>sparse_grams</code>, and <code>bloom_filter</code> indexes can not be used for optimizing queries where the result of a function is expected to be false.<p>For example:<ul class="custom-ul">
+<li class="custom-li">Can be optimized:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>s LIKE '%test%'</code></li>
+<li class="custom-li"><code>NOT s NOT LIKE '%test%'</code></li>
+<li class="custom-li"><code>s = 1</code></li>
+<li class="custom-li"><code>NOT s != 1</code></li>
+<li class="custom-li"><code>startsWith(s, 'test')</code></li>
+</ul>
+</li>
+<li class="custom-li">Can not be optimized:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><code>NOT s LIKE '%test%'</code></li>
+<li class="custom-li"><code>s NOT LIKE '%test%'</code></li>
+<li class="custom-li"><code>NOT s = 1</code></li>
+<li class="custom-li"><code>s != 1</code></li>
+<li class="custom-li"><code>NOT startsWith(s, 'test')</code></li>
+</ul>
+</li>
+</ul></p></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="projections">Projections<a aria-label="Direct link to Projections" class="hash-link" href="#projections" title="Direct link to Projections">​</a></h2>
+<p>Projections are like <a href="/docs/sql-reference/statements/create/view">materialized views</a> but defined in part-level. It provides consistency guarantees along with automatic usage in queries.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>When you are implementing projections you should also consider the <a href="/docs/operations/settings/settings#force_optimize_projection">force_optimize_projection</a> setting.</p></div></div>
+<p>Projections are not supported in the <code>SELECT</code> statements with the <a href="/docs/sql-reference/statements/select/from#final-modifier">FINAL</a> modifier.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="projection-query">Projection query<a aria-label="Direct link to Projection query" class="hash-link" href="#projection-query" title="Direct link to Projection query">​</a></h3>
+<p>A projection query is what defines a projection. It implicitly selects data from the parent table.
+<strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT &lt;column list expr&gt; [GROUP BY] &lt;group keys expr&gt; [ORDER BY] &lt;expr&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Projections can be modified or dropped with the <a href="/docs/sql-reference/statements/alter/projection">ALTER</a> statement.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="projection-index">Projection indexes<a aria-label="Direct link to Projection indexes" class="hash-link" href="#projection-index" title="Direct link to Projection indexes">​</a></h3>
+<p>Projection indexes extend the projection subsystem by providing a lightweight and explicit way to define projection-level indexes.
+Externally, a projection index is still a projection, but with simplified syntax and clearer intent: it defines an expression which is dedicated to filtering, rather than serving materialized data.
+Internally, a projection index does not materialize the original table in permuted row order like a regular projection.
+Instead, the permutation is stored in the form of a numeric permutation column <code>_part_offset</code>, i.e. <code>SELECT _part_offset ORDER BY &lt;index_expr&gt;</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="projection-index-syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#projection-index-syntax" title="Direct link to Syntax">​</a></h4>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">PROJECTION &lt;name&gt; INDEX &lt;index_expr&gt; TYPE &lt;index_type&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE example
+(
+    id UInt64,
+    region String,
+    user_id UInt32,
+    PROJECTION region_proj INDEX region TYPE basic,
+    PROJECTION uid_proj INDEX user_id TYPE basic
+)
+ENGINE = MergeTree
+ORDER BY id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="projection-index-types">Index types<a aria-label="Direct link to Index types" class="hash-link" href="#projection-index-types" title="Direct link to Index types">​</a></h4>
+<p>Currently supported:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>basic</strong>: equivalent to a normal MergeTree index on the expression.</li>
+</ul>
+<p>The framework allows adding more index types in the future.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="projection-storage">Projection storage<a aria-label="Direct link to Projection storage" class="hash-link" href="#projection-storage" title="Direct link to Projection storage">​</a></h3>
+<p>Projections are stored inside the part directory. It's similar to an index but contains a subdirectory that stores an anonymous <code>MergeTree</code> table's part. The table is induced by the definition query of the projection. If there is a <code>GROUP BY</code> clause, the underlying storage engine becomes <a href="/docs/engines/table-engines/mergetree-family/aggregatingmergetree">AggregatingMergeTree</a>, and all aggregate functions are converted to <code>AggregateFunction</code>. If there is an <code>ORDER BY</code> clause, the <code>MergeTree</code> table uses it as its primary key expression. During the merge process the projection part is merged via its storage's merge routine. The checksum of the parent table's part is combined with the projection's part. Other maintenance jobs are similar to skip indices.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="projection-query-analysis">Query analysis<a aria-label="Direct link to Query analysis" class="hash-link" href="#projection-query-analysis" title="Direct link to Query analysis">​</a></h3>
+<ol class="custom-ol">
+<li class="custom-li">Check if the projection can be used to answer the given query, that is, it generates the same answer as querying the base table.</li>
+<li class="custom-li">Select the best feasible match, which contains the least granules to read.</li>
+<li class="custom-li">The query pipeline which uses projections will be different from the one that uses the original parts. If the projection is absent in some parts, we can add the pipeline to "project" it on the fly.</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="concurrent-data-access">Concurrent data access<a aria-label="Direct link to Concurrent data access" class="hash-link" href="#concurrent-data-access" title="Direct link to Concurrent data access">​</a></h2>
+<p>For concurrent table access, we use multi-versioning. In other words, when a table is simultaneously read and updated, data is read from a set of parts that is current at the time of the query. There are no lengthy locks. Inserts do not get in the way of read operations.</p>
+<p>Reading from a table is automatically parallelized.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-ttl">TTL for columns and tables<a aria-label="Direct link to TTL for columns and tables" class="hash-link" href="#table_engine-mergetree-ttl" title="Direct link to TTL for columns and tables">​</a></h2>
+<p>Determines the lifetime of values.</p>
+<p>The <code>TTL</code> clause can be set for the whole table and for each individual column. Table-level <code>TTL</code> can also specify the logic of automatic moving data between disks and volumes, or recompressing parts where all the data has been expired.</p>
+<p>Expressions must evaluate to <a href="/docs/sql-reference/data-types/date">Date</a>, <a href="/docs/sql-reference/data-types/date32">Date32</a>, <a href="/docs/sql-reference/data-types/datetime">DateTime</a> or <a href="/docs/sql-reference/data-types/datetime64">DateTime64</a> data type.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Avoid non-deterministic functions in TTL expressions</div><p>TTL is evaluated during background merges, and not at insert time.
+Functions like <code>rand()</code>, <code>now()</code>, or <code>now64()</code> will be re-evaluated on every merge, leading to unpredictable deletion behavior.
+ClickHouse blocks expressions with no column dependency at all, but does not currently reject non-deterministic functions mixed with a column reference (e.g. <code>ts + rand()</code>). TTL expressions should be based solely on deterministic, column-derived values for predictable results.</p></div></div>
+<p><strong>Syntax</strong></p>
+<p>Setting time-to-live for a column:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">TTL time_column
+TTL time_column + interval
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To define <code>interval</code>, use <a href="/docs/sql-reference/operators#operators-for-working-with-dates-and-times">time interval</a> operators, for example:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">TTL date_time + INTERVAL 1 MONTH
+TTL date_time + INTERVAL 15 HOUR
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mergetree-column-ttl">Column TTL<a aria-label="Direct link to Column TTL" class="hash-link" href="#mergetree-column-ttl" title="Direct link to Column TTL">​</a></h3>
+<p>When the values in the column expire, ClickHouse replaces them with the default values for the column data type. If all the column values in the data part expire, ClickHouse deletes this column from the data part in a filesystem.</p>
+<p>The <code>TTL</code> clause can't be used for key columns.</p>
+<p><strong>Examples</strong></p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="creating-a-table-with-ttl">Creating a table with <code>TTL</code>:<a aria-label="Direct link to creating-a-table-with-ttl" class="hash-link" href="#creating-a-table-with-ttl" title="Direct link to creating-a-table-with-ttl">​</a></h4>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab
+(
+    d DateTime,
+    a Int TTL d + INTERVAL 1 MONTH,
+    b Int TTL d + INTERVAL 1 MONTH,
+    c String
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(d)
+ORDER BY d;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="adding-ttl-to-a-column-of-an-existing-table">Adding TTL to a column of an existing table<a aria-label="Direct link to Adding TTL to a column of an existing table" class="hash-link" href="#adding-ttl-to-a-column-of-an-existing-table" title="Direct link to Adding TTL to a column of an existing table">​</a></h4>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab
+    MODIFY COLUMN
+    c String TTL d + INTERVAL 1 DAY;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="altering-ttl-of-the-column">Altering TTL of the column<a aria-label="Direct link to Altering TTL of the column" class="hash-link" href="#altering-ttl-of-the-column" title="Direct link to Altering TTL of the column">​</a></h4>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab
+    MODIFY COLUMN
+    c String TTL d + INTERVAL 1 MONTH;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mergetree-table-ttl">Table TTL<a aria-label="Direct link to Table TTL" class="hash-link" href="#mergetree-table-ttl" title="Direct link to Table TTL">​</a></h3>
+<p>Table can have an expression for removal of expired rows, and multiple expressions for automatic move of parts between <a href="#table_engine-mergetree-multiple-volumes">disks or volumes</a>. When rows in the table expire, ClickHouse deletes all corresponding rows. For parts moving or recompressing, all rows of a part must satisfy the <code>TTL</code> expression criteria.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">TTL expr
+    [DELETE|RECOMPRESS codec_name1|TO DISK 'xxx'|TO VOLUME 'xxx'][, DELETE|RECOMPRESS codec_name2|TO DISK 'aaa'|TO VOLUME 'bbb'] ...
+    [WHERE conditions]
+    [GROUP BY key_expr [SET v1 = aggr_func(v1) [, v2 = aggr_func(v2) ...]] ]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Type of TTL rule may follow each TTL expression. It affects an action which is to be done once the expression is satisfied (reaches current time):</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>DELETE</code> - delete expired rows (default action);</li>
+<li class="custom-li"><code>RECOMPRESS codec_name</code> - recompress data part with the <code>codec_name</code>;</li>
+<li class="custom-li"><code>TO DISK 'aaa'</code> - move part to the disk <code>aaa</code>;</li>
+<li class="custom-li"><code>TO VOLUME 'bbb'</code> - move part to the disk <code>bbb</code>;</li>
+<li class="custom-li"><code>GROUP BY</code> - aggregate expired rows.</li>
+</ul>
+<p><code>DELETE</code> action can be used together with <code>WHERE</code> clause to delete only some of the expired rows based on a filtering condition:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">TTL time_column + INTERVAL 1 MONTH DELETE WHERE column = 'value'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>GROUP BY</code> expression must be a prefix of the table primary key.</p>
+<p>If a column is not part of the <code>GROUP BY</code> expression and is not set explicitly in the <code>SET</code> clause, in result row it contains an occasional value from the grouped rows (as if aggregate function <code>any</code> is applied to it).</p>
+<p><strong>Examples</strong></p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="creating-a-table-with-ttl-1">Creating a table with <code>TTL</code>:<a aria-label="Direct link to creating-a-table-with-ttl-1" class="hash-link" href="#creating-a-table-with-ttl-1" title="Direct link to creating-a-table-with-ttl-1">​</a></h4>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab
+(
+    d DateTime,
+    a Int
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(d)
+ORDER BY d
+TTL d + INTERVAL 1 MONTH DELETE,
+    d + INTERVAL 1 WEEK TO VOLUME 'aaa',
+    d + INTERVAL 2 WEEK TO DISK 'bbb';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="altering-ttl-of-the-table">Altering <code>TTL</code> of the table:<a aria-label="Direct link to altering-ttl-of-the-table" class="hash-link" href="#altering-ttl-of-the-table" title="Direct link to altering-ttl-of-the-table">​</a></h4>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab
+    MODIFY TTL d + INTERVAL 1 DAY;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Creating a table, where the rows are expired after one month. The expired rows where dates are Mondays are deleted:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_with_where
+(
+    d DateTime,
+    a Int
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(d)
+ORDER BY d
+TTL d + INTERVAL 1 MONTH DELETE WHERE toDayOfWeek(d) = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="creating-a-table-where-expired-rows-are-recompressed">Creating a table, where expired rows are recompressed:<a aria-label="Direct link to Creating a table, where expired rows are recompressed:" class="hash-link" href="#creating-a-table-where-expired-rows-are-recompressed" title="Direct link to Creating a table, where expired rows are recompressed:">​</a></h4>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_for_recompression
+(
+    d DateTime,
+    key UInt64,
+    value String
+) ENGINE MergeTree()
+ORDER BY tuple()
+PARTITION BY key
+TTL d + INTERVAL 1 MONTH RECOMPRESS CODEC(ZSTD(17)), d + INTERVAL 1 YEAR RECOMPRESS CODEC(LZ4HC(10))
+SETTINGS min_rows_for_wide_part = 0, min_bytes_for_wide_part = 0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Creating a table, where expired rows are aggregated. In result rows <code>x</code> contains the maximum value across the grouped rows, <code>y</code> — the minimum value, and <code>d</code> — any occasional value from grouped rows.</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_for_aggregation
+(
+    d DateTime,
+    k1 Int,
+    k2 Int,
+    x Int,
+    y Int
+)
+ENGINE = MergeTree
+ORDER BY (k1, k2)
+TTL d + INTERVAL 1 MONTH GROUP BY k1, k2 SET x = max(x), y = min(y);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mergetree-removing-expired-data">Removing expired data<a aria-label="Direct link to Removing expired data" class="hash-link" href="#mergetree-removing-expired-data" title="Direct link to Removing expired data">​</a></h3>
+<p>Data with an expired <code>TTL</code> is removed when ClickHouse merges data parts.</p>
+<p>When ClickHouse detects that data is expired, it performs an off-schedule merge. To control the frequency of such merges, you can set <code>merge_with_ttl_timeout</code>. If the value is too low, it will perform many off-schedule merges that may consume a lot of resources.</p>
+<p>If you perform the <code>SELECT</code> query between merges, you may get expired data. To avoid it, use the <a href="/docs/sql-reference/statements/optimize">OPTIMIZE</a> query before <code>SELECT</code>.</p>
+<p><strong>See Also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/merge-tree-settings#ttl_only_drop_parts">ttl_only_drop_parts</a> setting</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="disk-types">Disk types<a aria-label="Direct link to Disk types" class="hash-link" href="#disk-types" title="Direct link to Disk types">​</a></h2>
+<p>In addition to local block devices, ClickHouse supports these storage types:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#table_engine-mergetree-s3"><code>s3</code> for S3 and MinIO</a></li>
+<li class="custom-li"><a href="/docs/integrations/gcs#creating-a-disk"><code>gcs</code> for GCS</a></li>
+<li class="custom-li"><a href="/docs/operations/storing-data#azure-blob-storage"><code>blob_storage_disk</code> for Azure Blob Storage</a></li>
+<li class="custom-li"><a href="/docs/engines/table-engines/integrations/hdfs"><code>hdfs</code> for HDFS</a></li>
+<li class="custom-li"><a href="/docs/operations/storing-data#web-storage"><code>web</code> for read-only from web</a></li>
+<li class="custom-li"><a href="/docs/operations/storing-data#using-local-cache"><code>cache</code> for local caching</a></li>
+<li class="custom-li"><a href="/docs/operations/backup/disk"><code>s3_plain</code> for backups to S3</a></li>
+<li class="custom-li"><a href="/docs/operations/storing-data#s3-plain-rewritable-storage"><code>s3_plain_rewritable</code> for immutable, non-replicated tables in S3</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-multiple-volumes">Using multiple block devices for data storage<a aria-label="Direct link to Using multiple block devices for data storage" class="hash-link" href="#table_engine-mergetree-multiple-volumes" title="Direct link to Using multiple block devices for data storage">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="introduction">Introduction<a aria-label="Direct link to Introduction" class="hash-link" href="#introduction" title="Direct link to Introduction">​</a></h3>
+<p><code>MergeTree</code> family table engines can store data on multiple block devices. For example, it can be useful when the data of a certain table are implicitly split into "hot" and "cold". The most recent data is regularly requested but requires only a small amount of space. On the contrary, the fat-tailed historical data is requested rarely. If several disks are available, the "hot" data may be located on fast disks (for example, NVMe SSDs or in memory), while the "cold" data - on relatively slow ones (for example, HDD).</p>
+<p>This applies to all disk types, including S3 and other object storage disks. For example, you can spread data across multiple S3 buckets within a single volume, or create tiered policies that move data from local disks to S3. See <a href="#s3-multiple-volumes">Using S3 disks with multiple volumes</a> for details.</p>
+<p>Data part is the minimum movable unit for <code>MergeTree</code>-engine tables. The data belonging to one part are stored on one disk. Data parts can be moved between disks in the background (according to user settings) as well as by means of the <a href="/docs/sql-reference/statements/alter/partition">ALTER</a> queries.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="terms">Terms<a aria-label="Direct link to Terms" class="hash-link" href="#terms" title="Direct link to Terms">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">Disk — Block device mounted to the filesystem.</li>
+<li class="custom-li">Default disk — Disk that stores the path specified in the <a href="/docs/operations/server-configuration-parameters/settings#path">path</a> server setting.</li>
+<li class="custom-li">Volume — Ordered set of equal disks (similar to <a href="https://en.wikipedia.org/wiki/Non-RAID_drive_architectures" rel="noopener noreferrer" target="_blank">JBOD</a>).</li>
+<li class="custom-li">Storage policy — Set of volumes and the rules for moving data between them.</li>
+</ul>
+<p>The names given to the described entities can be found in the system tables, <a href="/docs/operations/system-tables/storage_policies">system.storage_policies</a> and <a href="/docs/operations/system-tables/disks">system.disks</a>. To apply one of the configured storage policies for a table, use the <code>storage_policy</code> setting of <code>MergeTree</code>-engine family tables.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-multiple-volumes_configure">Configuration<a aria-label="Direct link to Configuration" class="hash-link" href="#table_engine-mergetree-multiple-volumes_configure" title="Direct link to Configuration">​</a></h3>
+<p>Disks, volumes and storage policies should be declared inside the <code>&lt;storage_configuration&gt;</code> tag either in a file in the <code>config.d</code> directory.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>Disks can also be declared in the <code>SETTINGS</code> section of a query.  This is useful
+for ad-hoc analysis to temporarily attach a disk that is, for example, hosted at a URL.
+See <a href="/docs/operations/storing-data#dynamic-configuration">dynamic storage</a> for more details.</p></div></div>
+<p>Configuration structure:</p>
+<div class="wrapper_EBtA" style="height:358.15000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    &lt;disks&gt;
+        &lt;disk_name_1&gt; &lt;!-- disk name --&gt;
+            &lt;path&gt;/mnt/fast_ssd/clickhouse/&lt;/path&gt;
+        &lt;/disk_name_1&gt;
+        &lt;disk_name_2&gt;
+            &lt;path&gt;/mnt/hdd1/clickhouse/&lt;/path&gt;
+            &lt;keep_free_space_bytes&gt;10485760&lt;/keep_free_space_bytes&gt;
+        &lt;/disk_name_2&gt;
+        &lt;disk_name_3&gt;
+            &lt;path&gt;/mnt/hdd2/clickhouse/&lt;/path&gt;
+            &lt;keep_free_space_bytes&gt;10485760&lt;/keep_free_space_bytes&gt;
+        &lt;/disk_name_3&gt;
+
+        ...
+    &lt;/disks&gt;
+
+    ...
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Tags:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>&lt;disk_name_N&gt;</code> — Disk name. Names must be different for all disks.</li>
+<li class="custom-li"><code>path</code> — path under which a server will store data (<code>data</code> and <code>shadow</code> folders), should be terminated with '/'.</li>
+<li class="custom-li"><code>keep_free_space_bytes</code> — the amount of free disk space to be reserved.</li>
+</ul>
+<p>The order of the disk definition is not important.</p>
+<p>Storage policies configuration markup:</p>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    ...
+    &lt;policies&gt;
+        &lt;policy_name_1&gt;
+            &lt;volumes&gt;
+                &lt;volume_name_1&gt;
+                    &lt;disk&gt;disk_name_from_disks_configuration&lt;/disk&gt;
+                    &lt;max_data_part_size_bytes&gt;1073741824&lt;/max_data_part_size_bytes&gt;
+                    &lt;load_balancing&gt;round_robin&lt;/load_balancing&gt;
+                &lt;/volume_name_1&gt;
+                &lt;volume_name_2&gt;
+                    &lt;!-- configuration --&gt;
+                &lt;/volume_name_2&gt;
+                &lt;!-- more volumes --&gt;
+            &lt;/volumes&gt;
+            &lt;move_factor&gt;0.2&lt;/move_factor&gt;
+        &lt;/policy_name_1&gt;
+        &lt;policy_name_2&gt;
+            &lt;!-- configuration --&gt;
+        &lt;/policy_name_2&gt;
+
+        &lt;!-- more policies --&gt;
+    &lt;/policies&gt;
+    ...
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Tags:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>policy_name_N</code> — Policy name. Policy names must be unique.</li>
+<li class="custom-li"><code>volume_name_N</code> — Volume name. Volume names must be unique.</li>
+<li class="custom-li"><code>disk</code> — a disk within a volume.</li>
+<li class="custom-li"><code>max_data_part_size_bytes</code> — the maximum size of a part that can be stored on any of the volume's disks. If the a size of a merged part estimated to be bigger than <code>max_data_part_size_bytes</code> then this part will be written to a next volume. Basically this feature allows to keep new/small parts on a hot (SSD) volume and move them to a cold (HDD) volume when they reach large size. Do not use this setting if your policy has only one volume.</li>
+<li class="custom-li"><code>move_factor</code> — when the amount of available space gets lower than this factor, data automatically starts to move on the next volume if any (by default, 0.1). ClickHouse sorts existing parts by size from largest to smallest (in descending order) and selects parts with the total size that is sufficient to meet the <code>move_factor</code> condition. If the total size of all parts is insufficient, all parts will be moved.</li>
+<li class="custom-li"><code>perform_ttl_move_on_insert</code> — Disables TTL move on data part INSERT. By default (if enabled) if we insert a data part that already expired by the TTL move rule it immediately goes to a volume/disk declared in move rule. This can significantly slowdown insert in case if destination volume/disk is slow (e.g. S3). If disabled then already expired data part is written into a default volume and then right after moved to TTL volume.</li>
+<li class="custom-li"><code>load_balancing</code> - Policy for disk balancing, <code>round_robin</code> or <code>least_used</code>.</li>
+<li class="custom-li"><code>least_used_ttl_ms</code> - Configure timeout (in milliseconds) for the updating available space on all disks (<code>0</code> - update always, <code>-1</code> - never update, default is <code>60000</code>). Note, if the disk can be used by ClickHouse only and is not subject to a online filesystem resize/shrink you can use <code>-1</code>, in all other cases it is not recommended, since eventually it will lead to incorrect space distribution.</li>
+<li class="custom-li"><code>prefer_not_to_merge</code> — You should not use this setting. Disables merging of data parts on this volume (this is harmful and leads to performance degradation). When this setting is enabled (don't do it), merging data on this volume is not allowed (which is bad). This allows (but you don't need it) controlling (if you want to control something, you're making a mistake) how ClickHouse works with slow disks (but ClickHouse knows better, so please don't use this setting).</li>
+<li class="custom-li"><code>volume_priority</code> — Defines the priority (order) in which volumes are filled. Lower value means higher priority. The parameter values should be natural numbers and collectively cover the range from 1 to N (lowest priority given) without skipping any numbers.<!-- -->
+<ul class="custom-ul">
+<li class="custom-li">If <em>all</em> volumes are tagged, they are prioritized in given order.</li>
+<li class="custom-li">If only <em>some</em> volumes are tagged, those without the tag have the lowest priority, and they are prioritized in the order they are defined in config.</li>
+<li class="custom-li">If <em>no</em> volumes are tagged, their priority is set correspondingly to their order they are declared in configuration.</li>
+<li class="custom-li">Two volumes cannot have the same priority value.</li>
+</ul>
+</li>
+</ul>
+<p>Configuration examples:</p>
+<div class="wrapper_EBtA" style="height:716.3000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    ...
+    &lt;policies&gt;
+        &lt;hdd_in_order&gt; &lt;!-- policy name --&gt;
+            &lt;volumes&gt;
+                &lt;single&gt; &lt;!-- volume name --&gt;
+                    &lt;disk&gt;disk1&lt;/disk&gt;
+                    &lt;disk&gt;disk2&lt;/disk&gt;
+                &lt;/single&gt;
+            &lt;/volumes&gt;
+        &lt;/hdd_in_order&gt;
+
+        &lt;moving_from_ssd_to_hdd&gt;
+            &lt;volumes&gt;
+                &lt;hot&gt;
+                    &lt;disk&gt;fast_ssd&lt;/disk&gt;
+                    &lt;max_data_part_size_bytes&gt;1073741824&lt;/max_data_part_size_bytes&gt;
+                &lt;/hot&gt;
+                &lt;cold&gt;
+                    &lt;disk&gt;disk1&lt;/disk&gt;
+                &lt;/cold&gt;
+            &lt;/volumes&gt;
+            &lt;move_factor&gt;0.2&lt;/move_factor&gt;
+        &lt;/moving_from_ssd_to_hdd&gt;
+
+        &lt;small_jbod_with_external_no_merges&gt;
+            &lt;volumes&gt;
+                &lt;main&gt;
+                    &lt;disk&gt;jbod1&lt;/disk&gt;
+                &lt;/main&gt;
+                &lt;external&gt;
+                    &lt;disk&gt;external&lt;/disk&gt;
+                &lt;/external&gt;
+            &lt;/volumes&gt;
+        &lt;/small_jbod_with_external_no_merges&gt;
+    &lt;/policies&gt;
+    ...
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In given example, the <code>hdd_in_order</code> policy implements the <a href="https://en.wikipedia.org/wiki/Round-robin_scheduling" rel="noopener noreferrer" target="_blank">round-robin</a> approach. Thus this policy defines only one volume (<code>single</code>), the data parts are stored on all its disks in circular order. Such policy can be quite useful if there are several similar disks are mounted to the system, but RAID is not configured. Keep in mind that each individual disk drive is not reliable and you might want to compensate it with replication factor of 3 or more.</p>
+<p>If there are different kinds of disks available in the system, <code>moving_from_ssd_to_hdd</code> policy can be used instead. The volume <code>hot</code> consists of an SSD disk (<code>fast_ssd</code>), and the maximum size of a part that can be stored on this volume is 1GB. All the parts with the size larger than 1GB will be stored directly on the <code>cold</code> volume, which contains an HDD disk <code>disk1</code>.
+Also, once the disk <code>fast_ssd</code> gets filled by more than 80%, data will be transferred to the <code>disk1</code> by a background process.</p>
+<p>The order of volume enumeration within a storage policy is important in case at least one of the volumes listed has no explicit <code>volume_priority</code> parameter.
+Once a volume is overfilled, data are moved to the next one. The order of disk enumeration is important as well because data are stored on them in turns.</p>
+<p>When creating a table, one can apply one of the configured storage policies to it:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_with_non_default_policy (
+    EventDate Date,
+    OrderID UInt64,
+    BannerID UInt64,
+    SearchPhrase String
+) ENGINE = MergeTree
+ORDER BY (OrderID, BannerID)
+PARTITION BY toYYYYMM(EventDate)
+SETTINGS storage_policy = 'moving_from_ssd_to_hdd'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>default</code> storage policy implies using only one volume, which consists of only one disk given in <code>&lt;path&gt;</code>.
+You could change storage policy after table creation with [ALTER TABLE ... MODIFY SETTING] query, new policy should include all old disks and volumes with same names.</p>
+<p>The number of threads performing background moves of data parts can be changed by <a href="/docs/operations/server-configuration-parameters/settings#background_move_pool_size">background_move_pool_size</a> setting.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="details">Details<a aria-label="Direct link to Details" class="hash-link" href="#details" title="Direct link to Details">​</a></h3>
+<p>In the case of <code>MergeTree</code> tables, data is getting to disk in different ways:</p>
+<ul class="custom-ul">
+<li class="custom-li">As a result of an insert (<code>INSERT</code> query).</li>
+<li class="custom-li">During background merges and <a href="/docs/sql-reference/statements/alter#mutations">mutations</a>.</li>
+<li class="custom-li">When downloading from another replica.</li>
+<li class="custom-li">As a result of partition freezing <a href="/docs/sql-reference/statements/alter/partition#freeze-partition">ALTER TABLE ... FREEZE PARTITION</a>.</li>
+</ul>
+<p>In all these cases except for mutations and partition freezing, a part is stored on a volume and a disk according to the given storage policy:</p>
+<ol class="custom-ol">
+<li class="custom-li">The first volume (in the order of definition) that has enough disk space for storing a part (<code>unreserved_space &gt; current_part_size</code>) and allows for storing parts of a given size (<code>max_data_part_size_bytes &gt; current_part_size</code>) is chosen.</li>
+<li class="custom-li">Within this volume, that disk is chosen that follows the one, which was used for storing the previous chunk of data, and that has free space more than the part size (<code>unreserved_space - keep_free_space_bytes &gt; current_part_size</code>).</li>
+</ol>
+<p>Under the hood, mutations and partition freezing make use of <a href="https://en.wikipedia.org/wiki/Hard_link" rel="noopener noreferrer" target="_blank">hard links</a>. Hard links between different disks are not supported, therefore in such cases the resulting parts are stored on the same disks as the initial ones.</p>
+<p>In the background, parts are moved between volumes on the basis of the amount of free space (<code>move_factor</code> parameter) according to the order the volumes are declared in the configuration file.
+Data is never transferred from the last one and into the first one. One may use system tables <a href="/docs/operations/system-tables/part_log">system.part_log</a> (field <code>type = MOVE_PART</code>) and <a href="/docs/operations/system-tables/parts">system.parts</a> (fields <code>path</code> and <code>disk</code>) to monitor background moves. Also, the detailed information can be found in server logs.</p>
+<p>User can force moving a part or a partition from one volume to another using the query <a href="/docs/sql-reference/statements/alter/partition">ALTER TABLE ... MOVE PART|PARTITION ... TO VOLUME|DISK ...</a>, all the restrictions for background operations are taken into account. The query initiates a move on its own and does not wait for background operations to be completed. User will get an error message if not enough free space is available or if any of the required conditions are not met.</p>
+<p>Moving data does not interfere with data replication. Therefore, different storage policies can be specified for the same table on different replicas.</p>
+<p>After the completion of background merges and mutations, old parts are removed only after a certain amount of time (<code>old_parts_lifetime</code>).
+During this time, they are not moved to other volumes or disks. Therefore, until the parts are finally removed, they are still taken into account for evaluation of the occupied disk space.</p>
+<p>User can assign new big parts to different disks of a <a href="https://en.wikipedia.org/wiki/Non-RAID_drive_architectures" rel="noopener noreferrer" target="_blank">JBOD</a> volume in a balanced way using the <a href="/docs/operations/settings/merge-tree-settings#min_bytes_to_rebalance_partition_over_jbod">min_bytes_to_rebalance_partition_over_jbod</a> setting.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-mergetree-s3">Using external storage for data storage<a aria-label="Direct link to Using external storage for data storage" class="hash-link" href="#table_engine-mergetree-s3" title="Direct link to Using external storage for data storage">​</a></h2>
+<p><a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> family table engines can store data to <code>S3</code>, <code>AzureBlobStorage</code>, <code>HDFS</code> using a disk with types <code>s3</code>, <code>azure_blob_storage</code>, <code>hdfs</code> accordingly. See <a href="/docs/operations/storing-data#configuring-external-storage">configuring external storage options</a> for more details.</p>
+<p>Example for <a href="https://aws.amazon.com/s3/" rel="noopener noreferrer" target="_blank">S3</a> as external storage using a disk with type <code>s3</code>.</p>
+<p>Configuration markup:</p>
+<div class="wrapper_EBtA" style="height:678.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    ...
+    &lt;disks&gt;
+        &lt;s3&gt;
+            &lt;type&gt;s3&lt;/type&gt;
+            &lt;support_batch_delete&gt;true&lt;/support_batch_delete&gt;
+            &lt;endpoint&gt;https://clickhouse-public-datasets.s3.amazonaws.com/my-bucket/root-path/&lt;/endpoint&gt;
+            &lt;access_key_id&gt;your_access_key_id&lt;/access_key_id&gt;
+            &lt;secret_access_key&gt;your_secret_access_key&lt;/secret_access_key&gt;
+            &lt;region&gt;&lt;/region&gt;
+            &lt;header&gt;Authorization: Bearer SOME-TOKEN&lt;/header&gt;
+            &lt;server_side_encryption_customer_key_base64&gt;your_base64_encoded_customer_key&lt;/server_side_encryption_customer_key_base64&gt;
+            &lt;server_side_encryption_kms_key_id&gt;your_kms_key_id&lt;/server_side_encryption_kms_key_id&gt;
+            &lt;server_side_encryption_kms_encryption_context&gt;your_kms_encryption_context&lt;/server_side_encryption_kms_encryption_context&gt;
+            &lt;server_side_encryption_kms_bucket_key_enabled&gt;true&lt;/server_side_encryption_kms_bucket_key_enabled&gt;
+            &lt;proxy&gt;
+                &lt;uri&gt;http://proxy1&lt;/uri&gt;
+                &lt;uri&gt;http://proxy2&lt;/uri&gt;
+            &lt;/proxy&gt;
+            &lt;connect_timeout_ms&gt;10000&lt;/connect_timeout_ms&gt;
+            &lt;request_timeout_ms&gt;5000&lt;/request_timeout_ms&gt;
+            &lt;retry_attempts&gt;10&lt;/retry_attempts&gt;
+            &lt;single_read_retries&gt;4&lt;/single_read_retries&gt;
+            &lt;min_bytes_for_seek&gt;1000&lt;/min_bytes_for_seek&gt;
+            &lt;metadata_path&gt;/var/lib/clickhouse/disks/s3/&lt;/metadata_path&gt;
+            &lt;skip_access_check&gt;false&lt;/skip_access_check&gt;
+        &lt;/s3&gt;
+        &lt;s3_cache&gt;
+            &lt;type&gt;cache&lt;/type&gt;
+            &lt;disk&gt;s3&lt;/disk&gt;
+            &lt;path&gt;/var/lib/clickhouse/disks/s3_cache/&lt;/path&gt;
+            &lt;max_size&gt;10Gi&lt;/max_size&gt;
+        &lt;/s3_cache&gt;
+    &lt;/disks&gt;
+    ...
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Also see <a href="/docs/operations/storing-data#configuring-external-storage">configuring external storage options</a>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="s3-multiple-volumes">Using S3 disks with multiple volumes<a aria-label="Direct link to Using S3 disks with multiple volumes" class="hash-link" href="#s3-multiple-volumes" title="Direct link to Using S3 disks with multiple volumes">​</a></h3>
+<p>S3 (and other object storage) disks can be used in multi-disk and multi-volume storage policies the same way as local disks. This allows you to spread data across multiple S3 buckets within a single volume (JBOD-style), or set up tiered storage policies with S3 volumes.</p>
+<p>For example, to distribute data across two S3 buckets in a round-robin fashion:</p>
+<div class="wrapper_EBtA" style="height:490.1px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    &lt;disks&gt;
+        &lt;s3_bucket1&gt;
+            &lt;type&gt;s3&lt;/type&gt;
+            &lt;endpoint&gt;https://s3.amazonaws.com/bucket-1/data/&lt;/endpoint&gt;
+            &lt;access_key_id&gt;your_access_key_id&lt;/access_key_id&gt;
+            &lt;secret_access_key&gt;your_secret_access_key&lt;/secret_access_key&gt;
+        &lt;/s3_bucket1&gt;
+        &lt;s3_bucket2&gt;
+            &lt;type&gt;s3&lt;/type&gt;
+            &lt;endpoint&gt;https://s3.amazonaws.com/bucket-2/data/&lt;/endpoint&gt;
+            &lt;access_key_id&gt;your_access_key_id&lt;/access_key_id&gt;
+            &lt;secret_access_key&gt;your_secret_access_key&lt;/secret_access_key&gt;
+        &lt;/s3_bucket2&gt;
+    &lt;/disks&gt;
+    &lt;policies&gt;
+        &lt;s3_multi_bucket&gt;
+            &lt;volumes&gt;
+                &lt;main&gt;
+                    &lt;disk&gt;s3_bucket1&lt;/disk&gt;
+                    &lt;disk&gt;s3_bucket2&lt;/disk&gt;
+                &lt;/main&gt;
+            &lt;/volumes&gt;
+        &lt;/s3_multi_bucket&gt;
+    &lt;/policies&gt;
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can also combine local and S3 volumes in a tiered policy, for example moving data from a local SSD to S3 as it ages:</p>
+<div class="wrapper_EBtA" style="height:508.95000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;storage_configuration&gt;
+    &lt;disks&gt;
+        &lt;local_ssd&gt;
+            &lt;path&gt;/mnt/fast_ssd/clickhouse/&lt;/path&gt;
+        &lt;/local_ssd&gt;
+        &lt;s3_cold&gt;
+            &lt;type&gt;s3&lt;/type&gt;
+            &lt;endpoint&gt;https://s3.amazonaws.com/cold-storage/data/&lt;/endpoint&gt;
+            &lt;access_key_id&gt;your_access_key_id&lt;/access_key_id&gt;
+            &lt;secret_access_key&gt;your_secret_access_key&lt;/secret_access_key&gt;
+        &lt;/s3_cold&gt;
+    &lt;/disks&gt;
+    &lt;policies&gt;
+        &lt;local_to_s3&gt;
+            &lt;volumes&gt;
+                &lt;hot&gt;
+                    &lt;disk&gt;local_ssd&lt;/disk&gt;
+                    &lt;max_data_part_size_bytes&gt;1073741824&lt;/max_data_part_size_bytes&gt;
+                &lt;/hot&gt;
+                &lt;cold&gt;
+                    &lt;disk&gt;s3_cold&lt;/disk&gt;
+                &lt;/cold&gt;
+            &lt;/volumes&gt;
+            &lt;move_factor&gt;0.2&lt;/move_factor&gt;
+        &lt;/local_to_s3&gt;
+    &lt;/policies&gt;
+&lt;/storage_configuration&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>When using <code>use_environment_credentials</code> for S3 authentication, the environment credentials (<code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_SESSION_TOKEN</code>) are shared across all S3 disks. It is not possible to use different environment credentials for different disks. If you need different credentials for each S3 disk, use explicit <code>access_key_id</code> and <code>secret_access_key</code> settings per disk instead.</p></div></div>
+<p>It is possible to set up non-replicated MergeTree tables with a one-writer, many-readers scenario on shared storage. This is provided by the automatic refresh of the parts list, which can be set up on readers. Note that this requires shared filesystem metadata across replicas (or <code>table_disk = true</code> with a table-local disk). See <a href="/docs/operations/storing-data#refresh-parts-interval-and-table-disk">refresh_parts_interval and table_disk</a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">cache configuration</div><p>ClickHouse versions 22.3 through 22.7 use a different cache configuration, see <a href="/docs/operations/storing-data#using-local-cache">using local cache</a> if you are using one of those versions.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="virtual-columns">Virtual columns<a aria-label="Direct link to Virtual columns" class="hash-link" href="#virtual-columns" title="Direct link to Virtual columns">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><code>_part</code> — Name of a part.</li>
+<li class="custom-li"><code>_part_index</code> — Sequential index of the part in the query result.</li>
+<li class="custom-li"><code>_part_starting_offset</code> — Cumulative starting row of the part in the query result.</li>
+<li class="custom-li"><code>_part_offset</code> — Number of row in the part.</li>
+<li class="custom-li"><code>_part_granule_offset</code> — Number of granule in the part.</li>
+<li class="custom-li"><code>_partition_id</code> — Name of a partition.</li>
+<li class="custom-li"><code>_part_uuid</code> — Unique part identifier (if enabled MergeTree setting <code>assign_part_uuids</code>).</li>
+<li class="custom-li"><code>_part_data_version</code> — Data version of part (either min block number or mutation version).</li>
+<li class="custom-li"><code>_partition_value</code> — Values (a tuple) of a <code>partition by</code> expression.</li>
+<li class="custom-li"><code>_sample_factor</code> — Sample factor (from the query).</li>
+<li class="custom-li"><code>_block_number</code> — Original number of block for row that was assigned at insert, persisted on merges when setting <code>enable_block_number_column</code> is enabled.</li>
+<li class="custom-li"><code>_block_offset</code> — Original number of row in block that was assigned at insert, persisted on merges when setting <code>enable_block_offset_column</code> is enabled.</li>
+<li class="custom-li"><code>_disk_name</code> — Disk name used for the storage.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="column-statistics">Column statistics<a aria-label="Direct link to Column statistics" class="hash-link" href="#column-statistics" title="Direct link to Column statistics">​</a></h2>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<p>The statistics declaration is in the columns section of the <code>CREATE</code> query for tables from the <code>*MergeTree*</code> Family:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab
+(
+    a Int64 STATISTICS(TDigest, Uniq),
+    b Float64
+)
+ENGINE = MergeTree
+ORDER BY a
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can also manipulate statistics with <code>ALTER</code> statements:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab ADD STATISTICS b TYPE TDigest, Uniq;
+ALTER TABLE tab DROP STATISTICS a;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>These lightweight statistics aggregate information about distribution of values in columns. Statistics are stored in every part and updated when every insert comes.
+They can be used for prewhere optimization only if we enable <code>set use_statistics = 1</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="part-pruning-with-statistics">Part Pruning with Statistics<a aria-label="Direct link to Part Pruning with Statistics" class="hash-link" href="#part-pruning-with-statistics" title="Direct link to Part Pruning with Statistics">​</a></h4>
+<p>When <code>use_statistics_for_part_pruning</code> is enabled, statistics can be used for part pruning.
+Currently, only <code>MinMax</code> statistics support part pruning. When MinMax statistics are defined on a column, ClickHouse tracks the minimum and maximum values for that column in each part.
+Part pruning allows to skip reading entire data parts when the query filter condition cannot match any rows in that part.</p>
+<p><strong>Example:</strong></p>
+<div class="wrapper_EBtA" style="height:433.55px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a table with MinMax statistics on the 'value' column
+CREATE TABLE test_stats
+(
+    id UInt64,
+    value Int64 STATISTICS(MinMax)
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+SYSTEM STOP MERGES test_stats;
+
+-- Insert data in separate inserts to create multiple parts
+INSERT INTO test_stats SELECT number, number FROM numbers(1000); -- Part 1: value range [0, 999]
+INSERT INTO test_stats SELECT number, number + 10000 FROM numbers(1000); -- Part 2: value range [10000, 10999]
+
+SET use_statistics_for_part_pruning = 1;
+
+-- This query will skip Part 1 entirely because its max value (999) &lt; 5000
+SELECT count() FROM test_stats WHERE value &gt; 5000;
+
+-- Use EXPLAIN to see the pruning effect
+EXPLAIN indexes = 1 SELECT count() FROM test_stats WHERE value &gt; 5000;
+-- The output will show "Parts: 1/2" indicating one part was pruned
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="available-types-of-column-statistics">Available types of column statistics<a aria-label="Direct link to Available types of column statistics" class="hash-link" href="#available-types-of-column-statistics" title="Direct link to Available types of column statistics">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><code>MinMax</code></p>
+<p>The minimum and maximum column value which allows to estimate the selectivity of range filters on numeric columns.</p>
+<p>Syntax: <code>minmax</code></p>
+</li>
+<li class="custom-li">
+<p><code>TDigest</code></p>
+<p><a href="https://github.com/tdunning/t-digest" rel="noopener noreferrer" target="_blank">TDigest</a> sketches which allow to compute approximate percentiles (e.g. the 90th percentile) for numeric columns.</p>
+<p>Syntax: <code>tdigest</code></p>
+</li>
+<li class="custom-li">
+<p><code>Uniq</code></p>
+<p><a href="https://en.wikipedia.org/wiki/HyperLogLog" rel="noopener noreferrer" target="_blank">HyperLogLog</a> sketches which provide an estimation how many distinct values a column contains.</p>
+<p>Syntax: <code>uniq</code></p>
+</li>
+<li class="custom-li">
+<p><code>CountMin</code></p>
+<p><a href="https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch" rel="noopener noreferrer" target="_blank">CountMin</a> sketches which provide an approximate count of the frequency of each value in a column.</p>
+<p>Syntax <code>countmin</code></p>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="supported-data-types">Supported data types<a aria-label="Direct link to Supported data types" class="hash-link" href="#supported-data-types" title="Direct link to Supported data types">​</a></h3>
+<table><thead><tr><th><th>(U)Int*, Float*, Decimal(<em>), Date</em>, Boolean, Enum*<th>String or FixedString<tbody><tr><td>CountMin<td>✔<td>✔<tr><td>MinMax<td>✔<td>✗<tr><td>TDigest<td>✔<td>✗<tr><td>Uniq<td>✔<td>✔</td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="supported-operations">Supported operations<a aria-label="Direct link to Supported operations" class="hash-link" href="#supported-operations" title="Direct link to Supported operations">​</a></h3>
+<table><thead><tr><th><th>Equality filters (==)<th>Range filters (<code>&gt;, &gt;=, &lt;, &lt;=</code>)<tbody><tr><td>CountMin<td>✔<td>✗<tr><td>MinMax<td>✗<td>✔<tr><td>TDigest<td>✗<td>✔<tr><td>Uniq<td>✔<td>✗</td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="column-level-settings">Column-level settings<a aria-label="Direct link to Column-level settings" class="hash-link" href="#column-level-settings" title="Direct link to Column-level settings">​</a></h2>
+<p>Certain MergeTree settings can be overridden at column level:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>max_compress_block_size</code> — Maximum size of blocks of uncompressed data before compressing for writing to a table.</li>
+<li class="custom-li"><code>min_compress_block_size</code> — Minimum size of blocks of uncompressed data required for compression when writing the next mark.</li>
+</ul>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab
+(
+    id Int64,
+    document String SETTINGS (min_compress_block_size = 16777216, max_compress_block_size = 16777216)
+)
+ENGINE = MergeTree
+ORDER BY id
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Column-level settings can be modified or removed using <a href="/docs/sql-reference/statements/alter/column">ALTER MODIFY COLUMN</a>, for example:</p>
+<ul class="custom-ul">
+<li class="custom-li">Remove <code>SETTINGS</code> from column declaration:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab MODIFY COLUMN document REMOVE SETTINGS;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Modify a setting:</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab MODIFY COLUMN document MODIFY SETTING min_compress_block_size = 8192;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Reset one or more settings, also removes the setting declaration in the column expression of the table's CREATE query.</li>
+</ul>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE tab MODIFY COLUMN document RESET SETTING min_compress_block_size;
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">MergeTree Family</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/replication"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Replicated*</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-creating-a-table">Creating tables</a><ul><li><a class="table-of-contents__link toc-highlight" href="#mergetree-query-clauses">Query clauses</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#mergetree-data-storage">Data storage</a><li><a class="table-of-contents__link toc-highlight" href="#primary-keys-and-indexes-in-queries">Primary Keys and Indexes in Queries</a><ul><li><a class="table-of-contents__link toc-highlight" href="#selecting-a-primary-key">Selecting a primary key</a><li><a class="table-of-contents__link toc-highlight" href="#choosing-a-primary-key-that-differs-from-the-sorting-key">Choosing a primary key that differs from the sorting key</a><li><a class="table-of-contents__link toc-highlight" href="#use-of-indexes-and-partitions-in-queries">Use of indexes and partitions in queries</a><li><a class="table-of-contents__link toc-highlight" href="#use-of-index-for-deterministic-expressions-in-primary-keys">Use of index for deterministic expressions in primary keys</a><li><a class="table-of-contents__link toc-highlight" href="#use-of-index-for-partially-monotonic-primary-keys">Use of index for partially-monotonic primary keys</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-data_skipping-indexes">Data skipping indexes</a><li><a class="table-of-contents__link toc-highlight" href="#skip-index-types">Skip Index Types</a><li><a class="table-of-contents__link toc-highlight" href="#text">Text index</a><li><a class="table-of-contents__link toc-highlight" href="#functions-support">Functions support</a></li></li></li></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#projections">Projections</a><ul><li><a class="table-of-contents__link toc-highlight" href="#projection-query">Projection query</a><li><a class="table-of-contents__link toc-highlight" href="#projection-index">Projection indexes</a><li><a class="table-of-contents__link toc-highlight" href="#projection-storage">Projection storage</a><li><a class="table-of-contents__link toc-highlight" href="#projection-query-analysis">Query analysis</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#concurrent-data-access">Concurrent data access</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-ttl">TTL for columns and tables</a><ul><li><a class="table-of-contents__link toc-highlight" href="#mergetree-column-ttl">Column TTL</a><li><a class="table-of-contents__link toc-highlight" href="#mergetree-table-ttl">Table TTL</a><li><a class="table-of-contents__link toc-highlight" href="#mergetree-removing-expired-data">Removing expired data</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#disk-types">Disk types</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-multiple-volumes">Using multiple block devices for data storage</a><ul><li><a class="table-of-contents__link toc-highlight" href="#introduction">Introduction</a><li><a class="table-of-contents__link toc-highlight" href="#terms">Terms</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-multiple-volumes_configure">Configuration</a><li><a class="table-of-contents__link toc-highlight" href="#details">Details</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#table_engine-mergetree-s3">Using external storage for data storage</a><ul><li><a class="table-of-contents__link toc-highlight" href="#s3-multiple-volumes">Using S3 disks with multiple volumes</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#virtual-columns">Virtual columns</a><li><a class="table-of-contents__link toc-highlight" href="#column-statistics">Column statistics</a><ul><li><a class="table-of-contents__link toc-highlight" href="#available-types-of-column-statistics">Available types of column statistics</a><li><a class="table-of-contents__link toc-highlight" href="#supported-data-types">Supported data types</a><li><a class="table-of-contents__link toc-highlight" href="#supported-operations">Supported operations</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#column-level-settings">Column-level settings</a></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

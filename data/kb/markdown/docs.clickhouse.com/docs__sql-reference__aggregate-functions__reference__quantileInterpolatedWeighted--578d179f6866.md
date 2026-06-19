@@ -1,0 +1,88 @@
+# quantileInterpolatedWeighted \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- quantileInterpolatedWeighted
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/quantileInterpolatedWeighted.md)# quantileInterpolatedWeighted
+
+## quantileInterpolatedWeighted[​](#quantileInterpolatedWeighted "Direct link to quantileInterpolatedWeighted")
+
+
+Introduced in: v23\.1\.0
+
+
+Computes [quantile](https://en.wikipedia.org/wiki/Quantile) of a numeric data sequence using linear interpolation, taking into account the weight of each element.
+
+
+To get the interpolated value, all the passed values are combined into an array, which are then sorted by their corresponding weights.
+Quantile interpolation is then performed using the [weighted percentile method](https://en.wikipedia.org/wiki/Percentile#The_weighted_percentile_method) by building a cumulative distribution based on weights and then a linear interpolation is performed using the weights and the values to compute the quantiles.
+
+
+When using multiple `quantile*` functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could).
+In this case, use the [`quantiles`](/docs/sql-reference/aggregate-functions/reference/quantiles#quantiles) function.
+
+
+**Syntax**
+
+
+
+```
+quantileInterpolatedWeighted(level)(expr, weight)
+
+```
+
+**Aliases**: `medianInterpolatedWeighted`
+
+
+**Parameters**
+
+
+- `level` — Optional. Level of quantile. Constant floating\-point number from 0 to 1\. We recommend using a `level` value in the range of `[0.01, 0.99]`. Default value: 0\.5\. At `level=0.5` the function calculates median. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Arguments**
+
+
+- `expr` — Expression over the column values resulting in numeric data types, Date or DateTime. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal) or [`Date`](/docs/sql-reference/data-types/date) or [`DateTime`](/docs/sql-reference/data-types/datetime)
+- `weight` — Column with weights of sequence members. Weight is a number of value occurrences. [`UInt*`](/docs/sql-reference/data-types/int-uint)
+
+
+**Returned value**
+
+
+Quantile of the specified level. [`Float64`](/docs/sql-reference/data-types/float) or [`Date`](/docs/sql-reference/data-types/date) or [`DateTime`](/docs/sql-reference/data-types/datetime)
+
+
+**Examples**
+
+
+**Computing interpolated weighted quantile**
+
+
+
+```
+CREATE TABLE t (
+    n Int32,
+    val Int32
+) ENGINE = Memory;
+
+INSERT INTO t VALUES (0, 3), (1, 2), (2, 1), (5, 4);
+
+SELECT quantileInterpolatedWeighted(n, val) FROM t;
+
+```
+
+
+```
+┌─quantileInterpolatedWeighted(n, val)─┐
+│                                    1 │
+└──────────────────────────────────────┘
+
+```
+
+**See Also**
+
+
+- [median](/docs/sql-reference/aggregate-functions/reference/median)
+- [quantiles](/docs/sql-reference/aggregate-functions/reference/quantiles)
+[PreviousquantileGK](/docs/sql-reference/aggregate-functions/reference/quantileGK)[NextquantilePrometheusHistogram](/docs/sql-reference/aggregate-functions/reference/quantilePrometheusHistogram)- [quantileInterpolatedWeighted](#quantileInterpolatedWeighted)
+Was this page helpful?

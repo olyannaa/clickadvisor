@@ -1,0 +1,36 @@
+# timeSeriesTags \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Table functions](/docs/sql-reference/table-functions)- timeSeriesTags
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/timeSeriesTags.md)# timeSeriesTags
+
+`timeSeriesTags(db_name.time_series_table)` \- Returns the [tags](/docs/engines/table-engines/special/time_series#tags-table) table
+used by table `db_name.time_series_table` whose table engine is the [TimeSeries](/docs/engines/table-engines/special/time_series) engine:
+
+
+
+```
+CREATE TABLE db_name.time_series_table ENGINE=TimeSeries TAGS tags_table
+
+```
+
+The function also works if the *tags* table is inner:
+
+
+
+```
+CREATE TABLE db_name.time_series_table ENGINE=TimeSeries TAGS INNER UUID '01234567-89ab-cdef-0123-456789abcdef'
+
+```
+
+The following queries are equivalent:
+
+
+
+```
+SELECT * FROM timeSeriesTags(db_name.time_series_table);
+SELECT * FROM timeSeriesTags('db_name.time_series_table');
+SELECT * FROM timeSeriesTags('db_name', 'time_series_table');
+
+```
+[PrevioustimeSeriesSelector](/docs/sql-reference/table-functions/timeSeriesSelector)[Nextzeros](/docs/sql-reference/table-functions/zeros)Was this page helpful?

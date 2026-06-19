@@ -1,0 +1,256 @@
+<h1>ClickHouse and PostgreSQL - a Match Made in Data Heaven - part 2</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">ClickHouse and PostgreSQL - a Match Made in Data Heaven - part 2</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="Dale McDirmid" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/dale-mcdiarmid">Dale McDiarmid</a></div><div class="text-sm text-neutral-300">Jan 26, 2023 · 10 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><blockquote>
+<p>While many of the approaches in this blog post remain valid, the content is from 2023. For the latest guidance on migrating data from Postgres to ClickHouse, we recommend exploring newer resources - primarily how ClickPipes, ClickHouse Cloud's managed data ingestion pipeline, now supports ingesting data into <a href="https://clickhouse.com/docs/integrations/clickpipes/postgres">ClickHouse from Postgres using CDC</a>.</p>
+</blockquote>
+<span class="relative mb-9 flex w-full justify-center"><img alt="clickhouse-postgresql.png" loading="lazy" src="/uploads/clickhouse_postgresql_1d123677ea.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="introduction" level="2">Introduction<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/migrating-data-between-clickhouse-postgres-part-2#introduction">#</a></span></h2>
+<p>This post continues our series on the Postgres integrations available in ClickHouse. In our <a href="https://clickhouse.com/blog/migrating-data-between-clickhouse-postgres">previous post</a>, we explored the Postgres function and table engine, demonstrating how users can move their transactional data to ClickHouse from Postgres for analytical workloads. In this post, we show how Postgres data can also be used in conjunction with the popular ClickHouse dictionary feature to accelerate queries - specifically joins. Finally, we show how the Postgres table engine can be used to push the results of analytical queries back to Postgres from ClickHouse. This "reverse ELT" process can be used for cases where users need to display summarized data in an end-user application but wish to offload the heavy computation of these statistics to ClickHouse.</p>
+<p>If you want to dive deeper into these examples and reproduce them, ClickHouse Cloud is a great starting point - <a href="https://clickhouse.cloud/signUp?loc=blog&amp;ajs_aid=b44bb600-929d-4c35-9f15-21edd1872094">spin up a cluster and get $300 of free credit</a>, load the data, let us deal with the infrastructure, and get querying!</p>
+<p>We continue to use only a development instance in ClickHouse Cloud for the examples in this post. For our Postgres instance, we also continue with <a href="https://supabase.com/">Supabase</a>, which offers a generous free tier sufficient for our examples. We assume the user has loaded the UK house price dataset into ClickHouse as a step from the <a href="https://clickhouse.com/blog/migrating-data-between-clickhouse-postgres">previous blog post</a>. This dataset can also be loaded without using Postgres using the steps outlined <a href="https://clickhouse.com/docs/en/getting-started/example-datasets/uk-price-paid/">here</a>.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="powering-dictionaries-with-postgres" level="2">Powering Dictionaries with Postgres<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/migrating-data-between-clickhouse-postgres-part-2#powering-dictionaries-with-postgres">#</a></span></h2>
+<p>As we've highlighted in <a href="https://clickhouse.com/blog/faster-queries-dictionaries-clickhouse">previous blog posts</a>, dictionaries can be used to accelerate ClickHouse queries, especially those involving joins. Consider the following example, where we aim to find the regions for the UK (based on ISO 3166-2) that have experienced the largest price change in the last 20 years. Note that ISO 3166-2 codes are different than postcodes and represent a larger regional area but, more importantly, are useful for visualizing this data in tools such as Superset.</p>
+<p>The JOIN requires us to use a list of postcode to regional code mappings, which can be downloaded and loaded into a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">codes</code> table, as shown below. With over 1 million rows, this takes about a minute to load into our Supabase free tier instance. Let's assume this data is only in Postgres for now, so we will join this in Postgres to answer the query.</p>
+<p>Note: our list of postcodes to iso 3166-2 codes were generated from the house price dataset and using a <a href="https://gist.github.com/gingerwizard/07044995d259c5f82582da4d6f9cf3f8">listing of regional codes</a> present in our play.clickhouse.com environment. This dataset, while sufficient for our needs, is therefore not complete or exhaustive, covering only postcodes present in the house price dataset. The query used to generate our file can be found <a href="https://gist.github.com/gingerwizard/b863d765e9df46994145982d7f7a6c82">here</a>.</p>
+<pre class="code-with-play"><div class="code">
+wget https://datasets-documentation.s3.amazonaws.com/uk-house-prices/postgres/uk_postcode_to_iso.sql
+
+psql -c "CREATE TABLE uk_postcode_to_iso
+(
+        id serial,
+    	postcode varchar(8) primary key,
+    	iso_code char(6)
+);"
+
+psql -c "CREATE INDEX ON uk_postcode_to_iso (iso_code);"
+psql &lt; uk_postcode_to_iso.sql
+
+psql -c "select count(*) from uk_postcode_to_iso;"
+  count
+---------
+ 1272836
+(1 row)
+
+psql -c "\timing" -c "SELECT iso_code, round(avg(((median_2022 - median_2002)/median_2002) * 100)) AS percent_change FROM (
+  SELECT postcode1 || ' ' || postcode2 AS postcode, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price) AS median_2002 FROM uk_price_paid WHERE extract(year from date) = '2002' GROUP BY postcode
+) med_2002 INNER JOIN (
+  SELECT postcode1 || ' ' || postcode2 AS postcode, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price) AS median_2022 FROM uk_price_paid WHERE extract(year from date) = '2022' GROUP BY postcode
+) med_2022 ON med_2002.postcode=med_2022.postcode INNER JOIN (
+	SELECT iso_code, postcode FROM uk_postcode_to_iso
+) postcode_to_iso ON med_2022.postcode=postcode_to_iso.postcode GROUP BY iso_code ORDER BY percent_change DESC LIMIT 10;"
+
+Timing is on.
+
+iso_code | percent_change
+----------+----------------
+ GB-TOF   |        	403
+ GB-KEC   |        	380
+ GB-MAN   |        	360
+ GB-SLF   |        	330
+ GB-BGW   |        	321
+ GB-HCK   |        	313
+ GB-MTY   |        	306
+ GB-AGY   |        	302
+ GB-RCT   |        	293
+ GB-BOL   |        	292
+(10 rows)
+
+Time: 48523.927 ms (00:48.524)
+</div>
+</pre>
+<br/>
+<p>The query here is quite complicated and <a href="https://clickhouse.com/blog/migrating-data-between-clickhouse-postgres">more expensive than the queries in our previous post</a>, which just computed the highest changing postcodes for London. There is no opportunity to exploit the town index, although we can utilize the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">EXTRACT(year FROM date</code> index as <a href="https://gist.github.com/gingerwizard/029bd291cbd028c292153f63dada0868">shown by an EXPLAIN</a>.</p>
+<p>We could also load this iso code data into a ClickHouse table and repeat the join, adjusting the syntax where required. Alternatively, we might be tempted to leave the mapping in Postgres as its subject to <a href="https://www.centralmailing.co.uk/blog/royal-mail-is-celebrating-40-years-since-the-introduction-of-post-codes/">reasonably frequent changes</a>. If performing the join in ClickHouse, this produces the following query. Note how we create a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">uk_postcode_to_iso</code> using the <a href="https://clickhouse.com/docs/en/engines/table-engines/integrations/postgresql">PostgreSQL table </a>engine to simplify the query syntax vs. using the <a href="https://clickhouse.com/docs/en/sql-reference/table-functions/postgresql">postgres function</a>.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="postgres_table_join.png" loading="lazy" src="/uploads/postgres_table_join_5668fc2fb7.png"/></span>
+<pre class="code-with-play"><div class="code">
+CREATE TABLE uk_postcode_to_iso AS postgresql('db.zcxfcrchxescrtxsnxuc.supabase.co', 'postgres', 'uk_postcode_to_iso', 'postgres', '<!-- -->')
+
+SELECT
+	iso_code,
+	round(avg(percent_change)) AS avg_percent_change
+FROM
+(
+	SELECT
+    	postcode,
+    	medianIf(price, toYear(date) = 2002) AS median_2002,
+    	medianIf(price, toYear(date) = 2022) AS median_2022,
+    	((median_2022 - median_2002) / median_2002) * 100 AS percent_change
+	FROM uk_price_paid
+	GROUP BY concat(postcode1, ' ', postcode2) AS postcode
+	HAVING isNaN(percent_change) = 0
+) AS med_by_postcode
+INNER JOIN uk_postcode_to_iso ON uk_postcode_to_iso.postcode = med_by_postcode.postcode
+GROUP BY iso_code
+ORDER BY avg_percent_change DESC
+LIMIT 10
+
+┌─iso_code─┬─avg_percent_change─┐
+│ GB-TOF   │            	403 │
+│ GB-KEC   │            	380 │
+│ GB-MAN   │            	360 │
+│ GB-SLF   │            	330 │
+│ GB-BGW   │            	321 │
+│ GB-HCK   │            	313 │
+│ GB-MTY   │            	306 │
+│ GB-AGY   │            	302 │
+│ GB-RCT   │            	293 │
+│ GB-BOL   │            	292 │
+└──────────┴────────────────────┘
+
+10 rows in set. Elapsed: 4.131 sec. Processed 29.01 million rows, 305.27 MB (7.02 million rows/s., 73.90 MB/s.)
+</div>
+</pre>
+<br/>
+<p>This isn't delivering the performance we would like. Instead of creating a ClickHouse table for the mapping, we can create a PostgreSQL-backed dictionary as shown below:</p>
+<pre class="code-with-play"><div class="code">
+CREATE DICTIONARY uk_postcode_to_iso_dict
+(
+`postcode` String,
+`iso_code` String
+)
+PRIMARY KEY postcode
+SOURCE(POSTGRESQL(
+   port 5432
+   host 'db.ebsmckuuiwnvyiniuvdt.supabase.co'
+   user 'postgres'
+   password '<!-- -->'
+   db 'postgres'
+   table 'uk_postcode_to_iso'
+   invalidate_query 'SELECT max(id) as mid FROM uk_postcode_to_iso'
+))
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+//force loading of dictionary
+SELECT dictGet('uk_postcode_to_iso_dict', 'iso_code', 'BA5 1PD')
+
+┌─dictGet('uk_postcode_to_iso_dict', 'iso_code', 'BA5 1PD')─┐
+│ GB-SOM                                                	│
+└───────────────────────────────────────────────────────────┘
+
+1 row in set. Elapsed: 0.885 sec.
+</div>
+</pre>
+<br/>
+<p>This dictionary will periodically update based on the LIFETIME clause, automatically syncing any changes. In this case, we also define an <a href="https://clickhouse.com/docs/en/sql-reference/dictionaries/external-dictionaries/external-dicts-dict-sources#postgresql"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">invalidate_query</code></a> clause which controls when the dataset needs to be reloaded from the source by returning a single value. If this changes, the dictionary is reloaded - in this case, when the max id changes. In a production scenario, we would probably want a query capable of detecting updates via a modified time field.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="postgres_dictionary.png" loading="lazy" src="/uploads/postgres_dictionary_7319d09577.png"/></span>
+<p>Using this dictionary, we can now modify our query and exploit the fact that  this table is held locally in memory for fast lookups. Note how we can also avoid the join:</p>
+<pre class="code-with-play"><div class="code">
+SELECT
+	iso_code,
+	round(avg(percent_change)) AS avg_percent_change
+FROM
+(
+	SELECT
+    	dictGet('uk_postcode_to_iso_dict', 'iso_code', postcode) AS iso_code,
+    	medianIf(price, toYear(date) = 2002) AS median_2002,
+    	medianIf(price, toYear(date) = 2022) AS median_2022,
+    	((median_2022 - median_2002) / median_2002) * 100 AS percent_change
+	FROM uk_price_paid
+	GROUP BY concat(postcode1, ' ', postcode2) AS postcode
+	HAVING isNaN(percent_change) = 0
+)
+GROUP BY iso_code
+ORDER BY avg_percent_change DESC
+LIMIT 10
+
+┌─iso_code─┬─avg_percent_change─┐
+│ GB-TOF   │            	403 │
+│ GB-KEC   │            	380 │
+│ GB-MAN   │            	360 │
+│ GB-SLF   │            	330 │
+│ GB-BGW   │            	321 │
+│ GB-HCK   │            	313 │
+│ GB-MTY   │            	306 │
+│ GB-AGY   │            	302 │
+│ GB-RCT   │            	293 │
+│ GB-BOL   │            	292 │
+└──────────┴────────────────────┘
+
+10 rows in set. Elapsed: 0.444 sec. Processed 27.73 million rows, 319.84 MB (62.47 million rows/s., 720.45 MB/s.)
+</div>
+</pre>
+<br/>
+<p>That's better. For those interested, this data is plottable in tools such as Superset, which can interpret these iso-codes - see <a href="https://clickhouse.com/blog/visualizing-data-with-superset">our previous blog post on Superset</a> for a similar example.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="uk_codes.png" loading="lazy" src="/uploads/uk_codes_32da86b9b0.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="pushing-results-to-postgres" level="2">Pushing Results to Postgres<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/migrating-data-between-clickhouse-postgres-part-2#pushing-results-to-postgres">#</a></span></h2>
+<p>Up to now, we’ve demonstrated the value of moving data to ClickHouse from Postgres for analytical workloads. If we consider this as an ETL process, it is likely that at some point, we will want to reverse this workflow and load the results of our analysis back into Postgres. We can achieve this using the same <a href="https://clickhouse.com/docs/en/engines/table-engines/integrations/postgresql#usage-example">table engine</a> we highlighted earlier in this series.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="postgres_insert_select.png" loading="lazy" src="/uploads/postgres_insert_select_d8dc6cb3c7.png"/></span>
+<p>Suppose we wanted to push aggregate statistics back to Postgres for the sales during each month, summarized by postcode, type, whether the house is new, and if it's a freehold or leasehold. Our hypothetical site will display these statistics on every page of a listing to help its users understand the historical market conditions in an area. Additionally, they would like to be able to display these statistics over time. To lower the load* on their production Postgres instance, they offload this computation to ClickHouse and periodically push these results back to a summary table.</p>
+<blockquote style="font-size:14px">
+<p>In reality, this isn't a particularly heavy query and could probably be scheduled in Postgres.</p>
+</blockquote>
+<p>Below we create a ClickHouse database backed by Postgres before creating a table and inserting the results of our analytical query.</p>
+<pre class="code-with-play"><div class="code">
+CREATE TABLE summary_prices(
+postcode1 varchar(8),
+            	type varchar(13),
+            	is_new SMALLINT,
+            	duration varchar(9),
+            	sold integer,
+            	month Date,
+            	avg_price integer,
+            	quantile_prices integer[]);
+                
+// create Postgres engine table in ClickHouse
+CREATE TABLE summary_prices AS postgresql('db.zcxfcrchxescrtxsnxuc.supabase.co', 'postgres', 'summary_prices', 'postgres', '<!-- -->')
+
+//check connectivity
+SELECT count()
+FROM summary_prices
+
+┌─count()─┐
+│       0 │
+└─────────┘
+
+1 row in set. Elapsed: 0.337 sec.
+
+// insert the result of our query to Postgres
+INSERT INTO summary_prices SELECT
+	postcode1,
+	type,
+	is_new,
+	duration,
+	count() AS sold,
+	month,
+	avg(price) AS avg_price,
+	quantilesExactExclusive(0.25, 0.5, 0.75, 0.9, 0.95, 0.99)(price) AS quantile_prices
+FROM uk_price_paid
+WHERE postcode1 != ''
+GROUP BY
+	toStartOfMonth(date) AS month,
+	postcode1,
+	type,
+	is_new,
+	duration
+ORDER BY
+	postcode1 ASC,
+	type ASC,
+	is_new ASC,
+	duration ASC,
+	month ASC
+
+0 rows in set. Elapsed: 25.714 sec. Processed 27.69 million rows, 276.98 MB (775.43 thousand rows/s., 7.76 MB/s.)
+</div>
+</pre>
+<br/>
+<p>Our site now has a simple query to run to fetch the historical price statistics for an area and house of the same type.</p>
+<pre class="code-with-play"><div class="code">
+postgres=&gt; SELECT postcode1, month, avg_price, quantile_prices FROM summary_prices WHERE postcode1='BA5' AND type='detached' AND is_new=0 and duration='freehold' LIMIT 10;
+ postcode1 |   month    | avg_price |              quantile_prices
+-----------+------------+-----------+--------------------------------------------
+ BA5       | 1995-01-01 |    108000 | {64000,100000,160000,160000,160000,160000}
+ BA5       | 1995-02-01 |     95142 | {86500,100000,115000,130000,130000,130000}
+ BA5       | 1995-03-01 |    138991 | {89487,95500,174750,354000,354000,354000}
+ BA5       | 1995-04-01 |     91400 | {63750,69500,130000,165000,165000,165000}
+ BA5       | 1995-05-01 |    110625 | {83500,94500,149750,170000,170000,170000}
+ BA5       | 1995-06-01 |    124583 | {79375,118500,173750,185000,185000,185000}
+ BA5       | 1995-07-01 |    126375 | {88250,95500,185375,272500,272500,272500}
+ BA5       | 1995-08-01 |    104416 | {67500,95000,129750,200000,200000,200000}
+ BA5       | 1995-09-01 |    103000 | {70000,97000,143500,146000,146000,146000}
+ BA5       | 1995-10-01 |     90800 | {58375,72250,111250,213700,223000,223000}
+(10 rows)
+</div>
+</pre>
+<br/>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="conclusion" level="2">Conclusion<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/migrating-data-between-clickhouse-postgres-part-2#conclusion">#</a></span></h2>
+<p>In this series of posts, we have shown how ClickHouse and Postgres are complementary, demonstrating with examples of how data can be moved effortlessly between the two databases using the native ClickHouse functions and table engines. In this specific post, we have covered a Postgres-backed dictionary and how it can be used to accelerate joins for queries involving a frequently changing dataset. Finally, we have performed a “reverse ETL” operation, pushing the results of an analytical query back to Postgres for consumption from a possible user-facing application.</p></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

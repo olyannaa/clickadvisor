@@ -1,0 +1,41 @@
+name: Refresh KB
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  refresh-kb:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+      - name: Refresh raw and markdown KB
+        run: poetry run python scripts/kb/crawler.py
+      - name: Chunk markdown KB
+        run: poetry run python scripts/kb/chunker.py
+      - name: Validate chunked KB
+        run: poetry run python scripts/kb/validator.py
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/refresh-kb
+          commit-message: "chore(kb): refresh knowledge base artifacts"
+          title: "chore(kb): refresh knowledge base artifacts"
+          body: |
+            Automated weekly ClickHouse knowledge base refresh.
+            
+            - crawled upstream documentation sources
+            - rebuilt markdown and chunk artifacts
+            - validated frontmatter, duplicates, and links
+          labels: documentation, automation

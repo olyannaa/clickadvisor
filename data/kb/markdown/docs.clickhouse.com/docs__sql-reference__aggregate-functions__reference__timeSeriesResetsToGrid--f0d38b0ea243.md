@@ -1,0 +1,106 @@
+# timeSeriesResetsToGrid \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- timeSeriesResetsToGrid
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/timeSeriesResetsToGrid.md)# timeSeriesResetsToGrid
+
+## timeSeriesResetsToGrid[​](#timeSeriesResetsToGrid "Direct link to timeSeriesResetsToGrid")
+
+
+Introduced in: v25\.6\.0
+
+
+Aggregate function that takes time series data as pairs of timestamps and values and calculates [PromQL\-like resets](https://prometheus.io/docs/prometheus/latest/querying/functions/#resets) from this data on a regular time grid described by start timestamp, end timestamp and step. For each point on the grid the samples for calculating `resets` are considered within the specified time window.
+
+
+NoteThis function is experimental, enable it by setting `allow_experimental_ts_to_grid_aggregate_function=true`.
+
+
+**Syntax**
+
+
+
+```
+timeSeriesResetsToGrid(start_timestamp, end_timestamp, grid_step, staleness)(timestamp, value)
+
+```
+
+**Parameters**
+
+
+- `start_timestamp` — Specifies start of the grid. \- `end_timestamp` — Specifies end of the grid. \- `grid_step` — Specifies step of the grid in seconds. \- `staleness` — Specifies the maximum "staleness" in seconds of the considered samples.
+
+
+**Arguments**
+
+
+- `timestamp` — Timestamp of the sample. Can be individual values or arrays. \- `value` — Value of the time series corresponding to the timestamp. Can be individual values or arrays.
+
+
+**Returned value**
+
+
+`resets` values on the specified grid as an `Array(Nullable(Float64))`. The returned array contains one value for each time grid point. The value is NULL if there are no samples within the window to calculate the resets value for a particular grid point.
+
+
+**Examples**
+
+
+**Calculate resets values on the grid \[90, 105, 120, 135, 150, 165, 180, 195, 210, 225]**
+
+
+
+```
+WITH
+    -- NOTE: the gap between 130 and 190 is to show how values are filled for ts = 180 according to window parameter
+    [110, 120, 130, 190, 200, 210, 220, 230]::Array(DateTime) AS timestamps,
+    [1, 3, 2, 6, 6, 4, 2, 0]::Array(Float32) AS values, -- array of values corresponding to timestamps above
+    90 AS start_ts,       -- start of timestamp grid
+    90 + 135 AS end_ts,   -- end of timestamp grid
+    15 AS step_seconds,   -- step of timestamp grid
+    45 AS window_seconds  -- "staleness" window
+SELECT timeSeriesResetsToGrid(start_ts, end_ts, step_seconds, window_seconds)(timestamp, value)
+FROM
+(
+    -- This subquery converts arrays of timestamps and values into rows of `timestamp`, `value`
+    SELECT
+        arrayJoin(arrayZip(timestamps, values)) AS ts_and_val,
+        ts_and_val.1 AS timestamp,
+        ts_and_val.2 AS value
+);
+
+```
+
+
+```
+┌─timeSeriesResetsToGrid(start_ts, end_ts, step_seconds, window_seconds)(timestamp, value)─┐
+│ [NULL,NULL,0,1,1,1,NULL,0,1,2]                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+
+```
+
+**Same query with array arguments**
+
+
+
+```
+WITH
+    [110, 120, 130, 190, 200, 210, 220, 230]::Array(DateTime) AS timestamps,
+    [1, 3, 2, 6, 6, 4, 2, 0]::Array(Float32) AS values,
+    90 AS start_ts,
+    90 + 135 AS end_ts,
+    15 AS step_seconds,
+    45 AS window_seconds
+SELECT timeSeriesResetsToGrid(start_ts, end_ts, step_seconds, window_seconds)(timestamps, values);
+
+```
+
+
+```
+┌─timeSeriesResetsToGrid(start_ts, end_ts, step_seconds, window_seconds)(timestamp, value)─┐
+│ [NULL,NULL,0,1,1,0,NULL,0,1,2]                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+
+```
+[PrevioustimeSeriesResampleToGridWithStaleness](/docs/sql-reference/aggregate-functions/reference/timeSeriesResampleToGridWithStaleness)[NexttopK](/docs/sql-reference/aggregate-functions/reference/topk)- [timeSeriesResetsToGrid](#timeSeriesResetsToGrid)
+Was this page helpful?

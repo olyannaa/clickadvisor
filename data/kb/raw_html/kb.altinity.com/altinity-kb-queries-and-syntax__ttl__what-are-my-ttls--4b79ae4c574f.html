@@ -1,0 +1,52 @@
+<h1>What are my TTL settings? | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-queries-and-syntax/">Queries &amp; Syntax</a></li><li class="breadcrumb-item"><a href="/altinity-kb-queries-and-syntax/ttl/">TTL</a></li><li aria-current="page" class="breadcrumb-item active">What are my TTL settings</li></ol></nav><div class="td-content"><h1>What are my TTL settings?</h1><div class="lead"></div><h2 id="using-show-create-table">Using <code>SHOW CREATE TABLE</code></h2><p>If you just want to see the current TTL settings on a table, you can look at the schema definition.</p><pre tabindex="0"><code>SHOW CREATE TABLE events2_local
+FORMAT Vertical
+
+Query id: eba671e5-6b8c-4a81-a4d8-3e21e39fb76b
+
+Row 1:
+──────
+statement: CREATE TABLE default.events2_local
+(
+    `EventDate` DateTime,
+    `EventID` UInt32,
+    `Value` String
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/default/events2_local', '{replica}')
+PARTITION BY toYYYYMM(EventDate)
+ORDER BY (EventID, EventDate)
+TTL EventDate + toIntervalMonth(1)
+SETTINGS index_granularity = 8192
+</code></pre><p>This works even when there’s no data in the table. It does not tell you when the TTLs expire or anything specific to data in one or more of the table parts.</p><h2 id="using-systemparts">Using system.parts</h2><p>If you want to see the actually TTL values for specific data, run a query on system.parts.
+There are columns listing all currently applicable TTL limits for each part.
+(It does not work if the table is empty because there aren’t any parts yet.)</p><pre tabindex="0"><code>SELECT *
+FROM system.parts
+WHERE (database = 'default') AND (table = 'events2_local')
+FORMAT Vertical
+
+Query id: 59106476-210f-4397-b843-9920745b6200
+
+Row 1:
+──────
+partition:                             202203
+name:                                  202203_0_0_0
+...
+database:                              default
+table:                                 events2_local
+...
+delete_ttl_info_min:                   2022-04-27 21:26:30
+delete_ttl_info_max:                   2022-04-27 21:26:30
+move_ttl_info.expression:              []
+move_ttl_info.min:                     []
+move_ttl_info.max:                     []
+default_compression_codec:             LZ4
+recompression_ttl_info.expression:     []
+recompression_ttl_info.min:            []
+recompression_ttl_info.max:            []
+group_by_ttl_info.expression:          []
+group_by_ttl_info.min:                 []
+group_by_ttl_info.max:                 []
+rows_where_ttl_info.expression:        []
+rows_where_ttl_info.min:               []
+rows_where_ttl_info.max:               []
+</code></pre><div class="td-page-meta__lastmod">Last modified 2022.03.27: <a href="https://github.com/Altinity/altinityknowledgebase/commit/6cbffeb8b0ca31471663ad1676da9d5b57531754">Update what-are-my-ttls.md (6cbffeb)</a></div></div></main>

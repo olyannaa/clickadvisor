@@ -1,0 +1,210 @@
+<h1>Replicated* table engines | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Replicated*</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/replication.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Replicated* table engines</h1></header><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In ClickHouse Cloud replication is managed for you. Please create your tables without adding arguments.  For example, in the text below you would replace:<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = ReplicatedMergeTree(
+    '/clickhouse/tables/{shard}/table_name',
+    '{replica}'
+)
+</code></pre></div><div class="activity_PoTP"></div></div><p>with:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ENGINE = ReplicatedMergeTree
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></div></div>
+<p>Replication is only supported for tables in the MergeTree family</p>
+<ul class="custom-ul">
+<li class="custom-li">ReplicatedSummingMergeTree</li>
+<li class="custom-li">ReplicatedCoalescingMergeTree</li>
+<li class="custom-li">ReplicatedVersionedCollapsingMergeTree</li>
+<li class="custom-li">ReplicatedCollapsingMergeTree</li>
+<li class="custom-li">ReplicatedGraphiteMergeTree</li>
+<li class="custom-li">ReplicatedMergeTree</li>
+<li class="custom-li">ReplicatedReplacingMergeTree</li>
+<li class="custom-li">ReplicatedAggregatingMergeTree</li>
+</ul>
+<p>Replication works at the level of an individual table, not the entire server. A server can store both replicated and non-replicated tables at the same time.</p>
+<p>Replication does not depend on sharding. Each shard has its own independent replication.</p>
+<p>Compressed data for <code>INSERT</code> and <code>ALTER</code> queries is replicated (for more information, see the documentation for <a href="/docs/sql-reference/statements/alter">ALTER</a>.</p>
+<p><code>CREATE</code>, <code>DROP</code>, <code>ATTACH</code>, <code>DETACH</code> and <code>RENAME</code> queries are executed on a single server and are not replicated:</p>
+<ul class="custom-ul">
+<li class="custom-li">The <code>CREATE TABLE</code> query creates a new replicatable table on the server where the query is run. If this table already exists on other servers, it adds a new replica.</li>
+<li class="custom-li">The <code>DROP TABLE</code> query deletes the replica located on the server where the query is run.</li>
+<li class="custom-li">The <code>RENAME</code> query renames the table on one of the replicas. In other words, replicated tables can have different names on different replicas.</li>
+</ul>
+<p>ClickHouse uses <a href="/docs/guides/sre/keeper/clickhouse-keeper">ClickHouse Keeper</a> for storing replicas meta information. It is possible to use ZooKeeper version 3.4.5 or newer, but ClickHouse Keeper is recommended.</p>
+<p>To use replication, set parameters in the <a href="/docs/operations/server-configuration-parameters/settings#zookeeper">zookeeper</a> server configuration section.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Don't neglect the security setting. ClickHouse supports the <code>digest</code> <a href="https://zookeeper.apache.org/doc/current/zookeeperProgrammers.html#sc_ZooKeeperAccessControl" rel="noopener noreferrer" target="_blank">ACL scheme</a> of the ZooKeeper security subsystem.</p></div></div>
+<p>Example of setting the addresses of the ClickHouse Keeper cluster:</p>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;zookeeper&gt;
+    &lt;node&gt;
+        &lt;host&gt;example1&lt;/host&gt;
+        &lt;port&gt;2181&lt;/port&gt;
+    &lt;/node&gt;
+    &lt;node&gt;
+        &lt;host&gt;example2&lt;/host&gt;
+        &lt;port&gt;2181&lt;/port&gt;
+    &lt;/node&gt;
+    &lt;node&gt;
+        &lt;host&gt;example3&lt;/host&gt;
+        &lt;port&gt;2181&lt;/port&gt;
+    &lt;/node&gt;
+&lt;/zookeeper&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse also supports storing replicas meta information in an auxiliary ZooKeeper cluster. Do this by providing the ZooKeeper cluster name and path as engine arguments.
+In other words, it supports storing the metadata of different tables in different ZooKeeper clusters.</p>
+<p>Example of setting the addresses of the auxiliary ZooKeeper cluster:</p>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;auxiliary_zookeepers&gt;
+    &lt;zookeeper2&gt;
+        &lt;node&gt;
+            &lt;host&gt;example_2_1&lt;/host&gt;
+            &lt;port&gt;2181&lt;/port&gt;
+        &lt;/node&gt;
+        &lt;node&gt;
+            &lt;host&gt;example_2_2&lt;/host&gt;
+            &lt;port&gt;2181&lt;/port&gt;
+        &lt;/node&gt;
+        &lt;node&gt;
+            &lt;host&gt;example_2_3&lt;/host&gt;
+            &lt;port&gt;2181&lt;/port&gt;
+        &lt;/node&gt;
+    &lt;/zookeeper2&gt;
+    &lt;zookeeper3&gt;
+        &lt;node&gt;
+            &lt;host&gt;example_3_1&lt;/host&gt;
+            &lt;port&gt;2181&lt;/port&gt;
+        &lt;/node&gt;
+    &lt;/zookeeper3&gt;
+&lt;/auxiliary_zookeepers&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To store table metadata in an auxiliary ZooKeeper cluster instead of the default ZooKeeper cluster, we can use SQL to create the table with
+ReplicatedMergeTree engine as follows:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name ( ... ) ENGINE = ReplicatedMergeTree('zookeeper_name_configured_in_auxiliary_zookeepers:path', 'replica_name') ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can specify any existing ZooKeeper cluster and the system will use a directory on it for its own data (the directory is specified when creating a replicatable table).</p>
+<p>If ZooKeeper is not set in the config file, you can't create replicated tables, and any existing replicated tables will be read-only.</p>
+<p>ZooKeeper is not used in <code>SELECT</code> queries because replication does not affect the performance of <code>SELECT</code> and queries run just as fast as they do for non-replicated tables. When querying distributed replicated tables, ClickHouse behavior is controlled by the settings <a href="/docs/operations/settings/settings#max_replica_delay_for_distributed_queries">max_replica_delay_for_distributed_queries</a> and <a href="/docs/operations/settings/settings#fallback_to_stale_replicas_for_distributed_queries">fallback_to_stale_replicas_for_distributed_queries</a>.</p>
+<p>For each <code>INSERT</code> query, approximately ten entries are added to ZooKeeper through several transactions. (To be more precise, this is for each inserted block of data; an INSERT query contains one block or one block per <code>max_insert_block_size = 1048576</code> rows.) This leads to slightly longer latencies for <code>INSERT</code> compared to non-replicated tables. But if you follow the recommendations to insert data in batches of no more than one <code>INSERT</code> per second, it does not create any problems. The entire ClickHouse cluster used for coordinating one ZooKeeper cluster has a total of several hundred <code>INSERTs</code> per second. The throughput on data inserts (the number of rows per second) is just as high as for non-replicated data.</p>
+<p>For very large clusters, you can use different ZooKeeper clusters for different shards. However, from our experience this has not proven necessary based on production clusters with approximately 300 servers.</p>
+<p>Replication is asynchronous and multi-master. <code>INSERT</code> queries (as well as <code>ALTER</code>) can be sent to any available server. Data is inserted on the server where the query is run, and then it is copied to the other servers. Because it is asynchronous, recently inserted data appears on the other replicas with some latency. If part of the replicas are not available, the data is written when they become available. If a replica is available, the latency is the amount of time it takes to transfer the block of compressed data over the network. The number of threads performing background tasks for replicated tables can be set by <a href="/docs/operations/server-configuration-parameters/settings#background_schedule_pool_size">background_schedule_pool_size</a> setting.</p>
+<p><code>ReplicatedMergeTree</code> engine uses a separate thread pool for replicated fetches. Size of the pool is limited by the <a href="/docs/operations/server-configuration-parameters/settings#background_fetches_pool_size">background_fetches_pool_size</a> setting which can be tuned with a server restart.</p>
+<p>By default, an INSERT query waits for confirmation of writing the data from only one replica. If the data was successfully written to only one replica and the server with this replica ceases to exist, the stored data will be lost. To enable getting confirmation of data writes from multiple replicas, use the <code>insert_quorum</code> option.</p>
+<p>Each block of data is written atomically. The INSERT query is divided into blocks up to <code>max_insert_block_size = 1048576</code> rows. In other words, if the <code>INSERT</code> query has less than 1048576 rows, it is made atomically.</p>
+<p>Data blocks are deduplicated. For multiple writes of the same data block (data blocks of the same size containing the same rows in the same order), the block is only written once. The reason for this is in case of network failures when the client application does not know if the data was written to the DB, so the <code>INSERT</code> query can simply be repeated. It does not matter which replica INSERTs were sent to with identical data. <code>INSERTs</code> are idempotent. Deduplication parameters are controlled by <a href="/docs/operations/server-configuration-parameters/settings#merge_tree">merge_tree</a> server settings.</p>
+<p>During replication, only the source data to insert is transferred over the network. Further data transformation (merging) is coordinated and performed on all the replicas in the same way. This minimizes network usage, which means that replication works well when replicas reside in different datacenters. (Note that duplicating data in different datacenters is the main goal of replication.)</p>
+<p>You can have any number of replicas of the same data. Based on our experiences, a relatively reliable and convenient solution could use double replication in production, with each server using RAID-5 or RAID-6 (and RAID-10 in some cases).</p>
+<p>The system monitors data synchronicity on replicas and is able to recover after a failure. Failover is automatic (for small differences in data) or semi-automatic (when data differs too much, which may indicate a configuration error).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="creating-replicated-tables">Creating replicated tables<a aria-label="Direct link to Creating replicated tables" class="hash-link" href="#creating-replicated-tables" title="Direct link to Creating replicated tables">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In ClickHouse Cloud, replication is handled automatically.<p>Create tables using <a href="/docs/engines/table-engines/mergetree-family/mergetree"><code>MergeTree</code></a> without replication arguments. The system internally rewrites <a href="/docs/engines/table-engines/mergetree-family/mergetree"><code>MergeTree</code></a> to <a href="/docs/cloud/reference/shared-merge-tree"><code>SharedMergeTree</code></a> for replication and data distribution.<p>Avoid using <code>ReplicatedMergeTree</code> or specifying replication parameters, as replication is managed by the platform.</p></p></p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="replicatedmergetree-parameters">Replicated*MergeTree parameters<a aria-label="Direct link to Replicated*MergeTree parameters" class="hash-link" href="#replicatedmergetree-parameters" title="Direct link to Replicated*MergeTree parameters">​</a></h3>
+<table><thead><tr><th>Parameter<th>Description<tbody><tr><td><code>zoo_path</code><td>The path to the table in ClickHouse Keeper.<tr><td><code>replica_name</code><td>The replica name in ClickHouse Keeper.<tr><td><code>other_parameters</code><td>Parameters of an engine used for creating the replicated version, for example, version in <code>ReplacingMergeTree</code>.</td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name
+(
+    EventDate DateTime,
+    CounterID UInt32,
+    UserID UInt32,
+    ver UInt16
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{layer}-{shard}/table_name', '{replica}', ver)
+PARTITION BY toYYYYMM(EventDate)
+ORDER BY (CounterID, EventDate, intHash32(UserID))
+SAMPLE BY intHash32(UserID);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true" markdown="1"><summary>Example in deprecated syntax</summary><div><div class="collapsibleContent_i85q"><div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name
+(
+    EventDate DateTime,
+    CounterID UInt32,
+    UserID UInt32
+) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/table_name', '{replica}', EventDate, intHash32(UserID), (CounterID, EventDate, intHash32(UserID), EventTime), 8192);
+</code></pre></div><div class="activity_PoTP"></div></div></div></div></details>
+<p>As the example shows, these parameters can contain substitutions in <code>{}</code>. The substituted values are taken from the <a href="/docs/operations/server-configuration-parameters/settings#macros">macros</a> section of the configuration file.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;macros&gt;
+    &lt;shard&gt;02&lt;/shard&gt;
+    &lt;replica&gt;example05-02-1&lt;/replica&gt;
+&lt;/macros&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The path to the table in ClickHouse Keeper should be unique for each replicated table. Tables on different shards should have different paths.
+In this case, the path consists of the following parts:</p>
+<p><code>/clickhouse/tables/</code> is the common prefix. We recommend using exactly this one.</p>
+<p><code>{shard}</code> will be expanded to the shard identifier.</p>
+<p><code>table_name</code> is the name of the node for the table in ClickHouse Keeper. It is a good idea to make it the same as the table name. It is defined explicitly, because in contrast to the table name, it does not change after a RENAME query.
+<em>HINT</em>: you could add a database name in front of <code>table_name</code> as well. E.g. <code>db_name.table_name</code></p>
+<p>The two built-in substitutions <code>{database}</code> and <code>{table}</code> can be used, they expand into the table name and the database name respectively (unless these macros are defined in the <code>macros</code> section). So the zookeeper path can be specified as <code>'/clickhouse/tables/{shard}/{database}/{table}'</code>.
+Be careful with table renames when using these built-in substitutions. The path in ClickHouse Keeper cannot be changed, and when the table is renamed, the macros will expand into a different path, the table will refer to a path that does not exist in ClickHouse Keeper, and will go into read-only mode.</p>
+<p>The replica name identifies different replicas of the same table. You can use the server name for this, as in the example. The name only needs to be unique within each shard.</p>
+<p>You can define the parameters explicitly instead of using substitutions. This might be convenient for testing and for configuring small clusters. However, you can't use distributed DDL queries (<code>ON CLUSTER</code>) in this case.</p>
+<p>When working with large clusters, we recommend using substitutions because they reduce the probability of error.</p>
+<p>You can specify default arguments for <code>Replicated</code> table engine in the server configuration file. For instance:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;default_replica_path&gt;/clickhouse/tables/{shard}/{database}/{table}&lt;/default_replica_path&gt;
+&lt;default_replica_name&gt;{replica}&lt;/default_replica_name&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this case, you can omit arguments when creating tables:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name (
+    x UInt32
+) ENGINE = ReplicatedMergeTree
+ORDER BY x;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>It is equivalent to:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table_name (
+    x UInt32
+) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/{database}/table_name', '{replica}')
+ORDER BY x;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Run the <code>CREATE TABLE</code> query on each replica. This query creates a new replicated table, or adds a new replica to an existing one.</p>
+<p>If you add a new replica after the table already contains some data on other replicas, the data will be copied from the other replicas to the new one after running the query. In other words, the new replica syncs itself with the others.</p>
+<p>To delete a replica, run <code>DROP TABLE</code>. However, only one replica is deleted – the one that resides on the server where you run the query.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recovery-after-failures">Recovery after failures<a aria-label="Direct link to Recovery after failures" class="hash-link" href="#recovery-after-failures" title="Direct link to Recovery after failures">​</a></h2>
+<p>If ClickHouse Keeper is unavailable when a server starts, replicated tables switch to read-only mode. The system periodically attempts to connect to ClickHouse Keeper.</p>
+<p>If ClickHouse Keeper is unavailable during an <code>INSERT</code>, or an error occurs when interacting with ClickHouse Keeper, an exception is thrown.</p>
+<p>After connecting to ClickHouse Keeper, the system checks whether the set of data in the local file system matches the expected set of data (ClickHouse Keeper stores this information). If there are minor inconsistencies, the system resolves them by syncing data with the replicas.</p>
+<p>If the system detects broken data parts (with the wrong size of files) or unrecognized parts (parts written to the file system but not recorded in ClickHouse Keeper), it moves them to the <code>detached</code> subdirectory (they are not deleted). Any missing parts are copied from the replicas.</p>
+<p>Note that ClickHouse does not perform any destructive actions such as automatically deleting a large amount of data.</p>
+<p>When the server starts (or establishes a new session with ClickHouse Keeper), it only checks the quantity and sizes of all files. If the file sizes match but bytes have been changed somewhere in the middle, this is not detected immediately, but only when attempting to read the data for a <code>SELECT</code> query. The query throws an exception about a non-matching checksum or size of a compressed block. In this case, data parts are added to the verification queue and copied from the replicas if necessary.</p>
+<p>If the local set of data differs too much from the expected one, a safety mechanism is triggered. The server enters this in the log and refuses to launch. The reason for this is that this case may indicate a configuration error, such as if a replica on a shard was accidentally configured like a replica on a different shard. However, the thresholds for this mechanism are set fairly low, and this situation might occur during normal failure recovery. In this case, data is restored semi-automatically - by "pushing a button".</p>
+<p>To start recovery, create the node <code>/path_to_table/replica_name/flags/force_restore_data</code> in ClickHouse Keeper with any content, or run the command to restore all replicated tables:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">sudo -u clickhouse touch /var/lib/clickhouse/flags/force_restore_data
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Then restart the server. On start, the server deletes these flags and starts recovery.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recovery-after-complete-data-loss">Recovery after complete data loss<a aria-label="Direct link to Recovery after complete data loss" class="hash-link" href="#recovery-after-complete-data-loss" title="Direct link to Recovery after complete data loss">​</a></h2>
+<p>If all data and metadata disappeared from one of the servers, follow these steps for recovery:</p>
+<ol class="custom-ol">
+<li class="custom-li">Install ClickHouse on the server. Define substitutions correctly in the config file that contains the shard identifier and replicas, if you use them.</li>
+<li class="custom-li">If you had unreplicated tables that must be manually duplicated on the servers, copy their data from a replica (in the directory <code>/var/lib/clickhouse/data/db_name/table_name/</code>).</li>
+<li class="custom-li">Copy table definitions located in <code>/var/lib/clickhouse/metadata/</code> from a replica. If a shard or replica identifier is defined explicitly in the table definitions, correct it so that it corresponds to this replica. (Alternatively, start the server and make all the <code>ATTACH TABLE</code> queries that should have been in the .sql files in <code>/var/lib/clickhouse/metadata/</code>.)</li>
+<li class="custom-li">To start recovery, create the ClickHouse Keeper node <code>/path_to_table/replica_name/flags/force_restore_data</code> with any content, or run the command to restore all replicated tables: <code>sudo -u clickhouse touch /var/lib/clickhouse/flags/force_restore_data</code></li>
+</ol>
+<p>Then start the server (restart, if it is already running). Data will be downloaded from replicas.</p>
+<p>An alternative recovery option is to delete information about the lost replica from ClickHouse Keeper (<code>/path_to_table/replica_name</code>), then create the replica again as described in "<a href="#creating-replicated-tables">Creating replicated tables</a>".</p>
+<p>There is no restriction on network bandwidth during recovery. Keep this in mind if you are restoring many replicas at once.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="converting-from-mergetree-to-replicatedmergetree">Converting from MergeTree to ReplicatedMergeTree<a aria-label="Direct link to Converting from MergeTree to ReplicatedMergeTree" class="hash-link" href="#converting-from-mergetree-to-replicatedmergetree" title="Direct link to Converting from MergeTree to ReplicatedMergeTree">​</a></h2>
+<p>We use the term <code>MergeTree</code> to refer to all table engines in the <code>MergeTree family</code>, the same as for <code>ReplicatedMergeTree</code>.</p>
+<p>If you had a <code>MergeTree</code> table that was manually replicated, you can convert it to a replicated table. You might need to do this if you have already collected a large amount of data in a <code>MergeTree</code> table and now you want to enable replication.</p>
+<p><a href="/docs/sql-reference/statements/attach#attach-mergetree-table-as-replicatedmergetree">ATTACH TABLE ... AS REPLICATED</a> statement allows to attach detached <code>MergeTree</code> table as <code>ReplicatedMergeTree</code>.</p>
+<p><code>MergeTree</code> table can be automatically converted on server restart if <code>convert_to_replicated</code> flag is set at the table's data directory (<code>/store/xxx/xxxyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy/</code> for <code>Atomic</code> database).
+Create empty <code>convert_to_replicated</code> file and the table will be loaded as replicated on next server restart.</p>
+<p>This query can be used to get the table's data path. If table has many data paths, you have to use the first one.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT data_paths FROM system.tables WHERE table = 'table_name' AND database = 'database_name';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that ReplicatedMergeTree table will be created with values of <code>default_replica_path</code> and <code>default_replica_name</code> settings.
+To create a converted table on other replicas, you will need to explicitly specify its path in the first argument of the <code>ReplicatedMergeTree</code> engine. The following query can be used to get its path.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT zookeeper_path FROM system.replicas WHERE table = 'table_name';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>There is also a manual way to do this.</p>
+<p>If the data differs on various replicas, first sync it, or delete this data on all the replicas except one.</p>
+<p>Rename the existing MergeTree table, then create a <code>ReplicatedMergeTree</code> table with the old name.
+Move the data from the old table to the <code>detached</code> subdirectory inside the directory with the new table data (<code>/var/lib/clickhouse/data/db_name/table_name/</code>).
+Then run <code>ALTER TABLE ATTACH PARTITION</code> on one of the replicas to add these data parts to the working set.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="converting-from-replicatedmergetree-to-mergetree">Converting from ReplicatedMergeTree to MergeTree<a aria-label="Direct link to Converting from ReplicatedMergeTree to MergeTree" class="hash-link" href="#converting-from-replicatedmergetree-to-mergetree" title="Direct link to Converting from ReplicatedMergeTree to MergeTree">​</a></h2>
+<p>Use <a href="/docs/sql-reference/statements/attach#attach-mergetree-table-as-replicatedmergetree">ATTACH TABLE ... AS NOT REPLICATED</a> statement to attach detached <code>ReplicatedMergeTree</code> table as <code>MergeTree</code> on a single server.</p>
+<p>Another way to do this involves server restart. Create a MergeTree table with a different name. Move all the data from the directory with the <code>ReplicatedMergeTree</code> table data to the new table's data directory. Then delete the <code>ReplicatedMergeTree</code> table and restart the server.</p>
+<p>If you want to get rid of a <code>ReplicatedMergeTree</code> table without launching the server:</p>
+<ul class="custom-ul">
+<li class="custom-li">Delete the corresponding <code>.sql</code> file in the metadata directory (<code>/var/lib/clickhouse/metadata/</code>).</li>
+<li class="custom-li">Delete the corresponding path in ClickHouse Keeper (<code>/path_to_table/replica_name</code>).</li>
+</ul>
+<p>After this, you can launch the server, create a <code>MergeTree</code> table, move the data to its directory, and then restart the server.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recovery-when-metadata-in-the-zookeeper-cluster-is-lost-or-damaged">Recovery when metadata in the ClickHouse Keeper cluster is lost or damaged<a aria-label="Direct link to Recovery when metadata in the ClickHouse Keeper cluster is lost or damaged" class="hash-link" href="#recovery-when-metadata-in-the-zookeeper-cluster-is-lost-or-damaged" title="Direct link to Recovery when metadata in the ClickHouse Keeper cluster is lost or damaged">​</a></h2>
+<p>If the data in ClickHouse Keeper was lost or damaged, you can save data by moving it to an unreplicated table as described above.</p>
+<p><strong>See Also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/server-configuration-parameters/settings#background_schedule_pool_size">background_schedule_pool_size</a></li>
+<li class="custom-li"><a href="/docs/operations/server-configuration-parameters/settings#background_fetches_pool_size">background_fetches_pool_size</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/merge-tree-settings#execute_merges_on_single_replica_time_threshold">execute_merges_on_single_replica_time_threshold</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/merge-tree-settings#max_replicated_fetches_network_bandwidth">max_replicated_fetches_network_bandwidth</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/merge-tree-settings#max_replicated_sends_network_bandwidth">max_replicated_sends_network_bandwidth</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/mergetree"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">MergeTree</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/custom-partitioning-key"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Custom Partitioning Key</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#creating-replicated-tables">Creating replicated tables</a><ul><li><a class="table-of-contents__link toc-highlight" href="#replicatedmergetree-parameters">Replicated*MergeTree parameters</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#recovery-after-failures">Recovery after failures</a><li><a class="table-of-contents__link toc-highlight" href="#recovery-after-complete-data-loss">Recovery after complete data loss</a><li><a class="table-of-contents__link toc-highlight" href="#converting-from-mergetree-to-replicatedmergetree">Converting from MergeTree to ReplicatedMergeTree</a><li><a class="table-of-contents__link toc-highlight" href="#converting-from-replicatedmergetree-to-mergetree">Converting from ReplicatedMergeTree to MergeTree</a><li><a class="table-of-contents__link toc-highlight" href="#recovery-when-metadata-in-the-zookeeper-cluster-is-lost-or-damaged">Recovery when metadata in the ClickHouse Keeper cluster is lost or damaged</a></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

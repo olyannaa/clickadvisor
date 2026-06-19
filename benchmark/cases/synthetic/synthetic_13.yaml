@@ -1,0 +1,18 @@
+case_id: synthetic_13
+source: synthetic
+sql: |
+  SELECT * FROM comments WHERE length(body) > 0
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: length_zero_to_empty
+  detected_by_rule: R-013
+  severity: high
+  description: Проверку length(body) > 0 можно заменить на notEmpty(body).
+expected_rules_to_fire:
+- R-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-013.
+expected_findings_count: 1
+status: validated

@@ -1,0 +1,154 @@
+<h1>azureBlobStorage | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/table-functions" itemprop="item"><span itemprop="name">Table functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">azureBlobStorage</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/azureBlobStorage.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>azureBlobStorage Table Function</h1></header>
+<p>Provides a table-like interface to select/insert files in <a href="https://azure.microsoft.com/en-us/products/storage/blobs" rel="noopener noreferrer" target="_blank">Azure Blob Storage</a>. This table function is similar to the <a href="/docs/sql-reference/table-functions/s3">s3 function</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">Connection string<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">Storage account URL<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">Named collection</li></li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>Credentials are embedded in the connection string, so no separate <code>account_name</code>/<code>account_key</code> is needed:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">azureBlobStorage(connection_string, container_name, blobpath [, format, compression, structure])
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>Requires <code>account_name</code> and <code>account_key</code> as separate arguments:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">azureBlobStorage(storage_account_url, container_name, blobpath, account_name, account_key [, format, compression, structure])
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>See <a href="#named-collections">Named Collections</a> below for the full list of supported keys:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">azureBlobStorage(named_collection[, option=value [,..]])
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="arguments">Arguments<a aria-label="Direct link to Arguments" class="hash-link" href="#arguments" title="Direct link to Arguments">​</a></h2>
+<table><thead><tr><th>Argument<th>Description<tbody><tr><td><code>connection_string</code><td>A connection string that includes embedded credentials (account name + account key or SAS token). When using this form, <code>account_name</code> and <code>account_key</code> should <strong>not</strong> be passed separately. See <a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string?toc=%2Fazure%2Fstorage%2Fblobs%2Ftoc.json&amp;bc=%2Fazure%2Fstorage%2Fblobs%2Fbreadcrumb%2Ftoc.json#configure-a-connection-string-for-an-azure-storage-account" rel="noopener noreferrer" target="_blank">Configure a connection string</a>.<tr><td><code>storage_account_url</code><td>The storage account endpoint URL, e.g. <code>https://myaccount.blob.core.windows.net/</code>. When using this form, you <strong>must</strong> also pass <code>account_name</code> and <code>account_key</code>.<tr><td><code>container_name</code><td>Container name.<tr><td><code>blobpath</code><td>File path. Supports the following wildcards in read-only mode: <code>*</code>, <code>**</code>, <code>?</code>, <code>{abc,def}</code> and <code>{N..M}</code> where <code>N</code>, <code>M</code> — numbers, <code>'abc'</code>, <code>'def'</code> — strings.<tr><td><code>account_name</code><td>Storage account name. <strong>Required</strong> when using <code>storage_account_url</code> without SAS; must <strong>not</strong> be passed when using <code>connection_string</code>.<tr><td><code>account_key</code><td>Storage account key. <strong>Required</strong> when using <code>storage_account_url</code> without SAS; must <strong>not</strong> be passed when using <code>connection_string</code>.<tr><td><code>format</code><td>The <a href="/docs/sql-reference/formats">format</a> of the file.<tr><td><code>compression</code><td>Supported values: <code>none</code>, <code>gzip/gz</code>, <code>brotli/br</code>, <code>xz/LZMA</code>, <code>zstd/zst</code>. By default, it will autodetect compression by file extension (same as setting to <code>auto</code>).<tr><td><code>structure</code><td>Structure of the table. Format <code>'column1_name column1_type, column2_name column2_type, ...'</code>.<tr><td><code>partition_strategy</code><td>Optional. Supported values: <code>WILDCARD</code> or <code>HIVE</code>. <code>WILDCARD</code> requires a <code>{_partition_id}</code> in the path, which is replaced with the partition key. <code>HIVE</code> does not allow wildcards, assumes the path is the table root, and generates Hive-style partitioned directories with Snowflake IDs as filenames and the file format as the extension. Defaults to <code>WILDCARD</code>.<tr><td><code>partition_columns_in_data_file</code><td>Optional. Only used with <code>HIVE</code> partition strategy. Tells ClickHouse whether to expect partition columns to be written in the data file. Defaults <code>false</code>.<tr><td><code>extra_credentials</code><td>Use <code>client_id</code> and <code>tenant_id</code> for authentication. If extra_credentials are provided, they are given priority over <code>account_name</code> and <code>account_key</code>.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="named-collections">Named Collections<a aria-label="Direct link to Named Collections" class="hash-link" href="#named-collections" title="Direct link to Named Collections">​</a></h2>
+<p>Arguments can also be passed using <a href="/docs/operations/named-collections">named collections</a>. In this case the following keys are supported:</p>
+<table><thead><tr><th>Key<th>Required<th>Description<tbody><tr><td><code>container</code><td>Yes<td>Container name. Corresponds to the positional argument <code>container_name</code>.<tr><td><code>blob_path</code><td>Yes<td>File path (with optional wildcards). Corresponds to the positional argument <code>blobpath</code>.<tr><td><code>connection_string</code><td>No*<td>Connection string with embedded credentials. *Either <code>connection_string</code> or <code>storage_account_url</code> must be provided.<tr><td><code>storage_account_url</code><td>No*<td>Storage account endpoint URL. *Either <code>connection_string</code> or <code>storage_account_url</code> must be provided.<tr><td><code>account_name</code><td>No<td>Required when using <code>storage_account_url</code><tr><td><code>account_key</code><td>No<td>Required when using <code>storage_account_url</code><tr><td><code>format</code><td>No<td>File format.<tr><td><code>compression</code><td>No<td>Compression type.<tr><td><code>structure</code><td>No<td>Table structure.<tr><td><code>client_id</code><td>No<td>Client ID for authentication.<tr><td><code>tenant_id</code><td>No<td>Tenant ID for authentication.</td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Named collection key names differ from positional function argument names: <code>container</code> (not <code>container_name</code>) and <code>blob_path</code> (not <code>blobpath</code>).</p></div></div>
+<p><strong>Example:</strong></p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE NAMED COLLECTION azure_my_data AS
+    storage_account_url = 'https://myaccount.blob.core.windows.net/',
+    container = 'mycontainer',
+    blob_path = 'data/*.parquet',
+    account_name = 'myaccount',
+    account_key = 'mykey...==',
+    format = 'Parquet';
+
+SELECT *
+FROM azureBlobStorage(azure_my_data)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can also override named collection values at query time:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM azureBlobStorage(azure_my_data, blob_path = 'other_data/*.csv', format = 'CSVWithNames')
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="returned_value">Returned value<a aria-label="Direct link to Returned value" class="hash-link" href="#returned_value" title="Direct link to Returned value">​</a></h2>
+<p>A table with the specified structure for reading or writing data in the specified file.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="reading-with-storage-account-url">Reading with <code>storage_account_url</code> form<a aria-label="Direct link to reading-with-storage-account-url" class="hash-link" href="#reading-with-storage-account-url" title="Direct link to reading-with-storage-account-url">​</a></h3>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM azureBlobStorage(
+    'https://myaccount.blob.core.windows.net/',
+    'mycontainer',
+    'data/*.parquet',
+    'myaccount',
+    'mykey...==',
+    'Parquet'
+)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="reading-with-connection-string">Reading with <code>connection_string</code> form<a aria-label="Direct link to reading-with-connection-string" class="hash-link" href="#reading-with-connection-string" title="Direct link to reading-with-connection-string">​</a></h3>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM azureBlobStorage(
+    'DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey...==;EndPointSuffix=core.windows.net',
+    'mycontainer',
+    'data/*.csv',
+    'CSVWithNames'
+)
+LIMIT 5;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="writing-with-partitions">Writing with partitions<a aria-label="Direct link to Writing with partitions" class="hash-link" href="#writing-with-partitions" title="Direct link to Writing with partitions">​</a></h3>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO TABLE FUNCTION azureBlobStorage(
+    'DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey...==;EndPointSuffix=core.windows.net',
+    'mycontainer',
+    'test_{_partition_id}.csv',
+    'CSV',
+    'auto',
+    'column1 UInt32, column2 UInt32, column3 UInt32'
+) PARTITION BY column3
+VALUES (1, 2, 3), (3, 2, 1), (78, 43, 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Then read back a specific partition:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT *
+FROM azureBlobStorage(
+    'DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey...==;EndPointSuffix=core.windows.net',
+    'mycontainer',
+    'test_1.csv',
+    'CSV',
+    'auto',
+    'column1 UInt32, column2 UInt32, column3 UInt32'
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─column1─┬─column2─┬─column3─┐
+│       3 │       2 │       1 │
+└─────────┴─────────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="virtual-columns">Virtual Columns<a aria-label="Direct link to Virtual Columns" class="hash-link" href="#virtual-columns" title="Direct link to Virtual Columns">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><code>_path</code> — Path to the file. Type: <code>LowCardinality(String)</code>.</li>
+<li class="custom-li"><code>_file</code> — Name of the file. Type: <code>LowCardinality(String)</code>.</li>
+<li class="custom-li"><code>_size</code> — Size of the file in bytes. Type: <code>Nullable(UInt64)</code>. If the file size is unknown, the value is <code>NULL</code>.</li>
+<li class="custom-li"><code>_time</code> — Last modified time of the file. Type: <code>Nullable(DateTime)</code>. If the time is unknown, the value is <code>NULL</code>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="partitioned-write">Partitioned Write<a aria-label="Direct link to Partitioned Write" class="hash-link" href="#partitioned-write" title="Direct link to Partitioned Write">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="partition-strategy">Partition Strategy<a aria-label="Direct link to Partition Strategy" class="hash-link" href="#partition-strategy" title="Direct link to Partition Strategy">​</a></h3>
+<p>Supported for INSERT queries only.</p>
+<p><code>WILDCARD</code> (default): Replaces the <code>{_partition_id}</code> wildcard in the file path with the actual partition key.</p>
+<p><code>HIVE</code> implements hive style partitioning for reads &amp; writes. It generates files using the following format: <code>&lt;prefix&gt;/&lt;key1=val1/key2=val2...&gt;/&lt;snowflakeid&gt;.&lt;toLower(file_format)&gt;</code>.</p>
+<p><strong>Example of <code>HIVE</code> partition strategy</strong></p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO TABLE FUNCTION azureBlobStorage(
+    azure_conf2,
+    storage_account_url = 'https://myaccount.blob.core.windows.net/',
+    container = 'cont',
+    blob_path = 'azure_table_root',
+    format = 'CSVWithNames',
+    compression = 'auto',
+    structure = 'year UInt16, country String, id Int32',
+    partition_strategy = 'hive'
+) PARTITION BY (year, country)
+VALUES (2020, 'Russia', 1), (2021, 'Brazil', 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">SELECT _path, * FROM azureBlobStorage(
+    azure_conf2,
+    storage_account_url = 'https://myaccount.blob.core.windows.net/',
+    container = 'cont',
+    blob_path = 'azure_table_root/**.csvwithnames'
+)
+
+   ┌─_path───────────────────────────────────────────────────────────────────────────┬─id─┬─year─┬─country─┐
+1. │ cont/azure_table_root/year=2021/country=Brazil/7351307847391293440.csvwithnames │  2 │ 2021 │ Brazil  │
+2. │ cont/azure_table_root/year=2020/country=Russia/7351307847378710528.csvwithnames │  1 │ 2020 │ Russia  │
+   └─────────────────────────────────────────────────────────────────────────────────┴────┴──────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="hive-style-partitioning">use_hive_partitioning setting<a aria-label="Direct link to use_hive_partitioning setting" class="hash-link" href="#hive-style-partitioning" title="Direct link to use_hive_partitioning setting">​</a></h2>
+<p>This is a hint for ClickHouse to parse hive style partitioned files upon reading time. It has no effect on writing. For symmetrical reads and writes, use the <code>partition_strategy</code> argument.</p>
+<p>When setting <code>use_hive_partitioning</code> is set to 1, ClickHouse will detect Hive-style partitioning in the path (<code>/name=value/</code>) and will allow to use partition columns as virtual columns in the query. These virtual columns will have the same names as in the partitioned path.</p>
+<p><strong>Example</strong></p>
+<p>Use virtual column, created with Hive-style partitioning</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM azureBlobStorage(config, storage_account_url='...', container='...', blob_path='http://data/path/date=*/country=*/code=*/*.parquet') WHERE date &gt; '2020-01-01' AND country = 'Netherlands' AND code = 42;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="using-shared-access-signatures-sas-sas-tokens">Using Shared Access Signatures (SAS)<a aria-label="Direct link to Using Shared Access Signatures (SAS)" class="hash-link" href="#using-shared-access-signatures-sas-sas-tokens" title="Direct link to Using Shared Access Signatures (SAS)">​</a></h2>
+<p>A Shared Access Signature (SAS) is a URI that grants restricted access to an Azure Storage container or file. Use it to provide time-limited access to storage account resources without sharing your storage account key. More details <a href="https://learn.microsoft.com/en-us/rest/api/storageservices/delegate-access-with-shared-access-signature" rel="noopener noreferrer" target="_blank">here</a>.</p>
+<p>The <code>azureBlobStorage</code> function supports Shared Access Signatures (SAS).</p>
+<p>A <a href="https://learn.microsoft.com/en-us/azure/ai-services/translator/document-translation/how-to-guides/create-sas-tokens?tabs=Containers" rel="noopener noreferrer" target="_blank">Blob SAS token</a> contains all the information needed to authenticate the request, including the target blob, permissions, and validity period. To construct a blob URL, append the SAS token to the blob service endpoint. For example, if the endpoint is <code>https://clickhousedocstest.blob.core.windows.net/</code>, the request becomes:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count()
+FROM azureBlobStorage('BlobEndpoint=https://clickhousedocstest.blob.core.windows.net/;SharedAccessSignature=sp=r&amp;st=2025-01-29T14:58:11Z&amp;se=2025-01-29T22:58:11Z&amp;spr=https&amp;sv=2022-11-02&amp;sr=c&amp;sig=Ac2U0xl4tm%2Fp7m55IilWl1yHwk%2FJG0Uk6rMVuOiD0eE%3D', 'exampledatasets', 'example.csv')
+
+┌─count()─┐
+│      10 │
+└─────────┘
+
+1 row in set. Elapsed: 0.425 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Alternatively, users can use the generated <a href="https://learn.microsoft.com/en-us/azure/ai-services/translator/document-translation/how-to-guides/create-sas-tokens?tabs=Containers" rel="noopener noreferrer" target="_blank">Blob SAS URL</a>:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT count()
+FROM azureBlobStorage('https://clickhousedocstest.blob.core.windows.net/?sp=r&amp;st=2025-01-29T14:58:11Z&amp;se=2025-01-29T22:58:11Z&amp;spr=https&amp;sv=2022-11-02&amp;sr=c&amp;sig=Ac2U0xl4tm%2Fp7m55IilWl1yHwk%2FJG0Uk6rMVuOiD0eE%3D', 'exampledatasets', 'example.csv')
+
+┌─count()─┐
+│      10 │
+└─────────┘
+
+1 row in set. Elapsed: 0.153 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related">Related<a aria-label="Direct link to Related" class="hash-link" href="#related" title="Direct link to Related">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/engines/table-engines/integrations/azureBlobStorage">AzureBlobStorage Table Engine</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/table-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Table Functions</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/azureBlobStorageCluster"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">azureBlobStorageCluster</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#arguments">Arguments</a><li><a class="table-of-contents__link toc-highlight" href="#named-collections">Named Collections</a><li><a class="table-of-contents__link toc-highlight" href="#returned_value">Returned value</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#reading-with-storage-account-url">Reading with <code>storage_account_url</code> form</a><li><a class="table-of-contents__link toc-highlight" href="#reading-with-connection-string">Reading with <code>connection_string</code> form</a><li><a class="table-of-contents__link toc-highlight" href="#writing-with-partitions">Writing with partitions</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#virtual-columns">Virtual Columns</a><li><a class="table-of-contents__link toc-highlight" href="#partitioned-write">Partitioned Write</a><ul><li><a class="table-of-contents__link toc-highlight" href="#partition-strategy">Partition Strategy</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#hive-style-partitioning">use_hive_partitioning setting</a><li><a class="table-of-contents__link toc-highlight" href="#using-shared-access-signatures-sas-sas-tokens">Using Shared Access Signatures (SAS)</a><li><a class="table-of-contents__link toc-highlight" href="#related">Related</a></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

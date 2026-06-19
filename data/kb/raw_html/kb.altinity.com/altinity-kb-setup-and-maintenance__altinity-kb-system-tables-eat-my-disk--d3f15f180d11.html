@@ -1,0 +1,83 @@
+<h1>System tables ate my disk | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">Regulating the size of System tables</li></ol></nav><div class="td-content"><h1>System tables ate my disk</h1><div class="lead">When the ClickHouse® SYSTEM database gets out of hand</div><blockquote><p><strong>Note 1:</strong> System database stores virtual tables (<strong>parts</strong>, <strong>tables,</strong> <strong>columns, etc.</strong>) and *<strong>_log</strong> tables.</p><p>Virtual tables do not persist on disk. They reflect ClickHouse® memory (c++ structures). They cannot be changed or removed.</p><p>Log tables are named with postfix *<strong>_log</strong> and have the <a href="/engines/mergetree-table-engine-family/">MergeTree engine</a>
+. ClickHouse does not use information stored in these tables, this data is for you only.</p><p>You can drop / rename / truncate *<strong>_log</strong> tables at any time. ClickHouse will recreate them in about 7 seconds (flush period).</p></blockquote><blockquote><p><strong>Note 2:</strong> Log tables with numeric postfixes (_1 / 2 / 3 …) <code>query_log_1 query_thread_log_3</code> are results of <a href="https://altinity.com/clickhouse-upgrade-overview/" target="_blank">ClickHouse upgrades</a>
+(or other changes of schemas of these tables). When a new version of ClickHouse starts and discovers that a system log table’s schema is incompatible with a new schema, then ClickHouse renames the old *_log table to the name with the prefix and creates a table with the new schema. You can drop such tables if you don’t need such historic data.</p></blockquote><h2 id="you-can-disable-all--any-of-them">You can disable all / any of them</h2><p>Do not create log tables at all (a restart is needed for these changes to take effect).</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/z_log_disable.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+    &lt;asynchronous_metric_log remove="1"/&gt;
+    &lt;asynchronous_insert_log remove="1"/&gt;
+    &lt;backup_log remove="1"/&gt;
+    &lt;error_log remove="1"/&gt;
+    &lt;metric_log remove="1"/&gt;
+    &lt;query_metric_log remove="1"/&gt;
+    &lt;query_thread_log remove="1" /&gt;  
+    &lt;query_log remove="1" /&gt;
+    &lt;query_views_log remove="1" /&gt;
+    &lt;part_log remove="1"/&gt;
+    &lt;session_log remove="1"/&gt;
+    &lt;text_log remove="1" /&gt;
+    &lt;trace_log remove="1"/&gt;
+    &lt;crash_log remove="1"/&gt;
+    &lt;opentelemetry_span_log remove="1"/&gt;
+    &lt;zookeeper_log remove="1"/&gt;
+    &lt;processors_profile_log remove="1"/&gt;
+    &lt;latency_log remove="1"/&gt;
+    &lt;background_schedule_pool_log remove="1"/&gt;
+    &lt;aggregated_zookeeper_log remove="1"/&gt;
+    &lt;zookeeper_connection_log remove="1"/&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>Hint: <code>z_log_disable.xml</code> is named with <strong>z_</strong> in the beginning, it means this config will be applied the last and will override all other config files with these sections (config are applied in alphabetical order).</p><p><strong>We do not recommend removing <code>query_log</code> as it has very useful information for debugging, and logging can be easily turned off without a restart through user profiles:</strong></p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/users.d/z_log_queries.xml
+&lt;clickhouse&gt;
+    &lt;profiles&gt;
+        &lt;default&gt;
+            &lt;log_queries&gt;0&lt;/log_queries&gt; &lt;!-- normally it's better to keep it turned on! --&gt;
+        &lt;/default&gt;
+    &lt;/profiles&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>You can also configure these settings to reduce the amount of data in the <code>system.query_log</code> table:</p><pre tabindex="0"><code class="language-markup" data-lang="markup">name                              | value       | description                                                                                                                                                       
+----------------------------------+-------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+log_queries_min_type              | QUERY_START | Minimal type in query_log to log, possible values (from low to high): QUERY_START, QUERY_FINISH, EXCEPTION_BEFORE_START, EXCEPTION_WHILE_PROCESSING.
+log_queries_min_query_duration_ms | 0           | Minimal time for the query to run, to get to the query_log/query_thread_log.
+log_queries_cut_to_length         | 100000      | If query length is greater than specified threshold (in bytes), then cut query when writing to query log. Also limit length of printed query in ordinary text log.
+log_profile_events                | 1           | Log query performance statistics into the query_log and query_thread_log.
+log_query_settings                | 1           | Log query settings into the query_log.
+log_queries_probability           | 1           | Log queries with the specified probabality.
+</code></pre><p>The other system log tables that can be disabled in profiles are:</p><ul><li>query_views_log</li><li>query_thread_log</li><li>processors_profile_log</li><li>query_metric_log</li><li>trace_log (<a href="https://clickhouse.com/docs/operations/system-tables/trace_log" rel="nofollow" target="_blank">https://clickhouse.com/docs/operations/system-tables/trace_log</a>
+)</li></ul><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/users.d/z_log_tables.xml
+&lt;clickhouse&gt;
+    &lt;profiles&gt;
+        &lt;default&gt;
+            &lt;log_query_views&gt;0&lt;/log_query_views&gt;
+            &lt;log_query_threads&gt;0&lt;/log_query_threads&gt;
+            &lt;log_processors_profiles&gt;0&lt;/log_processors_profiles&gt;
+            &lt;query_metric_log_interval&gt;0&lt;/query_metric_log_interval&gt;
+        &lt;/default&gt;
+    &lt;/profiles&gt;
+&lt;/clickhouse&gt;
+</code></pre><h2 id="you-can-configure-ttl">You can configure TTL</h2><p>Example for <code>query_log</code>. It drops partitions with data older than 14 days:</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/query_log_ttl.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+    &lt;query_log replace="1"&gt;
+        &lt;database&gt;system&lt;/database&gt;
+        &lt;table&gt;query_log&lt;/table&gt;
+        &lt;engine&gt;ENGINE = MergeTree PARTITION BY (event_date)
+                ORDER BY (event_time)
+                TTL event_date + INTERVAL 14 DAY DELETE
+        &lt;/engine&gt;
+        &lt;flush_interval_milliseconds&gt;7500&lt;/flush_interval_milliseconds&gt;
+    &lt;/query_log&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>After that you need to restart ClickHouse and <em>if using old clickhouse versions like 20 or less</em>, drop or rename the existing system.query_log table and then CH creates a new table with these settings. This is automatically done in newer versions 21+.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">RENAME</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TABLE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">query_log</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TO</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">query_log_1</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><p>Important part here is a daily partitioning <code>PARTITION BY (event_date)</code> in this case TTL expression <code>event_date + INTERVAL 14 DAY DELETE</code> expires all rows at the same time. In this case ClickHouse drops whole partitions. Dropping of partitions is very easy operation for CPU / Disk I/O.</p><p>Usual TTL processing (when table partitioned by toYYYYMM and TTL by day) is heavy CPU / Disk I/O consuming operation which re-writes data parts without expired rows.</p><p>You can <a href="/altinity-kb-queries-and-syntax/ttl/modify-ttl/">add TTL without ClickHouse restart</a>
+(and table dropping or renaming):</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">ALTER</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TABLE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">system</span><span style="color:#000;font-weight:700">.</span><span style="color:#000">query_log</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">MODIFY</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">TTL</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">event_date</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">+</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87">INTERVAL</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">14</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">DAY</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><p>But in this case ClickHouse will drop only whole monthly partitions (will store data older than 14 days).</p><h2 id="one-more-way-to-configure-ttl-for-system-tables">One more way to configure TTL for system tables</h2><p>This way just adds TTL to a table and leaves monthly (default) partitioning (will store data older than 14 days).</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/config.d/query_log_ttl.xml
+&lt;?xml version="1.0"?&gt;
+&lt;clickhouse&gt;
+    &lt;query_log&gt;
+        &lt;database&gt;system&lt;/database&gt;
+        &lt;table&gt;query_log&lt;/table&gt;
+        &lt;ttl&gt;event_date + INTERVAL 30 DAY DELETE&lt;/ttl&gt;
+    &lt;/query_log&gt;
+&lt;/clickhouse&gt;
+</code></pre><p>💡 For the <a href="https://github.com/Altinity/clickhouse-operator/blob/master/README.md" target="_blank">clickhouse-operator</a>
+, the above method of using only the <code>&lt;engine&gt;</code> tag without <code>&lt;ttl&gt;</code> or <code>&lt;partition&gt;</code> is recommended, because of possible configuration clashes.</p><p>After that you need to restart ClickHouse and <em>if using old clickhouse versions like 20 or less</em>, drop or rename the existing system.query_log table and then CH creates a new table with these settings. This is automatically done in newer versions 21+.</p><div class="td-page-meta__lastmod">Last modified 2026.04.29: <a href="https://github.com/Altinity/altinityknowledgebase/commit/2800f28df4622a4c6d907d549bebe44e96a141e9">Update altinity-kb-system-tables-eat-my-disk.md (2800f28)</a></div></div></main>

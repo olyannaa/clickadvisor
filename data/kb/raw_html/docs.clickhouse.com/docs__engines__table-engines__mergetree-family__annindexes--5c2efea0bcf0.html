@@ -1,0 +1,527 @@
+<h1>Exact and Approximate Vector Search | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Exact and Approximate Vector Search</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/annindexes.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Exact and Approximate Vector Search</h1></header><p>The problem of finding the N closest points in a multi-dimensional (vector) space for a given point is known as <a href="https://en.wikipedia.org/wiki/Nearest_neighbor_search" rel="noopener noreferrer" target="_blank">nearest neighbor search</a> or, in short: vector search.
+Two general approaches exist for solving vector search:</p>
+<ul class="custom-ul">
+<li class="custom-li">Exact vector search calculates the distance between the given point and all points in the vector space. This ensures the best possible accuracy, i.e. the returned points are guaranteed to be the actual nearest neighbors. Since the vector space is explored exhaustively, exact vector search can be too slow for real-world use.</li>
+<li class="custom-li">Approximate vector search refers to a group of techniques (e.g., special data structures like graphs and random forests) which compute results much faster than exact vector search. The result accuracy is typically "good enough" for practical use. Many approximate techniques provide parameters to tune the trade-off between the result accuracy and the search time.</li>
+</ul>
+<p>A vector search (exact or approximate) can be written in SQL as follows:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH [...] AS reference_vector
+SELECT [...]
+FROM table
+WHERE [...] -- a WHERE clause is optional
+ORDER BY &lt;DistanceFunction&gt;(vectors, reference_vector)
+LIMIT &lt;N&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The points in the vector space are stored in a column <code>vectors</code> of array type, e.g. <a href="/docs/sql-reference/data-types/array">Array(Float64)</a>, <a href="/docs/sql-reference/data-types/array">Array(Float32)</a>, or <a href="/docs/sql-reference/data-types/array">Array(BFloat16)</a>.
+The reference vector is a constant array and given as a common table expression.
+<code>&lt;DistanceFunction&gt;</code> computes the distance between the reference point and all stored points.
+Any of the available <a href="/docs/sql-reference/functions/distance-functions">distance function</a> can be used for that.
+<code>&lt;N&gt;</code> specifies how many neighbors should be returned.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="exact-nearest-neighbor-search">Exact vector search<a aria-label="Direct link to Exact vector search" class="hash-link" href="#exact-nearest-neighbor-search" title="Direct link to Exact vector search">​</a></h2>
+<p>An exact vector search can be performed using above SELECT query as is.
+The runtime of such queries is generally proportional to the number of stored vectors and their dimension, i.e. the number of array elements.
+Also, since ClickHouse performs a brute-force scan of all vectors, the runtime depends also on the number of threads by the query (see setting <a href="/docs/operations/settings/settings#max_threads">max_threads</a>).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="exact-nearest-neighbor-search-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#exact-nearest-neighbor-search-example" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab(id Int32, vec Array(Float32)) ENGINE = MergeTree ORDER BY id;
+
+INSERT INTO tab VALUES (0, [1.0, 0.0]), (1, [1.1, 0.0]), (2, [1.2, 0.0]), (3, [1.3, 0.0]), (4, [1.4, 0.0]), (5, [1.5, 0.0]), (6, [0.0, 2.0]), (7, [0.0, 2.1]), (8, [0.0, 2.2]), (9, [0.0, 2.3]), (10, [0.0, 2.4]), (11, [0.0, 2.5]);
+
+WITH [0., 2.] AS reference_vec
+SELECT id, vec
+FROM tab
+ORDER BY L2Distance(vec, reference_vec) ASC
+LIMIT 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>returns</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">   ┌─id─┬─vec─────┐
+1. │  6 │ [0,2]   │
+2. │  7 │ [0,2.1] │
+3. │  8 │ [0,2.2] │
+   └────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="approximate-nearest-neighbor-search">Approximate vector search<a aria-label="Direct link to Approximate vector search" class="hash-link" href="#approximate-nearest-neighbor-search" title="Direct link to Approximate vector search">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="vector-similarity-index">Vector Similarity Indexes<a aria-label="Direct link to Vector Similarity Indexes" class="hash-link" href="#vector-similarity-index" title="Direct link to Vector Similarity Indexes">​</a></h3>
+<p>ClickHouse provides a special "vector similarity" index to perform approximate vector search.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Vector similarity indexes are available in ClickHouse version 25.8 and higher.
+If you run into problems, kindly open an issue in the <a href="https://github.com/clickhouse/clickhouse/issues" rel="noopener noreferrer" target="_blank">ClickHouse repository</a>.</p></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="creating-a-vector-similarity-index">Creating a Vector Similarity Index<a aria-label="Direct link to Creating a Vector Similarity Index" class="hash-link" href="#creating-a-vector-similarity-index" title="Direct link to Creating a Vector Similarity Index">​</a></h4>
+<p>A vector similarity index can be created on a new table like this:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table
+(
+  [...],
+  vectors Array(Float*),
+  INDEX &lt;index_name&gt; vectors TYPE vector_similarity(&lt;type&gt;, &lt;distance_function&gt;, &lt;dimensions&gt;) [GRANULARITY &lt;N&gt;]
+)
+ENGINE = MergeTree
+ORDER BY [...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Alternatively, to add a vector similarity index to an existing table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table ADD INDEX &lt;index_name&gt; vectors TYPE vector_similarity(&lt;type&gt;, &lt;distance_function&gt;, &lt;dimensions&gt;) [GRANULARITY &lt;N&gt;];
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Vector similarity indexes are special kinds of skipping indexes (see <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-data_skipping-indexes">here</a> and <a href="/docs/optimize/skipping-indexes">here</a>).
+Accordingly, above <code>ALTER TABLE</code> statement only causes the index to be built for future new data inserted into the table.
+To build the index for existing data as well, you need to materialize it:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table MATERIALIZE INDEX &lt;index_name&gt; SETTINGS mutations_sync = 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Function <code>&lt;distance_function&gt;</code> must be</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>L2Distance</code>, the <a href="https://en.wikipedia.org/wiki/Euclidean_distance" rel="noopener noreferrer" target="_blank">Euclidean distance</a>, representing the length of a line between two points in Euclidean space,</li>
+<li class="custom-li"><code>cosineDistance</code>, the <a href="https://en.wikipedia.org/wiki/Cosine_similarity#Cosine_distance" rel="noopener noreferrer" target="_blank">cosine distance</a>, representing the angle between two non-zero vectors, or</li>
+<li class="custom-li"><code>dotProduct</code>, the <a href="https://en.wikipedia.org/wiki/Dot_product" rel="noopener noreferrer" target="_blank">dot product</a> (inner product), representing the sum of element-wise products of two vectors. Equivalent to <code>cosineDistance</code> on normalized data.</li>
+</ul>
+<p>For normalized data, <code>L2Distance</code> is usually the best choice, otherwise <code>cosineDistance</code> is recommended to compensate for scale.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>For distance functions <code>L2Distance</code> and <code>cosineDistance</code>, a smaller value means a higher similarity, whereas for <code>dotProduct</code>, a higher value means a higher similarity.
+As a result, vector indexes with <code>L2Distance</code> and <code>cosineDistance</code> can only be used by <code>SELECT [...] ORDER BY [...] ASC</code> queries (<code>ASC</code> is the default for <code>ORDER BY</code>), whereas vector indexes built for <code>dotProduct</code> can only be used by <code>SELECT [...] ORDER BY [...] DESC</code> queries.</p></div></div>
+<p><code>&lt;dimensions&gt;</code> specifies the array cardinality (number of elements) in the underlying column.
+If ClickHouse finds an array with a different cardinality during index creation, the index is discarded and an error is returned.</p>
+<p>The optional GRANULARITY parameter <code>&lt;N&gt;</code> refers to the size of the index granules (see <a href="/docs/optimize/skipping-indexes">here</a>).
+Unlike regular skip indexes, which use a default index granularity of 1, vector similarity indexes use 100 million as default index granularity.
+This value makes sure that only few indexes are build internally even for large parts.
+We recommend changing the index granularity only for advanced users who understand the implications of what they are doing (see <a href="#differences-to-regular-skipping-indexes">below</a>).</p>
+<p>Vector similarity indexes are generic in the sense that they can accommodate different approximate search method.
+The actually used method is specified by parameter <code>&lt;type&gt;</code>.
+As of now, the only available method is HNSW (<a href="https://arxiv.org/abs/1603.09320" rel="noopener noreferrer" target="_blank">academic paper</a>), a popular and state-of-the-art technique for approximate vector search based on hierarchical proximity graphs.
+If HNSW is used as type, users may optionally specify further HNSW-specific parameters:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE table
+(
+  [...],
+  vectors Array(Float*),
+  INDEX index_name vectors TYPE vector_similarity('hnsw', &lt;distance_function&gt;, &lt;dimensions&gt;[, &lt;quantization&gt;, &lt;hnsw_max_connections_per_layer&gt;, &lt;hnsw_candidate_list_size_for_construction&gt;]) [GRANULARITY N]
+)
+ENGINE = MergeTree
+ORDER BY [...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>These HNSW-specific parameters are available:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>&lt;quantization&gt;</code> controls the quantization of the vectors in the proximity graph. Possible values are <code>f64</code>, <code>f32</code>, <code>f16</code>, <code>bf16</code>, <code>i8</code>, or <code>b1</code>. The default value is <code>bf16</code>. Note that this parameter does not affect the representation of the vectors in the underlying column.</li>
+<li class="custom-li"><code>&lt;hnsw_max_connections_per_layer&gt;</code> controls the number of neighbors per graph node, also known as HNSW hyperparameter <code>M</code>. The default value is <code>32</code>. Value <code>0</code> means using the default value.</li>
+<li class="custom-li"><code>&lt;hnsw_candidate_list_size_for_construction&gt;</code> controls the size of the dynamic candidate list during construction of the HNSW graph, also known as HNSW hyperparameter <code>ef_construction</code>. The default value is <code>128</code>. Value <code>0</code> means using the default value.</li>
+</ul>
+<p>The default values of all HNSW-specific parameters work reasonably well in the majority of use cases.
+We therefore do not recommend customizing the HNSW-specific parameters.</p>
+<p>Further restrictions apply:</p>
+<ul class="custom-ul">
+<li class="custom-li">Vector similarity indexes can only be build on columns of type <a href="/docs/sql-reference/data-types/array">Array(Float32)</a>, <a href="/docs/sql-reference/data-types/array">Array(Float64)</a>, or <a href="/docs/sql-reference/data-types/array">Array(BFloat16)</a>. Arrays of nullable and low-cardinality floats such as <code>Array(Nullable(Float32))</code> and <code>Array(LowCardinality(Float32))</code> are not allowed.</li>
+<li class="custom-li">Vector similarity indexes must be build on single columns.</li>
+<li class="custom-li">Vector similarity indexes may be build on calculated expressions (e.g., <code>INDEX index_name arraySort(vectors) TYPE vector_similarity([...])</code>) but such indexes cannot be used for approximate neighbor search later on.</li>
+<li class="custom-li">Vector similarity indexes require that all arrays in the underlying column have <code>&lt;dimension&gt;</code>-many elements - this is checked during index creation. To detect violations of this requirement as early as possible, users can add a <a href="/docs/sql-reference/statements/create/table#constraints">constraint</a> for the vector column, e.g., <code>CONSTRAINT same_length CHECK length(vectors) = 256</code>.</li>
+<li class="custom-li">Likewise, array values in the underlying column must not be empty (<code>[]</code>) or have a default value (also <code>[]</code>).</li>
+</ul>
+<p><strong>Estimating storage and memory consumption</strong></p>
+<p>A vector generated for use with a typical AI model (e.g. a Large Language Model, <a href="https://en.wikipedia.org/wiki/Large_language_model" rel="noopener noreferrer" target="_blank">LLMs</a>) consists of hundreds or thousands of floating-point values.
+Thus, a single vector value can have a memory consumption of multiple kilobyte.
+Users who like to estimate the storage required for the underlying vector column in the table, as well as the main memory needed for the vector similarity index, can use below two formula:</p>
+<p>Storage consumption of the vector column in the table (uncompressed):</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Storage consumption = Number of vectors * Dimension * Size of column data type
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example for the <a href="https://huggingface.co/datasets/KShivendu/dbpedia-entities-openai-1M" rel="noopener noreferrer" target="_blank">dbpedia dataset</a>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Storage consumption = 1 million * 1536 * 4 (for Float32) = 6.1 GB
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The vector similarity index must be fully loaded from disk into main memory to perform searches.
+Similarly, the vector index is also constructed fully in memory and then saved to disk.</p>
+<p>Memory consumption required to load a vector index:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Memory for vectors in the index (mv) = Number of vectors * Dimension * Size of quantized data type
+Memory for in-memory graph (mg) = Number of vectors * hnsw_max_connections_per_layer * Bytes_per_node_id (= 4) * Layer_node_repetition_factor (= 2)
+
+Memory consumption: mv + mg
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example for the <a href="https://huggingface.co/datasets/KShivendu/dbpedia-entities-openai-1M" rel="noopener noreferrer" target="_blank">dbpedia dataset</a>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Memory for vectors in the index (mv) = 1 million * 1536 * 2 (for BFloat16) = 3072 MB
+Memory for in-memory graph (mg) = 1 million * 64 * 2 * 4 = 512 MB
+
+Memory consumption = 3072 + 512 = 3584 MB
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Above formula does not account for additional memory required by vector similarity indexes to allocate runtime data structures like pre-allocated buffers and caches.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="using-a-vector-similarity-index">Using a Vector Similarity Index<a aria-label="Direct link to Using a Vector Similarity Index" class="hash-link" href="#using-a-vector-similarity-index" title="Direct link to Using a Vector Similarity Index">​</a></h4>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>To use vector similarity indexes, setting <a href="/docs/operations/settings/settings">compatibility</a> has be <code>''</code> (the default value), or <code>'25.1'</code> or newer.</p></div></div>
+<p>Vector similarity indexes support SELECT queries of this form:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH [...] AS reference_vector
+SELECT [...]
+FROM table
+WHERE [...] -- a WHERE clause is optional
+ORDER BY &lt;DistanceFunction&gt;(vectors, reference_vector)
+LIMIT &lt;N&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse's query optimizer tries to match above query template and make use of available vector similarity indexes.
+A query can only use a vector similarity index if the distance function in the SELECT query is the same as the distance function in the index definition.</p>
+<p>Advanced users may provide a custom value for setting <a href="/docs/operations/settings/settings#hnsw_candidate_list_size_for_search">hnsw_candidate_list_size_for_search</a> (also know as HNSW hyperparameter "ef_search") to tune the size of the candidate list during search (e.g.  <code>SELECT [...] SETTINGS hnsw_candidate_list_size_for_search = &lt;value&gt;</code>).
+The default value of the setting 256 works well in the majority of use cases.
+Higher setting values mean better accuracy at the cost of slower performance.</p>
+<p>If the query can use a vector similarity index, ClickHouse checks that the LIMIT <code>&lt;N&gt;</code> provided in SELECT queries is within reasonable bounds.
+More specifically, an error is returned if <code>&lt;N&gt;</code> is bigger than the value of setting <a href="/docs/operations/settings/settings#max_limit_for_vector_search_queries">max_limit_for_vector_search_queries</a> with default value 100.
+Too large LIMIT values can slow down searches and usually indicate a usage error.</p>
+<p>To check if a SELECT query uses a vector similarity index, you can prefix the query with <code>EXPLAIN indexes = 1</code>.</p>
+<p>As an example, query</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1
+WITH [0.462, 0.084, ..., -0.110] AS reference_vec
+SELECT id, vec
+FROM tab
+ORDER BY L2Distance(vec, reference_vec) ASC
+LIMIT 10;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>may return</p>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">    ┌─explain─────────────────────────────────────────────────────────────────────────────────────────┐
+ 1. │ Expression (Project names)                                                                      │
+ 2. │   Limit (preliminary LIMIT (without OFFSET))                                                    │
+ 3. │     Sorting (Sorting for ORDER BY)                                                              │
+ 4. │       Expression ((Before ORDER BY + (Projection + Change column names to column identifiers))) │
+ 5. │         ReadFromMergeTree (default.tab)                                                         │
+ 6. │         Indexes:                                                                                │
+ 7. │           PrimaryKey                                                                            │
+ 8. │             Condition: true                                                                     │
+ 9. │             Parts: 1/1                                                                          │
+10. │             Granules: 575/575                                                                   │
+11. │           Skip                                                                                  │
+12. │             Name: idx                                                                           │
+13. │             Description: vector_similarity GRANULARITY 100000000                                │
+14. │             Parts: 1/1                                                                          │
+15. │             Granules: 10/575                                                                    │
+    └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this example, 1 million vectors in the <a href="https://huggingface.co/datasets/KShivendu/dbpedia-entities-openai-1M" rel="noopener noreferrer" target="_blank">dbpedia dataset</a>, each with dimension 1536, are stored in 575 granules, i.e. 1.7k rows per granule.
+The query asks for 10 neighbours and the vector similarity index finds these 10 neighbours in 10 separate granules.
+These 10 granules will be read during query execution.</p>
+<p>Vector similarity indexes are used if the output contains <code>Skip</code> and the name and type of the vector index (in the example, <code>idx</code> and <code>vector_similarity</code>).
+In this case, the vector similarity index dropped two of four granules, i.e. 50% of the data.
+The more granules can be dropped, the more effective index usage becomes.</p>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>To enforce index usage, you can run the SELECT query with setting <a href="/docs/operations/settings/settings#force_data_skipping_indices">force_data_skipping_indexes</a> (provide the index name as setting value).</p></div></div>
+<p><strong>Post-filtering and Pre-filtering</strong></p>
+<p>Users may optionally specify a <code>WHERE</code> clause with additional filter conditions for the SELECT query.
+ClickHouse will evaluate these filter conditions using post-filtering or pre-filtering strategy.
+In short, both strategies determine the order in which the filters are evaluated:</p>
+<ul class="custom-ul">
+<li class="custom-li">Post-filtering means that the vector similarity index is evaluated first, afterwards ClickHouse evaluates the additional filter(s) specified in the <code>WHERE</code> clause.</li>
+<li class="custom-li">Pre-filtering means that the filter evaluation order is the other way round.</li>
+</ul>
+<p>The strategies have different trade-offs:</p>
+<ul class="custom-ul">
+<li class="custom-li">Post-filtering has the general problem that it may return less than the number of rows requested in the <code>LIMIT &lt;N&gt;</code> clause. This situation happens when one or more result rows returned by the vector similarity index fails to satisfy the additional filters.</li>
+<li class="custom-li">Pre-filtering is generally an unsolved problem. Certain specialized vector databases provide pre-filtering algorithms but most relational databases (including ClickHouse) will fall back to exact neighbor search, i.e., a brute-force scan without index.</li>
+</ul>
+<p>What strategy is used depends on the filter condition.</p>
+<p><em>Additional filters are part of the partition key</em></p>
+<p>If the additional filter condition is part of the partition key, then ClickHouse will apply partition pruning.
+As an example, a table is range-partitioned by column <code>year</code> and the following query is run:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH [0., 2.] AS reference_vec
+SELECT id, vec
+FROM tab
+WHERE year = 2025
+ORDER BY L2Distance(vec, reference_vec) ASC
+LIMIT 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse will prune all partitions except the 2025 one.</p>
+<p><em>Additional filters cannot be evaluated using indexes</em></p>
+<p>If additional filter conditions cannot be evaluated using indexes (primary key index, skipping index), ClickHouse will apply post-filtering.</p>
+<p><em>Additional filters can be evaluated using the primary key index</em></p>
+<p>If additional filter conditions can be evaluated using the <a href="/docs/engines/table-engines/mergetree-family/mergetree#primary-key">primary key</a> (i.e., they form a prefix of the primary key) and</p>
+<ul class="custom-ul">
+<li class="custom-li">the filter condition eliminates at least one row within a part, the ClickHouse will fall back to pre-filtering for the "surviving" ranges within the part,</li>
+<li class="custom-li">the filter condition eliminates no rows within a part, the ClickHouse will perform post-filtering for the part.</li>
+</ul>
+<p>In practical use cases, the latter case is rather unlikely.</p>
+<p><em>Additional filters can be evaluated using skipping index</em></p>
+<p>If additional filter conditions can be evaluated using <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-data_skipping-indexes">skipping indexes</a> (minmax index, set index, etc.), Clickhouse performs post-filtering.
+In such cases, the vector similarity index is evaluated first as it is expected to remove the most rows relative to other skipping indexes.</p>
+<p>For finer control over post-filtering vs. pre-filtering, two settings can be used:</p>
+<p>Setting <a href="/docs/operations/settings/settings#vector_search_filter_strategy">vector_search_filter_strategy</a> (default: <code>auto</code> which implements above heuristics) may be set to <code>prefilter</code>.
+This is useful to force pre-filtering in cases where the additional filter conditions are extremely selective.
+As an example, the following query may benefit from pre-filtering:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bookid, author, title
+FROM books
+WHERE price &lt; 2.00
+ORDER BY cosineDistance(book_vector, getEmbedding('Books on ancient Asian empires'))
+LIMIT 10
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Assuming that only a very small number of books cost less than 2 dollar, post-filtering may return zero rows because the top 10 matches returned by the vector index could all be priced above 2 dollar.
+By forcing pre-filtering (add <code>SETTINGS vector_search_filter_strategy = 'prefilter'</code> to the query), ClickHouse first finds all books with a price of less than 2 dollar and then executes a brute-force vector search for the found books.</p>
+<p>As an alternative approach to resolve above issue, setting <a href="/docs/operations/settings/settings#vector_search_index_fetch_multiplier">vector_search_index_fetch_multiplier</a> (default: <code>1.0</code>, maximum: <code>1000.0</code>) may be configured to a value &gt; <code>1.0</code> (for example, <code>2.0</code>).
+The number of nearest neighbors fetched from the vector index is multiplied by the setting value and then the additional filter to be applied on those rows to return LIMIT-many rows.
+As an example, we can query again but with multiplier <code>3.0</code>:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT bookid, author, title
+FROM books
+WHERE price &lt; 2.00
+ORDER BY cosineDistance(book_vector, getEmbedding('Books on ancient Asian empires'))
+LIMIT 10
+SETTING vector_search_index_fetch_multiplier = 3.0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse will fetch 3.0 x 10 = 30 nearest neighbors from the vector index in each part and afterwards evaluate the additional filters.
+Only the ten closest neighbors will be returned.
+We note that setting <code>vector_search_index_fetch_multiplier</code> can mitigate the problem but in extreme cases (very selective WHERE condition), it is still possible that less than N requested rows returned.</p>
+<p><strong>Rescoring</strong></p>
+<p>Skip indexes in ClickHouse generally filter at the granule level, i.e. a lookup in a skip index (internally) returns a list of potentially matching granules which reduces the number of read data in the subsequent scan.
+This works well for skip indexes in general but in the case of vector similarity indexes, it creates a "granularity mismatch".
+In more detail, the vector similarity index determines the row numbers of the N most similar vectors for a given reference vector, but it then needs to extrapolate these row numbers to granule numbers.
+ClickHouse will then load these granules from disk, and repeat the distance calculation for all vectors in these granules.
+This step is called rescoring and while it can theoretically improve accuracy - remember the vector similarity index returns only an <em>approximate</em> result, it is obvious not optimal in terms of performance.</p>
+<p>ClickHouse therefore provides an optimization which disables rescoring and returns the most similar vectors and their distances directly from the index.
+The optimization is enabled by default, see setting <a href="/docs/operations/settings/settings#vector_search_with_rescoring">vector_search_with_rescoring</a>.
+The way it works at a high level is that ClickHouse makes the most similar vectors and their distances available as a virtual column <code>_distances</code>.
+To see this, run a vector search query with <code>EXPLAIN header = 1</code>:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN header = 1
+WITH [0., 2.] AS reference_vec
+SELECT id
+FROM tab
+ORDER BY L2Distance(vec, reference_vec) ASC
+LIMIT 3
+SETTINGS vector_search_with_rescoring = 0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">Query id: a2a9d0c8-a525-45c1-96ca-c5a11fa66f47
+
+    ┌─explain─────────────────────────────────────────────────────────────────────────────────────────────────┐
+ 1. │ Expression (Project names)                                                                              │
+ 2. │ Header: id Int32                                                                                        │
+ 3. │   Limit (preliminary LIMIT (without OFFSET))                                                            │
+ 4. │   Header: L2Distance(__table1.vec, _CAST([0., 2.]_Array(Float64), 'Array(Float64)'_String)) Float64     │
+ 5. │           __table1.id Int32                                                                             │
+ 6. │     Sorting (Sorting for ORDER BY)                                                                      │
+ 7. │     Header: L2Distance(__table1.vec, _CAST([0., 2.]_Array(Float64), 'Array(Float64)'_String)) Float64   │
+ 8. │             __table1.id Int32                                                                           │
+ 9. │       Expression ((Before ORDER BY + (Projection + Change column names to column identifiers)))         │
+10. │       Header: L2Distance(__table1.vec, _CAST([0., 2.]_Array(Float64), 'Array(Float64)'_String)) Float64 │
+11. │               __table1.id Int32                                                                         │
+12. │         ReadFromMergeTree (default.tab)                                                                 │
+13. │         Header: id Int32                                                                                │
+14. │                 _distance Float32                                                                       │
+    └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>A query run without rescoring (<code>vector_search_with_rescoring = 0</code>) and with parallel replicas enabled may fall back to rescoring.</p></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="performance-tuning">Performance tuning<a aria-label="Direct link to Performance tuning" class="hash-link" href="#performance-tuning" title="Direct link to Performance tuning">​</a></h4>
+<p><strong>Tuning compression</strong></p>
+<p>In virtually all use cases, the vectors in the underlying column are dense and do not compress well.
+As a result, <a href="/docs/sql-reference/statements/create/table#column_compression_codec">compression</a> slows down inserts and reads into/from the vector column.
+We therefore recommend to disable compression.
+To do that, specify <code>CODEC(NONE)</code> for the vector column like this:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab(id Int32, vec Array(Float32) CODEC(NONE), INDEX idx vec TYPE vector_similarity('hnsw', 'L2Distance', 2)) ENGINE = MergeTree ORDER BY id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Tuning index creation</strong></p>
+<p>The life cycle of vector similarity indexes is tied to the life cycle of parts.
+In other words, whenever a new part with defined vector similarity index is created, the index is create as well.
+This typically happens when data is <a href="https://clickhouse.com/docs/guides/inserting-data" rel="noopener noreferrer" target="_blank">inserted</a> or during <a href="https://clickhouse.com/docs/merges" rel="noopener noreferrer" target="_blank">merges</a>.
+Unfortunately, HNSW is known for long index creation times which can significantly slow down inserts and merges.
+Vector similarity indexes are ideally only used if the data is immutable or rarely changed.</p>
+<p>To speed up index creation, the following techniques can be used:</p>
+<p>First, index creation can be parallelized.
+The maximum number of index creation threads can be configured using server setting <a href="/docs/operations/server-configuration-parameters/settings#max_build_vector_similarity_index_thread_pool_size">max_build_vector_similarity_index_thread_pool_size</a>.
+For optimal performance, the setting value should be configured to the number of CPU cores.</p>
+<p>Second, to speed up INSERT statements, users may disable the creation of skipping indexes on newly inserted parts using session setting <a href="/docs/operations/settings/settings#materialize_skip_indexes_on_insert">materialize_skip_indexes_on_insert</a>.
+SELECT queries on such parts will fall back to exact search.
+Since inserted parts tend to be small compared to the total table size, the performance impact of that is expected to be negligible.</p>
+<p>Third, to speed up merges, users may disable the creation of skipping indexes on merged parts using session setting <a href="/docs/operations/settings/merge-tree-settings#materialize_skip_indexes_on_merge">materialize_skip_indexes_on_merge</a>.
+This, in conjunction with statement <a href="/docs/sql-reference/statements/alter/skipping-index#materialize-index">ALTER TABLE [...] MATERIALIZE INDEX [...]</a>, provides explicit control over the life cycle of vector similarity indexes.
+For example, index creation can be deferred until all data was ingested or until a period of low system load such as the weekend.</p>
+<p><strong>Tuning index usage</strong></p>
+<p>SELECT queries need to load vector similarity indexes into main memory to use them.
+To avoid that the same vector similarity index is loaded repeatedly into main memory, ClickHouse provides a dedicated in-memory cache for such indexes.
+The bigger this cache is, the fewer unnecessary loads will happen.
+The maximum cache size can be configured using server setting <a href="/docs/operations/server-configuration-parameters/settings#vector_similarity_index_cache_size">vector_similarity_index_cache_size</a>.
+By default, the cache can grow up to 5 GB in size.</p>
+<p>The following log messages (<code>system.text_log</code>) indicate that the vector similarity index is being loaded.
+If such messages appear repeatedly for different vector search queries, this indicates that the cache size is too low.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">2026-02-03 07:39:10.351635 [1386] f0ac5c85-1b1c-4f35-8848-87a1d1aa00ba : VectorSimilarityIndex Start loading vector similarity index
+
+&lt;...&gt;
+
+2026-02-03 07:40:25.217603 [1386] f0ac5c85-1b1c-4f35-8848-87a1d1aa00ba : VectorSimilarityIndex Loaded vector similarity index: max_level = 2, connectivity = 64, size = 1808111, capacity = 1808111, memory_usage = 8.00 GiB, bytes_per_vector = 4096, scalar_words = 1024, nodes = 1808111, edges = 51356964, max_edges = 233395072
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The vector similarity index cache stores vector index granules.
+If individual vector index granules are bigger than the cache size, they will not be cached.
+Therefore, please make sure to calculate the vector index size (based on the formula in "Estimating storage and memory consumption" or <a href="/docs/operations/system-tables/data_skipping_indices">system.data_skipping_indices</a>) and size the cache correspondingly.</p></div></div>
+<p><em>We reiterate that verifying and, if necessary, increasing the vector index cache should be the first step when investigating slow vector search queries.</em></p>
+<p>The current size of the vector similarity index cache is shown in <a href="/docs/operations/system-tables/metrics">system.metrics</a>:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT metric, value
+FROM system.metrics
+WHERE metric = 'VectorSimilarityIndexCacheBytes'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The cache hits and misses for a query with some query id can be obtained from <a href="/docs/operations/system-tables/query_log">system.query_log</a>:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SYSTEM FLUSH LOGS query_log;
+
+SELECT ProfileEvents['VectorSimilarityIndexCacheHits'], ProfileEvents['VectorSimilarityIndexCacheMisses']
+FROM system.query_log
+WHERE type = 'QueryFinish' AND query_id = '&lt;...&gt;'
+ORDER BY event_time_microseconds;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For production use-cases, we recommend that the cache is sized large enough so that all vector indexes remain in memory at all times.</p>
+<p><strong>Tuning quantization</strong></p>
+<p><a href="https://huggingface.co/blog/embedding-quantization" rel="noopener noreferrer" target="_blank">Quantization</a> is a technique to reduce the memory footprint of vectors and the computational costs of building and traversing vector indexes.
+ClickHouse vector indexes supports the following quantization options:</p>
+<table><thead><tr><th>Quantization<th>Name<th>Storage per dimension<tbody><tr><td>f32<td>Single precision<td>4 bytes<tr><td>f16<td>Half precision<td>2 bytes<tr><td>bf16 (default)<td>Half precision (brain float)<td>2 bytes<tr><td>i8<td>Quarter precision<td>1 byte<tr><td>b1<td>Binary<td>1 bit</td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<p>Quantization reduces the precision of vector searches compared to searching the original full-precision floating-point values (<code>f32</code>).
+However, on most datasets, half-precision brain float quantization (<code>bf16</code>) results in a negligible precision loss, therefore vector similarity indexes use this quantization technique by default.
+Quarter precision (<code>i8</code>) and binary (<code>b1</code>) quantization causes appreciable precision loss in vector searches.
+We recommend both quantizations only if the the size of the vector similarity index is significantly larger than the available DRAM size.
+In this case, we also suggest enabling rescoring (<a href="/docs/operations/settings/settings#vector_search_index_fetch_multiplier">vector_search_index_fetch_multiplier</a>, <a href="/docs/operations/settings/settings#vector_search_with_rescoring">vector_search_with_rescoring</a>) to improve accuracy.
+Binary quantization is only recommended for 1) normalized embeddings (i.e. vector length = 1, OpenAI models are usually normalized), and 2) if the cosine distance is used as distance function.
+Binary quantization internally uses the Hamming distance to construct and search the proximity graph.
+The rescoring step uses the original full-precision vectors stored in the table to identify the nearest neighbours via cosine distance.</p>
+<p><strong>Tuning data transfer</strong></p>
+<p>The reference vector in a vector search query is provided by the user and generally retrieved by making a call to a Large Language Model (LLM).
+Typical Python code which runs a vector search in ClickHouse might look like this</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-python"><code class="language-python">search_v = openai_client.embeddings.create(input = "[Good Books]", model='text-embedding-3-large', dimensions=1536).data[0].embedding
+
+params = {'search_v': search_v}
+result = chclient.query(
+   "SELECT id FROM items
+    ORDER BY cosineDistance(vector, %(search_v)s)
+    LIMIT 10",
+    parameters = params)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Embedding vectors (<code>search_v</code> in above snippet) could have a very large dimension.
+For example, OpenAI provides models that generate embeddings vectors with 1536 or even 3072 dimensions.
+In above code, the ClickHouse Python driver substitutes the embedding vector by a human readable string and subsequently send the SELECT query entirely as a string.
+Assuming the embedding vector consists of 1536 single-precision floating point values, the sent string reaches a length of 20 kB.
+This creates a high CPU usage for tokenizing, parsing and performing thousands of string-to-float conversions.
+Also, significant space is required in the ClickHouse server log file, causing bloat in <code>system.query_log</code> as well.</p>
+<p>Note that most LLM models return an embedding vector as a list or NumPy array of native floats.
+We therefore recommend Python applications to bind the reference vector parameter in binary form by using the following style:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-python"><code class="language-python">search_v = openai_client.embeddings.create(input = "[Good Books]", model='text-embedding-3-large', dimensions=1536).data[0].embedding
+
+params = {'$search_v_binary$': np.array(search_v, dtype=np.float32).tobytes()}
+result = chclient.query(
+   "SELECT id FROM items
+    ORDER BY cosineDistance(vector, reinterpret($search_v_binary$, 'Array(Float32)'))
+    LIMIT 10"
+    parameters = params)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In the example, the reference vector is sent as-is in binary form and reinterpreted as array of floats on the server.
+This saves CPU time on the server side, and avoids bloat in the server logs and <code>system.query_log</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="administration">Administration and monitoring<a aria-label="Direct link to Administration and monitoring" class="hash-link" href="#administration" title="Direct link to Administration and monitoring">​</a></h4>
+<p>The on-disk size of vector similarity indexes can be obtained from <a href="/docs/operations/system-tables/data_skipping_indices">system.data_skipping_indices</a>:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT database, table, name, formatReadableSize(data_compressed_bytes)
+FROM system.data_skipping_indices
+WHERE type = 'vector_similarity';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Example output:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">┌─database─┬─table─┬─name─┬─formatReadab⋯ssed_bytes)─┐
+│ default  │ tab   │ idx  │ 348.00 MB                │
+└──────────┴───────┴──────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="differences-to-regular-skipping-indexes">Differences to regular skipping indexes<a aria-label="Direct link to Differences to regular skipping indexes" class="hash-link" href="#differences-to-regular-skipping-indexes" title="Direct link to Differences to regular skipping indexes">​</a></h4>
+<p>As all regular <a href="/docs/optimize/skipping-indexes">skipping indexes</a>, vector similarity indexes are constructed over granules and each indexed block consists of <code>GRANULARITY = [N]</code>-many granules (<code>[N]</code> = 1 by default for normal skipping indexes).
+For example, if the primary index granularity of the table is 8192 (setting <code>index_granularity = 8192</code>) and <code>GRANULARITY = 2</code>, then each indexed block will contain 16384 rows.
+However, data structures and algorithms for approximate neighbor search are inherently row-oriented.
+They store a compact representation of a set of rows and also return rows for vector search queries.
+This causes some rather unintuitive differences in the way vector similarity indexes behave compared to normal skipping indexes.</p>
+<p>When a user defines a vector similarity index on a column, ClickHouse internally creates a vector similarity "sub-index" for each index block.
+The sub-index is "local" in the sense that it only knows about the rows of its containing index block.
+In the previous example and assuming that a column has 65536 rows, we obtain four index blocks (spanning eight granules) and a vector similarity sub-index for each index block.
+A sub-index is theoretically able to return the rows with the N closest points within its index block directly.
+However, since ClickHouse loads data from disk to memory at the granularity of granules, sub-indexes extrapolate matching rows to granule granularity.
+This is different from regular skipping indexes which skip data at the granularity of index blocks.</p>
+<p>The <code>GRANULARITY</code> parameter determines how many vector similarity sub-indexes are created.
+Bigger <code>GRANULARITY</code> values mean fewer but larger vector similarity sub-indexes, up to the point where a column (or a column's data part) has only a single sub-index.
+In that case, the sub-index has a "global" view of all column rows and can directly return all granules of the column (part) with relevant rows (there are at most <code>LIMIT [N]</code>-many such granules).
+In a second step, ClickHouse will load these granules and identify the actually best rows by performing a brute-force distance calculation over all rows of the granules.
+With a small <code>GRANULARITY</code> value, each of the sub-indexes returns up to <code>LIMIT N</code>-many granules.
+As a result, more granules need to be loaded and post-filtered.
+Note that the search accuracy is with both cases equally good, only the processing performance differs.
+It is generally recommended to use a large <code>GRANULARITY</code> for vector similarity indexes and fall back to a smaller <code>GRANULARITY</code> values only in case of problems like excessive memory consumption of the vector similarity structures.
+If no <code>GRANULARITY</code> was specified for vector similarity indexes, the default value is 100 million.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="approximate-nearest-neighbor-search-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#approximate-nearest-neighbor-search-example" title="Direct link to Example">​</a></h4>
+<p>Queries:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab(id Int32, vec Array(Float32), INDEX idx vec TYPE vector_similarity('hnsw', 'L2Distance', 2)) ENGINE = MergeTree ORDER BY id;
+
+INSERT INTO tab VALUES (0, [1.0, 0.0]), (1, [1.1, 0.0]), (2, [1.2, 0.0]), (3, [1.3, 0.0]), (4, [1.4, 0.0]), (5, [1.5, 0.0]), (6, [0.0, 2.0]), (7, [0.0, 2.1]), (8, [0.0, 2.2]), (9, [0.0, 2.3]), (10, [0.0, 2.4]), (11, [0.0, 2.5]);
+
+WITH [0., 2.] AS reference_vec
+SELECT id, vec
+FROM tab
+ORDER BY L2Distance(vec, reference_vec) ASC
+LIMIT 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-result"><code class="language-result">   ┌─id─┬─vec─────┐
+1. │  6 │ [0,2]   │
+2. │  7 │ [0,2.1] │
+3. │  8 │ [0,2.2] │
+   └────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Further example datasets that use approximate vector search:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/getting-started/example-datasets/laion-400m-dataset">LAION-400M</a></li>
+<li class="custom-li"><a href="/docs/getting-started/example-datasets/laion-5b-dataset">LAION-5B</a></li>
+<li class="custom-li"><a href="/docs/getting-started/example-datasets/dbpedia-dataset">dbpedia</a></li>
+<li class="custom-li"><a href="/docs/getting-started/example-datasets/hackernews-vector-search-dataset">hackernews</a></li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="approximate-nearest-neighbor-search-qbit">Quantized Bit (QBit)<a aria-label="Direct link to Quantized Bit (QBit)" class="hash-link" href="#approximate-nearest-neighbor-search-qbit" title="Direct link to Quantized Bit (QBit)">​</a></h3>
+<p>One common approach to speed up exact vector search is to use a lower-precision <a href="/docs/sql-reference/data-types/float">float data type</a>.
+For example, if vectors are stored as <code>Array(BFloat16)</code> instead of <code>Array(Float32)</code>, the data size is reduced by half, and query runtimes are expected to decrease proportionally.
+This method is known as quantization. While it speeds up computation, it may reduce result accuracy despite performing an exhaustive scan of all vectors.</p>
+<p>With traditional quantization, we lose precision both during search and when storing the data. In the example above, we would store <code>BFloat16</code> instead of <code>Float32</code>, meaning we can never perform a more accurate search later, even if desired. One alternative approach is to store two copies of the data: quantized and full-precision. While this works, it requires redundant storage. Consider a scenario where we have <code>Float64</code> as original data and want to run searches with different precision (16-bit, 32-bit, or full 64-bit). We would need to store three separate copies of the data.</p>
+<p>ClickHouse offers the Quantized Bit (<code>QBit</code>) data type that addresses these limitations by:</p>
+<ol class="custom-ol">
+<li class="custom-li">Storing the original full-precision data.</li>
+<li class="custom-li">Allowing quantization precision to be specified at query time.</li>
+</ol>
+<p>This is achieved by storing data in a bit-grouped format (meaning all i-th bits of all vectors are stored together), enabling reads at only the requested precision level. You get the speed benefits of reduced I/O and computation from quantization while keeping all original data available when needed. When maximum precision is selected, the search becomes exact.</p>
+<p>To declare a column of <code>QBit</code> type, use the following syntax:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">column_name QBit(element_type, dimension)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Where:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>element_type</code> – the type of each vector element. Supported types are <code>BFloat16</code>, <code>Float32</code>, and <code>Float64</code></li>
+<li class="custom-li"><code>dimension</code> – the number of elements in each vector</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="qbit-create">Creating a <code>QBit</code> Table and Adding Data<a aria-label="Direct link to qbit-create" class="hash-link" href="#qbit-create" title="Direct link to qbit-create">​</a></h4>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE fruit_animal (
+    word String,
+    vec QBit(Float64, 5)
+) ENGINE = MergeTree
+ORDER BY word;
+
+INSERT INTO fruit_animal VALUES
+    ('apple', [-0.99105519, 1.28887844, -0.43526649, -0.98520696, 0.66154391]),
+    ('banana', [-0.69372815, 0.25587061, -0.88226235, -2.54593015, 0.05300475]),
+    ('orange', [0.93338752, 2.06571317, -0.54612565, -1.51625717, 0.69775337]),
+    ('dog', [0.72138876, 1.55757105, 2.10953259, -0.33961248, -0.62217325]),
+    ('cat', [-0.56611276, 0.52267331, 1.27839863, -0.59809804, -1.26721048]),
+    ('horse', [-0.61435682, 0.48542571, 1.21091247, -0.62530446, -1.33082533]);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="qbit-search">Vector Search with <code>QBit</code><a aria-label="Direct link to qbit-search" class="hash-link" href="#qbit-search" title="Direct link to qbit-search">​</a></h4>
+<p>Let's find the nearest neighbors to a vector representing word 'lemon' using L2 distance. The third parameter in the distance function specifies the precision in bits - higher values provide more accuracy but require more computation.</p>
+<p>You can find all available distance functions for <code>QBit</code> <a href="/docs/sql-reference/data-types/qbit#vector-search-functions">here</a>.</p>
+<p><strong>Full precision search (64-bit):</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    word,
+    L2DistanceTransposed(vec, [-0.88693672, 1.31532824, -0.51182908, -0.99652702, 0.59907770], 64) AS distance
+FROM fruit_animal
+ORDER BY distance;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─word───┬────────────distance─┐
+1. │ apple  │ 0.14639757188169716 │
+2. │ banana │   1.998961369007679 │
+3. │ orange │   2.039041552613732 │
+4. │ cat    │   2.752802631487914 │
+5. │ horse  │  2.7555776805484813 │
+6. │ dog    │   3.382295083120104 │
+   └────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Reduced precision search:</strong></p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    word,
+    L2DistanceTransposed(vec, [-0.88693672, 1.31532824, -0.51182908, -0.99652702, 0.59907770], 12) AS distance
+FROM fruit_animal
+ORDER BY distance;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─word───┬───────────distance─┐
+1. │ apple  │  0.757668703053566 │
+2. │ orange │ 1.5499475034938677 │
+3. │ banana │ 1.6168396735102937 │
+4. │ cat    │  2.429752230904804 │
+5. │ horse  │  2.524650475528617 │
+6. │ dog    │   3.17766975527459 │
+   └────────┴────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Notice that with 12-bit quantization, we get a good approximation of the distances with faster query execution. The relative ordering remains largely consistent, with 'apple' still being the closest match.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="qbit-performance">Performance Considerations<a aria-label="Direct link to Performance Considerations" class="hash-link" href="#qbit-performance" title="Direct link to Performance Considerations">​</a></h4>
+<p>The performance benefit of <code>QBit</code> comes from reduced I/O operations, as less data needs to be read from storage when using lower precision. Moreover, when the <code>QBit</code> contains <code>Float32</code> data, if the precision parameter is 16 or below, there will be additional benefits from reduced computation. The precision parameter directly controls the trade-off between accuracy and speed:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Higher precision</strong> (closer to the original data width): More accurate results, slower queries</li>
+<li class="custom-li"><strong>Lower precision</strong>: Faster queries with approximate results, reduced memory usage</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="references">References<a aria-label="Direct link to References" class="hash-link" href="#references" title="Direct link to References">​</a></h3>
+<p>Blogs:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/blog/vector-search-clickhouse-p1" rel="noopener noreferrer" target="_blank">Vector Search with ClickHouse - Part 1</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/blog/vector-search-clickhouse-p2" rel="noopener noreferrer" target="_blank">Vector Search with ClickHouse - Part 2</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/blog/qbit-vector-search" rel="noopener noreferrer" target="_blank">We built a vector search engine that lets you choose precision at query time</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/graphitemergetree"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">GraphiteMergeTree</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/textindexes"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Full-text Search with Text Indexes</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#exact-nearest-neighbor-search">Exact vector search</a><ul><li><a class="table-of-contents__link toc-highlight" href="#exact-nearest-neighbor-search-example">Example</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#approximate-nearest-neighbor-search">Approximate vector search</a><ul><li><a class="table-of-contents__link toc-highlight" href="#vector-similarity-index">Vector Similarity Indexes</a><li><a class="table-of-contents__link toc-highlight" href="#approximate-nearest-neighbor-search-qbit">Quantized Bit (QBit)</a><li><a class="table-of-contents__link toc-highlight" href="#references">References</a></li></li></li></ul></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

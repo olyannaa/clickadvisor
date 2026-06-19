@@ -1,0 +1,480 @@
+<h1>ClickHouse and the MTA Data Challenge</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">ClickHouse and the MTA Data Challenge</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Fneutral_avatar_400804ae96.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fneutral_avatar_400804ae96.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fneutral_avatar_400804ae96.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/pme-team">PME Team</a></div><div class="text-sm text-neutral-300">Oct 24, 2024 · 21 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p>We love <a href="https://clickhouse.com/blog/clickhouse-1-trillion-row-challenge">open data challenges</a> at ClickHouse, so when we saw that MTA (Metropolitan Transportation Authority) had<a href="https://new.mta.info/article/mta-open-data-challenge"> announced such a challenge</a> on their website, we couldn’t resist the temptation to contribute. We’ve focused on the turnstile dataset allowing analysis of subway usage in NYC, making this available in our new playground where users can query the data for free.</p>
+<blockquote style="font-size:15px">
+<p>The MTA (Metropolitan Transportation Authority) operates public transportation systems in New York City, including subways, buses, and commuter rail services, serving millions of passengers daily. The MTA Open Data Challenge is a month-long competition aimed at developers and data enthusiasts. MTA encourages participants to use their datasets to create projects that creatively leverage the data, whether through web apps, visualizations, or reports. Submissions must use at least one dataset from data.ny.gov, and will be judged on creativity, utility, execution, and transparency.</p>
+</blockquote>
+<p>While the MTA challenge has 176 datasets to play around with, most of them are quite small, with only a few hundred rows. They still make excellent resources, but they aren’t really the volume of data to which ClickHouse is best suited.</p>
+<p>ClickHouse is an OLAP database designed for scale, and we, therefore, wanted to find the largest dataset to explore! This happens to be the <a href="https://data.ny.gov/browse?q=turnstile&amp;sortBy=relevance">turnstile dataset</a>, which contains 100 million rows over all the years. This dataset contains information on entry/exit values for turnstiles in New York City, thus allowing an analysis of the movement of people around the city. At first glance, this dataset seemed quite simple, but as we found out, it required significantly more effort to clean and provide in usable form than first expected.</p>
+<blockquote style="font-size:15px">
+<p>The dataset itself covers the years 2014 to 2022. A (much cleaner) version of the turnstile data is available for more recent years. We’ve also loaded this dataset and provided example queries. In the interest of making all of the data available, however, we focus on the historical data in this blog.</p>
+</blockquote>
+<p>In this post, we’ll explore the steps to load and clean this data to make it usable for further analysis so others can reproduce it in their own ClickHouse instance. This highlights some of the key features ClickHouse makes available for data engineering with many of the steps and queries reusable for other datasets.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="example_sql_clickhouse.png" loading="lazy" src="/uploads/example_sql_clickhouse_6b6cac3cb8.png"/></span>
+<p>For those just interested in the final dataset, we’ve made it available in our new <a href="https://sql.clickhouse.com">ClickHouse playground</a>, where we’ve got more than 220 queries and 35 datasets for you <a href="https://sql.clickhouse.com/?query_id=HPN5AHXEHK1NM2NB9S3AV2">to try out!</a> To contribute new queries and datasets, <a href="https://github.com/ClickHouse/sql.clickhouse.com">visit the demo repository</a>.</p>
+<blockquote style="font-size:14px">
+<p>All of the steps in this blog can be reproduced with<a href="https://clickhouse.com/docs/en/operations/utilities/clickhouse-local"> clickhouse-local</a>, an easy-to-use version of ClickHouse that is ideal for developers who need to perform fast processing on local and remote files using SQL without having to install a full database server.</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="initial-data-exploration-and-load" level="2">Initial data exploration and load<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#initial-data-exploration-and-load">#</a></span></h2>
+<p>To simplify loading, we’ve made the turnstile data (distributed as TSV files) available on a public bucket. We can explore the columns available with a simple S3 query. This relies on ClickHouse schema inference to infer the column types:</p>
+<pre style="font-size:13px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">DESCRIBE</span> <span class="hljs-keyword">TABLE</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv'</span>)
+SETTINGS describe_compact_output <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+
+┌─name───────────────────────────────────────────────────────┬─type────────────────────┐
+│ C<span class="hljs-operator">/</span>A                                                    	 │ Nullable(String)    	   │
+│ Unit                                                   	 │ Nullable(String)    	   │
+│ SCP                                                    	 │ Nullable(String)    	   │
+│ Station                                                	 │ Nullable(String)    	   │
+│ Line Name                                              	 │ Nullable(String)    	   │
+│ Division                                               	 │ Nullable(String)    	   │
+│ <span class="hljs-type">Date</span>                                                   	 │ Nullable(DateTime64(<span class="hljs-number">9</span>)) │
+│ <span class="hljs-type">Time</span>                                                   	 │ Nullable(String)    	   │
+│ Description                                            	 │ Nullable(String)    	   │
+│ Entries                                                	 │ Nullable(Int64)     	   │
+│ Exits                                                  	 │ Nullable(Int64)     	   │
+└────────────────────────────────────────────────────────────┴─────────────────────────┘
+
+
+<span class="hljs-number">11</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.309</span> sec.
+</code></pre>
+<p>If we sample the data and review the<a href="https://data.ny.gov/api/views/i55r-43gk/files/e348e3e7-9998-4e5e-926b-bdf04b62610e?download=true&amp;filename=MTA_SubwayTurnstileUsageData2014_Overview.pdf"> dataset description</a>, we can see that each row represents the entry and exit counts for a turnstile reported at a specific time. The description highlights these counts are reported periodically, so these statistics represent the previous period. Below, we query the data directly in S3 (in-place):</p>
+<pre style="font-size:13px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv'</span>)
+LIMIT <span class="hljs-number">1</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+C<span class="hljs-operator">/</span>A:                                                        A002
+Unit:                                                       R051
+SCP:                                                        <span class="hljs-number">02</span><span class="hljs-number">-00</span><span class="hljs-number">-00</span>
+Station:                                                    LEXINGTON AVE
+Line Name:                                                  NQR456
+Division:                                                   BMT
+<span class="hljs-type">Date</span>:                                                       <span class="hljs-number">2014</span><span class="hljs-number">-12</span><span class="hljs-number">-31</span> <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00.000000000</span>
+<span class="hljs-type">Time</span>:                                                       <span class="hljs-number">23</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>
+Description:                                                REGULAR
+Entries:                                                    <span class="hljs-number">4943320</span>
+Exits                                                     : <span class="hljs-number">1674736</span>
+
+<span class="hljs-number">1</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.113</span> sec.
+</code></pre>
+<p>For easier processing and to prevent repeated downloads of the data, we can load this data into a local table. To create this table from the inferred schema and load the data, we can use the following. </p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> subway_transits_2014_2022_raw
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> tuple() <span class="hljs-keyword">EMPTY</span>
+<span class="hljs-keyword">AS</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv'</span>)
+</code></pre>
+<p>This creates an empty table using the schema. We’ll use this as a staging table for data exploration only and, for now, omit<a href="https://clickhouse.com/docs/en/optimize/sparse-primary-indexes"> an ordering key</a>: Loading this data becomes a simple <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code>:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> subway_transits_2014_2022_raw
+SETTINGS max_insert_threads <span class="hljs-operator">=</span> <span class="hljs-number">16</span>, parallel_distributed_insert_select <span class="hljs-operator">=</span> <span class="hljs-number">2</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> s3Cluster(<span class="hljs-string">'default'</span>, <span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/mta/*.tsv'</span>)
+SETTINGS max_insert_threads <span class="hljs-operator">=</span> <span class="hljs-number">16</span>, parallel_distributed_insert_select <span class="hljs-operator">=</span> <span class="hljs-number">2</span>
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">39.236</span> sec. Processed <span class="hljs-number">94.88</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.82</span> GB (<span class="hljs-number">2.42</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">352.14</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">1.54</span> GiB.
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">count</span>()
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_raw
+
+┌──<span class="hljs-built_in">count</span>()─┐
+│ <span class="hljs-number">94875892</span> │ <span class="hljs-comment">-- 94.88 million</span>
+└──────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.002</span> sec.
+
+</code></pre>
+<blockquote style="font-size:14px">
+<p>We’ve applied some simple optimizations to speed up this load, such as using the s3Cluster function. You can read more about these in the<a href="https://clickhouse.com:8443/docs/en/integrations/s3/performance"> Optimizing for S3 Insert and Read Performance guide</a>*.  The above timings (and subsequent) are from our sql.clickhouse.com environment, which consists of 3 nodes, each with 30vCPUs. Your performance will vary, but given the size of the dataset will heavily depend on network connection.</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="schema-improvements" level="2">Schema improvements<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#schema-improvements">#</a></span></h2>
+<p>Examining the table schema reveals plenty of opportunities for optimization.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> subway_transits_2014_2022_raw
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> subway_transits_2014_2022_raw
+(
+	`C<span class="hljs-operator">/</span>A` Nullable(String),
+	`Unit` Nullable(String),
+	`SCP` Nullable(String),
+	`Station` Nullable(String),
+	`Line Name` Nullable(String),
+	`Division` Nullable(String),
+	`<span class="hljs-type">Date</span>` Nullable(DateTime64(<span class="hljs-number">9</span>)),
+	`<span class="hljs-type">Time</span>` Nullable(String),
+	`Description` Nullable(String),
+	`Entries` Nullable(Int64),
+	`Exits                                                 	` Nullable(Int64)
+)
+ENGINE <span class="hljs-operator">=</span> SharedMergeTree(<span class="hljs-string">'/clickhouse/tables/{uuid}/{shard}'</span>, <span class="hljs-string">'{replica}'</span>)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> tuple()
+</code></pre>
+<p>Aside from the column names being less than ideal (lowercase with no special chars is preferred), the Nullable type isn’t required. This<a href="https://clickhouse.com/docs/en/cloud/bestpractices/avoid-nullable-columns"> consumes additional space</a> to differentiate between a Null and empty value and should be avoided. Furthermore, our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Date</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Time</code> should be combined into a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">date_time</code> column - ClickHouse has a rich set of<a href="https://clickhouse.com/docs/en/sql-reference/functions/date-time-functions"> date time functions</a> that enable a DateTime type to be queried with respect to time, date, or both.</p>
+<p>A quick check of the<a href="https://data.ny.gov/api/views/ug6q-shqc/files/5fea1a03-cb1b-45af-b05f-a121019e949e?download=true&amp;filename=MTA_SubwayTurnstileUsageData2015_DataDictionary.pdf"> column descriptions for the data</a><span style="text-decoration:underline"> </span>reveals some additional opportunities for optimization. The entries and exits cannot exceed an Int32, after which they wrap around (separate issue), and can only be positive. Most of the String columns are also low cardinality, something we can confirm with a quick query:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+    uniq(`C<span class="hljs-operator">/</span>A`),
+    uniq(Unit),
+    uniq(SCP),
+    uniq(Station),
+    uniq(`Line Name`),
+    uniq(Division),
+    uniq(Description)
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_raw
+FORMAT Vertical
+
+Query id: c925aaa4<span class="hljs-number">-6302</span><span class="hljs-number">-41e4</span><span class="hljs-number">-9</span>f1e<span class="hljs-number">-1</span>ba88587c3bc
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+uniq(C<span class="hljs-operator">/</span>A):         <span class="hljs-number">762</span>
+uniq(Unit):        <span class="hljs-number">476</span>
+uniq(SCP):         <span class="hljs-number">334</span>
+uniq(Station):     <span class="hljs-number">579</span>
+uniq(Line Name):   <span class="hljs-number">130</span>
+uniq(Division):    <span class="hljs-number">7</span>
+uniq(Description): <span class="hljs-number">2</span>
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.959</span> sec. Processed <span class="hljs-number">94.88</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">10.27</span> GB (<span class="hljs-number">98.91</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">10.71</span> GB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">461.18</span> MiB.
+</code></pre>
+<p>It therefore makes sense to make these a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">LowCardinality(String)</code> type<a href="https://clickhouse.com/docs/en/data-compression/compression-in-clickhouse"> which will lead to better compression and faster queries</a>!</p>
+<p>Anyone from NYC will also be familiar with the line naming system. The column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Line Name</code> denotes the lines available from the turnstile i.e.</p>
+<p>“The train lines that stop at the station, such as 456”</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="4523572781_c8f1c3a4b6_o.jpg" loading="lazy" src="/uploads/4523572781_c8f1c3a4b6_o_711cf233fc.jpg"/></span>
+456 thus represents the 4, 5 and 6 lines. Glancing over the data revealed these aren’t consistently ordered. For example, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">456NQR</code> is the same as  <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">NQR456</code>:<!-- -->
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> `Line Name`
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_raw
+<span class="hljs-keyword">WHERE</span> (`Line Name` <span class="hljs-operator">=</span> <span class="hljs-string">'NQR456'</span>) <span class="hljs-keyword">OR</span> (`Line Name` <span class="hljs-operator">=</span> <span class="hljs-string">'456NQR'</span>)
+LIMIT <span class="hljs-number">1</span> <span class="hljs-keyword">BY</span> `Line Name`
+
+┌─Line Name─┐
+│ NQR456	│
+│ <span class="hljs-number">456</span>NQR	│
+└───────────┘
+
+<span class="hljs-number">2</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.059</span> sec. Processed <span class="hljs-number">94.88</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">1.20</span> GB (<span class="hljs-number">1.60</span> billion <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">20.20</span> GB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">105.88</span> MiB.
+</code></pre>
+<p>To simplify future queries we tokenize this string into an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Array(LowCardinality(String))</code> and sort the values.</p>
+<p>Finally, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">station</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">date_time</code> seem like reasonable first choices for<a href="https://clickhouse.com/docs/en/optimize/sparse-primary-indexes"> our ordering key</a>.</p>
+<p>Our table schema thus becomes:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> subway_transits_2014_2022_v1
+(
+   `ca` LowCardinality(String),
+   `unit` LowCardinality(String),
+   `scp` LowCardinality(String),
+   `station` LowCardinality(String),
+   `line_names` <span class="hljs-keyword">Array</span>(LowCardinality(String)),
+   `division` LowCardinality(String),
+   `date_time` DateTime32,
+   `description` LowCardinality(String),
+   `entries` UInt32,
+   `exits` UInt32
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (station, date_time)
+</code></pre>
+<p>We can load this data by reading from our earlier <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">subway_transits_2014_2022_raw</code> table, using a <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">SELECT</code> to transform the rows.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> subway_transits_2014_2022_v1 <span class="hljs-keyword">SELECT</span>
+	`C<span class="hljs-operator">/</span>A` <span class="hljs-keyword">AS</span> ca,
+	Unit <span class="hljs-keyword">AS</span> unit,
+	SCP <span class="hljs-keyword">AS</span> scp,
+	Station <span class="hljs-keyword">AS</span> station,
+	arraySort(ngrams(assumeNotNull(`Line Name`), <span class="hljs-number">1</span>)) <span class="hljs-keyword">AS</span> line_names,
+	Division <span class="hljs-keyword">AS</span> division,
+	parseDateTimeBestEffort(trimBoth(concat(<span class="hljs-built_in">CAST</span>(<span class="hljs-type">Date</span>, <span class="hljs-string">'Date32'</span>), <span class="hljs-string">' '</span>, <span class="hljs-type">Time</span>))) <span class="hljs-keyword">AS</span> date_time,
+	Description <span class="hljs-keyword">AS</span> description,
+	Entries <span class="hljs-keyword">AS</span> entries,
+	`Exits                                                 	` <span class="hljs-keyword">AS</span> exits
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_raw
+SETTINGS max_insert_threads <span class="hljs-operator">=</span> <span class="hljs-number">16</span>
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">4.235</span> sec. Processed <span class="hljs-number">94.88</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">14.54</span> GB (<span class="hljs-number">22.40</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">3.43</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="cleaning-the-mta-transit-dataset" level="2">Cleaning the MTA transit dataset<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#cleaning-the-mta-transit-dataset">#</a></span></h2>
+<p>Let’s now go through the steps that we took to clean the data. We found a couple of major issues, which we’ll go through in turn.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="challenge-1-cumulative-values-and-outliers" level="3">Challenge 1: cumulative values and outliers<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#challenge-1-cumulative-values-and-outliers">#</a></span></h3>
+<p>MTA provides a longer form<a href="https://data.ny.gov/api/views/ug6q-shqc/files/29edbef3-268e-461d-95f1-374b1c8a6f9d?download=true&amp;filename=MTA_SubwayTurnstileUsageData2015_Overview.pdf"> description of the data</a>, which provides insight into some data quality issues and challenges. Not least, the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">entries</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">exit</code> values are cumulative.</p>
+<p><em>&gt; Data is provided about every four hours for the cumulative register values for entries and exits for each turnstile, similar to odometer readings. The four-hour intervals will differ from other stations due to the need for staggering to prevent flooding the system with audit readings all at once. Systemwide, stations have been set to begin audit transmittal between 00 to 03 hours, then every four hours after the first audit of the day. The number of people who entered or exited a turnstile in a period can be obtained by comparing it to an earlier reading.</em></p>
+<p>These cumulative values are challenging to use and would require queries to compute time ordered derivatives for every turnstile.  We note that the 4 hour periodic delivery of data will make attributing usage of a station to specific periods still very imprecise. This is something we can't resolve, so counts below the granularity of this period are unlikely to be accurate.</p>
+<p>These values also have some clear data quality issues:</p>
+<p><em>&gt; Turnstile audits are often not available every four hours, turnstiles sometimes count down instead of up, exit and entry counters periodically get reset, and the timestamps for audits vary between turnstiles. In addition, the data is 10 digits long and will roll over to zero on overflow.</em></p>
+<p>Ideally we'd like to compute the number of entries and exits for each row based on the difference to the previous time value for the turnstile. This requires us to reliably be able to identify a turnstile.</p>
+<p>While turnstiles have an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">scp</code> identifier, this is not unique across stations. Instead we can use a combination of the scp, ca (booth identifier at station) and unit(remote unit ID of the station) to identify a specific station.</p>
+<p>To compute the number of entries and exits for each turnstile, requires a<a href="https://clickhouse.com/docs/en/sql-reference/window-functions"> window function</a>. The following computes the columns <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">entries_change</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">exits_change</code> for each row.</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">WITH</span> <span class="hljs-number">1000</span> <span class="hljs-keyword">AS</span> threshold_per_hour
+<span class="hljs-keyword">SELECT</span>
+    <span class="hljs-operator">*</span>,
+    <span class="hljs-keyword">any</span>(date_time) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_date_time,
+    <span class="hljs-keyword">any</span>(entries) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_entries,
+    <span class="hljs-keyword">any</span>(exits) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_exits,
+    dateDiff(<span class="hljs-string">'hour'</span>, p_date_time, date_time) <span class="hljs-keyword">AS</span> hours,
+    if((entries <span class="hljs-operator">&lt;</span> p_entries) <span class="hljs-keyword">OR</span> (((entries <span class="hljs-operator">-</span> p_entries) <span class="hljs-operator">/</span> if(hours <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span>, hours, <span class="hljs-number">1</span>)) <span class="hljs-operator">&gt;</span> threshold_per_hour), <span class="hljs-number">0</span>, entries <span class="hljs-operator">-</span> p_entries) <span class="hljs-keyword">AS</span> entries_change,
+    if((exits <span class="hljs-operator">&lt;</span> p_exits) <span class="hljs-keyword">OR</span> (((exits <span class="hljs-operator">-</span> p_exits) <span class="hljs-operator">/</span> if(hours <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span>, hours, <span class="hljs-number">1</span>)) <span class="hljs-operator">&gt;</span> threshold_per_hour), <span class="hljs-number">0</span>, exits <span class="hljs-operator">-</span> p_exits) <span class="hljs-keyword">AS</span> exits_change
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_v1
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span>
+    ca <span class="hljs-keyword">ASC</span>,
+    unit <span class="hljs-keyword">ASC</span>,
+    scp <span class="hljs-keyword">ASC</span>,
+    date_time <span class="hljs-keyword">ASC</span>
+</code></pre>
+<p>A few important points for the query:</p>
+<ul>
+<li>We order by <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ca</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">unit</code>, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">scp</code>, and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">date_time</code> (ascending). This ensures the rows for each turnstile are processed together in increasing time order, allowing us to compute the delta.</li>
+<li>The function creates a window for each turnstile using <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">PARTITION BY ca, unit, scp</code>. Within each window the data is again ordered by increasing time. The <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ROWS BETWEEN 1 PRECEDING AND CURRENT ROW</code> clause is used to add the columns <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">p_entries</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">p_exits</code>. These contain the previous entries and exit values for each row. The time from the previous row is captured in <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">p_date_time</code>.</li>
+<li>The columns <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">entries_change</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">exits_change</code> contain the delta between the previous and current values for the entries and exits, respectively. Importantly, if the change is negative, we return a value of 0, assuming this represents a rollover. Additionally, an analysis of the data revealed <strong>significant outlier values</strong> where the change would be unrealistically high e.g. 10,000 people used a turnstile in an hour. If the change exceeds a threshold of N per hour (1000), we also return 0 to filter out these values. Choosing a value threshold was based on the number of realistic people who could pass through a turnstile in our hour (<a href="https://www.turnstiles.us/turnstile-passthrough-rates-how-many-people-can-pass-per-minute/">10-15 people per minute</a>). This approach is imperfect with more sophisticated approaches which consider historical trends possible.</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="challenge-2-missinginconsistent-station-names" level="3">Challenge 2: missing/inconsistent station names<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#challenge-2-missinginconsistent-station-names">#</a></span></h3>
+<p>While the datasets for each year use the same schema, the <a href="https://data.ny.gov/Transportation/MTA-Subway-Turnstile-Usage-Data-2022/k7j9-jnct/about_data">dataset for 2022</a> is missing station names.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> toYear(date_time) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">year</span>
+<span class="hljs-keyword">FROM</span> mta.subway_transits_2014_2022_v1
+<span class="hljs-keyword">WHERE</span> station <span class="hljs-operator">=</span> <span class="hljs-string">''</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">year</span>
+
+   ┌─<span class="hljs-keyword">year</span>─┐
+<span class="hljs-number">1.</span> │ <span class="hljs-number">2022</span> │
+   └──────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.016</span> sec. Processed <span class="hljs-number">10.98</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">54.90</span> MB (<span class="hljs-number">678.86</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">3.39</span> GB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">98.99</span> MiB.
+</code></pre>
+<p>To make this dataset more usable, we would ideally populate the station name for 2022 based on a unique turnstile id to station name mapping (populated from earlier data).</p>
+<p>However, if we analyze the station names, we can see they are rarely consistent, even for the same turnstile! For example, inconsistent use of <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">AV</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">AVE</code> for “avenue” appears to result in multiple entries for the same station.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> station
+<span class="hljs-keyword">FROM</span> subway_transits_2014_2022_v1
+<span class="hljs-keyword">WHERE</span> station <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%AV%'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> station <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+FORMAT PrettyCompactMonoBlock
+
+┌─station──────┐
+│ <span class="hljs-number">1</span> AV         │
+│ <span class="hljs-number">1</span> AVE        │
+│ <span class="hljs-number">138</span> ST<span class="hljs-number">-3</span> AVE │
+│ <span class="hljs-number">14</span> ST<span class="hljs-number">-6</span> AVE  │
+│ <span class="hljs-number">149</span> ST<span class="hljs-number">-3</span> AVE │
+│ <span class="hljs-number">18</span> AV        │
+│ <span class="hljs-number">18</span> AVE       │
+│ <span class="hljs-number">2</span> AV         │
+│ <span class="hljs-number">2</span> AVE        │
+│ <span class="hljs-number">20</span> AV        │
+└──────────────┘
+
+<span class="hljs-number">10</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.024</span> sec. Processed <span class="hljs-number">36.20</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">41.62</span> MB (<span class="hljs-number">1.53</span> billion <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">1.75</span> GB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">26.68</span> MiB.
+</code></pre>
+<p>If we can establish a turnstile to station name mapping, we can address simple issues like this by just picking one of the names consistently (e.g. always the longest) and remapping all of the data. Note this won't address more complex mappings, such as mapping the names '42 ST-TIMES SQ', and 'TIMES SQ-42 ST' to "TIMES SQ". We can defer these to query time for now.</p>
+<p>To hold our mapping, we can use a dictionary. This in-memory structure will allow a station name lookup by a tuple of <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">(ca, unit, scp)</code> . We populate this dictionary with the query shown below, selecting the longest station name for each turnstile. The latter is achieved by producing a distinct list of station names assigned to each <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">(ca, unit, scp)</code> via the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">groupArrayDistinct</code> function. This is then sorted by length, with the first (longest) entry selected.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> DICTIONARY station_names
+(
+`ca` String,
+`unit` String,
+`scp` String,
+`station_name` String
+)
+<span class="hljs-keyword">PRIMARY</span> KEY (ca, unit, scp)
+SOURCE(CLICKHOUSE(QUERY $query$
+   <span class="hljs-keyword">SELECT</span>
+       ca,
+       unit,
+       scp,
+       arrayReverseSort(station <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> length(station), groupArrayDistinct(station))[<span class="hljs-number">1</span>] <span class="hljs-keyword">AS</span> station_name
+   <span class="hljs-keyword">FROM</span> subway_transits_2014_2022_v1
+   <span class="hljs-keyword">WHERE</span> station <span class="hljs-operator">!=</span> <span class="hljs-string">''</span>
+   <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span>
+       ca,
+       unit,
+       scp
+$query$))
+LIFETIME(MIN <span class="hljs-number">0</span> MAX <span class="hljs-number">0</span>)
+LAYOUT(complex_key_hashed())
+</code></pre>
+<blockquote style="font-size:15px">
+<p>For more details on dictionaries, including the types available and how to configure them, see the Dictionaries documentation.</p>
+</blockquote>
+<p>We can efficiently retrieve a specific station name using the dictGet` function. For example:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> dictGet(station_names, <span class="hljs-string">'station_name'</span>, (<span class="hljs-string">'R148'</span>, <span class="hljs-string">'R033'</span>, <span class="hljs-string">'01-04-01'</span>))
+
+┌─name───────────┐
+│ <span class="hljs-number">42</span> ST<span class="hljs-operator">-</span>TIMES SQ │
+└────────────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.001</span> sec.
+</code></pre>
+<blockquote style="font-size:15px">
+<p>Note the first time the dictionary is invoked, the request might be slow depending on whether the data is loaded eagerly on creation or lazily on the first request. This can be<a href="https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#dictionaries_lazy_load"> configured using dictionaries_lazy_load</a>.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="combining-solutions-for-final-data" level="3">Combining solutions for final data<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#combining-solutions-for-final-data">#</a></span></h3>
+<p>We can now combine our window function and dictionary lookup to produce a final version of the data. The idea here is simple: execute a query using the window function and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">dictGet</code> against v1 of our table, inserting the results into a new table. Our final table schema:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> mta.subway_transits_2014_2022_v2
+(
+    `ca` LowCardinality(String),
+    `unit` LowCardinality(String),
+    `scp` LowCardinality(String),
+    `line_names` <span class="hljs-keyword">Array</span>(LowCardinality(String)),
+    `division` LowCardinality(String),
+    `date_time` DateTime,
+    `description` LowCardinality(String),
+    `entries` UInt32,
+    `exits` UInt32,
+    `station` LowCardinality(String),
+    `entries_change` UInt32,
+    `exits_change` UInt32
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (ca, unit, scp, date_time)
+</code></pre>
+<p>Using an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code>:</p>
+<pre style="font-size:14px"><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> mta.subway_transits_2014_2022_v2 <span class="hljs-keyword">WITH</span> <span class="hljs-number">2000</span> <span class="hljs-keyword">AS</span> threshold_per_hour  <span class="hljs-keyword">SELECT</span>
+   ca, unit, scp, line_names, division, date_time, description, entries, exits,
+   dictGet(station_names, <span class="hljs-string">'station_name'</span>, (ca, unit, scp)) <span class="hljs-keyword">as</span> station,
+   entries_change, exits_change
+<span class="hljs-keyword">FROM</span>
+(
+  <span class="hljs-keyword">SELECT</span>
+       <span class="hljs-operator">*</span>,
+       <span class="hljs-keyword">any</span>(date_time) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_date_time,
+       <span class="hljs-keyword">any</span>(entries) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_entries,
+       <span class="hljs-keyword">any</span>(exits) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> ca, unit, scp <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> date_time <span class="hljs-keyword">ASC</span> <span class="hljs-keyword">ROWS</span> <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">1</span> PRECEDING <span class="hljs-keyword">AND</span> <span class="hljs-keyword">CURRENT</span> <span class="hljs-type">ROW</span>) <span class="hljs-keyword">AS</span> p_exits,
+       dateDiff(<span class="hljs-string">'hour'</span>, p_date_time, date_time) <span class="hljs-keyword">AS</span> hours,
+       if((entries <span class="hljs-operator">&lt;</span> p_entries) <span class="hljs-keyword">OR</span> (((entries <span class="hljs-operator">-</span> p_entries) <span class="hljs-operator">/</span> if(hours <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span>, hours, <span class="hljs-number">1</span>)) <span class="hljs-operator">&gt;</span> threshold_per_hour), <span class="hljs-number">0</span>, entries <span class="hljs-operator">-</span> p_entries) <span class="hljs-keyword">AS</span> entries_change,
+       if((exits <span class="hljs-operator">&lt;</span> p_exits) <span class="hljs-keyword">OR</span> (((exits <span class="hljs-operator">-</span> p_exits) <span class="hljs-operator">/</span> if(hours <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span>, hours, <span class="hljs-number">1</span>)) <span class="hljs-operator">&gt;</span> threshold_per_hour), <span class="hljs-number">0</span>, exits <span class="hljs-operator">-</span> p_exits) <span class="hljs-keyword">AS</span> exits_change
+   <span class="hljs-keyword">FROM</span> subway_transits_2014_2022_v1
+   <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span>
+       ca <span class="hljs-keyword">ASC</span>,
+       unit <span class="hljs-keyword">ASC</span>,
+       scp <span class="hljs-keyword">ASC</span>,
+       date_time <span class="hljs-keyword">ASC</span>
+  
+) SETTINGS max_insert_threads<span class="hljs-operator">=</span><span class="hljs-number">16</span>
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">24.305</span> sec. Processed <span class="hljs-number">94.88</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">2.76</span> GB (<span class="hljs-number">3.90</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">113.67</span> MB<span class="hljs-operator">/</span>s.)
+
+</code></pre>
+<p>Our final table:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> mta.subway_transits_2014_2022_v2
+LIMIT <span class="hljs-number">1</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+ca:             A002
+unit:           R051
+scp:            <span class="hljs-number">02</span><span class="hljs-number">-00</span><span class="hljs-number">-00</span>
+line_names:     [<span class="hljs-string">'4'</span>,<span class="hljs-string">'5'</span>,<span class="hljs-string">'6'</span>,<span class="hljs-string">'N'</span>,<span class="hljs-string">'Q'</span>,<span class="hljs-string">'R'</span>]
+division:       BMT
+date_time:      <span class="hljs-number">2014</span><span class="hljs-number">-01</span><span class="hljs-number">-02</span> <span class="hljs-number">03</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>
+description:    REGULAR
+entries:        <span class="hljs-number">4469306</span>
+exits:          <span class="hljs-number">1523801</span>
+station:        LEXINGTON AVE
+entries_change: <span class="hljs-number">0</span>
+exits_change:   <span class="hljs-number">0</span>
+
+<span class="hljs-number">1</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.005</span> sec.
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="sample-queries-for-the-mta-transit-dataset" level="2">Sample queries for the MTA transit dataset<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#sample-queries-for-the-mta-transit-dataset">#</a></span></h2>
+<p>You can run the following queries in the ClickHouse playground. We’ve provided some default charts for each query to get you started.</p>
+<p><strong>If you’d like to suggest further queries or improvements, for the MTA dataset or others, please don’t hesitate to reach out and raise an issue on the<a href="https://github.com/ClickHouse/sql.clickhouse.com"> demo’s repo</a>.</strong></p>
+<p>Lets first confirm the most popular stations align with official figures. For example, we’ll use 2018:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+
+SELECT
+    station,
+    sum(entries_change) AS total_entries,
+    formatReadableQuantity(total_entries) AS total_entries_read
+FROM mta.subway_transits_2014_2022_v2
+WHERE toYear(date_time) = '2018'
+GROUP BY station
+ORDER BY sum(entries_change) DESC
+LIMIT 10
+
+</div> <a href="https://sql.clickhouse.com/?query_id=4MGH76GE6QN6WA6H8TCYKR&amp;run_query=true&amp;tab=charts" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="query_1.png" loading="lazy" src="/uploads/query_1_cb5c5d11bc.png"/></span>
+<p>The quality of our results is impacted by both the data, which is extremely noisy, and the method we used to remove outliers. However, these do appear to align with the<a href="https://new.mta.info/agency/new-york-city-transit/subway-bus-ridership-2022"> high-level numbers reported by MTA</a>. Note also that some station entries, such as Times Square, have separate entry points in our data, i.e., '42 ST-TIMES SQ' and 'TIMES SQ-42 ST' to'TIMES SQ`. We leave this cleanup exercise as a to-do and currently resolve using conditionals at query time.</p>
+<p>If we examine the traffic for the top 10 stations over the full period, the decline as a result of COVID is obvious:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+
+SELECT
+    station,
+    toYear(date_time) AS year,
+    sum(entries_change) AS total_entries
+FROM mta.subway_transits_2014_2022_v2
+WHERE station IN (
+    SELECT station
+    FROM mta.subway_transits_2014_2022_v2
+    GROUP BY station
+    ORDER BY sum(entries_change) DESC
+    LIMIT 10
+)
+GROUP BY
+    year,
+    station
+ORDER BY year ASC
+
+</div> <a href="https://sql.clickhouse.com/?query_id=KADCUSBZG3UWVV2N4QUJXW&amp;run_query=true&amp;tab=charts" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="query_2.png" loading="lazy" src="/uploads/query_2_cd8cd4544f.png"/></span>
+<p>Despite our efforts, this data still remains very noisy. There are obvious anomalies which require further efforts to remove - we welcome suggestions on approaches. Conversely, the transit data from 2022 appears to be much more reliable and of higher quality. We’ve also loaded this into the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">transit_data</code> table and provided some example queries.</p>
+<p>Using this data, we can observe daily commuter patterns to show which stations are busy during which rush hour:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+
+SELECT
+    station_complex,
+    toHour(hour_of_day) AS hour,
+    CAST(avg(total_entries), 'UInt64') AS avg_entries
+FROM
+(
+    SELECT
+        toStartOfHour(transit_timestamp) AS hour_of_day,
+        station_complex,
+        sum(ridership) AS total_entries
+    FROM mta.transit_data
+    WHERE toDayOfWeek(transit_timestamp) &lt;= 5
+    GROUP BY
+        station_complex,
+        hour_of_day
+)
+GROUP BY
+    hour,
+    station_complex
+ORDER BY
+    hour ASC,
+    avg_entries DESC
+LIMIT 3 BY hour
+
+</div> <a href="https://sql.clickhouse.com/?query_id=HPN5AHXEHK1NM2NB9S3AV2&amp;run_query=true&amp;tab=charts" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="query_3.png" loading="lazy" src="/uploads/query_3_571e11865d.png"/></span>
+<p>We can also easily compare weekend vs weekday traffic. This highlights some obvious times of the year e.g. 4th July, when commuter traffic is significantly lower.</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+
+SELECT
+    toStartOfWeek(transit_timestamp) AS week,
+    'weekday' AS period,
+    sum(ridership) AS total
+FROM mta.transit_data
+WHERE toDayOfWeek(transit_timestamp) &lt;= 5
+GROUP BY week
+ORDER BY week ASC
+UNION ALL
+SELECT
+    toStartOfWeek(transit_timestamp) AS week,
+    'weekend' AS period,
+    sum(ridership) AS total
+FROM mta.transit_data
+WHERE toDayOfWeek(transit_timestamp) &gt; 5
+GROUP BY week
+ORDER BY week ASC
+
+</div> <a href="https://sql.clickhouse.com/?query_id=STHDUVXOFZFGF2JCHJGB5Y&amp;run_query=true&amp;tab=charts" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="query_4.png" loading="lazy" src="/uploads/query_4_07bce635ab.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="conclusion" level="2">Conclusion<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-mta-data-challenge-subway-transits-demo#conclusion">#</a></span></h2>
+<p>We had fun working on the MTA challenge (at least as much fun as you can have when cleaning data!) and hope that our work has made it easier for everyone to do some fun analysis of the data.</p>
+<p>We’d love it if you shared any queries (and charts) you came up with on the <a href="https://github.com/ClickHouse/sql.clickhouse.com">demo repository</a>.</p></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

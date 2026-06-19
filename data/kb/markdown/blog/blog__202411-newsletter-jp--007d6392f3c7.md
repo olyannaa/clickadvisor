@@ -1,0 +1,250 @@
+# 2024年11月のニュースレター
+
+
+リアルタイムデータウェアハウス領域でこの1ヶ月に起きた出来事をまとめた、2024年11月のClickHouseニュースレターへようこそ。
+
+
+今回の大きなニュースは、Refreshable Materialized Viewsが本番運用可能になったことと、公式のDockerイメージが公開されたことです。
+
+
+さらに、Alexey Milovidovが「Data Talks on the Rocks」にゲスト出演したり、Dictionaryを活用してクエリを簡素化する方法を紹介したり、新しいJSONデータ型について掘り下げたりと盛りだくさんな内容になっています。
+
+
+ 
+
+
+## 今月の内容 [\#](/jp/blog/202411-newsletter-jp#%E4%BB%8A%E6%9C%88%E3%81%AE%E5%86%85%E5%AE%B9)
+
+
+- [注目のコミュニティメンバー](https://clickhouse.com/blog/202411-newsletter#featured-community-member)
+- [今後のイベント](https://clickhouse.com/blog/202411-newsletter#upcoming-events)
+- [バージョン24\.10リリース](https://clickhouse.com/blog/202411-newsletter#2410-release)
+- [Data Talks on the Rocks に登場したAlexey Milovidov](https://clickhouse.com/blog/202411-newsletter#alexey-milovidov-on-data-talks-on-the-rocks)
+- [ClickHouseの辞書機能でクエリを簡素化](https://clickhouse.com/blog/202411-newsletter#simplifying-queries-with-clickhouse-dictionaries)
+- [Alpha VantageとClickHouseで構築する金融データパイプライン](https://clickhouse.com/blog/202411-newsletter#building-a-financial-data-pipeline-with-alpha-vantage-and-clickhouse)
+- [新しい強力なJSONデータ型をClickHouseに実装した方法](https://clickhouse.com/blog/202411-newsletter#how-we-built-a-new-powerful-json-data-type-for-clickhouse)
+- [ClickHouse Cloudライブアップデート：2024年11月版](https://clickhouse.com/blog/202411-newsletter#clickhouse-cloud-live-update-november-2024)
+- [ちょっとした読み物](https://clickhouse.com/blog/202411-newsletter#quick-reads)
+- [今月の投稿](https://clickhouse.com/blog/202411-newsletter#post-of-the-month)
+
+
+ 
+
+
+## AWS re でお会いしましょう [\#](/jp/blog/202411-newsletter-jp#aws-re-%E3%81%A7%E3%81%8A%E4%BC%9A%E3%81%84%E3%81%97%E3%81%BE%E3%81%97%E3%82%87%E3%81%86)
+
+
+![aws-reinvent-202411.png](/uploads/aws_reinvent_202411_0edd3daa88.png)
+re:Inventに参加される方はいらっしゃいますか？ 私たちも参加するので、ぜひお会いしましょう！
+
+
+事前に [sales@clickhouse.com](mailto:sales@clickhouse.com) へメールしてミーティングの予約をするか、当日ブース(\#1737\)にお立ち寄りください：
+
+
+- [私たちの3人の創設者](https://clickhouse.com/company/our-story)（Aaron、Alexey、Yury）と直接会える機会
+- ライブデモ
+- 限定グッズ
+- そしてClickHouseのエキスパートとのおしゃべり
+
+
+さらに、The Chainsmokersと一緒にClickHouse House Partyも開催します。見逃せない最高の夜になること間違いなしです！
+
+
+![house-party-202411.png](/uploads/house_party_202411_ba778b3256.png)
+
+[The Chainsmokersのパーティーに登録する](https://clickhouse.com/houseparty/vegas-2024)
+
+
+
+ 
+
+
+## 今月の注目コミュニティメンバー [\#](/jp/blog/202411-newsletter-jp#%E4%BB%8A%E6%9C%88%E3%81%AE%E6%B3%A8%E7%9B%AE%E3%82%B3%E3%83%9F%E3%83%A5%E3%83%8B%E3%83%86%E3%82%A3%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC)
+
+
+今月の注目コミュニティメンバーは、[Weights \& Biases](https://wandb.ai?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter)の共同創業者兼CEOであるLukas Biewaldさんです。
+
+
+![featured-202411.png](/uploads/featured_202411_c82ec62b60.png)
+
+Lukasさんは機械学習の分野で20年の経験を持ち、以前はChris Van Pelt氏とFigure Eightを共同創業し、機械学習アプリケーション向けのデータラベリングを専門としていました。同社は2019年3月にAppenによって買収されています。
+
+
+
+2018年には、機械学習の実験追跡やデータセット管理、モデル開発でのコラボレーションを支援するMLOpsプラットフォーム、Weights \& Biasesを共同創業しました。
+
+
+Lukasさんは9月に開催されたClickHouse San Franciscoミートアップで[講演](https://clickhouse.com/videos/ai-developer-platform?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter)を行い、AIアプリケーション開発の経験や、Weights \& BiasesのWeaveアプリケーションにおけるClickHouse活用方法を紹介してくれました。その内容は[最近公開されたブログ記事](https://clickhouse.com/blog/weights-and-biases-scale-ai-development?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter)にもまとめられています。
+
+
+[LukasさんのLinkedInをフォローする](https://www.linkedin.com/in/lbiewald?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter)
+
+
+ 
+
+
+## 今後のイベント [\#](/jp/blog/202411-newsletter-jp#%E4%BB%8A%E5%BE%8C%E3%81%AE%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+
+
+**グローバルイベント**
+
+
+- [リリースコール 24\.11](https://clickhouse.com/company/events/v24-11-community-release-call?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- 11月28日
+
+
+**無料トレーニング**
+
+
+- [PostgresからClickHouseへの移行ワークショップ](https://clickhouse.com/company/events/202411-emea-postgres-to-clickhouse-migration?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- オンライン \- 11月27日
+- [ClickHouse Fundamentals](https://clickhouse.com/company/events/clickhouse-fundamentals?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- オンライン \- 12月4日
+- [スウェーデン開催：対面ClickHouseトレーニング](https://clickhouse.com/company/events/202412-emea-stockholm-inperson-clickhousetraining?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- スウェーデン \- 12月9日
+- [デンマーク開催：対面ClickHouseトレーニング](https://clickhouse.com/company/events/202412-emea-copenhagen-inperson-clickhousetraining?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- デンマーク \- 12月9日
+- [ニューヨーク開催：ClickHouse Developer対面トレーニング](https://clickhouse.com/company/events/202412-amer-manhattan-inperson-clickhouse-developer?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- マンハッタン, NY \- 12月11\-12日
+- [ClickHouse Developerトレーニング](https://clickhouse.com/company/events/202412-global-training-clickhouse-developer?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- オンライン \- 12月18\-19日
+
+
+**AMERでのイベント**
+
+
+- [Microsoft Ignite](https://clickhouse.com/company/events/202411-amer-microsoft-ignite?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- シカゴ \- 11月19\-22日
+- [AWS re:Invent 2024](https://clickhouse.com/company/events/202412-amer-reinvent-meetingrequests?utm_source=clickhouse&utm_medium=email&utm_campaign=202411-newsletter) \- ラスベガス \- 12月2\-6日
+- [ニューヨークでのミートアップ](https://www.meetup.com/clickhouse-new-york-user-group/events/304268174) \- 12月9日
+- [サンフランシスコでのミートアップ](https://www.meetup.com/clickhouse-silicon-valley-meetup-group/events/304286951) \- 12月12日
+
+
+**EMEAでのイベント**
+
+
+- [ドバイでのミートアップ](https://www.meetup.com/clickhouse-dubai-meetup-group/events/303096989/) \- 11月21日
+- [パリでのミートアップ](https://www.meetup.com/clickhouse-france-user-group/events/303096434) \- 11月26日
+- [アムステルダムでのミートアップ](https://www.meetup.com/clickhouse-netherlands-user-group/events/303638814/) \- 12月3日
+- [ストックホルムでのミートアップ](https://www.meetup.com/clickhouse-stockholm-user-group/events/304382411/) \- 12月9日
+
+
+  
+
+## バージョン24\.10リリース [\#](/jp/blog/202411-newsletter-jp#%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B32410%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9)
+
+
+![release-24.10.png](/uploads/release_24_10_988ee5facb.png)
+Refreshable Materialized Viewsがついに本番運用できるようになりました！ これがバージョン24\.10の目玉機能ですが、CLONE AS句でテーブルのクローンをより簡単に作成できるようになったことや、S3バケットをクエリするときに便利なリモートファイルキャッシュなども追加されています。
+
+
+[リリース記事を読む](https://clickhouse.com/blog/clickhouse-release-24-10)
+
+
+ 
+
+
+## Data Talks on the Rocks に登場したAlexey Milovidov [\#](/jp/blog/202411-newsletter-jp#data-talks-on-the-rocks-%E3%81%AB%E7%99%BB%E5%A0%B4%E3%81%97%E3%81%9Falexey-milovidov)
+
+
+![alexey-data talks-202411.png](/uploads/alexey_data_talks_202411_ffc0bfdf7c.png)
+Data Talks on the Rocksは、データやアナリティクス領域の最新トレンドを語り合うリーダーや創業者へのインタビューシリーズで、Rill DataのCEO兼共同創業者であるMichael Driscoll氏がホストしています。
+
+
+第4回のゲストとして、ClickHouseのCTO兼共同創業者であるAlexey Milovidovが招かれました。ハッシュ関数がデータベース設計で重要な理由や、AIが将来データベース技術に与える可能性のある影響、ClickHouseの新しいアナライザの開発など、幅広い話題が展開されています。
+
+
+[インタビューを視聴する](https://www.rilldata.com/blog/rill-clickhouse-alexey-milovidov-interview)
+
+
+ 
+
+
+## ClickHouseの辞書機能でクエリを簡素化 [\#](/jp/blog/202411-newsletter-jp#clickhouse%E3%81%AE%E8%BE%9E%E6%9B%B8%E6%A9%9F%E8%83%BD%E3%81%A7%E3%82%AF%E3%82%A8%E3%83%AA%E3%82%92%E7%B0%A1%E7%B4%A0%E5%8C%96)
+
+
+[Aggregations.ioの創設者であるJeffrey Needles](https://www.linkedin.com/in/jeffreyneedles/)さんが、辞書を使ってクエリを簡素化する方法を解説するブログ記事を公開しました。
+
+
+辞書を使うメリットやデータの取得元、キーの型をどれにするかといった基本的な内容から、辞書を使った際のクエリのパフォーマンス向上まで、わかりやすく紹介しています。
+
+
+[ブログを読む](https://aggregations.io/blog/clickhouse-dictionaries)
+
+
+ 
+
+
+## Alpha VantageとClickHouseで構築する金融データパイプライン [\#](/jp/blog/202411-newsletter-jp#alpha-vantage%E3%81%A8clickhouse%E3%81%A7%E6%A7%8B%E7%AF%89%E3%81%99%E3%82%8B%E9%87%91%E8%9E%8D%E3%83%87%E3%83%BC%E3%82%BF%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3)
+
+
+![correlation returns-202411.png](/uploads/correlation_returns_202411_b71341e433.png)
+Craig Dicksonさんが、高速データパイプラインの構築例として、データ取得にはAlpha Vantageを、データの保存と分析にはClickHouseを使用する方法を紹介しています。
+
+
+Alpha Vantage APIから取得したデータをPandasで整形し、ClickHouse Cloudに取り込むフローを説明してから、Vega\-Altairを使ったデータ可視化の作成例も示してくれています。
+
+
+[ブログを読む](https://medium.com/@thecraigdickson/building-a-financial-data-pipeline-with-alpha-vantage-and-clickhouse-5860d1e5a4be)
+
+
+ 
+
+
+## 新しい強力なJSONデータ型をClickHouseに実装した方法 [\#](/jp/blog/202411-newsletter-jp#%E6%96%B0%E3%81%97%E3%81%84%E5%BC%B7%E5%8A%9B%E3%81%AAjson%E3%83%87%E3%83%BC%E3%82%BF%E5%9E%8B%E3%82%92clickhouse%E3%81%AB%E5%AE%9F%E8%A3%85%E3%81%97%E3%81%9F%E6%96%B9%E6%B3%95)
+
+
+![json-data-type-202411.png](/uploads/json_data_type_202411_7b2068bbc1.png)
+新しいJSONデータ型は2024年8月リリースのバージョン24\.8で導入されました。[リリース記事](https://clickhouse.com/blog/clickhouse-release-24-08)でいくつかサンプルをお見せしましたが、深く掘り下げる機会がなかったので、今回はTom SchreiberとPavel Kruglovが、その仕組みを詳しく解説してくれます。
+
+
+
+同じJSONパス内に複数の型が混在する場合の対処方法、クエリ時の作業負荷を回避するテクニック、ディスク上の列データファイルが膨大に増えてしまう事態を防ぐ仕組みなど、新しいデータ型のメリットがよくわかります。
+
+
+
+図解も多いので、ClickHouseファンなら必見です！
+
+
+[ブログを読む](https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse)
+
+
+ 
+
+
+## ClickHouse Cloudライブアップデート：2024年11月版 [\#](/jp/blog/202411-newsletter-jp#clickhouse-cloud%E3%83%A9%E3%82%A4%E3%83%96%E3%82%A2%E3%83%83%E3%83%97%E3%83%87%E3%83%BC%E3%83%882024%E5%B9%B411%E6%9C%88%E7%89%88)
+
+
+今回のClickHouse Cloudライブアップデートでは、Krithika Balagurunathan氏とZach Naimon氏が[Bring Your Own Cloud](https://clickhouse.com/cloud/bring-your-own-cloud)と[Compute\-compute分離](https://clickhouse.com/docs/en/cloud/reference/compute-compute-separation)について解説してくれました。
+
+
+
+機能概要と簡単なデモの後、詳細なQ\&Aが行われ、「BYOCはFedRAMP要件を満たすのか？」「リソース消費量に基づいて水平方向のオートスケーリングを自動化できるか？」「既存のクラスタをどうやってBYOCに移行する？」「読み書き用ノードと読み取り専用ノードでインスタンスタイプを変えられるのか？」といった質問が飛び出しました。
+
+
+
+詳しく知りたい方は以下の録画をご覧ください！
+
+
+
+[録画を視聴する](https://clickhouse.com/videos/clickhouse-cloud-live-november-2024-byoc-compute-compute-separation)
+
+
+ 
+
+
+## ちょっとした読み物 [\#](/jp/blog/202411-newsletter-jp#%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8%E3%81%97%E3%81%9F%E8%AA%AD%E3%81%BF%E7%89%A9)
+
+
+- 「短い読み物」というわけではないですが、ClickHouseに[公式Dockerイメージ](https://hub.docker.com/_/clickhouse)が登場しました！
+- Carl Lindesvärdさんが、[ClickHouseを半年間使って学んだこと](https://x.com/CarlLindesvard/status/1848706279293763917)をTwitterスレッドで紹介しています。
+- Ravindra Elicherlaさんは[WebsocketのティックデータをClickHouseに保存する方法](https://ravindraelicherla.medium.com/storing-tick-by-tick-webscocket-data-into-clickhouse-f4bbd29d0d65)を解説しています。
+- [Trench](https://github.com/FrigadeHQ/trench)というApache KafkaとClickHouseを使ったイベントトラッキングシステムを見つけました。[Frigade](https://github.com/FrigadeHQ/trench)のリアルタイムイベント追跡パイプラインを支え、大量のイベント処理や[リアルタイム分析](https://clickhouse.com/engineering-resources/what-is-real-time-analytics)を可能にしています。
+- MetricFireチームが[TelegrafとMetricFireを使ってClickHouseをモニタリングする方法](https://medium.com/@MetricFire/how-to-monitor-clickhouse-with-telegraf-and-metricfire-6b4aef886c49)を解説しています。
+- [既存のクラスタに負荷をかけずに、非シャーディングのClickHouseクラスタからシャーディング構成へデータを移行する](https://medium.com/@jgrodman/migrating-clickhouse-data-without-adding-load-to-the-db-031d6a868b0e)手順を、Triple WhaleのソフトウェアエンジニアであるJesse Grodmanさんが共有しています。
+
+
+ 
+
+
+## 今月の投稿 [\#](/jp/blog/202411-newsletter-jp#%E4%BB%8A%E6%9C%88%E3%81%AE%E6%8A%95%E7%A8%BF)
+
+
+今月お気に入りだったのは、[Steven TeyさんによるClickHouseのarrayIntersect関数](https://x.com/steventey/status/1855669066817839116)に関する投稿です。
+
+
+![tweet-202411.png](/uploads/tweet_202411_301f2111e1.png)
+
+[投稿を見る](https://x.com/steventey/status/1855669066817839116)

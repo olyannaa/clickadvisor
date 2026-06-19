@@ -1,0 +1,275 @@
+<h1>GROUP BY Clause | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/select" itemprop="item"><span itemprop="name">SELECT</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">GROUP BY</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/select/group-by.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>GROUP BY Clause</h1></header><p><code>GROUP BY</code> clause switches the <code>SELECT</code> query into an aggregation mode, which works as follows:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>GROUP BY</code> clause contains a list of expressions (or a single expression, which is considered to be the list of length one). This list acts as a "grouping key", while each individual expression will be referred to as a "key expression".</li>
+<li class="custom-li">All the expressions in the <a href="/docs/sql-reference/statements/select">SELECT</a>, <a href="/docs/sql-reference/statements/select/having">HAVING</a>, and <a href="/docs/sql-reference/statements/select/order-by">ORDER BY</a> clauses <strong>must</strong> be calculated based on key expressions <strong>or</strong> on <a href="/docs/sql-reference/aggregate-functions">aggregate functions</a> over non-key expressions (including plain columns). In other words, each column selected from the table must be used either in a key expression or inside an aggregate function, but not both.</li>
+<li class="custom-li">Result of aggregating <code>SELECT</code> query will contain as many rows as there were unique values of "grouping key" in source table. Usually, this significantly reduces the row count, often by orders of magnitude, but not necessarily: row count stays the same if all "grouping key" values were distinct.</li>
+</ul>
+<p>When you want to group data in the table by column numbers instead of column names, enable the setting <a href="/docs/operations/settings/settings#enable_positional_arguments">enable_positional_arguments</a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>There's an additional way to run aggregation over a table. If a query contains table columns only inside aggregate functions, the <code>GROUP BY clause</code> can be omitted, and aggregation by an empty set of keys is assumed. Such queries always return exactly one row.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="null-processing">NULL Processing<a aria-label="Direct link to NULL Processing" class="hash-link" href="#null-processing" title="Direct link to NULL Processing">​</a></h2>
+<p>For grouping, ClickHouse interprets <a href="/docs/sql-reference/syntax#null">NULL</a> as a value, and <code>NULL==NULL</code>. It differs from <code>NULL</code> processing in most other contexts.</p>
+<p>Here's an example to show what this means.</p>
+<p>Assume you have this table:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─x─┬────y─┐
+│ 1 │    2 │
+│ 2 │ ᴺᵁᴸᴸ │
+│ 3 │    2 │
+│ 3 │    3 │
+│ 3 │ ᴺᵁᴸᴸ │
+└───┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The query <code>SELECT sum(x), y FROM t_null_big GROUP BY y</code> results in:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─sum(x)─┬────y─┐
+│      4 │    2 │
+│      3 │    3 │
+│      5 │ ᴺᵁᴸᴸ │
+└────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can see that <code>GROUP BY</code> for <code>y = NULL</code> summed up <code>x</code>, as if <code>NULL</code> is this value.</p>
+<p>If you pass several keys to <code>GROUP BY</code>, the result will give you all the combinations of the selection, as if <code>NULL</code> were a specific value.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="rollup-modifier">ROLLUP Modifier<a aria-label="Direct link to ROLLUP Modifier" class="hash-link" href="#rollup-modifier" title="Direct link to ROLLUP Modifier">​</a></h2>
+<p><code>ROLLUP</code> modifier is used to calculate subtotals for the key expressions, based on their order in the <code>GROUP BY</code> list. The subtotals rows are added after the result table.</p>
+<p>The subtotals are calculated in the reverse order: at first subtotals are calculated for the last key expression in the list, then for the previous one, and so on up to the first key expression.</p>
+<p>In the subtotals rows the values of already "grouped" key expressions are set to <code>0</code> or empty line.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Mind that <a href="/docs/sql-reference/statements/select/having">HAVING</a> clause can affect the subtotals results.</p></div></div>
+<p><strong>Example</strong></p>
+<p>Consider the table t:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─year─┬─month─┬─day─┐
+│ 2019 │     1 │   5 │
+│ 2019 │     1 │  15 │
+│ 2020 │     1 │   5 │
+│ 2020 │     1 │  15 │
+│ 2020 │    10 │   5 │
+│ 2020 │    10 │  15 │
+└──────┴───────┴─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT year, month, day, count(*) FROM t GROUP BY ROLLUP(year, month, day);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As <code>GROUP BY</code> section has three key expressions, the result contains four tables with subtotals "rolled up" from right to left:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>GROUP BY year, month, day</code>;</li>
+<li class="custom-li"><code>GROUP BY year, month</code> (and <code>day</code> column is filled with zeros);</li>
+<li class="custom-li"><code>GROUP BY year</code> (now <code>month, day</code> columns are both filled with zeros);</li>
+<li class="custom-li">and totals (and all three key expression columns are zeros).</li>
+</ul>
+<div class="wrapper_EBtA" style="height:377px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─year─┬─month─┬─day─┬─count()─┐
+│ 2020 │    10 │  15 │       1 │
+│ 2020 │     1 │   5 │       1 │
+│ 2019 │     1 │   5 │       1 │
+│ 2020 │     1 │  15 │       1 │
+│ 2019 │     1 │  15 │       1 │
+│ 2020 │    10 │   5 │       1 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│ 2019 │     1 │   0 │       2 │
+│ 2020 │     1 │   0 │       2 │
+│ 2020 │    10 │   0 │       2 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│ 2019 │     0 │   0 │       2 │
+│ 2020 │     0 │   0 │       4 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│    0 │     0 │   0 │       6 │
+└──────┴───────┴─────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The same query also can be written using <code>WITH</code> keyword.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT year, month, day, count(*) FROM t GROUP BY year, month, day WITH ROLLUP;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>See also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#group_by_use_nulls">group_by_use_nulls</a> setting for SQL standard compatibility.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cube-modifier">CUBE Modifier<a aria-label="Direct link to CUBE Modifier" class="hash-link" href="#cube-modifier" title="Direct link to CUBE Modifier">​</a></h2>
+<p><code>CUBE</code> modifier is used to calculate subtotals for every combination of the key expressions in the <code>GROUP BY</code> list. The subtotals rows are added after the result table.</p>
+<p>In the subtotals rows the values of all "grouped" key expressions are set to <code>0</code> or empty line.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Mind that <a href="/docs/sql-reference/statements/select/having">HAVING</a> clause can affect the subtotals results.</p></div></div>
+<p><strong>Example</strong></p>
+<p>Consider the table t:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─year─┬─month─┬─day─┐
+│ 2019 │     1 │   5 │
+│ 2019 │     1 │  15 │
+│ 2020 │     1 │   5 │
+│ 2020 │     1 │  15 │
+│ 2020 │    10 │   5 │
+│ 2020 │    10 │  15 │
+└──────┴───────┴─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT year, month, day, count(*) FROM t GROUP BY CUBE(year, month, day);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As <code>GROUP BY</code> section has three key expressions, the result contains eight tables with subtotals for all key expression combinations:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>GROUP BY year, month, day</code></li>
+<li class="custom-li"><code>GROUP BY year, month</code></li>
+<li class="custom-li"><code>GROUP BY year, day</code></li>
+<li class="custom-li"><code>GROUP BY year</code></li>
+<li class="custom-li"><code>GROUP BY month, day</code></li>
+<li class="custom-li"><code>GROUP BY month</code></li>
+<li class="custom-li"><code>GROUP BY day</code></li>
+<li class="custom-li">and totals.</li>
+</ul>
+<p>Columns, excluded from <code>GROUP BY</code>, are filled with zeros.</p>
+<div class="wrapper_EBtA" style="height:754px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─year─┬─month─┬─day─┬─count()─┐
+│ 2020 │    10 │  15 │       1 │
+│ 2020 │     1 │   5 │       1 │
+│ 2019 │     1 │   5 │       1 │
+│ 2020 │     1 │  15 │       1 │
+│ 2019 │     1 │  15 │       1 │
+│ 2020 │    10 │   5 │       1 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│ 2019 │     1 │   0 │       2 │
+│ 2020 │     1 │   0 │       2 │
+│ 2020 │    10 │   0 │       2 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│ 2020 │     0 │   5 │       2 │
+│ 2019 │     0 │   5 │       1 │
+│ 2020 │     0 │  15 │       2 │
+│ 2019 │     0 │  15 │       1 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│ 2019 │     0 │   0 │       2 │
+│ 2020 │     0 │   0 │       4 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│    0 │     1 │   5 │       2 │
+│    0 │    10 │  15 │       1 │
+│    0 │    10 │   5 │       1 │
+│    0 │     1 │  15 │       2 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│    0 │     1 │   0 │       4 │
+│    0 │    10 │   0 │       2 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│    0 │     0 │   5 │       3 │
+│    0 │     0 │  15 │       3 │
+└──────┴───────┴─────┴─────────┘
+┌─year─┬─month─┬─day─┬─count()─┐
+│    0 │     0 │   0 │       6 │
+└──────┴───────┴─────┴─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The same query also can be written using <code>WITH</code> keyword.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT year, month, day, count(*) FROM t GROUP BY year, month, day WITH CUBE;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>See also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#group_by_use_nulls">group_by_use_nulls</a> setting for SQL standard compatibility.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="with-totals-modifier">WITH TOTALS Modifier<a aria-label="Direct link to WITH TOTALS Modifier" class="hash-link" href="#with-totals-modifier" title="Direct link to WITH TOTALS Modifier">​</a></h2>
+<p>If the <code>WITH TOTALS</code> modifier is specified, another row will be calculated. This row will have key columns containing default values (zeros or empty lines), and columns of aggregate functions with the values calculated across all the rows (the "total" values).</p>
+<p>This extra row is only produced in <code>JSON*</code>, <code>TabSeparated*</code>, and <code>Pretty*</code> formats, separately from the other rows:</p>
+<ul class="custom-ul">
+<li class="custom-li">In <code>XML</code> and <code>JSON*</code> formats, this row is output as a separate 'totals' field.</li>
+<li class="custom-li">In <code>TabSeparated*</code>, <code>CSV*</code> and <code>Vertical</code> formats, the row comes after the main result, preceded by an empty row (after the other data).</li>
+<li class="custom-li">In <code>Pretty*</code> formats, the row is output as a separate table after the main result.</li>
+<li class="custom-li">In <code>Template</code> format, the row is output according to specified template.</li>
+<li class="custom-li">In the other formats it is not available.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>totals is output in the results of <code>SELECT</code> queries, and is not output in <code>INSERT INTO ... SELECT</code>.</p></div></div>
+<p><code>WITH TOTALS</code> can be run in different ways when <a href="/docs/sql-reference/statements/select/having">HAVING</a> is present. The behavior depends on the <code>totals_mode</code> setting.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="configuring-totals-processing">Configuring Totals Processing<a aria-label="Direct link to Configuring Totals Processing" class="hash-link" href="#configuring-totals-processing" title="Direct link to Configuring Totals Processing">​</a></h3>
+<p>By default, <code>totals_mode = 'before_having'</code>. In this case, 'totals' is calculated across all rows, including the ones that do not pass through HAVING and <code>max_rows_to_group_by</code>.</p>
+<p>The other alternatives include only the rows that pass through HAVING in 'totals', and behave differently with the setting <code>max_rows_to_group_by</code> and <code>group_by_overflow_mode = 'any'</code>.</p>
+<p><code>after_having_exclusive</code> – Don't include rows that didn't pass through <code>max_rows_to_group_by</code>. In other words, 'totals' will have less than or the same number of rows as it would if <code>max_rows_to_group_by</code> were omitted.</p>
+<p><code>after_having_inclusive</code> – Include all the rows that didn't pass through 'max_rows_to_group_by' in 'totals'. In other words, 'totals' will have more than or the same number of rows as it would if <code>max_rows_to_group_by</code> were omitted.</p>
+<p><code>after_having_auto</code> – Count the number of rows that passed through HAVING. If it is more than a certain amount (by default, 50%), include all the rows that didn't pass through 'max_rows_to_group_by' in 'totals'. Otherwise, do not include them.</p>
+<p><code>totals_auto_threshold</code> – By default, 0.5. The coefficient for <code>after_having_auto</code>.</p>
+<p>If <code>max_rows_to_group_by</code> and <code>group_by_overflow_mode = 'any'</code> are not used, all variations of <code>after_having</code> are the same, and you can use any of them (for example, <code>after_having_auto</code>).</p>
+<p>You can use <code>WITH TOTALS</code> in subqueries, including subqueries in the <a href="/docs/sql-reference/statements/select/join">JOIN</a> clause (in this case, the respective total values are combined).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="group-by-all">GROUP BY ALL<a aria-label="Direct link to GROUP BY ALL" class="hash-link" href="#group-by-all" title="Direct link to GROUP BY ALL">​</a></h2>
+<p><code>GROUP BY ALL</code> is equivalent to listing all the SELECT-ed expressions that are not aggregate functions.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    a * 2,
+    b,
+    count(c),
+FROM t
+GROUP BY ALL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>is the same as</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    a * 2,
+    b,
+    count(c),
+FROM t
+GROUP BY a * 2, b
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For a special case that if there is a function having both aggregate functions and other fields as its arguments, the <code>GROUP BY</code> keys will contain the maximum non-aggregate fields we can extract from it.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    substring(a, 4, 2),
+    substring(substring(a, 1, 2), 1, count(b))
+FROM t
+GROUP BY ALL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>is the same as</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    substring(a, 4, 2),
+    substring(substring(a, 1, 2), 1, count(b))
+FROM t
+GROUP BY substring(a, 4, 2), substring(a, 1, 2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    count(),
+    median(FetchTiming &gt; 60 ? 60 : FetchTiming),
+    count() - sum(Refresh)
+FROM hits
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As opposed to MySQL (and conforming to standard SQL), you can't get some value of some column that is not in a key or aggregate function (except constant expressions). To work around this, you can use the 'any' aggregate function (get the first encountered value) or 'min/max'.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    domainWithoutWWW(URL) AS domain,
+    count(),
+    any(Title) AS title -- getting the first occurred page header for each domain.
+FROM hits
+GROUP BY domain
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For every different key value encountered, <code>GROUP BY</code> calculates a set of aggregate function values.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="grouping-sets-modifier">GROUPING SETS modifier<a aria-label="Direct link to GROUPING SETS modifier" class="hash-link" href="#grouping-sets-modifier" title="Direct link to GROUPING SETS modifier">​</a></h2>
+<p>This is the most general modifier.
+This modifier allows manually specifying several aggregation key sets (grouping sets).
+Aggregation is performed separately for each grouping set, and after that, all results are combined.
+If a column is not presented in a grouping set, it's filled with a default value.</p>
+<p>In other words, modifiers described above can be represented via <code>GROUPING SETS</code>.
+Despite the fact that queries with <code>ROLLUP</code>, <code>CUBE</code> and <code>GROUPING SETS</code> modifiers are syntactically equal, they may perform differently.
+When <code>GROUPING SETS</code> try to execute everything in parallel, <code>ROLLUP</code> and <code>CUBE</code> are executing the final merging of the aggregates in a single thread.</p>
+<p>In the situation when source columns contain default values, it might be hard to distinguish if a row is a part of the aggregation which uses those columns as keys or not.
+To solve this problem <code>GROUPING</code> function must be used.</p>
+<p><strong>Example</strong></p>
+<p>The following two queries are equivalent.</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Query 1
+SELECT year, month, day, count(*) FROM t GROUP BY year, month, day WITH ROLLUP;
+
+-- Query 2
+SELECT year, month, day, count(*) FROM t GROUP BY
+GROUPING SETS
+(
+    (year, month, day),
+    (year, month),
+    (year),
+    ()
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>See also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#group_by_use_nulls">group_by_use_nulls</a> setting for SQL standard compatibility.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="implementation-details">Implementation Details<a aria-label="Direct link to Implementation Details" class="hash-link" href="#implementation-details" title="Direct link to Implementation Details">​</a></h2>
+<p>Aggregation is one of the most important features of a column-oriented DBMS, and thus it's implementation is one of the most heavily optimized parts of ClickHouse. By default, aggregation is done in memory using a hash-table. It has 40+ specializations that are chosen automatically depending on "grouping key" data types.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="group-by-optimization-depending-on-table-sorting-key">GROUP BY Optimization Depending on Table Sorting Key<a aria-label="Direct link to GROUP BY Optimization Depending on Table Sorting Key" class="hash-link" href="#group-by-optimization-depending-on-table-sorting-key" title="Direct link to GROUP BY Optimization Depending on Table Sorting Key">​</a></h3>
+<p>The aggregation can be performed more effectively, if a table is sorted by some key, and <code>GROUP BY</code> expression contains at least prefix of sorting key or injective functions. In this case when a new key is read from table, the in-between result of aggregation can be finalized and sent to client. This behaviour is switched on by the <a href="/docs/operations/settings/settings#optimize_aggregation_in_order">optimize_aggregation_in_order</a> setting. Such optimization reduces memory usage during aggregation, but in some cases may slow down the query execution.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="group-by-in-external-memory">GROUP BY in External Memory<a aria-label="Direct link to GROUP BY in External Memory" class="hash-link" href="#group-by-in-external-memory" title="Direct link to GROUP BY in External Memory">​</a></h3>
+<p>You can enable dumping temporary data to the disk to restrict memory usage during <code>GROUP BY</code>.
+The <a href="/docs/operations/settings/settings#max_bytes_before_external_group_by">max_bytes_before_external_group_by</a> setting determines the threshold RAM consumption for dumping <code>GROUP BY</code> temporary data to the file system. If set to 0 (the default), it is disabled.
+Alternatively, you can set <a href="/docs/operations/settings/settings#max_bytes_ratio_before_external_group_by">max_bytes_ratio_before_external_group_by</a>, which allows to use <code>GROUP BY</code> in external memory only once the query reaches certain threshold of used memory.</p>
+<p>When using <code>max_bytes_before_external_group_by</code>, we recommend that you set <code>max_memory_usage</code> about twice as high (or <code>max_bytes_ratio_before_external_group_by=0.5</code>). This is necessary because there are two stages to aggregation: reading the data and forming intermediate data (1) and merging the intermediate data (2). Dumping data to the file system can only occur during stage 1. If the temporary data wasn't dumped, then stage 2 might require up to the same amount of memory as in stage 1.</p>
+<p>For example, if <a href="/docs/operations/settings/settings#max_memory_usage">max_memory_usage</a> was set to 10000000000 and you want to use external aggregation, it makes sense to set <code>max_bytes_before_external_group_by</code> to 10000000000, and <code>max_memory_usage</code> to 20000000000. When external aggregation is triggered (if there was at least one dump of temporary data), maximum consumption of RAM is only slightly more than <code>max_bytes_before_external_group_by</code>.</p>
+<p>With distributed query processing, external aggregation is performed on remote servers. In order for the requester server to use only a small amount of RAM, set <code>distributed_aggregation_memory_efficient</code> to 1.</p>
+<p>When merging data flushed to the disk, as well as when merging results from remote servers when the <code>distributed_aggregation_memory_efficient</code> setting is enabled, consumes up to <code>1/256 * the_number_of_threads</code> from the total amount of RAM.</p>
+<p>When external aggregation is enabled, if there was less than <code>max_bytes_before_external_group_by</code> of data (i.e. data was not flushed), the query runs just as fast as without external aggregation. If any temporary data was flushed, the run time will be several times longer (approximately three times).</p>
+<p>If you have an <a href="/docs/sql-reference/statements/select/order-by">ORDER BY</a> with a <a href="/docs/sql-reference/statements/select/limit">LIMIT</a> after <code>GROUP BY</code>, then the amount of used RAM depends on the amount of data in <code>LIMIT</code>, not in the whole table. But if the <code>ORDER BY</code> does not have <code>LIMIT</code>, do not forget to enable external sorting (<code>max_bytes_before_external_sort</code>).</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/from"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">FROM</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/having"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">HAVING</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#null-processing">NULL Processing</a><li><a class="table-of-contents__link toc-highlight" href="#rollup-modifier">ROLLUP Modifier</a><li><a class="table-of-contents__link toc-highlight" href="#cube-modifier">CUBE Modifier</a><li><a class="table-of-contents__link toc-highlight" href="#with-totals-modifier">WITH TOTALS Modifier</a><ul><li><a class="table-of-contents__link toc-highlight" href="#configuring-totals-processing">Configuring Totals Processing</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#group-by-all">GROUP BY ALL</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#grouping-sets-modifier">GROUPING SETS modifier</a><li><a class="table-of-contents__link toc-highlight" href="#implementation-details">Implementation Details</a><ul><li><a class="table-of-contents__link toc-highlight" href="#group-by-optimization-depending-on-table-sorting-key">GROUP BY Optimization Depending on Table Sorting Key</a><li><a class="table-of-contents__link toc-highlight" href="#group-by-in-external-memory">GROUP BY in External Memory</a></li></li></ul></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

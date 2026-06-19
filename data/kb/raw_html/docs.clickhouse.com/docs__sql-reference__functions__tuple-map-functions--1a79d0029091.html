@@ -1,0 +1,655 @@
+<h1>Map functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Maps</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/tuple-map-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Map functions</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractKeyValuePairs">extractKeyValuePairs<a aria-label="Direct link to extractKeyValuePairs" class="hash-link" href="#extractKeyValuePairs" title="Direct link to extractKeyValuePairs">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Extracts key-value pairs from any string. The string does not need to be 100% structured in a key value pair format;</p>
+<p>It can contain noise (e.g. log files). The key-value pair format to be interpreted should be specified via function arguments.</p>
+<p>A key-value pair consists of a key followed by a <code>key_value_delimiter</code> and a value. Quoted keys and values are also supported. Key value pairs must be separated by pair delimiters.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractKeyValuePairs(data, [key_value_delimiter], [pair_delimiter], [quoting_character])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>data</code> - String to extract key-value pairs from. <a href="/docs/sql-reference/data-types/string">String</a> or <a href="/docs/sql-reference/data-types/fixedstring">FixedString</a>.</li>
+<li class="custom-li"><code>key_value_delimiter</code> - Character to be used as delimiter between the key and the value. Defaults to <code>:</code>. <a href="/docs/sql-reference/data-types/string">String</a> or <a href="/docs/sql-reference/data-types/fixedstring">FixedString</a>.</li>
+<li class="custom-li"><code>pair_delimiters</code> - Set of character to be used as delimiters between pairs. Defaults to <code>\space</code>, <code>,</code> and <code>;</code>. <a href="/docs/sql-reference/data-types/string">String</a> or <a href="/docs/sql-reference/data-types/fixedstring">FixedString</a>.</li>
+<li class="custom-li"><code>quoting_character</code> - Character to be used as quoting character. Defaults to <code>"</code>. <a href="/docs/sql-reference/data-types/string">String</a> or <a href="/docs/sql-reference/data-types/fixedstring">FixedString</a>.</li>
+<li class="custom-li"><code>unexpected_quoting_character_strategy</code> - Strategy to handle quoting characters in unexpected places during <code>read_key</code> and <code>read_value</code> phase. Possible values: <code>invalid</code>, <code>accept</code> and <code>promote</code>. Invalid will discard key/value and transition back to <code>WAITING_KEY</code> state. Accept will treat it as a normal character. Promote will transition to <code>READ_QUOTED_{KEY/VALUE}</code> state and start from next character. The default value is <code>INVALID</code></li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">The extracted key-value pairs in a Map(String, String).</li>
+</ul>
+<p><strong>Examples</strong></p>
+<p>Query:</p>
+<p><strong>Simple case</strong></p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">arthur :) select extractKeyValuePairs('name:neymar, age:31 team:psg,nationality:brazil') as kv
+
+SELECT extractKeyValuePairs('name:neymar, age:31 team:psg,nationality:brazil') as kv
+
+Query id: f9e0ca6f-3178-4ee2-aa2c-a5517abb9cee
+
+┌─kv──────────────────────────────────────────────────────────────────────┐
+│ {'name':'neymar','age':'31','team':'psg','nationality':'brazil'}        │
+└─────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Single quote as quoting character</strong></p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">arthur :) select extractKeyValuePairs('name:\'neymar\';\'age\':31;team:psg;nationality:brazil,last_key:last_value', ':', ';,', '\'') as kv
+
+SELECT extractKeyValuePairs('name:\'neymar\';\'age\':31;team:psg;nationality:brazil,last_key:last_value', ':', ';,', '\'') as kv
+
+Query id: 0e22bf6b-9844-414a-99dc-32bf647abd5e
+
+┌─kv───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ {'name':'neymar','age':'31','team':'psg','nationality':'brazil','last_key':'last_value'}                                 │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>unexpected_quoting_character_strategy examples:</p>
+<p>unexpected_quoting_character_strategy=invalid</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc:5', ':', ' ,;', '\"', 'INVALID') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv────────────────┐
+│ {'abc':'5'}  │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc":5', ':', ' ,;', '\"', 'INVALID') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv──┐
+│ {}  │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>unexpected_quoting_character_strategy=accept</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc:5', ':', ' ,;', '\"', 'ACCEPT') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv────────────────┐
+│ {'name"abc':'5'}  │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc":5', ':', ' ,;', '\"', 'ACCEPT') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv─────────────────┐
+│ {'name"abc"':'5'}  │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>unexpected_quoting_character_strategy=promote</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc:5', ':', ' ,;', '\"', 'PROMOTE') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv──┐
+│ {}  │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractKeyValuePairs('name"abc":5', ':', ' ,;', '\"', 'PROMOTE') as kv;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─kv───────────┐
+│ {'abc':'5'}  │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Escape sequences without escape sequences support</strong></p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">arthur :) select extractKeyValuePairs('age:a\\x0A\\n\\0') as kv
+
+SELECT extractKeyValuePairs('age:a\\x0A\\n\\0') AS kv
+
+Query id: e9fd26ee-b41f-4a11-b17f-25af6fd5d356
+
+┌─kv────────────────────┐
+│ {'age':'a\\x0A\\n\\0'} │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractKeyValuePairs(input)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>str_to_map</code>, <code>mapFromString</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractKeyValuePairsWithEscaping">extractKeyValuePairsWithEscaping<a aria-label="Direct link to extractKeyValuePairsWithEscaping" class="hash-link" href="#extractKeyValuePairsWithEscaping" title="Direct link to extractKeyValuePairsWithEscaping">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Same as <code>extractKeyValuePairs</code> but with escaping support.</p>
+<p>Escape sequences supported: <code>\x</code>, <code>\N</code>, <code>\a</code>, <code>\b</code>, <code>\e</code>, <code>\f</code>, <code>\n</code>, <code>\r</code>, <code>\t</code>, <code>\v</code> and <code>\0</code>.
+Non standard escape sequences are returned as it is (including the backslash) unless they are one of the following:
+<code>\\</code>, <code>'</code>, <code>"</code>, <code>backtick</code>, <code>/</code>, <code>=</code> or ASCII control characters (<code>c &lt;= 31</code>).</p>
+<p>This function will satisfy the use case where pre-escaping and post-escaping are not suitable. For instance, consider the following
+input string: <code>a: "aaaa\"bbb"</code>. The expected output is: <code>a: aaaa\"bbbb</code>.</p>
+<ul class="custom-ul">
+<li class="custom-li">Pre-escaping: Pre-escaping it will output: <code>a: "aaaa"bbb"</code> and <code>extractKeyValuePairs</code> will then output: <code>a: aaaa</code></li>
+<li class="custom-li">Post-escaping: <code>extractKeyValuePairs</code> will output <code>a: aaaa\</code> and post-escaping will keep it as it is.</li>
+</ul>
+<p>Leading escape sequences will be skipped in keys and will be considered invalid for values.</p>
+<p><strong>Escape sequences with escape sequence support turned on</strong></p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">arthur :) select extractKeyValuePairsWithEscaping('age:a\\x0A\\n\\0') as kv
+
+SELECT extractKeyValuePairsWithEscaping('age:a\\x0A\\n\\0') AS kv
+
+Query id: 44c114f0-5658-4c75-ab87-4574de3a1645
+
+┌─kv───────────────┐
+│ {'age':'a\n\n\0'} │
+└──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractKeyValuePairsWithEscaping(input)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="map">map<a aria-label="Direct link to map" class="hash-link" href="#map" title="Direct link to map">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Creates a value of type <code>Map(key, value)</code> from key-value pairs.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">map(key1, value1[, key2, value2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>key_n</code> — The keys of the map entries. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+<li class="custom-li"><code>value_n</code> — The values of the map entries. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map containing key<!-- -->:value<!-- --> pairs. <a href="/docs/sql-reference/data-types/map"><code>Map(Any, Any)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT map('key1', number, 'key2', number * 2) FROM numbers(3)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'key1':0,'key2':0}
+{'key1':1,'key2':2}
+{'key1':2,'key2':4}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapAdd">mapAdd<a aria-label="Direct link to mapAdd" class="hash-link" href="#mapAdd" title="Direct link to mapAdd">​</a></h2>
+<p>Introduced in: v20.7.0</p>
+<p>Collect all the keys and sum corresponding values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapAdd(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — Maps or tuples of two arrays in which items in the first array represent keys, and the second array contains values for each key. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Array(T), Array(T))</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map or returns a tuple, where the first array contains the sorted keys and the second array contains values. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Array(T), Array(T))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>With Map type</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapAdd(map(1, 1), map(1, 1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{1:2}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With tuple</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapAdd(([toUInt8(1), 2], [1, 1]), ([toUInt8(1), 2], [1, 1]))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">([1, 2], [2, 2])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapAll">mapAll<a aria-label="Direct link to mapAll" class="hash-link" href="#mapAll" title="Direct link to mapAll">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Tests whether a condition holds for all key-value pairs in a map.
+<code>mapAll</code> is a higher-order function.
+You can pass a lambda function to it as the first argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapAll([func,] map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to check. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if all key-value pairs satisfy the condition, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapAll((k, v) -&gt; v = 1, map('k1', 1, 'k2', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapApply">mapApply<a aria-label="Direct link to mapApply" class="hash-link" href="#mapApply" title="Direct link to mapApply">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>Applies a function to each element of a map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapApply(func, map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to apply function to. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a new map obtained from the original map by application of <code>func</code> for each element. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapApply((k, v) -&gt; (k, v * 2), map('k1', 1, 'k2', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k1':2,'k2':4}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapConcat">mapConcat<a aria-label="Direct link to mapConcat" class="hash-link" href="#mapConcat" title="Direct link to mapConcat">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Concatenates multiple maps based on the equality of their keys.
+If elements with the same key exist in more than one input map, all elements are added to the result map, but only the first one is accessible via operator [].</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapConcat(maps)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>maps</code> — Arbitrarily many maps. <a href="/docs/sql-reference/data-types/map"><code>Map</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map with concatenated maps passed as arguments. <a href="/docs/sql-reference/data-types/map"><code>Map</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapConcat(map('k1', 'v1'), map('k2', 'v2'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k1':'v1','k2':'v2'}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapContainsKey">mapContainsKey<a aria-label="Direct link to mapContainsKey" class="hash-link" href="#mapContainsKey" title="Direct link to mapContainsKey">​</a></h2>
+<p>Introduced in: v21.2.0</p>
+<p>Determines if a key is contained in a map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapContainsKey(map, key)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>mapContains</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to search in. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>key</code> — Key to search for. Type must match the key type of the map. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns 1 if map contains key, 0 if not. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapContainsKey(map('k1', 'v1', 'k2', 'v2'), 'k1')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapContainsKeyLike">mapContainsKeyLike<a aria-label="Direct link to mapContainsKeyLike" class="hash-link" href="#mapContainsKeyLike" title="Direct link to mapContainsKeyLike">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Checks whether map contains key <code>LIKE</code> specified pattern.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapContainsKeyLike(map, pattern)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to search in. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>pattern</code> — Pattern to match keys against. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if <code>map</code> contains a key matching <code>pattern</code>, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab (a Map(String, String))
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO tab VALUES ({'abc':'abc','def':'def'}), ({'hij':'hij','klm':'klm'});
+
+SELECT mapContainsKeyLike(a, 'a%') FROM tab;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─mapContainsKeyLike(a, 'a%')─┐
+│                           1 │
+│                           0 │
+└─────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapContainsValue">mapContainsValue<a aria-label="Direct link to mapContainsValue" class="hash-link" href="#mapContainsValue" title="Direct link to mapContainsValue">​</a></h2>
+<p>Introduced in: v25.6.0</p>
+<p>Determines if a value is contained in a map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapContainsValue(map, value)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to search in. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>value</code> — Value to search for. Type must match the value type of map. <a href="/docs/sql-reference/data-types"><code>Any</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if the map contains the value, <code>0</code> if not. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapContainsValue(map('k1', 'v1', 'k2', 'v2'), 'v1')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapContainsValueLike">mapContainsValueLike<a aria-label="Direct link to mapContainsValueLike" class="hash-link" href="#mapContainsValueLike" title="Direct link to mapContainsValueLike">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Checks whether a map contains a value <code>LIKE</code> the specified pattern.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapContainsValueLike(map, pattern)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to search in. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>pattern</code> — Pattern to match values against. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if <code>map</code> contains a value matching <code>pattern</code>, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab (a Map(String, String))
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO tab VALUES ({'abc':'abc','def':'def'}), ({'hij':'hij','klm':'klm'});
+
+SELECT mapContainsValueLike(a, 'a%') FROM tab;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─mapContainsV⋯ke(a, 'a%')─┐
+│                        1 │
+│                        0 │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapExists">mapExists<a aria-label="Direct link to mapExists" class="hash-link" href="#mapExists" title="Direct link to mapExists">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Tests whether a condition holds for at least one key-value pair in a map.
+<code>mapExists</code> is a higher-order function.
+You can pass a lambda function to it as the first argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapExists([func,] map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Optional. Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to check. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if at least one key-value pair satisfies the condition, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapExists((k, v) -&gt; v = 1, map('k1', 1, 'k2', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapExtractKeyLike">mapExtractKeyLike<a aria-label="Direct link to mapExtractKeyLike" class="hash-link" href="#mapExtractKeyLike" title="Direct link to mapExtractKeyLike">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Give a map with string keys and a <code>LIKE</code> pattern, this function returns a map with elements where the key matches the pattern.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapExtractKeyLike(map, pattern)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to extract from. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>pattern</code> — Pattern to match keys against. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map containing elements the key matching the specified pattern. If no elements match the pattern, an empty map is returned. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab (a Map(String, String))
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO tab VALUES ({'abc':'abc','def':'def'}), ({'hij':'hij','klm':'klm'});
+
+SELECT mapExtractKeyLike(a, 'a%') FROM tab;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─mapExtractKeyLike(a, 'a%')─┐
+│ {'abc':'abc'}              │
+│ {}                         │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapExtractValueLike">mapExtractValueLike<a aria-label="Direct link to mapExtractValueLike" class="hash-link" href="#mapExtractValueLike" title="Direct link to mapExtractValueLike">​</a></h2>
+<p>Introduced in: v25.5.0</p>
+<p>Given a map with string values and a <code>LIKE</code> pattern, this function returns a map with elements where the value matches the pattern.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapExtractValueLike(map, pattern)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to extract from. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>pattern</code> — Pattern to match values against. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map containing elements the value matching the specified pattern. If no elements match the pattern, an empty map is returned. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab (a Map(String, String))
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO tab VALUES ({'abc':'abc','def':'def'}), ({'hij':'hij','klm':'klm'});
+
+SELECT mapExtractValueLike(a, 'a%') FROM tab;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─mapExtractValueLike(a, 'a%')─┐
+│ {'abc':'abc'}                │
+│ {}                           │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapFilter">mapFilter<a aria-label="Direct link to mapFilter" class="hash-link" href="#mapFilter" title="Direct link to mapFilter">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>Filters a map by applying a function to each map element.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapFilter(func, map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to filter. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map containing only the elements in the map for which <code>func</code> returns something other than <code>0</code>. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapFilter((k, v) -&gt; v &gt; 1, map('k1', 1, 'k2', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k2':2}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapFromArrays">mapFromArrays<a aria-label="Direct link to mapFromArrays" class="hash-link" href="#mapFromArrays" title="Direct link to mapFromArrays">​</a></h2>
+<p>Introduced in: v23.3.0</p>
+<p>Creates a map from an array or map of keys and an array or map of values.
+The function is a convenient alternative to syntax <code>CAST([...], 'Map(key_type, value_type)')</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapFromArrays(keys, values)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>MAP_FROM_ARRAYS</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>keys</code> — Array or map of keys to create the map from. <a href="/docs/sql-reference/data-types/array"><code>Array</code></a> or <a href="/docs/sql-reference/data-types/map"><code>Map</code></a></li>
+<li class="custom-li"><code>values</code> — Array or map of values to create the map from. <a href="/docs/sql-reference/data-types/array"><code>Array</code></a> or <a href="/docs/sql-reference/data-types/map"><code>Map</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map with keys and values constructed from the key array and value array/map. <a href="/docs/sql-reference/data-types/map"><code>Map</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapFromArrays(['a', 'b', 'c'], [1, 2, 3])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'a':1,'b':2,'c':3}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With map inputs</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapFromArrays([1, 2, 3], map('a', 1, 'b', 2, 'c', 3))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{1:('a', 1), 2:('b', 2), 3:('c', 3)}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapKeys">mapKeys<a aria-label="Direct link to mapKeys" class="hash-link" href="#mapKeys" title="Direct link to mapKeys">​</a></h2>
+<p>Introduced in: v21.2.0</p>
+<p>Returns the keys of a given map.
+This function can be optimized by enabling setting <a href="/docs/operations/settings/settings#optimize_functions_to_subcolumns"><code>optimize_functions_to_subcolumns</code></a>.
+With the setting enabled, the function only reads the <code>keys</code> subcolumn instead of the entire map.
+The query <code>SELECT mapKeys(m) FROM table</code> is transformed to <code>SELECT m.keys FROM table</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapKeys(map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to extract keys from. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns array containing all keys from the map. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapKeys(map('k1', 'v1', 'k2', 'v2'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['k1','k2']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapPartialReverseSort">mapPartialReverseSort<a aria-label="Direct link to mapPartialReverseSort" class="hash-link" href="#mapPartialReverseSort" title="Direct link to mapPartialReverseSort">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Sorts the elements of a map in descending order with additional limit argument allowing partial sorting.
+If the func function is specified, the sorting order is determined by the result of the func function applied to the keys and values of the map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapPartialReverseSort([func,] limit, map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Optional. Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>limit</code> — Elements in the range <code>[1..limit]</code> are sorted. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>map</code> — Map to sort. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a partially sorted map in descending order. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapPartialReverseSort((k, v) -&gt; v, 2, map('k1', 3, 'k2', 1, 'k3', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k1':3,'k3':2,'k2':1}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapPartialSort">mapPartialSort<a aria-label="Direct link to mapPartialSort" class="hash-link" href="#mapPartialSort" title="Direct link to mapPartialSort">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Sorts the elements of a map in ascending order with additional limit argument allowing partial sorting.
+If the func function is specified, the sorting order is determined by the result of the func function applied to the keys and values of the map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapPartialSort([func,] limit, map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Optional. Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>limit</code> — Elements in the range <code>[1..limit]</code> are sorted. <a href="/docs/sql-reference/data-types/int-uint"><code>(U)Int*</code></a></li>
+<li class="custom-li"><code>map</code> — Map to sort. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a partially sorted map. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapPartialSort((k, v) -&gt; v, 2, map('k1', 3, 'k2', 1, 'k3', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k2':1,'k3':2,'k1':3}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapPopulateSeries">mapPopulateSeries<a aria-label="Direct link to mapPopulateSeries" class="hash-link" href="#mapPopulateSeries" title="Direct link to mapPopulateSeries">​</a></h2>
+<p>Introduced in: v20.10.0</p>
+<p>Fills missing key-value pairs in a map with integer keys.
+To support extending the keys beyond the largest value, a maximum key can be specified.
+More specifically, the function returns a map in which the keys form a series from the smallest to the largest key (or max argument if specified) with step size of 1, and corresponding values.
+If no value is specified for a key, a default value is used as value.
+In case keys repeat, only the first value (in order of appearance) is associated with the key.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapPopulateSeries(map[, max]) | mapPopulateSeries(keys, values[, max])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map with integer keys. <a href="/docs/sql-reference/data-types/map"><code>Map((U)Int*, V)</code></a></li>
+<li class="custom-li"><code>keys</code> — Array of keys. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>values</code> — Array of values. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>max</code> — Optional. Maximum key value. <a href="/docs/sql-reference/data-types/int-uint"><code>Int8</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int16</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int32</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int128</code></a> or <a href="/docs/sql-reference/data-types/int-uint"><code>Int256</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map or a tuple of two arrays where the first has keys in sorted order, and the second values for the corresponding keys. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Array(UInt*), Array(Any))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>With Map type</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapPopulateSeries(map(1, 10, 5, 20), 6)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{1:10, 2:0, 3:0, 4:0, 5:20, 6:0}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With mapped arrays</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapPopulateSeries([1, 2, 4], [11, 22, 44], 5)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">([1, 2, 3, 4, 5], [11, 22, 0, 44, 0])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapReverseSort">mapReverseSort<a aria-label="Direct link to mapReverseSort" class="hash-link" href="#mapReverseSort" title="Direct link to mapReverseSort">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Sorts the elements of a map in descending order.
+If the func function is specified, the sorting order is determined by the result of the func function applied to the keys and values of the map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapReverseSort([func,] map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Optional. Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to sort. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map sorted in descending order. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapReverseSort((k, v) -&gt; v, map('k1', 3, 'k2', 1, 'k3', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k1':3,'k3':2,'k2':1}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapSort">mapSort<a aria-label="Direct link to mapSort" class="hash-link" href="#mapSort" title="Direct link to mapSort">​</a></h2>
+<p>Introduced in: v23.4.0</p>
+<p>Sorts the elements of a map in ascending order.
+If the func function is specified, the sorting order is determined by the result of the func function applied to the keys and values of the map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapSort([func,] map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>func</code> — Optional. Lambda function. <a href="/docs/sql-reference/functions/overview#arrow-operator-and-lambda"><code>Lambda function</code></a></li>
+<li class="custom-li"><code>map</code> — Map to sort. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a map sorted in ascending order. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapSort((k, v) -&gt; v, map('k1', 3, 'k2', 1, 'k3', 2))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'k2':1,'k3':2,'k1':3}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapSubtract">mapSubtract<a aria-label="Direct link to mapSubtract" class="hash-link" href="#mapSubtract" title="Direct link to mapSubtract">​</a></h2>
+<p>Introduced in: v20.7.0</p>
+<p>Collect all the keys and subtract corresponding values.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapSubtract(arg1[, arg2, ...])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arg1[, arg2, ...]</code> — Maps or tuples of two arrays in which items in the first array represent keys, and the second array contains values for each key. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Array(T), Array(T))</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns one map or tuple, where the first array contains the sorted keys and the second array contains values. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a> or <a href="/docs/sql-reference/data-types/tuple"><code>Tuple(Array(T), Array(T))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>With Map type</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapSubtract(map(1, 1), map(1, 1))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{1:0}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>With tuple map</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapSubtract(([toUInt8(1), 2], [toInt32(1), 1]), ([toUInt8(1), 2], [toInt32(2), 1]))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">([1, 2], [-1, 0])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapUpdate">mapUpdate<a aria-label="Direct link to mapUpdate" class="hash-link" href="#mapUpdate" title="Direct link to mapUpdate">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>For two maps, returns the first map with values updated on the values for the corresponding keys in the second map.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapUpdate(map1, map2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map1</code> — The map to update. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+<li class="custom-li"><code>map2</code> — The map to use for updating. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>map1</code> with values updated from values for the corresponding keys in <code>map2</code>. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapUpdate(map('key1', 0, 'key3', 0), map('key1', 10, 'key2', 10))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">{'key3':0,'key1':10,'key2':10}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mapValues">mapValues<a aria-label="Direct link to mapValues" class="hash-link" href="#mapValues" title="Direct link to mapValues">​</a></h2>
+<p>Introduced in: v21.2.0</p>
+<p>Returns the values of a given map.
+This function can be optimized by enabling setting <a href="/docs/operations/settings/settings#optimize_functions_to_subcolumns"><code>optimize_functions_to_subcolumns</code></a>.
+With the setting enabled, the function only reads the <code>values</code> subcolumn instead of the entire map.
+The query <code>SELECT mapValues(m) FROM table</code> is transformed to <code>SELECT m.values FROM table</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mapValues(map)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>map</code> — Map to extract values from. <a href="/docs/sql-reference/data-types/map"><code>Map(K, V)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array containing all the values from the map. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT mapValues(map('k1', 'v1', 'k2', 'v2'))
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['v1','v2']
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/tuple-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Tuples</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/type-conversion-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Type conversion</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#extractKeyValuePairs">extractKeyValuePairs</a><li><a class="table-of-contents__link toc-highlight" href="#extractKeyValuePairsWithEscaping">extractKeyValuePairsWithEscaping</a><li><a class="table-of-contents__link toc-highlight" href="#map">map</a><li><a class="table-of-contents__link toc-highlight" href="#mapAdd">mapAdd</a><li><a class="table-of-contents__link toc-highlight" href="#mapAll">mapAll</a><li><a class="table-of-contents__link toc-highlight" href="#mapApply">mapApply</a><li><a class="table-of-contents__link toc-highlight" href="#mapConcat">mapConcat</a><li><a class="table-of-contents__link toc-highlight" href="#mapContainsKey">mapContainsKey</a><li><a class="table-of-contents__link toc-highlight" href="#mapContainsKeyLike">mapContainsKeyLike</a><li><a class="table-of-contents__link toc-highlight" href="#mapContainsValue">mapContainsValue</a><li><a class="table-of-contents__link toc-highlight" href="#mapContainsValueLike">mapContainsValueLike</a><li><a class="table-of-contents__link toc-highlight" href="#mapExists">mapExists</a><li><a class="table-of-contents__link toc-highlight" href="#mapExtractKeyLike">mapExtractKeyLike</a><li><a class="table-of-contents__link toc-highlight" href="#mapExtractValueLike">mapExtractValueLike</a><li><a class="table-of-contents__link toc-highlight" href="#mapFilter">mapFilter</a><li><a class="table-of-contents__link toc-highlight" href="#mapFromArrays">mapFromArrays</a><li><a class="table-of-contents__link toc-highlight" href="#mapKeys">mapKeys</a><li><a class="table-of-contents__link toc-highlight" href="#mapPartialReverseSort">mapPartialReverseSort</a><li><a class="table-of-contents__link toc-highlight" href="#mapPartialSort">mapPartialSort</a><li><a class="table-of-contents__link toc-highlight" href="#mapPopulateSeries">mapPopulateSeries</a><li><a class="table-of-contents__link toc-highlight" href="#mapReverseSort">mapReverseSort</a><li><a class="table-of-contents__link toc-highlight" href="#mapSort">mapSort</a><li><a class="table-of-contents__link toc-highlight" href="#mapSubtract">mapSubtract</a><li><a class="table-of-contents__link toc-highlight" href="#mapUpdate">mapUpdate</a><li><a class="table-of-contents__link toc-highlight" href="#mapValues">mapValues</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

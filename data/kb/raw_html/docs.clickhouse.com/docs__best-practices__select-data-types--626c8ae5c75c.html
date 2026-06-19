@@ -1,0 +1,114 @@
+<h1>Selecting data types | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/best-practices" itemprop="item"><span itemprop="name">Best practices</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Selecting data types</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/best-practices/select_data_type.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Selecting data types</h1></header><p>One of the core reasons for ClickHouse's query performance is its efficient data compression. Less data on disk results in faster queries and inserts by minimizing I/O overhead. ClickHouse's column-oriented architecture naturally arranges similar data adjacently, enabling compression algorithms and codecs to reduce data size dramatically. To maximize these compression benefits, it's essential to carefully choose appropriate data types.</p>
+<p>Compression efficiency in ClickHouse depends mainly on three factors: the ordering key, data types, and codecs, all defined through the table schema. Choosing optimal data types yields immediate improvements in both storage and query performance.</p>
+<p>Some straightforward guidelines can significantly enhance the schema:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><strong>Use Strict Types:</strong> Always select the correct data type for columns. Numeric and date fields should use appropriate numeric and date types rather than general-purpose String types. This ensures correct semantics for filtering and aggregations.</p>
+</li>
+<li class="custom-li">
+<p><strong>Avoid nullable Columns:</strong> Nullable columns introduce additional overhead by maintaining separate columns for tracking null values. Only use Nullable if explicitly required to distinguish between empty and null states. Otherwise, default or zero-equivalent values typically suffice. For further information on why this type should be avoided unless needed, see <a href="/docs/best-practices/select-data-types#avoid-nullable-columns">Avoid nullable Columns</a>.</p>
+</li>
+<li class="custom-li">
+<p><strong>Minimize Numeric Precision:</strong> Select numeric types with minimal bit-width that still accommodate the expected data range. For instance, prefer <a href="/docs/sql-reference/data-types/int-uint">UInt16 over Int32</a> if negative values aren't needed, and the range fits within 0–65535.</p>
+</li>
+<li class="custom-li">
+<p><strong>Optimize Date and Time Precision:</strong> Choose the most coarse-grained date or datetime type that meets query requirements. Use Date or Date32 for date-only fields, and prefer DateTime over DateTime64 unless millisecond or finer precision is essential.</p>
+</li>
+<li class="custom-li">
+<p><strong>Leverage LowCardinality and Specialized Types:</strong> For columns with fewer than approximately 10,000 unique values, use LowCardinality types to significantly reduce storage through dictionary encoding. Similarly, use FixedString only when the column values are strictly fixed-length strings (e.g., country or currency codes), and prefer Enum types for columns with a finite set of possible values to enable efficient storage and built-in data validation.</p>
+</li>
+<li class="custom-li">
+<p><strong>Enums for data validation:</strong> The Enum type can be used to efficiently encode enumerated types. Enums can either be 8 or 16 bits, depending on the number of unique values they're required to store. Consider using this if you need either the associated validation at insert time (undeclared values will be rejected) or wish to perform queries which exploit a natural ordering in the Enum values e.g. imagine a feedback column containing user responses Enum(':(' = 1, ':|' = 2, ':)' = 3).</p>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="example">Example<a aria-label="Direct link to Example" class="hash-link" href="#example" title="Direct link to Example">​</a></h2>
+<p>ClickHouse offers built-in tools to streamline type optimization. For example, schema inference can automatically identify initial types. Consider the Stack Overflow dataset, publicly available in Parquet format. Running a simple schema inference via the <a href="/docs/sql-reference/statements/describe-table"><code>DESCRIBE</code></a> command provides an initial non-optimized schema.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>By default, ClickHouse maps these to equivalent Nullable types. This is preferred as the schema is based on a sample of the rows only.</p></div></div>
+<div class="wrapper_EBtA" style="height:546.6500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">DESCRIBE TABLE s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/stackoverflow/parquet/posts/*.parquet')
+SETTINGS describe_compact_output = 1
+
+┌─name───────────────────────┬─type──────────────────────────────┐
+│ Id                         │ Nullable(Int64)                   │
+│ PostTypeId                 │ Nullable(Int64)                   │
+│ AcceptedAnswerId           │ Nullable(Int64)                   │
+│ CreationDate               │ Nullable(DateTime64(3, 'UTC'))    │
+│ Score                      │ Nullable(Int64)                   │
+│ ViewCount                  │ Nullable(Int64)                   │
+│ Body                       │ Nullable(String)                  │
+│ OwnerUserId                │ Nullable(Int64)                   │
+│ OwnerDisplayName           │ Nullable(String)                  │
+│ LastEditorUserId           │ Nullable(Int64)                   │
+│ LastEditorDisplayName      │ Nullable(String)                  │
+│ LastEditDate               │ Nullable(DateTime64(3, 'UTC'))    │
+│ LastActivityDate           │ Nullable(DateTime64(3, 'UTC'))    │
+│ Title                      │ Nullable(String)                  │
+│ Tags                       │ Nullable(String)                  │
+│ AnswerCount                │ Nullable(Int64)                   │
+│ CommentCount               │ Nullable(Int64)                   │
+│ FavoriteCount              │ Nullable(Int64)                   │
+│ ContentLicense             │ Nullable(String)                  │
+│ ParentId                   │ Nullable(String)                  │
+│ CommunityOwnedDate         │ Nullable(DateTime64(3, 'UTC'))    │
+│ ClosedDate                 │ Nullable(DateTime64(3, 'UTC'))    │
+└────────────────────────────┴───────────────────────────────────┘
+
+22 rows in set. Elapsed: 0.130 sec.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Note below we use the glob pattern *.parquet to read all files in the stackoverflow/parquet/posts folder.</p></div></div>
+<p>By applying our early simple rules to our posts table, we can identify an optimal type for each column:</p>
+<table><thead><tr><th>Column<th>Is Numeric<th>Min, Max<th>Unique Values<th>Nulls<th>Comment<th>Optimized Type<tbody><tr><td><code>PostTypeId</code><td>Yes<td>1, 8<td>8<td>No<td><td><code>Enum('Question' = 1, 'Answer' = 2, 'Wiki' = 3, 'TagWikiExcerpt' = 4, 'TagWiki' = 5, 'ModeratorNomination' = 6, 'WikiPlaceholder' = 7, 'PrivilegeWiki' = 8)</code><tr><td><code>AcceptedAnswerId</code><td>Yes<td>0, 78285170<td>12282094<td>Yes<td>Differentiate Null with 0 value<td>UInt32<tr><td><code>CreationDate</code><td>No<td>2008-07-31 21:42:52.667000000, 2024-03-31 23:59:17.697000000<td>-<td>No<td>Millisecond granularity isn't required, use DateTime<td>DateTime<tr><td><code>Score</code><td>Yes<td>-217, 34970<td>3236<td>No<td><td>Int32<tr><td><code>ViewCount</code><td>Yes<td>2, 13962748<td>170867<td>No<td><td>UInt32<tr><td><code>Body</code><td>No<td>-<td>-<td>No<td><td>String<tr><td><code>OwnerUserId</code><td>Yes<td>-1, 4056915<td>6256237<td>Yes<td><td>Int32<tr><td><code>OwnerDisplayName</code><td>No<td>-<td>181251<td>Yes<td>Consider Null to be empty string<td>String<tr><td><code>LastEditorUserId</code><td>Yes<td>-1, 9999993<td>1104694<td>Yes<td>0 is an unused value can be used for Nulls<td>Int32<tr><td><code>LastEditorDisplayName</code><td>No<td>-<td>70952<td>Yes<td>Consider Null to be an empty string. Tested LowCardinality and no benefit<td>String<tr><td><code>LastEditDate</code><td>No<td>2008-08-01 13:24:35.051000000, 2024-04-06 21:01:22.697000000<td>-<td>No<td>Millisecond granularity isn't required, use DateTime<td>DateTime<tr><td><code>LastActivityDate</code><td>No<td>2008-08-01 12:19:17.417000000, 2024-04-06 21:01:22.697000000<td>-<td>No<td>Millisecond granularity isn't required, use DateTime<td>DateTime<tr><td><code>Title</code><td>No<td>-<td>-<td>No<td>Consider Null to be an empty string<td>String<tr><td><code>Tags</code><td>No<td>-<td>-<td>No<td>Consider Null to be an empty string<td>String<tr><td><code>AnswerCount</code><td>Yes<td>0, 518<td>216<td>No<td>Consider Null and 0 to same<td>UInt16<tr><td><code>CommentCount</code><td>Yes<td>0, 135<td>100<td>No<td>Consider Null and 0 to same<td>UInt8<tr><td><code>FavoriteCount</code><td>Yes<td>0, 225<td>6<td>Yes<td>Consider Null and 0 to same<td>UInt8<tr><td><code>ContentLicense</code><td>No<td>-<td>3<td>No<td>LowCardinality outperforms FixedString<td>LowCardinality(String)<tr><td><code>ParentId</code><td>No<td>-<td>20696028<td>Yes<td>Consider Null to be an empty string<td>String<tr><td><code>CommunityOwnedDate</code><td>No<td>2008-08-12 04:59:35.017000000, 2024-04-01 05:36:41.380000000<td>-<td>Yes<td>Consider default 1970-01-01 for Nulls. Millisecond granularity isn't required, use DateTime<td>DateTime<tr><td><code>ClosedDate</code><td>No<td>2008-09-04 20:56:44, 2024-04-06 18:49:25.393000000<td>-<td>Yes<td>Consider default 1970-01-01 for Nulls. Millisecond granularity isn't required, use DateTime<td>DateTime</td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></td></td></td></td></td></td></td></tr></tbody></th></th></th></th></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>Identifying the type for a column relies on understanding its numeric range and number of unique values. To find the range of all columns, and the number of distinct values, you can use the simple query <code>SELECT * APPLY min, * APPLY max, * APPLY uniq FROM table FORMAT Vertical</code>. We recommend performing this over a smaller subset of the data as this can be expensive.</p></div></div>
+<p>This results in the following optimized schema (with respect to types):</p>
+<div class="wrapper_EBtA" style="height:527.8000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE posts
+(
+   Id Int32,
+   PostTypeId Enum('Question' = 1, 'Answer' = 2, 'Wiki' = 3, 'TagWikiExcerpt' = 4, 'TagWiki' = 5, 
+   'ModeratorNomination' = 6, 'WikiPlaceholder' = 7, 'PrivilegeWiki' = 8),
+   AcceptedAnswerId UInt32,
+   CreationDate DateTime,
+   Score Int32,
+   ViewCount UInt32,
+   Body String,
+   OwnerUserId Int32,
+   OwnerDisplayName String,
+   LastEditorUserId Int32,
+   LastEditorDisplayName String,
+   LastEditDate DateTime,
+   LastActivityDate DateTime,
+   Title String,
+   Tags String,
+   AnswerCount UInt16,
+   CommentCount UInt8,
+   FavoriteCount UInt8,
+   ContentLicense LowCardinality(String),
+   ParentId String,
+   CommunityOwnedDate DateTime,
+   ClosedDate DateTime
+)
+ENGINE = MergeTree
+ORDER BY tuple()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="avoid-nullable-columns">Avoid nullable columns<a aria-label="Direct link to Avoid nullable columns" class="hash-link" href="#avoid-nullable-columns" title="Direct link to Avoid nullable columns">​</a></h2>
+<p><a href="/docs/sql-reference/data-types/nullable"><code>Nullable</code> column</a> (e.g. <code>Nullable(String)</code>) creates a separate column of <code>UInt8</code> type. This additional column has to be processed every time a user works with a Nullable column. This leads to additional storage space used and almost always negatively affects performance.</p>
+<p>To avoid <code>Nullable</code> columns, consider setting a default value for that column.  For example, instead of:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE default.sample
+(
+    `x` Int8,
+    -- highlight-next-line
+    `y` Nullable(Int8)
+)
+ENGINE = MergeTree
+ORDER BY x
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>use</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE default.sample2
+(
+    `x` Int8,
+    -- highlight-next-line
+    `y` Int8 DEFAULT 0
+)
+ENGINE = MergeTree
+ORDER BY x
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Consider your use case; a default value may be inappropriate.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/best-practices/choosing-a-primary-key"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Choosing a primary key</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/best-practices/use-materialized-views"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Use materialized views</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#example">Example</a><li><a class="table-of-contents__link toc-highlight" href="#avoid-nullable-columns">Avoid nullable columns</a></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

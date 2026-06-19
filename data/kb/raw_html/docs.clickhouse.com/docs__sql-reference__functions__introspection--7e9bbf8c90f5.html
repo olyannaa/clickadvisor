@@ -1,0 +1,381 @@
+<h1>Introspection Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Introspection</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/introspection.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Introspection Functions</h1></header><p>You can use functions described in this chapter to introspect <a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format" rel="noopener noreferrer" target="_blank">ELF</a> and <a href="https://en.wikipedia.org/wiki/DWARF" rel="noopener noreferrer" target="_blank">DWARF</a> for query profiling.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>These functions are slow and may impose security considerations.</p></div></div>
+<p>For proper operation of introspection functions:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Install the <code>clickhouse-common-static-dbg</code> package.</p>
+</li>
+<li class="custom-li">
+<p>Set the <a href="/docs/operations/settings/settings#allow_introspection_functions">allow_introspection_functions</a> setting to 1.</p>
+<p>For security reasons introspection functions are disabled by default.</p>
+</li>
+</ul>
+<p>ClickHouse saves profiler reports to the <a href="/docs/operations/system-tables/trace_log">trace_log</a> system table. Make sure the table and profiler are configured properly.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="addressToLine">addressToLine<a aria-label="Direct link to addressToLine" class="hash-link" href="#addressToLine" title="Direct link to addressToLine">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Converts a virtual memory address inside the ClickHouse server process to a filename and line number in ClickHouse's source code.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This function is slow and may impose security considerations.</p></div></div>
+<p>To enable this introspection function:</p>
+<ul class="custom-ul">
+<li class="custom-li">Install the <code>clickhouse-common-static-dbg</code> package.</li>
+<li class="custom-li">Set setting <a href="/docs/operations/settings/settings#allow_introspection_functions"><code>allow_introspection_functions</code></a> to <code>1</code>.</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">addressToLine(address_of_binary_instruction)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>address_of_binary_instruction</code> — Address of instruction in a running process. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a source code filename and line number delimited by a colon, for example, <code>/build/obj-x86_64-linux-gnu/../src/Common/ThreadPool.cpp:199</code>. Returns the name of a binary, if no debug information could be found, otherwise an empty string, if the address is not valid. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Selecting the first string from the <code>trace_log</code> system table</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT * FROM system.trace_log LIMIT 1 \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-- The `trace` field contains the stack trace at the moment of sampling.
+Row 1:
+──────
+event_date:              2019-11-19
+event_time:              2019-11-19 18:57:23
+revision:                54429
+timer_type:              Real
+thread_number:           48
+query_id:                421b6855-1858-45a5-8f37-f383409d6d72
+trace:                   [140658411141617,94784174532828,94784076370703,94784076372094,94784076361020,94784175007680,140658411116251,140658403895439]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Getting the source code filename and the line number for a single address</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT addressToLine(94784076370703) \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+addressToLine(94784076370703): /build/obj-x86_64-linux-gnu/../src/Common/ThreadPool.cpp:199
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Applying the function to the whole stack trace</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- The arrayMap function in this example processing each individual element of the trace array by the addressToLine function.
+-- The result of this processing is seen in the trace_source_code_lines column of output.
+
+SELECT
+    arrayStringConcat(arrayMap(x -&gt; addressToLine(x), trace), '\n') AS trace_source_code_lines
+FROM system.trace_log
+LIMIT 1
+\G
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+trace_source_code_lines: /lib/x86_64-linux-gnu/libpthread-2.27.so
+/usr/lib/debug/usr/bin/clickhouse
+/build/obj-x86_64-linux-gnu/../src/Common/ThreadPool.cpp:199
+/build/obj-x86_64-linux-gnu/../src/Common/ThreadPool.h:155
+/usr/include/c++/9/bits/atomic_base.h:551
+/usr/lib/debug/usr/bin/clickhouse
+/lib/x86_64-linux-gnu/libpthread-2.27.so
+/build/glibc-OTsEL5/glibc-2.27/misc/../sysdeps/unix/sysv/linux/x86_64/clone.S:97
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="addressToLineWithInlines">addressToLineWithInlines<a aria-label="Direct link to addressToLineWithInlines" class="hash-link" href="#addressToLineWithInlines" title="Direct link to addressToLineWithInlines">​</a></h2>
+<p>Introduced in: v22.2.0</p>
+<p>Similar to <code>addressToLine</code>, but returns an Array with all inline functions.
+As a result of this, it is slower than <code>addressToLine</code>.</p>
+<p>To enable this introspection function:</p>
+<ul class="custom-ul">
+<li class="custom-li">Install the <code>clickhouse-common-static-dbg</code> package.</li>
+<li class="custom-li">Set setting <a href="/docs/operations/settings/settings#allow_introspection_functions"><code>allow_introspection_functions</code></a> to <code>1</code>.</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">addressToLineWithInlines(address_of_binary_instruction)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>address_of_binary_instruction</code> — The address of an instruction in a running process. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array whose first element is the source code filename and line number delimited by a colon. The second, third, etc. element list inline functions' source code filenames, line numbers and function names. If no debug information could be found, then an array with a single element equal to the name of the binary is returned, otherwise an empty array is returned if the address is not valid. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Applying the function to an address</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT addressToLineWithInlines(531055181::UInt64);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─addressToLineWithInlines(CAST('531055181', 'UInt64'))────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ['./src/Functions/addressToLineWithInlines.cpp:98','./build_normal_debug/./src/Functions/addressToLineWithInlines.cpp:176:DB::(anonymous namespace)::FunctionAddressToLineWithInlines::implCached(unsigned long) const'] │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Applying the function to the whole stack trace</strong></p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+
+-- The arrayJoin function will split array to rows
+
+SELECT
+    ta, addressToLineWithInlines(arrayJoin(trace) AS ta)
+FROM system.trace_log
+WHERE
+    query_id = '5e173544-2020-45de-b645-5deebe2aae54';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:791.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌────────ta─┬─addressToLineWithInlines(arrayJoin(trace))───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 365497529 │ ['./build_normal_debug/./contrib/libcxx/include/string_view:252']                                                                                                                                                        │
+│ 365593602 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:191']                                                                                                                                                                      │
+│ 365593866 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365592528 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365591003 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:477']                                                                                                                                                                      │
+│ 365590479 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:442']                                                                                                                                                                      │
+│ 365590600 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:457']                                                                                                                                                                      │
+│ 365598941 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365607098 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365590571 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:451']                                                                                                                                                                      │
+│ 365598941 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365607098 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365590571 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:451']                                                                                                                                                                      │
+│ 365598941 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365607098 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365590571 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:451']                                                                                                                                                                      │
+│ 365598941 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:0']                                                                                                                                                                        │
+│ 365597289 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:807']                                                                                                                                                                      │
+│ 365599840 │ ['./build_normal_debug/./src/Common/Dwarf.cpp:1118']                                                                                                                                                                     │
+│ 531058145 │ ['./build_normal_debug/./src/Functions/addressToLineWithInlines.cpp:152']                                                                                                                                                │
+│ 531055181 │ ['./src/Functions/addressToLineWithInlines.cpp:98','./build_normal_debug/./src/Functions/addressToLineWithInlines.cpp:176:DB::(anonymous namespace)::FunctionAddressToLineWithInlines::implCached(unsigned long) const'] │
+│ 422333613 │ ['./build_normal_debug/./src/Functions/IFunctionAdaptors.h:21']                                                                                                                                                          │
+│ 586866022 │ ['./build_normal_debug/./src/Functions/IFunction.cpp:216']                                                                                                                                                               │
+│ 586869053 │ ['./build_normal_debug/./src/Functions/IFunction.cpp:264']                                                                                                                                                               │
+│ 586873237 │ ['./build_normal_debug/./src/Functions/IFunction.cpp:334']                                                                                                                                                               │
+│ 597901620 │ ['./build_normal_debug/./src/Interpreters/ExpressionActions.cpp:601']                                                                                                                                                    │
+│ 597898534 │ ['./build_normal_debug/./src/Interpreters/ExpressionActions.cpp:718']                                                                                                                                                    │
+│ 630442912 │ ['./build_normal_debug/./src/Processors/Transforms/ExpressionTransform.cpp:23']                                                                                                                                          │
+│ 546354050 │ ['./build_normal_debug/./src/Processors/ISimpleTransform.h:38']                                                                                                                                                          │
+│ 626026993 │ ['./build_normal_debug/./src/Processors/ISimpleTransform.cpp:89']                                                                                                                                                        │
+│ 626294022 │ ['./build_normal_debug/./src/Processors/Executors/ExecutionThreadContext.cpp:45']                                                                                                                                        │
+│ 626293730 │ ['./build_normal_debug/./src/Processors/Executors/ExecutionThreadContext.cpp:63']                                                                                                                                        │
+│ 626169525 │ ['./build_normal_debug/./src/Processors/Executors/PipelineExecutor.cpp:213']                                                                                                                                             │
+│ 626170308 │ ['./build_normal_debug/./src/Processors/Executors/PipelineExecutor.cpp:178']                                                                                                                                             │
+│ 626166348 │ ['./build_normal_debug/./src/Processors/Executors/PipelineExecutor.cpp:329']                                                                                                                                             │
+│ 626163461 │ ['./build_normal_debug/./src/Processors/Executors/PipelineExecutor.cpp:84']                                                                                                                                              │
+│ 626323536 │ ['./build_normal_debug/./src/Processors/Executors/PullingAsyncPipelineExecutor.cpp:85']                                                                                                                                  │
+│ 626323277 │ ['./build_normal_debug/./src/Processors/Executors/PullingAsyncPipelineExecutor.cpp:112']                                                                                                                                 │
+│ 626323133 │ ['./build_normal_debug/./contrib/libcxx/include/type_traits:3682']                                                                                                                                                       │
+│ 626323041 │ ['./build_normal_debug/./contrib/libcxx/include/tuple:1415']                                                                                                                                                             │
+└───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="addressToSymbol">addressToSymbol<a aria-label="Direct link to addressToSymbol" class="hash-link" href="#addressToSymbol" title="Direct link to addressToSymbol">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Converts virtual memory address inside the ClickHouse server process to a symbol from ClickHouse's object files.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">addressToSymbol(address_of_binary_instruction)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>address_of_binary_instruction</code> — Address of instruction in a running process. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the symbol from ClickHouse object files or an empty string, if the address is not valid. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Selecting the first string from the <code>trace_log</code> system table</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT * FROM system.trace_log LIMIT 1 \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-- The `trace` field contains the stack trace at the moment of sampling.
+Row 1:
+──────
+event_date:    2019-11-20
+event_time:    2019-11-20 16:57:59
+revision:      54429
+timer_type:    Real
+thread_number: 48
+query_id:      724028bf-f550-45aa-910d-2af6212b94ac
+trace:         [94138803686098,94138815010911,94138815096522,94138815101224,94138815102091,94138814222988,94138806823642,94138814457211,94138806823642,94138814457211,94138806823642,94138806795179,94138806796144,94138753770094,94138753771646,94138753760572,94138852407232,140399185266395,140399178045583]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Getting a symbol for a single address</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT addressToSymbol(94138803686098) \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+addressToSymbol(94138803686098): _ZNK2DB24IAggregateFunctionHelperINS_20AggregateFunctionSumImmNS_24AggregateFunctionSumDataImEEEEE19addBatchSinglePlaceEmPcPPKNS_7IColumnEPNS_5ArenaE
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Applying the function to the whole stack trace</strong></p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+
+-- The arrayMap function allows to process each individual element of the trace array by the addressToSymbols function.
+-- The result of this processing is shown in the trace_symbols column of output.
+
+SELECT
+    arrayStringConcat(arrayMap(x -&gt; addressToSymbol(x), trace), '\n') AS trace_symbols
+FROM system.trace_log
+LIMIT 1
+\G
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+trace_symbols: _ZNK2DB24IAggregateFunctionHelperINS_20AggregateFunctionSumImmNS_24AggregateFunctionSumDataImEEEEE19addBatchSinglePlaceEmPcPPKNS_7IColumnEPNS_5ArenaE
+_ZNK2DB10Aggregator21executeWithoutKeyImplERPcmPNS0_28AggregateFunctionInstructionEPNS_5ArenaE
+_ZN2DB10Aggregator14executeOnBlockESt6vectorIN3COWINS_7IColumnEE13immutable_ptrIS3_EESaIS6_EEmRNS_22AggregatedDataVariantsERS1_IPKS3_SaISC_EERS1_ISE_SaISE_EERb
+_ZN2DB10Aggregator14executeOnBlockERKNS_5BlockERNS_22AggregatedDataVariantsERSt6vectorIPKNS_7IColumnESaIS9_EERS6_ISB_SaISB_EERb
+_ZN2DB10Aggregator7executeERKSt10shared_ptrINS_17IBlockInputStreamEERNS_22AggregatedDataVariantsE
+_ZN2DB27AggregatingBlockInputStream8readImplEv
+_ZN2DB17IBlockInputStream4readEv
+_ZN2DB26ExpressionBlockInputStream8readImplEv
+_ZN2DB17IBlockInputStream4readEv
+_ZN2DB26ExpressionBlockInputStream8readImplEv
+_ZN2DB17IBlockInputStream4readEv
+_ZN2DB28AsynchronousBlockInputStream9calculateEv
+_ZNSt17_Function_handlerIFvvEZN2DB28AsynchronousBlockInputStream4nextEvEUlvE_E9_M_invokeERKSt9_Any_data
+_ZN14ThreadPoolImplI20ThreadFromGlobalPoolE6workerESt14_List_iteratorIS0_E
+_ZZN20ThreadFromGlobalPoolC4IZN14ThreadPoolImplIS_E12scheduleImplIvEET_St8functionIFvvEEiSt8optionalImEEUlvE1_JEEEOS4_DpOT0_ENKUlvE_clEv
+_ZN14ThreadPoolImplISt6threadE6workerESt14_List_iteratorIS0_E
+execute_native_thread_routine
+start_thread
+clone
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="demangle">demangle<a aria-label="Direct link to demangle" class="hash-link" href="#demangle" title="Direct link to demangle">​</a></h2>
+<p>Introduced in: v20.1.0</p>
+<p>Converts a symbol to a C++ function name.
+The symbol is usually returned by function <code>addressToSymbol</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">demangle(symbol)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>symbol</code> — Symbol from an object file. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the name of the C++ function, or an empty string if the symbol is not valid. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Selecting the first string from the <code>trace_log</code> system table</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM system.trace_log LIMIT 1 \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">-- The `trace` field contains the stack trace at the moment of sampling.
+Row 1:
+──────
+event_date:    2019-11-20
+event_time:    2019-11-20 16:57:59
+revision:      54429
+timer_type:    Real
+thread_number: 48
+query_id:      724028bf-f550-45aa-910d-2af6212b94ac
+trace:         [94138803686098,94138815010911,94138815096522,94138815101224,94138815102091,94138814222988,94138806823642,94138814457211,94138806823642,94138814457211,94138806823642,94138806795179,94138806796144,94138753770094,94138753771646,94138753760572,94138852407232,140399185266395,140399178045583]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Getting a function name for a single address</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+SELECT demangle(addressToSymbol(94138803686098)) \G;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+demangle(addressToSymbol(94138803686098)): DB::IAggregateFunctionHelper&lt;DB::AggregateFunctionSum&lt;unsigned long, unsigned long, DB::AggregateFunctionSumData&lt;unsigned long&gt; &gt; &gt;::addBatchSinglePlace(unsigned long, char*, DB::IColumn const**, DB::Arena*) const
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Applying the function to the whole stack trace</strong></p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_introspection_functions=1;
+
+-- The arrayMap function allows to process each individual element of the trace array by the demangle function.
+-- The result of this processing is shown in the trace_functions column of output.
+
+SELECT
+    arrayStringConcat(arrayMap(x -&gt; demangle(addressToSymbol(x)), trace), '\n') AS trace_functions
+FROM system.trace_log
+LIMIT 1
+\G
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">Row 1:
+──────
+trace_functions: DB::IAggregateFunctionHelper&lt;DB::AggregateFunctionSum&lt;unsigned long, unsigned long, DB::AggregateFunctionSumData&lt;unsigned long&gt; &gt; &gt;::addBatchSinglePlace(unsigned long, char*, DB::IColumn const**, DB::Arena*) const
+DB::Aggregator::executeWithoutKeyImpl(char*&amp;, unsigned long, DB::Aggregator::AggregateFunctionInstruction*, DB::Arena*) const
+DB::Aggregator::executeOnBlock(...)
+DB::Aggregator::executeOnBlock(DB::Block const&amp;, ...)
+DB::Aggregator::execute(std::shared_ptr&lt;DB::IBlockInputStream&gt; const&amp;, DB::AggregatedDataVariants&amp;)
+DB::AggregatingBlockInputStream::readImpl()
+DB::IBlockInputStream::read()
+DB::ExpressionBlockInputStream::readImpl()
+DB::IBlockInputStream::read()
+DB::ExpressionBlockInputStream::readImpl()
+DB::IBlockInputStream::read()
+DB::AsynchronousBlockInputStream::calculate()
+std::_Function_handler&lt;void (), DB::AsynchronousBlockInputStream::next()::{lambda()#1}&gt;::_M_invoke(std::_Any_data const&amp;)
+ThreadPoolImpl&lt;ThreadFromGlobalPool&gt;::worker(std::_List_iterator&lt;ThreadFromGlobalPool&gt;)
+ThreadFromGlobalPool::ThreadFromGlobalPool&lt;ThreadPoolImpl&lt;ThreadFromGlobalPool&gt;::scheduleImpl&lt;void&gt;(std::function&lt;void ()&gt;, int, std::optional&lt;unsigned long&gt;)::{lambda()#3}&gt;(ThreadPoolImpl&lt;ThreadFromGlobalPool&gt;::scheduleImpl&lt;void&gt;(std::function&lt;void ()&gt;, int, std::optional&lt;unsigned long&gt;)::{lambda()#3}&amp;&amp;)::{lambda()#1}::operator()() const
+ThreadPoolImpl&lt;std::thread&gt;::worker(std::_List_iterator&lt;std::thread&gt;)
+execute_native_thread_routine
+start_thread
+clone
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="isMergeTreePartCoveredBy">isMergeTreePartCoveredBy<a aria-label="Direct link to isMergeTreePartCoveredBy" class="hash-link" href="#isMergeTreePartCoveredBy" title="Direct link to isMergeTreePartCoveredBy">​</a></h2>
+<p>Introduced in: v25.6.0</p>
+<p>Function which checks if the part of the first argument is covered by the part of the second argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">isMergeTreePartCoveredBy(nested_part, covering_part)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>nested_part</code> — Name of expected nested part. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>covering_part</code> — Name of expected covering part. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>1</code> if it covers, <code>0</code> otherwise. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH 'all_12_25_7_4' AS lhs, 'all_7_100_10_20' AS rhs
+SELECT isMergeTreePartCoveredBy(rhs, lhs), isMergeTreePartCoveredBy(lhs, rhs);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─isMergeTreePartCoveredBy(rhs, lhs)─┬─isMergeTreePartCoveredBy(lhs, rhs)─┐
+│                                  0 │                                  1 │
+└────────────────────────────────────┴────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="logTrace">logTrace<a aria-label="Direct link to logTrace" class="hash-link" href="#logTrace" title="Direct link to logTrace">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Emits a trace log message to the server log for each <a href="/docs/development/architecture#block">Block</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">logTrace(message)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>message</code> — Message that is emitted to the server log. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>0</code> always. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt8</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT logTrace('logTrace message');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─logTrace('logTrace message')─┐
+│                            0 │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mergeTreePartInfo">mergeTreePartInfo<a aria-label="Direct link to mergeTreePartInfo" class="hash-link" href="#mergeTreePartInfo" title="Direct link to mergeTreePartInfo">​</a></h2>
+<p>Introduced in: v25.6.0</p>
+<p>Function that helps to cut the useful values out of the <code>MergeTree</code> part name.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">mergeTreePartInfo(part_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>part_name</code> — Name of part to unpack. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a Tuple with subcolumns: <code>partition_id</code>, <code>min_block</code>, <code>max_block</code>, <code>level</code>, <code>mutation</code>. <a href="/docs/sql-reference/data-types/tuple"><code>Tuple</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic example</strong></p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH mergeTreePartInfo('all_12_25_7_4') AS info
+SELECT info.partition_id, info.min_block, info.max_block, info.level, info.mutation;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─info.partition_id─┬─info.min_block─┬─info.max_block─┬─info.level─┬─info.mutation─┐
+│ all               │             12 │             25 │          7 │             4 │
+└───────────────────┴────────────────┴────────────────┴────────────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tid">tid<a aria-label="Direct link to tid" class="hash-link" href="#tid" title="Direct link to tid">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns id of the thread, in which the current <a href="/docs/development/architecture#block">Block</a> is processed.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tid()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the current thread id. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt64</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tid();
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─tid()─┐
+│  3878 │
+└───────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/in-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">IN Operator</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/ip-address-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">IP Addresses</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#addressToLine">addressToLine</a><li><a class="table-of-contents__link toc-highlight" href="#addressToLineWithInlines">addressToLineWithInlines</a><li><a class="table-of-contents__link toc-highlight" href="#addressToSymbol">addressToSymbol</a><li><a class="table-of-contents__link toc-highlight" href="#demangle">demangle</a><li><a class="table-of-contents__link toc-highlight" href="#isMergeTreePartCoveredBy">isMergeTreePartCoveredBy</a><li><a class="table-of-contents__link toc-highlight" href="#logTrace">logTrace</a><li><a class="table-of-contents__link toc-highlight" href="#mergeTreePartInfo">mergeTreePartInfo</a><li><a class="table-of-contents__link toc-highlight" href="#tid">tid</a></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

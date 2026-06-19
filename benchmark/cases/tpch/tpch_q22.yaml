@@ -1,0 +1,24 @@
+case_id: tpch_q22
+source: tpch
+sql: "SELECT\n    cntrycode,\n    count(*) AS numcust,\n    sum(c_acctbal) AS totacctbal\nFROM\n    (\n        SELECT\n            substring(c_phone, 1, 2) AS cntrycode,\n            c_acctbal\n        FROM\n            customer\n        WHERE\n            substring(c_phone, 1, 2) IN ('13', '31', '23', '29', '30', '18', '17')\n            AND c_acctbal > (\n                SELECT\n                    avg(c_acctbal)\n                FROM\n                    customer\n                WHERE\n                    c_acctbal > 0.00\n                    AND substring(c_phone, 1, 2) IN ('13', '31', '23', '29', '30', '18', '17')\n            )\n            AND NOT exists (\n                SELECT\n                    *\n                FROM\n                    orders\n                WHERE\n                    o_custkey = c_custkey\n            )\n    ) AS custsale\nGROUP BY\n    cntrycode\nORDER BY\n    cntrycode;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Подзапрос в WHERE NOT EXISTS + подзапрос в SELECT
+- issue_id: I-2
+  type: disjunction_chain_to_in
+  detected_by_rule: R-010
+  severity: high
+  description: substring(c_phone,1,2) = '13' OR '31' OR '23' OR '29' OR '30' OR '18' OR '17' → IN
+expected_rules_to_fire:
+- D-013
+- R-010
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q22: Global Sales Opportunity.'
+expected_findings_count: 2
+status: reviewed

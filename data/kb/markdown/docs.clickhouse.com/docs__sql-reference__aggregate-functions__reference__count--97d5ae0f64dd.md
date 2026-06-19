@@ -1,0 +1,108 @@
+# count \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- count
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/count.md)# count
+
+## count[​](#count "Direct link to count")
+
+
+Introduced in: v1\.1\.0
+
+
+Counts the number of rows or not\-NULL values.
+
+
+ClickHouse supports the following syntaxes for `count`:
+
+
+- `count(expr)` or `COUNT(DISTINCT expr)`.
+- `count()` or `COUNT(*)`. The `count()` syntax is ClickHouse\-specific.
+
+
+**Details**
+
+
+ClickHouse supports the `COUNT(DISTINCT ...)` syntax.
+The behavior of this construction depends on the [`count_distinct_implementation`](/docs/operations/settings/settings#count_distinct_implementation) setting.
+It defines which of the [uniq\*](/docs/sql-reference/aggregate-functions/reference/uniq) functions is used to perform the operation.
+The default is the [uniqExact](/docs/sql-reference/aggregate-functions/reference/uniqexact) function.
+
+
+The `SELECT count() FROM table` query is optimized by default using metadata from MergeTree.
+If you need to use row\-level security, disable optimization using the [`optimize_trivial_count_query`](/docs/operations/settings/settings#optimize_trivial_count_query) setting.
+
+
+However `SELECT count(nullable_column) FROM table` query can be optimized by enabling the [`optimize_functions_to_subcolumns`](/docs/operations/settings/settings#optimize_functions_to_subcolumns) setting.
+With `optimize_functions_to_subcolumns = 1` the function reads only [`null`](/docs/sql-reference/data-types/nullable#finding-null) subcolumn instead of reading and processing the whole column data.
+The query `SELECT count(n) FROM table` transforms to `SELECT sum(NOT n.null) FROM table`.
+
+
+Improving COUNT(DISTINCT expr) performanceIf your `COUNT(DISTINCT expr)` query is slow, consider adding a [`GROUP BY`](/docs/sql-reference/statements/select/group-by) clause as this improves parallelization.
+You can also use a [projection](/docs/sql-reference/statements/alter/projection) to create an index on the target column used with `COUNT(DISTINCT target_col)`.
+
+
+**Syntax**
+
+
+
+```
+count([expr])
+
+```
+
+**Arguments**
+
+
+- `expr` — Optional. An expression. The function counts how many times this expression returned not null. [`Expression`](/docs/sql-reference/data-types/special-data-types/expression)
+
+
+**Returned value**
+
+
+Returns the a row count if the function is called without parameters, otherwise returns a count of how many times the passed expression returned not null. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Examples**
+
+
+**Basic row count**
+
+
+
+```
+SELECT count() FROM t
+
+```
+
+
+```
+┌─count()─┐
+│       5 │
+└─────────┘
+
+```
+
+**COUNT(DISTINCT) example**
+
+
+
+```
+-- This example shows that `count(DISTINCT num)` is performed by the `uniqExact` function according to the `count_distinct_implementation` setting value.
+SELECT name, value FROM system.settings WHERE name = 'count_distinct_implementation';
+SELECT count(DISTINCT num) FROM t
+
+```
+
+
+```
+┌─name──────────────────────────┬─value─────┐
+│ count_distinct_implementation │ uniqExact │
+└───────────────────────────────┴───────────┘
+┌─uniqExact(num)─┐
+│              3 │
+└────────────────┘
+
+```
+[PreviouscorrStable](/docs/sql-reference/aggregate-functions/reference/corrstable)[NextcovarPop](/docs/sql-reference/aggregate-functions/reference/covarpop)- [count](#count)
+Was this page helpful?

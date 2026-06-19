@@ -1,0 +1,42 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-05-25T12:03:00Z",
+  "analyzer_version": "0.1.0",
+  "llm_mode": "none",
+  "input_summary": {
+    "statements_total": 1,
+    "target_statements": 1,
+    "schema_tables_seen": 1,
+    "explain_kinds": ["PIPELINE"],
+    "hardware_present": true
+  },
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "finding_type": "env_suggestion",
+      "title": "Review max_threads against available hardware",
+      "severity": "medium",
+      "environment_scope": "query_parallelism",
+      "evidence": {
+        "matched_pattern": "pipeline thread count exceeds practical target",
+        "plan_signals": ["PIPELINE threads=64"],
+        "metadata_signals": ["hardware logical_cores=32", "physical_cores=16"]
+      },
+      "recommendation": {
+        "before_sql": null,
+        "after_sql": null,
+        "notes": [
+          "Consider lowering max_threads for this workload or profile.",
+          "Reported as environment guidance, not SQL rewrite."
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "findings_total": 1,
+    "by_tier": {
+      "env": 1
+    },
+    "estimated_cost_reduction": "medium"
+  }
+}

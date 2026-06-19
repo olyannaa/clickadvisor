@@ -1,0 +1,169 @@
+<h1>Understanding ClickHouse data skipping indexes | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/operations/overview" itemprop="item"><span itemprop="name">Performance and optimizations</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Data skipping indexes</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/clickhouse-docs/blob/main/docs/guides/best-practices/skipping-indexes.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Understanding ClickHouse data skipping indexes</h1></header>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="introduction">Introduction<a aria-label="Direct link to Introduction" class="hash-link" href="#introduction" title="Direct link to Introduction">​</a></h2>
+<p>Many factors affect ClickHouse query performance. The critical element in most scenarios is whether ClickHouse can use the primary key when evaluating the query WHERE clause condition. Accordingly, selecting a primary key that applies to the most common query patterns is essential for effective table design.</p>
+<p>Nevertheless, no matter how carefully tuned the primary key, there will inevitably be query use cases that can not efficiently use it. Users commonly rely on ClickHouse for time series type data, but they often wish to analyze that same data according to other business dimensions, such as customer id, website URL, or product number. In that case, query performance can be considerably worse because a full scan of each column value may be required to apply the WHERE clause condition. While ClickHouse is still relatively fast in those circumstances, evaluating millions or billions of individual values will cause "non-indexed" queries to execute much more slowly than those based on the primary key.</p>
+<p>In a traditional relational database, one approach to this problem is to attach one or more "secondary" indexes to a table. This is a b-tree structure that permits the database to find all matching rows on disk in O(log(n)) time instead of O(n) time (a table scan), where n is the number of rows. However, this type of secondary index won't work for ClickHouse (or other column-oriented databases) because there are no individual rows on the disk to add to the index.</p>
+<p>Instead, ClickHouse provides a different type of index, which in specific circumstances can significantly improve query speed. These structures are labeled "Skip" indexes because they enable ClickHouse to skip reading significant chunks of data that are guaranteed to have no matching values.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="basic-operation">Basic operation<a aria-label="Direct link to Basic operation" class="hash-link" href="#basic-operation" title="Direct link to Basic operation">​</a></h2>
+<p>You can only employ Data Skipping Indexes on the MergeTree family of tables. Each data skipping has four primary arguments:</p>
+<ul class="custom-ul">
+<li class="custom-li">Index name. The index name is used to create the index file in each partition. Also, it is required as a parameter when dropping or materializing the index.</li>
+<li class="custom-li">Index expression. The index expression is used to calculate the set of values stored in the index. It can be a combination of columns, simple operators, and/or a subset of functions determined by the index type.</li>
+<li class="custom-li">TYPE. The type of index controls the calculation that determines if it is possible to skip reading and evaluating each index block.</li>
+<li class="custom-li">GRANULARITY. Each indexed block consists of GRANULARITY granules. For example, if the granularity of the primary table index is 8192 rows, and the index granularity is 4, each indexed "block" will be 32768 rows.</li>
+</ul>
+<p>When a user creates a data skipping index, there will be two additional files in each data part directory for the table.</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>skp_idx_{index_name}.idx</code>, which contains the ordered expression values</li>
+<li class="custom-li"><code>skp_idx_{index_name}.mrk2</code>, which contains the corresponding offsets into the associated data column files.</li>
+</ul>
+<p>If some portion of the WHERE clause filtering condition matches the skip index expression when executing a query and reading the relevant column files, ClickHouse will use the index file data to determine whether each relevant block of data must be processed or can be bypassed (assuming that the block hasn't already been excluded by applying the primary key). To use a very simplified example, consider the following table loaded with predictable data.</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE skip_table
+(
+  my_key UInt64,
+  my_value UInt64
+)
+ENGINE MergeTree primary key my_key
+SETTINGS index_granularity=8192;
+
+INSERT INTO skip_table SELECT number, intDiv(number,4096) FROM numbers(100000000);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>When executing a simple query that doesn't use the primary key, all 100 million entries in the <code>my_value</code>
+column are scanned:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM skip_table WHERE my_value IN (125, 700)
+
+┌─my_key─┬─my_value─┐
+│ 512000 │      125 │
+│ 512001 │      125 │
+│    ... |      ... |
+└────────┴──────────┘
+
+8192 rows in set. Elapsed: 0.079 sec. Processed 100.00 million rows, 800.10 MB (1.26 billion rows/s., 10.10 GB/s.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Now add a very basic skip index:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE skip_table ADD INDEX vix my_value TYPE set(100) GRANULARITY 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Normally skip indexes are only applied on newly inserted data, so just adding the index won't affect the above query.</p>
+<p>To index already existing data, use this statement:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE skip_table MATERIALIZE INDEX vix;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Rerun the query with the newly created index:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM skip_table WHERE my_value IN (125, 700)
+
+┌─my_key─┬─my_value─┐
+│ 512000 │      125 │
+│ 512001 │      125 │
+│    ... |      ... |
+└────────┴──────────┘
+
+8192 rows in set. Elapsed: 0.051 sec. Processed 32.77 thousand rows, 360.45 KB (643.75 thousand rows/s., 7.08 MB/s.)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Instead of processing 100 million rows of 800 megabytes, ClickHouse has only read and analyzed 32768 rows of 360 kilobytes
+-- four granules of 8192 rows each.</p>
+<p>In a more visual form, this is how the 4096 rows with a <code>my_value</code> of 125 were read and selected, and how the following rows
+were skipped without reading from disk:</p>
+<div style="position:relative;margin-bottom:16px;margin-top:16px"><div style="cursor:default"><div style='background-size:cover;background-repeat:no-repeat;position:relative;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAJCAIAAACExCpEAAAACXBIWXMAAC4jAAAuIwF4pT92AAAA2klEQVR4nCXJ23KCMBRA0fz/n9kiODCdOigWoUDutxMOiQXstK7HvcnzH2NMKUUp5Zy/ygtBxJSScV5q0/XjtWsNWojBoP3bSmsAbwAnpm7H/KusJCjq+WCnbd+J835B1BZGKqosL0+Fno1B25nBL0AAIC6LhXlg4lR+vFXFXX9DCnfdG7REKQXgtQsjk1lenC8XBkKj5SD3505iTClG44Byecjyur7KoEZHJ8d+tpVwzgOAtKGbxPsxb5qWg2ReNLIVQZGY0iOlGRfr4PNct10/umndVohh27dfwRL5upBooAIAAAAASUVORK5CYII=");width:600px;margin:0 auto;display:block;box-shadow:none'><svg height="891" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px" width="1024"></svg><noscript><img alt="Simple Skip" height="891" src="/docs/assets/ideal-img/simple_skip.7d255c6.48.png" srcset="/docs/assets/ideal-img/simple_skip.7d255c6.48.png 48w,/docs/assets/ideal-img/simple_skip.f098e44.300.png 300w,/docs/assets/ideal-img/simple_skip.01a3825.600.png 600w,/docs/assets/ideal-img/simple_skip.8fdf70a.1024.png 1024w" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px;position:absolute;top:0;left:0" width="1024"/></noscript></div></div></div>
+<p>You can access detailed information about skip index usage by enabling the trace when executing queries.  From
+clickhouse-client, set the <code>send_logs_level</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET send_logs_level='trace';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This will provide useful debugging information when trying to tune query SQL and table indexes.  From the above
+example, the debug log shows that the skip index dropped all but two granules:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;Debug&gt; default.skip_table (933d4b2c-8cea-4bf9-8c93-c56e900eefd1) (SelectExecutor): Index `vix` has dropped 6102/6104 granules.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="skip-index-types">Skip index types<a aria-label="Direct link to Skip index types" class="hash-link" href="#skip-index-types" title="Direct link to Skip index types">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="minmax">minmax<a aria-label="Direct link to minmax" class="hash-link" href="#minmax" title="Direct link to minmax">​</a></h3>
+<p>This lightweight index type requires no parameters.  It stores the minimum and maximum values of the index expression
+for each block (if the expression is a tuple, it separately stores the values for each member of the element
+of the tuple).  This type is ideal for columns that tend to be loosely sorted by value.  This index type is usually the least expensive to apply during query processing.</p>
+<p>This type of index only works correctly with a scalar or tuple expression -- the index will never be applied to expressions that return an array or map data type.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="set">set<a aria-label="Direct link to set" class="hash-link" href="#set" title="Direct link to set">​</a></h3>
+<p>This lightweight index type accepts a single parameter of the max_size of the value set per block (0 permits
+an unlimited number of discrete values).  This set contains all values in the block (or is empty if the number of values exceeds the max_size).  This index type works well with columns with low cardinality within each set of granules (essentially, "clumped together") but higher cardinality overall.</p>
+<p>The cost, performance, and effectiveness of this index is dependent on the cardinality within blocks.  If each block contains a large number of unique values, either evaluating the query condition against a large index set will be very expensive, or the index won't be applied because the index is empty due to exceeding max_size.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="text">text<a aria-label="Direct link to text" class="hash-link" href="#text" title="Direct link to text">​</a></h3>
+<p>For workloads that involve natural language or free-form text search (e.g., searching words or phrases in large text columns), ClickHouse provides a <strong>text index</strong> (a real inverted index).
+Text index supports efficient full-text search semantics and tokenized lookups. It is the recommended choice for full-text search queries because it provides deterministic token indexing and better performance for search functions such as <code>hasAnyToken</code>, <code>hasAllTokens</code> but also optimize all common text search functions.</p>
+<p>See the text index documentation for details <a href="/docs/engines/table-engines/mergetree-family/textindexes">here</a>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="bloom-filter-types">Bloom filter types<a aria-label="Direct link to Bloom filter types" class="hash-link" href="#bloom-filter-types" title="Direct link to Bloom filter types">​</a></h3>
+<p>A <em>Bloom filter</em> is a data structure that allows space-efficient testing of set membership at the cost of a slight chance of false positives. A false positive isn't a significant concern in the case of skip indexes because the only disadvantage is reading a few unnecessary blocks. However, the potential for false positives does mean that the indexed expression should be expected to be true, otherwise valid data may be skipped.</p>
+<p>Because Bloom filters can more efficiently handle testing for a large number of discrete values, they can be appropriate for conditional expressions that produce more values to test. In particular, a Bloom filter index can be applied to arrays, where every value of the array is tested, and to maps, by converting either the keys or values to an array using the mapKeys or mapValues function.</p>
+<p>There are three Data Skipping Index types based on Bloom filters:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>The basic <strong>bloom_filter</strong> which takes a single optional parameter of the allowed "false positive" rate between 0 and 1 (if unspecified, .025 is used).</p>
+</li>
+<li class="custom-li">
+<p>The specialized <strong>tokenbf_v1</strong> <em>(Deprecated)</em>). It takes three parameters, all related to tuning the bloom filter used:  (1) the size of the filter in bytes (larger filters have fewer false positives, at some cost in storage), (2) number of hash functions applied (again, more hash filters reduce false positives), and (3) the seed for the bloom filter hash functions.  See the calculator <a href="https://hur.st/bloomfilter/" rel="noopener noreferrer" target="_blank">here</a> for more detail on how these parameters affect bloom filter functionality.
+This index works only with String, FixedString, and Map datatypes. The input expression is split into character sequences separated by non-alphanumeric characters. For example, a column value of <code>This is a candidate for a "full text" search</code> will contain the tokens <code>This</code> <code>is</code> <code>a</code> <code>candidate</code> <code>for</code> <code>full</code> <code>text</code> <code>search</code>.  It is intended for use in LIKE, EQUALS, IN, hasToken() and similar searches for words and other values within longer strings.  For example, one possible use might be searching for a small number of class names or line numbers in a column of free form application log lines.</p>
+</li>
+<li class="custom-li">
+<p>The specialized <strong>ngrambf_v1</strong> <em>(Deprecated)</em>. This index functions the same as the token index.  It takes one additional parameter before the Bloom filter settings, the size of the ngrams to index.  An ngram is a character string of length <code>n</code> of any characters, so the string <code>A short string</code> with an ngram size of 4 would be indexed as:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">'A sh', ' sho', 'shor', 'hort', 'ort ', 'rt s', 't st', ' str', 'stri', 'trin', 'ring'
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+</ul>
+<p>This index can also be useful for text searches, particularly languages without word breaks, such as Chinese.</p>
+<blockquote>
+<p>For full-text search workloads, the dedicated <strong>text index</strong> (see <a href="/docs/engines/table-engines/mergetree-family/textindexes">Text index for full-text search</a>) is recommended over the deprecated <em>tokenbf_v1</em> or <em>ngrambf_v1</em> indexes.
+The text index provides a true inverted index with better search performance, more predictable behavior, and greater flexibility and performance compared with token-based Bloom filter indexes.</p>
+</blockquote>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="skip-index-functions">Skip index functions<a aria-label="Direct link to Skip index functions" class="hash-link" href="#skip-index-functions" title="Direct link to Skip index functions">​</a></h2>
+<p>The core purpose of data-skipping indexes is to limit the amount of data analyzed by popular queries. Given the analytic nature of ClickHouse data, the pattern of those queries in most cases includes functional expressions. Accordingly, skip indexes must interact correctly with common functions to be efficient. This can happen either when:</p>
+<ul class="custom-ul">
+<li class="custom-li">data is inserted and the index is defined as a functional expression (with the result of the expression stored in the index files), or</li>
+<li class="custom-li">the query is processed and the expression is applied to the stored index values to determine whether to exclude the block.</li>
+</ul>
+<p>Each type of skip index works on a subset of available ClickHouse functions appropriate to the index implementation listed
+<a href="/docs/engines/table-engines/mergetree-family/mergetree#functions-support">here</a>. In general, set indexes and Bloom filter based indexes (another type of set index) are both unordered and therefore don't work with ranges. In contrast, minmax indexes work particularly well with ranges since determining whether ranges intersect is very fast. The efficacy of partial match functions LIKE, startsWith, endsWith, and hasToken depend on the index type used, the index expression, and the particular shape of the data.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="skip-index-settings">Skip index settings<a aria-label="Direct link to Skip index settings" class="hash-link" href="#skip-index-settings" title="Direct link to Skip index settings">​</a></h2>
+<p>There are two available settings that apply to skip indexes.</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>use_skip_indexes</strong>  (0 or 1, default 1).  Not all queries can efficiently use skip indexes.  If a particular filtering condition is
+likely to include most granules, applying the data skipping index incurs an unnecessary, and sometimes significant, cost.  Set the value to
+0 for queries that are unlikely to benefit from any skip indexes.</li>
+<li class="custom-li"><strong>force_data_skipping_indices</strong> (comma separated list of index names).  This setting can be used to prevent some kinds of inefficient
+queries.  In circumstances where querying a table is too expensive unless a skip index is used, using this setting with one or more index
+names will return an exception for any query that doesn't use the listed index.  This would prevent poorly written queries from
+consuming server resources.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="skip-best-practices">Skip index best practices<a aria-label="Direct link to Skip index best practices" class="hash-link" href="#skip-best-practices" title="Direct link to Skip index best practices">​</a></h2>
+<p>Skip indexes aren't intuitive, especially for those accustomed to secondary row-based indexes from the RDMS realm or inverted indexes from document stores. To get any benefit, applying a ClickHouse data skipping index must avoid enough granule reads to offset the cost of calculating the index. Critically, if a value occurs even once in an indexed block, it means the entire block must be read into memory and evaluated, and the index cost has been needlessly incurred.</p>
+<p>Consider the following data distribution:</p>
+<div style="position:relative;margin-bottom:16px;margin-top:16px"><div style="cursor:default"><div style='background-size:cover;background-repeat:no-repeat;position:relative;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAHCAIAAAC+zks0AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAjElEQVR4nCWOQQ7EIAwD+f9Lq4qGFCchKSysaOdqW+MUEWOMOaeqnucpIgDO4xi9rzlTKSUiWmsAVJWZuZSbyIFplogoItxdXwAQEWqNiLVWEpHneSLiy/aYiHPea/d0XZeZ9d7NTESYud43cm5EvZTt9hcAtdbtfhtutnpP3+0xhrt/H1W1AaH6c/8DFAvI5oSTASsAAAAASUVORK5CYII=");width:600px;margin:0 auto;display:block;box-shadow:none'><svg height="729" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px" width="1024"></svg><noscript><img alt="Bad Skip" height="729" src="/docs/assets/ideal-img/bad_skip.9864582.48.png" srcset="/docs/assets/ideal-img/bad_skip.9864582.48.png 48w,/docs/assets/ideal-img/bad_skip.31ea671.300.png 300w,/docs/assets/ideal-img/bad_skip.86b2009.600.png 600w,/docs/assets/ideal-img/bad_skip.227f5ca.1024.png 1024w" style="width:100%;height:auto;max-width:100%;margin-bottom:-4px;position:absolute;top:0;left:0" width="1024"/></noscript></div></div></div>
+<p>Assume the primary/order by key is <code>timestamp</code>, and there is an index on <code>visitor_id</code>.  Consider the following query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT timestamp, url FROM table WHERE visitor_id = 1001`
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>A traditional secondary index would be very advantageous with this kind of data distribution.  Instead of reading all 32768 rows to find
+the 5 rows with the requested visitor_id, the secondary index would include just five row locations, and only those five rows would be
+read from disk.  The exact opposite is true for a ClickHouse data skipping index.  All 32768 values in the <code>visitor_id</code> column will be tested
+regardless of the type of skip index.</p>
+<p>Accordingly, the natural impulse to try to speed up ClickHouse queries by simply adding an index to key
+columns is often incorrect.  This advanced functionality should only be used after investigating other alternatives, such as modifying the primary key (see <a href="/docs/guides/best-practices/sparse-primary-indexes">How to Pick a Primary Key</a>), using projections, or using materialized views. Even when a data skipping index is appropriate, careful tuning both the index and the table
+will often be necessary.</p>
+<p>In most cases a useful skip index requires a strong correlation between the primary key and the targeted, non-primary column/expression.
+If there is no correlation (as in the above diagram), the chances of the filtering condition being met by at least one of the rows in
+the block of several thousand values is high and few blocks will be skipped.  In contrast, if a range of values for the primary key (like time of
+day) is strongly associated with the values in the potential index column (such as television viewer ages), then a minmax type of index
+is likely to be beneficial.  Note that it may be possible to increase this correlation when inserting data, either by including additional
+columns in the sorting/ORDER BY key, or batching inserts in a way that values associated with the primary key are grouped on insert.  For
+example, all of the events for a particular site_id could be grouped and inserted together by the ingest process, even if the primary key
+is a timestamp containing events from a large number of sites.  This will result in many granules that contains only a few site ids, so many
+blocks could be skipped when searching by a specific site_id value.</p>
+<p>Another good candidate for a skip index is for high cardinality expressions where any one value is relatively sparse in the data.  One example
+might be an observability platform that tracks error codes in API requests.  Certain error codes, while rare in the data, might be particularly
+important for searches.  A set skip index on the error_code column would allow bypassing the vast majority of blocks that don't contain
+errors and therefore significantly improve error focused queries.</p>
+<p>Finally, the key best practice is to test, test, test. Again, unlike b-tree secondary indexes or inverted indexes for searching documents,
+data skipping index behavior isn't easily predictable. Adding them to a table incurs a meaningful cost both on data ingest and on queries
+that for any number of reasons don't benefit from the index. They should always be tested on real world type of data, and testing should
+include variations of the type, granularity size and other parameters. Testing will often reveal patterns and pitfalls that aren't obvious from
+thought experiments alone.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-docs">Related docs<a aria-label="Direct link to Related docs" class="hash-link" href="#related-docs" title="Direct link to Related docs">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/best-practices/use-data-skipping-indices-where-appropriate">Best practices guide</a></li>
+<li class="custom-li"><a href="/docs/optimize/skipping-indexes/examples">Data skipping index examples</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/statements/alter/skipping-index">Manipulating data skipping indices</a></li>
+<li class="custom-li"><a href="/docs/operations/system-tables/data_skipping_indices">System table information</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/optimize/partitioning-key"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Partitioning key</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/optimize/skipping-indexes/examples"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Data skipping indexes - examples</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#introduction">Introduction</a><li><a class="table-of-contents__link toc-highlight" href="#basic-operation">Basic operation</a><li><a class="table-of-contents__link toc-highlight" href="#skip-index-types">Skip index types</a><ul><li><a class="table-of-contents__link toc-highlight" href="#minmax">minmax</a><li><a class="table-of-contents__link toc-highlight" href="#set">set</a><li><a class="table-of-contents__link toc-highlight" href="#text">text</a><li><a class="table-of-contents__link toc-highlight" href="#bloom-filter-types">Bloom filter types</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#skip-index-functions">Skip index functions</a><li><a class="table-of-contents__link toc-highlight" href="#skip-index-settings">Skip index settings</a><li><a class="table-of-contents__link toc-highlight" href="#skip-best-practices">Skip index best practices</a><li><a class="table-of-contents__link toc-highlight" href="#related-docs">Related docs</a></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

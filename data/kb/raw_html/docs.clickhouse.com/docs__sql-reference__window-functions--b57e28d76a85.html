@@ -1,0 +1,659 @@
+<h1>Window Functions | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Window functions</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/window-functions/index.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Window Functions</h1></header><p>Window functions let you perform calculations across a set of rows that are related to the current row.
+Some of the calculations that you can do are similar to those that can be done with an aggregate function, but a window function doesn't cause rows to be grouped into a single output - the individual rows are still returned.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="standard-window-functions">Standard window functions<a aria-label="Direct link to Standard window functions" class="hash-link" href="#standard-window-functions" title="Direct link to Standard window functions">​</a></h2>
+<p>ClickHouse supports the standard grammar for defining windows and window functions. The table below indicates whether a feature is currently supported.</p>
+<table><thead><tr><th>Feature<th>Supported?<tbody><tr><td>ad hoc window specification (<code>count(*) over (partition by id order by time desc)</code>)<td>✅<tr><td>expressions involving window functions, e.g. <code>(count(*) over ()) / 2)</code><td>✅<tr><td><code>WINDOW</code> clause (<code>select ... from table window w as (partition by id)</code>)<td>✅<tr><td><code>ROWS</code> frame<td>✅<tr><td><code>RANGE</code> frame<td>✅ (the default)<tr><td><code>INTERVAL</code> syntax for <code>DateTime</code> <code>RANGE OFFSET</code> frame<td>❌ (specify the number of seconds instead (<code>RANGE</code> works with any numeric type).)<tr><td><code>GROUPS</code> frame<td>❌<tr><td>Calculating aggregate functions over a frame (<code>sum(value) over (order by time)</code>)<td>✅ (All aggregate functions are supported)<tr><td><code>rank()</code>, <code>dense_rank()</code>, <code>row_number()</code><td>✅ <br/>Alias: <code>denseRank()</code><tr><td><code>percent_rank()</code><td>✅  Efficiently computes the relative standing of a value within a partition in a dataset. This function effectively replaces the more verbose and computationally intensive manual SQL calculation expressed as <code>ifNull((rank() OVER(PARTITION BY x ORDER BY y) - 1) / nullif(count(1) OVER(PARTITION BY x) - 1, 0), 0)</code> <br/>Alias: <code>percentRank()</code><tr><td><code>cume_dist()</code><td>✅  Computes the cumulative distribution of a value within a group of values. Returns the percentage of rows with values less than or equal to the current row's value.<tr><td><code>lag/lead(value, offset)</code><td>✅ <br/> You can also use one of the following workarounds:<br/> 1) <code>any(value) over (.... rows between &lt;offset&gt; preceding and &lt;offset&gt; preceding)</code>, or <code>following</code> for <code>lead</code> <br/> 2) <code>lagInFrame/leadInFrame</code>, which are analogous, but respect the window frame. To get behavior identical to <code>lag/lead</code>, use <code>rows between unbounded preceding and unbounded following</code><tr><td>ntile(buckets)<td>✅ <br/> Specify window like, (partition by x order by y rows between unbounded preceding and unbounded following).</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="clickhouse-specific-window-functions">ClickHouse-specific window functions<a aria-label="Direct link to ClickHouse-specific window functions" class="hash-link" href="#clickhouse-specific-window-functions" title="Direct link to ClickHouse-specific window functions">​</a></h2>
+<p>There is also the following ClickHouse specific window function:</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="nonnegativederivativemetric_column-timestamp_column-interval-x-units">nonNegativeDerivative(metric_column, timestamp_column[, INTERVAL X UNITS])<a aria-label="Direct link to nonNegativeDerivative(metric_column, timestamp_column[, INTERVAL X UNITS])" class="hash-link" href="#nonnegativederivativemetric_column-timestamp_column-interval-x-units" title="Direct link to nonNegativeDerivative(metric_column, timestamp_column[, INTERVAL X UNITS])">​</a></h3>
+<p>Finds non-negative derivative for given <code>metric_column</code> by <code>timestamp_column</code>.
+<code>INTERVAL</code> can be omitted, default is <code>INTERVAL 1 SECOND</code>.
+The computed value is the following for each row:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>0</code> for 1st row,</li>
+<li class="custom-li"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><msub><mtext>metric</mtext><mi>i</mi></msub><mo>−</mo><msub><mtext>metric</mtext><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><mrow><msub><mtext>timestamp</mtext><mi>i</mi></msub><mo>−</mo><msub><mtext>timestamp</mtext><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow></mfrac><mo>∗</mo><mtext>interval</mtext></mrow><annotation encoding="application/x-tex">{\text{metric}_i - \text{metric}_{i-1} \over \text{timestamp}_i - \text{timestamp}_{i-1}}  * \text{interval}</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:1.492em;vertical-align:-0.5728em"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9193em"><span style="top:-2.655em"><span class="pstrut" style="height:3em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">timestamp</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2052em"><span style="top:-2.2341em;margin-right:0.0714em"><span class="pstrut" style="height:2.5em"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2659em"><span></span></span></span></span></span></span><span class="mbin mtight">−</span><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">timestamp</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2052em"><span style="top:-2.2341em;margin-right:0.0714em"><span class="pstrut" style="height:2.5em"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3254em"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em"><span class="pstrut" style="height:3em"></span><span class="frac-line" style="border-bottom-width:0.04em"></span></span><span style="top:-3.4518em"><span class="pstrut" style="height:3em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">metric</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em"><span style="top:-2.357em;margin-right:0.0714em"><span class="pstrut" style="height:2.5em"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em"><span></span></span></span></span></span></span><span class="mbin mtight">−</span><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">metric</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em"><span style="top:-2.357em;margin-right:0.0714em"><span class="pstrut" style="height:2.5em"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2025em"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.5728em"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:0.6944em"></span><span class="mord text"><span class="mord">interval</span></span></span></span></span> for <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>i</mi><mrow><mi>t</mi><mi>h</mi></mrow></msub></mrow><annotation encoding="application/x-tex">i_{th}</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8095em;vertical-align:-0.15em"></span><span class="mord"><span class="mord mathnormal">i</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em"><span class="pstrut" style="height:2.7em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">h</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em"><span></span></span></span></span></span></span></span></span></span> row.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">aggregate_function (column_name)
+  OVER ([[PARTITION BY grouping_column] [ORDER BY sorting_column] 
+        [ROWS or RANGE expression_to_bound_rows_within_the_group]] | [window_name])
+FROM table_name
+WINDOW window_name as ([
+  [PARTITION BY grouping_column]
+  [ORDER BY sorting_column]
+  [ROWS or RANGE expression_to_bound_rows_within_the_group]
+])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li"><code>PARTITION BY</code> - defines how to break a resultset into groups.</li>
+<li class="custom-li"><code>ORDER BY</code> - defines how to order rows inside the group during calculation aggregate_function.</li>
+<li class="custom-li"><code>ROWS or RANGE</code> - defines bounds of a frame, aggregate_function is calculated within a frame.</li>
+<li class="custom-li"><code>WINDOW</code> - allows multiple expressions to use the same window definition.</li>
+</ul>
+<div class="wrapper_EBtA" style="height:263.90000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">      PARTITION
+┌─────────────────┐  &lt;-- UNBOUNDED PRECEDING (BEGINNING of the PARTITION)
+│                 │
+│                 │
+│=================│  &lt;-- N PRECEDING  &lt;─┐
+│      N ROWS     │                     │  F
+│  Before CURRENT │                     │  R
+│~~~~~~~~~~~~~~~~~│  &lt;-- CURRENT ROW    │  A
+│     M ROWS      │                     │  M
+│   After CURRENT │                     │  E
+│=================│  &lt;-- M FOLLOWING  &lt;─┘
+│                 │
+│                 │
+└─────────────────┘  &lt;--- UNBOUNDED FOLLOWING (END of the PARTITION)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="functions">Functions<a aria-label="Direct link to Functions" class="hash-link" href="#functions" title="Direct link to Functions">​</a></h3>
+<p>These functions can be used only as a window function.</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/row_number"><code>row_number()</code></a> - Number the current row within its partition starting from 1.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/first_value"><code>first_value(x)</code></a> - Return the first value evaluated within its ordered frame.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/last_value"><code>last_value(x)</code></a> -    Return the last value evaluated within its ordered frame.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/nth_value"><code>nth_value(x, offset)</code></a> - Return the first non-NULL value evaluated against the nth row (offset) in its ordered frame.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/rank"><code>rank()</code></a> - Rank the current row within its partition with gaps.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/dense_rank"><code>dense_rank()</code></a> - Rank the current row within its partition without gaps.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/lagInFrame"><code>lagInFrame(x)</code></a> - Return a value evaluated at the row that is at a specified physical offset row before the current row within the ordered frame.</li>
+<li class="custom-li"><a href="/docs/sql-reference/window-functions/leadInFrame"><code>leadInFrame(x)</code></a> - Return a value evaluated at the row that is offset rows after the current row within the ordered frame.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<p>Let's have a look at some examples of how window functions can be used.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="numbering-rows">Numbering rows<a aria-label="Direct link to Numbering rows" class="hash-link" href="#numbering-rows" title="Direct link to Numbering rows">​</a></h3>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE salaries
+(
+    `team` String,
+    `player` String,
+    `salary` UInt32,
+    `position` String
+)
+Engine = Memory;
+
+INSERT INTO salaries FORMAT Values
+    ('Port Elizabeth Barbarians', 'Gary Chen', 195000, 'F'),
+    ('New Coreystad Archdukes', 'Charles Juarez', 190000, 'F'),
+    ('Port Elizabeth Barbarians', 'Michael Stanley', 150000, 'D'),
+    ('New Coreystad Archdukes', 'Scott Harrison', 150000, 'D'),
+    ('Port Elizabeth Barbarians', 'Robert George', 195000, 'M');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    player,
+    salary,
+    row_number() OVER (ORDER BY salary ASC) AS row
+FROM salaries;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─player──────────┬─salary─┬─row─┐
+│ Michael Stanley │ 150000 │   1 │
+│ Scott Harrison  │ 150000 │   2 │
+│ Charles Juarez  │ 190000 │   3 │
+│ Gary Chen       │ 195000 │   4 │
+│ Robert George   │ 195000 │   5 │
+└─────────────────┴────────┴─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    player,
+    salary,
+    row_number() OVER (ORDER BY salary ASC) AS row,
+    rank() OVER (ORDER BY salary ASC) AS rank,
+    dense_rank() OVER (ORDER BY salary ASC) AS denseRank
+FROM salaries;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─player──────────┬─salary─┬─row─┬─rank─┬─denseRank─┐
+│ Michael Stanley │ 150000 │   1 │    1 │         1 │
+│ Scott Harrison  │ 150000 │   2 │    1 │         1 │
+│ Charles Juarez  │ 190000 │   3 │    3 │         2 │
+│ Gary Chen       │ 195000 │   4 │    4 │         3 │
+│ Robert George   │ 195000 │   5 │    4 │         3 │
+└─────────────────┴────────┴─────┴──────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="aggregation-functions">Aggregation functions<a aria-label="Direct link to Aggregation functions" class="hash-link" href="#aggregation-functions" title="Direct link to Aggregation functions">​</a></h3>
+<p>Compare each player's salary to the average for their team.</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    player,
+    salary,
+    team,
+    avg(salary) OVER (PARTITION BY team) AS teamAvg,
+    salary - teamAvg AS diff
+FROM salaries;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─player──────────┬─salary─┬─team──────────────────────┬─teamAvg─┬───diff─┐
+│ Charles Juarez  │ 190000 │ New Coreystad Archdukes   │  170000 │  20000 │
+│ Scott Harrison  │ 150000 │ New Coreystad Archdukes   │  170000 │ -20000 │
+│ Gary Chen       │ 195000 │ Port Elizabeth Barbarians │  180000 │  15000 │
+│ Michael Stanley │ 150000 │ Port Elizabeth Barbarians │  180000 │ -30000 │
+│ Robert George   │ 195000 │ Port Elizabeth Barbarians │  180000 │  15000 │
+└─────────────────┴────────┴───────────────────────────┴─────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Compare each player's salary to the maximum for their team.</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    player,
+    salary,
+    team,
+    max(salary) OVER (PARTITION BY team) AS teamMax,
+    salary - teamMax AS diff
+FROM salaries;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─player──────────┬─salary─┬─team──────────────────────┬─teamMax─┬───diff─┐
+│ Charles Juarez  │ 190000 │ New Coreystad Archdukes   │  190000 │      0 │
+│ Scott Harrison  │ 150000 │ New Coreystad Archdukes   │  190000 │ -40000 │
+│ Gary Chen       │ 195000 │ Port Elizabeth Barbarians │  195000 │      0 │
+│ Michael Stanley │ 150000 │ Port Elizabeth Barbarians │  195000 │ -45000 │
+│ Robert George   │ 195000 │ Port Elizabeth Barbarians │  195000 │      0 │
+└─────────────────┴────────┴───────────────────────────┴─────────┴────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="partitioning-by-column">Partitioning by column<a aria-label="Direct link to Partitioning by column" class="hash-link" href="#partitioning-by-column" title="Direct link to Partitioning by column">​</a></h3>
+<div class="wrapper_EBtA" style="height:527.8000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE wf_partition
+(
+    `part_key` UInt64,
+    `value` UInt64,
+    `order` UInt64    
+)
+ENGINE = Memory;
+
+INSERT INTO wf_partition FORMAT Values
+   (1,1,1), (1,2,2), (1,3,3), (2,0,0), (3,0,0);
+
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (PARTITION BY part_key) AS frame_values
+FROM wf_partition
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [1,2,3]      │   &lt;┐   
+│        1 │     2 │     2 │ [1,2,3]      │    │  1-st group
+│        1 │     3 │     3 │ [1,2,3]      │   &lt;┘ 
+│        2 │     0 │     0 │ [0]          │   &lt;- 2-nd group
+│        3 │     0 │     0 │ [0]          │   &lt;- 3-d group
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="frame-bounding">Frame bounding<a aria-label="Direct link to Frame bounding" class="hash-link" href="#frame-bounding" title="Direct link to Frame bounding">​</a></h3>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE wf_frame
+(
+    `part_key` UInt64,
+    `value` UInt64,
+    `order` UInt64
+)
+ENGINE = Memory;
+
+INSERT INTO wf_frame FORMAT Values
+   (1,1,1), (1,2,2), (1,3,3), (1,4,4), (1,5,5);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Frame is bounded by bounds of a partition (BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (
+        PARTITION BY part_key 
+        ORDER BY order ASC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+    
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [1,2,3,4,5]  │
+│        1 │     2 │     2 │ [1,2,3,4,5]  │
+│        1 │     3 │     3 │ [1,2,3,4,5]  │
+│        1 │     4 │     4 │ [1,2,3,4,5]  │
+│        1 │     5 │     5 │ [1,2,3,4,5]  │
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- short form - no bound expression, no order by,
+-- an equalent of `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (PARTITION BY part_key) AS frame_values_short,
+    groupArray(value) OVER (PARTITION BY part_key
+         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+┌─part_key─┬─value─┬─order─┬─frame_values_short─┬─frame_values─┐
+│        1 │     1 │     1 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+│        1 │     2 │     2 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+│        1 │     3 │     3 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+│        1 │     4 │     4 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+│        1 │     5 │     5 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+└──────────┴───────┴───────┴────────────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- frame is bounded by the beginning of a partition and the current row
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (
+        PARTITION BY part_key 
+        ORDER BY order ASC
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [1]          │
+│        1 │     2 │     2 │ [1,2]        │
+│        1 │     3 │     3 │ [1,2,3]      │
+│        1 │     4 │     4 │ [1,2,3,4]    │
+│        1 │     5 │     5 │ [1,2,3,4,5]  │
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- short form (frame is bounded by the beginning of a partition and the current row)
+-- an equalent of `ORDER BY order ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (PARTITION BY part_key ORDER BY order ASC) AS frame_values_short,
+    groupArray(value) OVER (PARTITION BY part_key ORDER BY order ASC
+       ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values_short─┬─frame_values─┐
+│        1 │     1 │     1 │ [1]                │ [1]          │
+│        1 │     2 │     2 │ [1,2]              │ [1,2]        │
+│        1 │     3 │     3 │ [1,2,3]            │ [1,2,3]      │
+│        1 │     4 │     4 │ [1,2,3,4]          │ [1,2,3,4]    │
+│        1 │     5 │     5 │ [1,2,3,4,5]        │ [1,2,3,4,5]  │
+└──────────┴───────┴───────┴────────────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- frame is bounded by the beginning of a partition and the current row, but order is backward
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (PARTITION BY part_key ORDER BY order DESC) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [5,4,3,2,1]  │
+│        1 │     2 │     2 │ [5,4,3,2]    │
+│        1 │     3 │     3 │ [5,4,3]      │
+│        1 │     4 │     4 │ [5,4]        │
+│        1 │     5 │     5 │ [5]          │
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- sliding frame - 1 PRECEDING ROW AND CURRENT ROW
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (
+        PARTITION BY part_key 
+        ORDER BY order ASC
+        ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [1]          │
+│        1 │     2 │     2 │ [1,2]        │
+│        1 │     3 │     3 │ [2,3]        │
+│        1 │     4 │     4 │ [3,4]        │
+│        1 │     5 │     5 │ [4,5]        │
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:414.70000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- sliding frame - ROWS BETWEEN 1 PRECEDING AND UNBOUNDED FOLLOWING 
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER (
+        PARTITION BY part_key 
+        ORDER BY order ASC
+        ROWS BETWEEN 1 PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS frame_values
+FROM wf_frame
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┐
+│        1 │     1 │     1 │ [1,2,3,4,5]  │
+│        1 │     2 │     2 │ [1,2,3,4,5]  │
+│        1 │     3 │     3 │ [2,3,4,5]    │
+│        1 │     4 │     4 │ [3,4,5]      │
+│        1 │     5 │     5 │ [4,5]        │
+└──────────┴───────┴───────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:546.6500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- row_number does not respect the frame, so rn_1 = rn_2 = rn_3 != rn_4
+SELECT
+    part_key,
+    value,
+    order,
+    groupArray(value) OVER w1 AS frame_values,
+    row_number() OVER w1 AS rn_1,
+    sum(1) OVER w1 AS rn_2,
+    row_number() OVER w2 AS rn_3,
+    sum(1) OVER w2 AS rn_4
+FROM wf_frame
+WINDOW
+    w1 AS (PARTITION BY part_key ORDER BY order DESC),
+    w2 AS (
+        PARTITION BY part_key 
+        ORDER BY order DESC 
+        ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+    )
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─part_key─┬─value─┬─order─┬─frame_values─┬─rn_1─┬─rn_2─┬─rn_3─┬─rn_4─┐
+│        1 │     1 │     1 │ [5,4,3,2,1]  │    5 │    5 │    5 │    2 │
+│        1 │     2 │     2 │ [5,4,3,2]    │    4 │    4 │    4 │    2 │
+│        1 │     3 │     3 │ [5,4,3]      │    3 │    3 │    3 │    2 │
+│        1 │     4 │     4 │ [5,4]        │    2 │    2 │    2 │    2 │
+│        1 │     5 │     5 │ [5]          │    1 │    1 │    1 │    1 │
+└──────────┴───────┴───────┴──────────────┴──────┴──────┴──────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:433.55px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- first_value and last_value respect the frame
+SELECT
+    groupArray(value) OVER w1 AS frame_values_1,
+    first_value(value) OVER w1 AS first_value_1,
+    last_value(value) OVER w1 AS last_value_1,
+    groupArray(value) OVER w2 AS frame_values_2,
+    first_value(value) OVER w2 AS first_value_2,
+    last_value(value) OVER w2 AS last_value_2
+FROM wf_frame
+WINDOW
+    w1 AS (PARTITION BY part_key ORDER BY order ASC),
+    w2 AS (PARTITION BY part_key ORDER BY order ASC ROWS BETWEEN 1 PRECEDING AND CURRENT ROW)
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─frame_values_1─┬─first_value_1─┬─last_value_1─┬─frame_values_2─┬─first_value_2─┬─last_value_2─┐
+│ [1]            │             1 │            1 │ [1]            │             1 │            1 │
+│ [1,2]          │             1 │            2 │ [1,2]          │             1 │            2 │
+│ [1,2,3]        │             1 │            3 │ [2,3]          │             2 │            3 │
+│ [1,2,3,4]      │             1 │            4 │ [3,4]          │             3 │            4 │
+│ [1,2,3,4,5]    │             1 │            5 │ [4,5]          │             4 │            5 │
+└────────────────┴───────────────┴──────────────┴────────────────┴───────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- second value within the frame
+SELECT
+    groupArray(value) OVER w1 AS frame_values_1,
+    nth_value(value, 2) OVER w1 AS second_value
+FROM wf_frame
+WINDOW w1 AS (PARTITION BY part_key ORDER BY order ASC ROWS BETWEEN 3 PRECEDING AND CURRENT ROW)
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─frame_values_1─┬─second_value─┐
+│ [1]            │            0 │
+│ [1,2]          │            2 │
+│ [1,2,3]        │            2 │
+│ [1,2,3,4]      │            2 │
+│ [2,3,4,5]      │            3 │
+└────────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- second value within the frame + Null for missing values
+SELECT
+    groupArray(value) OVER w1 AS frame_values_1,
+    nth_value(toNullable(value), 2) OVER w1 AS second_value
+FROM wf_frame
+WINDOW w1 AS (PARTITION BY part_key ORDER BY order ASC ROWS BETWEEN 3 PRECEDING AND CURRENT ROW)
+ORDER BY
+    part_key ASC,
+    value ASC;
+
+┌─frame_values_1─┬─second_value─┐
+│ [1]            │         ᴺᵁᴸᴸ │
+│ [1,2]          │            2 │
+│ [1,2,3]        │            2 │
+│ [1,2,3,4]      │            2 │
+│ [2,3,4,5]      │            3 │
+└────────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="real-world-examples">Real world examples<a aria-label="Direct link to Real world examples" class="hash-link" href="#real-world-examples" title="Direct link to Real world examples">​</a></h2>
+<p>The following examples solve common real-world problems.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="maximumtotal-salary-per-department">Maximum/total salary per department<a aria-label="Direct link to Maximum/total salary per department" class="hash-link" href="#maximumtotal-salary-per-department" title="Direct link to Maximum/total salary per department">​</a></h3>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE employees
+(
+    `department` String,
+    `employee_name` String,
+    `salary` Float
+)
+ENGINE = Memory;
+
+INSERT INTO employees FORMAT Values
+   ('Finance', 'Jonh', 200),
+   ('Finance', 'Joan', 210),
+   ('Finance', 'Jean', 505),
+   ('IT', 'Tim', 200),
+   ('IT', 'Anna', 300),
+   ('IT', 'Elen', 500);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:622.0500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    department,
+    employee_name AS emp,
+    salary,
+    max_salary_per_dep,
+    total_salary_per_dep,
+    round((salary / total_salary_per_dep) * 100, 2) AS `share_per_dep(%)`
+FROM
+(
+    SELECT
+        department,
+        employee_name,
+        salary,
+        max(salary) OVER wndw AS max_salary_per_dep,
+        sum(salary) OVER wndw AS total_salary_per_dep
+    FROM employees
+    WINDOW wndw AS (
+        PARTITION BY department
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    )
+    ORDER BY
+        department ASC,
+        employee_name ASC
+);
+
+┌─department─┬─emp──┬─salary─┬─max_salary_per_dep─┬─total_salary_per_dep─┬─share_per_dep(%)─┐
+│ Finance    │ Jean │    505 │                505 │                  915 │            55.19 │
+│ Finance    │ Joan │    210 │                505 │                  915 │            22.95 │
+│ Finance    │ Jonh │    200 │                505 │                  915 │            21.86 │
+│ IT         │ Anna │    300 │                500 │                 1000 │               30 │
+│ IT         │ Elen │    500 │                500 │                 1000 │               50 │
+│ IT         │ Tim  │    200 │                500 │                 1000 │               20 │
+└────────────┴──────┴────────┴────────────────────┴──────────────────────┴──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="cumulative-sum">Cumulative sum<a aria-label="Direct link to Cumulative sum" class="hash-link" href="#cumulative-sum" title="Direct link to Cumulative sum">​</a></h3>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE warehouse
+(
+    `item` String,
+    `ts` DateTime,
+    `value` Float
+)
+ENGINE = Memory
+
+INSERT INTO warehouse VALUES
+    ('sku38', '2020-01-01', 9),
+    ('sku38', '2020-02-01', 1),
+    ('sku38', '2020-03-01', -4),
+    ('sku1', '2020-01-01', 1),
+    ('sku1', '2020-02-01', 1),
+    ('sku1', '2020-03-01', 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    item,
+    ts,
+    value,
+    sum(value) OVER (PARTITION BY item ORDER BY ts ASC) AS stock_balance
+FROM warehouse
+ORDER BY
+    item ASC,
+    ts ASC;
+
+┌─item──┬──────────────────ts─┬─value─┬─stock_balance─┐
+│ sku1  │ 2020-01-01 00:00:00 │     1 │             1 │
+│ sku1  │ 2020-02-01 00:00:00 │     1 │             2 │
+│ sku1  │ 2020-03-01 00:00:00 │     1 │             3 │
+│ sku38 │ 2020-01-01 00:00:00 │     9 │             9 │
+│ sku38 │ 2020-02-01 00:00:00 │     1 │            10 │
+│ sku38 │ 2020-03-01 00:00:00 │    -4 │             6 │
+└───────┴─────────────────────┴───────┴───────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="moving--sliding-average-per-3-rows">Moving / sliding average (per 3 rows)<a aria-label="Direct link to Moving / sliding average (per 3 rows)" class="hash-link" href="#moving--sliding-average-per-3-rows" title="Direct link to Moving / sliding average (per 3 rows)">​</a></h3>
+<div class="wrapper_EBtA" style="height:301.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE sensors
+(
+    `metric` String,
+    `ts` DateTime,
+    `value` Float
+)
+ENGINE = Memory;
+
+insert into sensors values('cpu_temp', '2020-01-01 00:00:00', 87),
+                          ('cpu_temp', '2020-01-01 00:00:01', 77),
+                          ('cpu_temp', '2020-01-01 00:00:02', 93),
+                          ('cpu_temp', '2020-01-01 00:00:03', 87),
+                          ('cpu_temp', '2020-01-01 00:00:04', 87),
+                          ('cpu_temp', '2020-01-01 00:00:05', 87),
+                          ('cpu_temp', '2020-01-01 00:00:06', 87),
+                          ('cpu_temp', '2020-01-01 00:00:07', 87);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:452.40000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    metric,
+    ts,
+    value,
+    avg(value) OVER (
+        PARTITION BY metric 
+        ORDER BY ts ASC 
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_temp
+FROM sensors
+ORDER BY
+    metric ASC,
+    ts ASC;
+
+┌─metric───┬──────────────────ts─┬─value─┬───moving_avg_temp─┐
+│ cpu_temp │ 2020-01-01 00:00:00 │    87 │                87 │
+│ cpu_temp │ 2020-01-01 00:00:01 │    77 │                82 │
+│ cpu_temp │ 2020-01-01 00:00:02 │    93 │ 85.66666666666667 │
+│ cpu_temp │ 2020-01-01 00:00:03 │    87 │ 85.66666666666667 │
+│ cpu_temp │ 2020-01-01 00:00:04 │    87 │                89 │
+│ cpu_temp │ 2020-01-01 00:00:05 │    87 │                87 │
+│ cpu_temp │ 2020-01-01 00:00:06 │    87 │                87 │
+│ cpu_temp │ 2020-01-01 00:00:07 │    87 │                87 │
+└──────────┴─────────────────────┴───────┴───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="moving--sliding-average-per-10-seconds">Moving / sliding average (per 10 seconds)<a aria-label="Direct link to Moving / sliding average (per 10 seconds)" class="hash-link" href="#moving--sliding-average-per-10-seconds" title="Direct link to Moving / sliding average (per 10 seconds)">​</a></h3>
+<div class="wrapper_EBtA" style="height:395.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    metric,
+    ts,
+    value,
+    avg(value) OVER (PARTITION BY metric ORDER BY ts
+      RANGE BETWEEN 10 PRECEDING AND CURRENT ROW) AS moving_avg_10_seconds_temp
+FROM sensors
+ORDER BY
+    metric ASC,
+    ts ASC;
+    
+┌─metric───┬──────────────────ts─┬─value─┬─moving_avg_10_seconds_temp─┐
+│ cpu_temp │ 2020-01-01 00:00:00 │    87 │                         87 │
+│ cpu_temp │ 2020-01-01 00:01:10 │    77 │                         77 │
+│ cpu_temp │ 2020-01-01 00:02:20 │    93 │                         93 │
+│ cpu_temp │ 2020-01-01 00:03:30 │    87 │                         87 │
+│ cpu_temp │ 2020-01-01 00:04:40 │    87 │                         87 │
+│ cpu_temp │ 2020-01-01 00:05:50 │    87 │                         87 │
+│ cpu_temp │ 2020-01-01 00:06:00 │    87 │                         87 │
+│ cpu_temp │ 2020-01-01 00:07:10 │    87 │                         87 │
+└──────────┴─────────────────────┴───────┴────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="moving--sliding-average-per-10-days">Moving / sliding average (per 10 days)<a aria-label="Direct link to Moving / sliding average (per 10 days)" class="hash-link" href="#moving--sliding-average-per-10-days" title="Direct link to Moving / sliding average (per 10 days)">​</a></h3>
+<p>Temperature is stored with second precision, but using <code>Range</code> and <code>ORDER BY toDate(ts)</code> we form a frame with the size of 10 units, and because of <code>toDate(ts)</code> the unit is a day.</p>
+<div class="wrapper_EBtA" style="height:377px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE sensors
+(
+    `metric` String,
+    `ts` DateTime,
+    `value` Float
+)
+ENGINE = Memory;
+
+insert into sensors values('ambient_temp', '2020-01-01 00:00:00', 16),
+                          ('ambient_temp', '2020-01-01 12:00:00', 16),
+                          ('ambient_temp', '2020-01-02 11:00:00', 9),
+                          ('ambient_temp', '2020-01-02 12:00:00', 9),                          
+                          ('ambient_temp', '2020-02-01 10:00:00', 10),
+                          ('ambient_temp', '2020-02-01 12:00:00', 10),
+                          ('ambient_temp', '2020-02-10 12:00:00', 12),                          
+                          ('ambient_temp', '2020-02-10 13:00:00', 12),
+                          ('ambient_temp', '2020-02-20 12:00:01', 16),
+                          ('ambient_temp', '2020-03-01 12:00:00', 16),
+                          ('ambient_temp', '2020-03-01 12:00:00', 16),
+                          ('ambient_temp', '2020-03-01 12:00:00', 16);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:471.25000000000006px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    metric,
+    ts,
+    value,
+    round(avg(value) OVER (PARTITION BY metric ORDER BY toDate(ts) 
+       RANGE BETWEEN 10 PRECEDING AND CURRENT ROW),2) AS moving_avg_10_days_temp
+FROM sensors
+ORDER BY
+    metric ASC,
+    ts ASC;
+
+┌─metric───────┬──────────────────ts─┬─value─┬─moving_avg_10_days_temp─┐
+│ ambient_temp │ 2020-01-01 00:00:00 │    16 │                      16 │
+│ ambient_temp │ 2020-01-01 12:00:00 │    16 │                      16 │
+│ ambient_temp │ 2020-01-02 11:00:00 │     9 │                    12.5 │
+│ ambient_temp │ 2020-01-02 12:00:00 │     9 │                    12.5 │
+│ ambient_temp │ 2020-02-01 10:00:00 │    10 │                      10 │
+│ ambient_temp │ 2020-02-01 12:00:00 │    10 │                      10 │
+│ ambient_temp │ 2020-02-10 12:00:00 │    12 │                      11 │
+│ ambient_temp │ 2020-02-10 13:00:00 │    12 │                      11 │
+│ ambient_temp │ 2020-02-20 12:00:01 │    16 │                   13.33 │
+│ ambient_temp │ 2020-03-01 12:00:00 │    16 │                      16 │
+│ ambient_temp │ 2020-03-01 12:00:00 │    16 │                      16 │
+│ ambient_temp │ 2020-03-01 12:00:00 │    16 │                      16 │
+└──────────────┴─────────────────────┴───────┴─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="references">References<a aria-label="Direct link to References" class="hash-link" href="#references" title="Direct link to References">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="github-issues">GitHub Issues<a aria-label="Direct link to GitHub Issues" class="hash-link" href="#github-issues" title="Direct link to GitHub Issues">​</a></h3>
+<p>The roadmap for the initial support of window functions is <a href="https://github.com/ClickHouse/ClickHouse/issues/18097" rel="noopener noreferrer" target="_blank">in this issue</a>.</p>
+<p>All GitHub issues related to window functions have the <a href="https://github.com/ClickHouse/ClickHouse/labels/comp-window-functions" rel="noopener noreferrer" target="_blank">comp-window-functions</a> tag.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="tests">Tests<a aria-label="Direct link to Tests" class="hash-link" href="#tests" title="Direct link to Tests">​</a></h3>
+<p>These tests contain the examples of the currently supported grammar:</p>
+<p><a href="https://github.com/ClickHouse/ClickHouse/blob/master/tests/performance/window_functions.xml" rel="noopener noreferrer" target="_blank">https://github.com/ClickHouse/ClickHouse/blob/master/tests/performance/window_functions.xml</a></p>
+<p><a href="https://github.com/ClickHouse/ClickHouse/blob/master/tests/queries/0_stateless/01591_window_functions.sql" rel="noopener noreferrer" target="_blank">https://github.com/ClickHouse/ClickHouse/blob/master/tests/queries/0_stateless/01591_window_functions.sql</a></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="postgres-docs">Postgres Docs<a aria-label="Direct link to Postgres Docs" class="hash-link" href="#postgres-docs" title="Direct link to Postgres Docs">​</a></h3>
+<p><a href="https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW" rel="noopener noreferrer" target="_blank">https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW</a></p>
+<p><a href="https://www.postgresql.org/docs/devel/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS" rel="noopener noreferrer" target="_blank">https://www.postgresql.org/docs/devel/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS</a></p>
+<p><a href="https://www.postgresql.org/docs/devel/functions-window.html" rel="noopener noreferrer" target="_blank">https://www.postgresql.org/docs/devel/functions-window.html</a></p>
+<p><a href="https://www.postgresql.org/docs/devel/tutorial-window.html" rel="noopener noreferrer" target="_blank">https://www.postgresql.org/docs/devel/tutorial-window.html</a></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mysql-docs">MySQL Docs<a aria-label="Direct link to MySQL Docs" class="hash-link" href="#mysql-docs" title="Direct link to MySQL Docs">​</a></h3>
+<p><a href="https://dev.mysql.com/doc/refman/8.0/en/window-function-descriptions.html" rel="noopener noreferrer" target="_blank">https://dev.mysql.com/doc/refman/8.0/en/window-function-descriptions.html</a></p>
+<p><a href="https://dev.mysql.com/doc/refman/8.0/en/window-functions-usage.html" rel="noopener noreferrer" target="_blank">https://dev.mysql.com/doc/refman/8.0/en/window-functions-usage.html</a></p>
+<p><a href="https://dev.mysql.com/doc/refman/8.0/en/window-functions-frames.html" rel="noopener noreferrer" target="_blank">https://dev.mysql.com/doc/refman/8.0/en/window-functions-frames.html</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related Content<a aria-label="Direct link to Related Content" class="hash-link" href="#related-content" title="Direct link to Related Content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/working-with-time-series-data-and-functions-ClickHouse" rel="noopener noreferrer" target="_blank">Working with time series data in ClickHouse</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/clickhouse-window-array-functions-git-commits" rel="noopener noreferrer" target="_blank">Window and array functions for Git commit sequences</a></li>
+<li class="custom-li">Blog: <a href="https://clickhouse.com/blog/getting-data-into-clickhouse-part-3-s3" rel="noopener noreferrer" target="_blank">Getting Data Into ClickHouse - Part 3 - Using S3</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/loop"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">loop</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/window-functions/row_number"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">row_number</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#standard-window-functions">Standard window functions</a><li><a class="table-of-contents__link toc-highlight" href="#clickhouse-specific-window-functions">ClickHouse-specific window functions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#nonnegativederivativemetric_column-timestamp_column-interval-x-units">nonNegativeDerivative(metric_column, timestamp_column[, INTERVAL X UNITS])</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><ul><li><a class="table-of-contents__link toc-highlight" href="#functions">Functions</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#numbering-rows">Numbering rows</a><li><a class="table-of-contents__link toc-highlight" href="#aggregation-functions">Aggregation functions</a><li><a class="table-of-contents__link toc-highlight" href="#partitioning-by-column">Partitioning by column</a><li><a class="table-of-contents__link toc-highlight" href="#frame-bounding">Frame bounding</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#real-world-examples">Real world examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#maximumtotal-salary-per-department">Maximum/total salary per department</a><li><a class="table-of-contents__link toc-highlight" href="#cumulative-sum">Cumulative sum</a><li><a class="table-of-contents__link toc-highlight" href="#moving--sliding-average-per-3-rows">Moving / sliding average (per 3 rows)</a><li><a class="table-of-contents__link toc-highlight" href="#moving--sliding-average-per-10-seconds">Moving / sliding average (per 10 seconds)</a><li><a class="table-of-contents__link toc-highlight" href="#moving--sliding-average-per-10-days">Moving / sliding average (per 10 days)</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#references">References</a><ul><li><a class="table-of-contents__link toc-highlight" href="#github-issues">GitHub Issues</a><li><a class="table-of-contents__link toc-highlight" href="#tests">Tests</a><li><a class="table-of-contents__link toc-highlight" href="#postgres-docs">Postgres Docs</a><li><a class="table-of-contents__link toc-highlight" href="#mysql-docs">MySQL Docs</a></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related Content</a></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

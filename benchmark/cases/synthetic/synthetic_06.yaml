@@ -1,0 +1,18 @@
+case_id: synthetic_06
+source: synthetic
+sql: |
+  SELECT * FROM events WHERE toYYYYMM(event_date) = 202401
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: toYYYYMM_eq_to_date_range
+  detected_by_rule: R-006
+  severity: high
+  description: toYYYYMM(event_date) в WHERE можно переписать в диапазон по дате.
+expected_rules_to_fire:
+- R-006
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-006.
+expected_findings_count: 1
+status: validated

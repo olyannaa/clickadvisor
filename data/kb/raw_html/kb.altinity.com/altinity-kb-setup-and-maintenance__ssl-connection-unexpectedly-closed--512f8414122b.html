@@ -1,0 +1,21 @@
+<h1>SSL connection unexpectedly closed | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">SSL connection unexpectedly closed</li></ol></nav><div class="td-content"><h1>SSL connection unexpectedly closed</h1><div class="lead"></div><p>ClickHouse doesn’t probe CA path which is default on CentOS and Amazon Linux.</p><h2 id="clickhouse-client">ClickHouse client</h2><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-client/conf.d/openssl-ca.xml
+&lt;config&gt;
+    &lt;openSSL&gt;
+        &lt;client&gt; &lt;!-- Used for connection to server's secure tcp port --&gt;
+            &lt;caConfig&gt;/etc/ssl/certs&lt;/caConfig&gt;
+        &lt;/client&gt;
+    &lt;/openSSL&gt;
+&lt;/config&gt;
+</code></pre><h2 id="clickhouse-server">ClickHouse server</h2><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/conf.d/openssl-ca.xml
+&lt;config&gt;
+    &lt;openSSL&gt;
+        &lt;server&gt;  &lt;!-- Used for https server AND secure tcp port --&gt;
+            &lt;caConfig&gt;/etc/ssl/certs&lt;/caConfig&gt;
+        &lt;/server&gt;
+        &lt;client&gt;  &lt;!-- Used for connecting to https dictionary source and secured Zookeeper communication --&gt;
+            &lt;caConfig&gt;/etc/ssl/certs&lt;/caConfig&gt;
+        &lt;/client&gt;
+    &lt;/openSSL&gt;
+&lt;/config&gt;
+</code></pre><p><a href="https://github.com/ClickHouse/ClickHouse/issues/17803" target="_blank">https://github.com/ClickHouse/ClickHouse/issues/17803</a></p><p><a href="https://github.com/ClickHouse/ClickHouse/issues/18869" target="_blank">https://github.com/ClickHouse/ClickHouse/issues/18869</a></p><div class="td-page-meta__lastmod">Last modified 2021.08.24: <a href="https://github.com/Altinity/altinityknowledgebase/commit/c865e00c9976c80fb48234e9f1d09992e654a557">Format corrections and spell checks. (c865e00)</a></div></div></main>

@@ -1,0 +1,29 @@
+case_id: clickbench_q23
+source: clickbench
+sql: 'SELECT SearchPhrase, MIN(URL), MIN(Title), COUNT(*) AS c, COUNT(DISTINCT UserID)
+  FROM hits WHERE Title LIKE ''%Google%'' AND URL NOT LIKE ''%.google.%'' AND SearchPhrase
+  <> '''' GROUP BY SearchPhrase ORDER BY c DESC LIMIT 10;
+
+  '
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: count_distinct_to_uniqExact
+  detected_by_rule: R-001
+  severity: high
+  description: Query contains `COUNT(DISTINCT UserID)` with a single argument, matching
+    the exact `uniqExact` specialization rule.
+- issue_id: I-2
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: Predicates `Title LIKE '%Google%'` and `URL NOT LIKE '%.google.%'`
+    use leading wildcards and are expected to bypass index-friendly filtering.
+expected_rules_to_fire:
+- R-001
+- D-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: 2 confirmed finding(s) after rule-card precondition check.'
+expected_findings_count: 2
+status: reviewed

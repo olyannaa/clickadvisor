@@ -1,0 +1,152 @@
+<h1>ウェアハウスの紹介: ClickHouse Cloud におけるコンピュート-コンピュート分離</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p>現代のクラウドデータベースサービスにおいて、コンピュート-コンピュート分離は特定のワークロード、ユーザー、ビジネス機能に対してコンピュートリソースを分離することで、データベースパフォーマンスとリソース管理を最適化する強力なアプローチを提供します。従来のリソース共有モデルとは異なり、この方法では、読み取りや書き込みなど、異なるタイプのデータベース操作に専用のコンピュートインスタンスを割り当てるため、相互干渉のリスクが低減します。特に需要の高い環境では、ワークロードが変動することでクエリの速度や信頼性に影響が生じる可能性があり、こうした場面で特に有用です。</p>
+<p>本記事では、ClickHouse Cloud におけるコンピュート-コンピュート分離の導入を発表し、その重要性と、何よりユーザーにとって何を意味するのかを解説します。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="コンピュート-コンピュート分離とは" level="2">コンピュート-コンピュート分離とは？<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%83%88-%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%83%88%E5%88%86%E9%9B%A2%E3%81%A8%E3%81%AF">#</a></span></h2>
+<p>データベースにおけるコンピュート-コンピュート分離とは、異なるユーザー、ワークロード、あるいはオペレーションタイプごとに専用のコンピュートリソースを割り当て、互いに干渉しないようにする仕組みを指します。コンピュートリソースを分離することで、あるクエリのパフォーマンスや安定性が他のワークロードによって影響を受けることを防ぐことができます。<br/>
+類似の結果を、クォータやリミットを活用することで部分的に実現することも可能ですが、柔軟性や保証の面では、コンピュート-コンピュート分離の持つ特性には及びません。</p>
+<p>実際には、ユーザーは同じデータ（テーブルやビューなど）を読み書きする際に、異なる専用のコンピュートプールを用意できるようになります。それぞれが異なるタスク向けに分離されているのです。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="これがなぜ便利なのか" level="2">これがなぜ便利なのか？<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%81%93%E3%82%8C%E3%81%8C%E3%81%AA%E3%81%9C%E4%BE%BF%E5%88%A9%E3%81%AA%E3%81%AE%E3%81%8B">#</a></span></h2>
+<p>このような分離は、以下のようなシナリオで非常に役立ちます。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="1-書き込みと読み取りの分離" level="3">1. 書き込みと読み取りの分離<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#1-%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%81%BF%E3%81%A8%E8%AA%AD%E3%81%BF%E5%8F%96%E3%82%8A%E3%81%AE%E5%88%86%E9%9B%A2">#</a></span></h3>
+<p>一部のユースケースでは、書き込み操作がクエリ実行時間に対して非常に敏感になる場合があります。こうしたシナリオでは、データベース内の他のクエリによって INSERT や UPDATE の実行時間が影響を受けないことが望ましいです。特にユーザーや BI ツールから直接投げられるアドホッククエリでは、非効率的だったり、リソースを過度に消費したりするクエリが実行される可能性があり、他のクエリにまで影響が及びがちです。</p>
+<p>コンピュート-コンピュート分離を行うことで、最も重要なワークロード――例えば INSERT 操作――に専用のコンピュートリソースを割り当て、他のクエリに左右されないパフォーマンスを実現できます。場合によっては、書き込みよりも特定の読み取り操作のほうが重要であるケースもあるでしょう。その場合も同様に、専用のコンピュートリソースを割り当てることで確実にパフォーマンスを確保できます。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="2-異なるチームや機能への専用コンピュートの提供" level="3">2. 異なるチームや機能への専用コンピュートの提供<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#2-%E7%95%B0%E3%81%AA%E3%82%8B%E3%83%81%E3%83%BC%E3%83%A0%E3%82%84%E6%A9%9F%E8%83%BD%E3%81%B8%E3%81%AE%E5%B0%82%E7%94%A8%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%83%88%E3%81%AE%E6%8F%90%E4%BE%9B">#</a></span></h3>
+<p>大規模企業では、数十、あるいは数百ものチームや部署が同じデータベースやデータウェアハウスにアクセスすることがあります。同じデータにアクセスしていても、チームごとに求められるパフォーマンスレベルが異なる場合がありますし、他チームとコンピュートリソースを共有することで、クエリパフォーマンスが不安定になることを好まないこともあります。</p>
+<p>さらに、コスト管理や予算上の理由から、チームごとにデータベースの利用料金を分離したい場合も多いでしょう。</p>
+<p>このようなシナリオにおいて、コンピュート-コンピュート分離は以下のメリットをもたらします:</p>
+<ul>
+<li>チームごとのワークロードを分離し、互いのクエリが相互にパフォーマンスへ影響を及ぼさないようにできる</li>
+<li>各チームに対して、異なるコンピュートサイズやアイドル設定を適用することができ、必要な性能とコストを最適化しやすくなる</li>
+<li>各チームの利用コストを明確に分離し、アイドリングを有効にしている場合でもクエリのコストをはっきりと把握できる</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="3-ワークロードごとに異なる-ha-レベル高可用性レベルを提供" level="3">3. ワークロードごとに異なる HA レベル(高可用性レベル)を提供<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#3-%E3%83%AF%E3%83%BC%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%89%E3%81%94%E3%81%A8%E3%81%AB%E7%95%B0%E3%81%AA%E3%82%8B-ha-%E3%83%AC%E3%83%99%E3%83%AB%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7%E3%83%AC%E3%83%99%E3%83%AB%E3%82%92%E6%8F%90%E4%BE%9B">#</a></span></h3>
+<p>ある種のワークロードは極めて重要度が高い一方、多少のダウンタイムを許容してコストを削減したい場合もあります。例えば:</p>
+<ul>
+<li>エンドユーザーに提供している製品のチャートや可視化は最高レベルの可用性が求められるため、3 つのアベイラビリティゾーンを使用すべきです。ただし、これらのクエリ自体は比較的シンプルであり、CPU やメモリを大量に必要としないことも多いです。</li>
+<li>ETL/ELT クエリは重要でありリソースを大きく消費しますが、失敗した場合に再実行が可能です。よって、2 つのアベイラビリティゾーンで合計 2 ノードだけを割り当てる程度で十分といったケースもあります。</li>
+<li>手動で実行される大規模なアドホッククエリは、メモリを大量に消費する可能性があり、またアナリストが平日の勤務時間 (例えば 5 日×8 時間) のみ作業するといった前提ならば、その時間以外はアイドリングしても問題ありません。さらに、一時的なノード障害があってもリトライ可能で、ある程度の失敗は許容できるかもしれません。そういった場合、1 つのアベイラビリティゾーンに単一ノードを割り当てるだけで十分かもしれません。</li>
+</ul>
+<p>このように、コンピュート-コンピュート分離を用いることで、各ワークロードが求める高可用性レベルをそれぞれ確保しつつ、同じデータベースを使う複数のチームに対してコストを分離することが可能です。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="ウェアハウスの導入" level="2">ウェアハウスの導入<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%8F%E3%82%A6%E3%82%B9%E3%81%AE%E5%B0%8E%E5%85%A5">#</a></span></h2>
+<p>ClickHouse Cloud において、各データベースインスタンスには以下が含まれます:</p>
+<ul>
+<li>1 つ以上の ClickHouse ノード（またはレプリカ）のグループ<br/>
+（アベイラビリティ設定に応じて 1 ノード以上で構成）</li>
+<li>サービス URL をもつエンドポイント（ClickHouse Cloud の UI コンソールを経由して複数作成可能）<br/>
+例: <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">https://dv2fzne24g.us-east-1.aws.clickhouse.cloud:8443</code></li>
+<li>サービスがすべてのデータおよび一部のメタデータを保存するオブジェクトストレージフォルダ</li>
+<li>通常 3 ノード構成の <a href="https://clickhouse.com/clickhouse/keeper">keeper</a> インスタンス:</li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_01.png" loading="lazy" src="/uploads/compute_compute_01_ba2b32bcdd.png"/></span>
+<p>ここに、新たに <strong>ウェアハウス (Warehouses)</strong> という概念を導入します。ウェアハウスとは、同じデータ（テーブル、ビュー、関数など）を共有する複数のサービスをまとめたセットです。各ウェアハウスには、<em>プライマリサービス</em>（最初に作成されたサービス）と、1 つ以上の<em>セカンダリサービス</em>が含まれます。<br/>
+例として、2 つのサービスを含むウェアハウスを以下に示します。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_02.png" loading="lazy" src="/uploads/compute_compute_02_9bccc649bb.png"/></span>
+<p>このようなウェアハウス内の各サービスは、それぞれ以下を独自に持っています:</p>
+<ul>
+<li><strong>エンドポイント</strong>: どのワークロードや BI ツール、ETL/ELT システムがどのノード群を利用するかを調整するため</li>
+<li><strong>コンピュートノード</strong>: 他サービスとの干渉を防ぎ、各ワークロードを独立して実行できる。たとえば、以下を個別にスケール可能:
+<ul>
+<li>サービスあたりのノード数</li>
+<li>ノードサイズ (RAM の GiB 単位)<br/>
+※インスタンスサイズが大きいほど vCPU も多くなる</li>
+<li>サービスのアイドリング設定</li>
+<li>エンタープライズ ティアの顧客の場合、サービス単位で異なる CPU/RAM 比率を選択可能。<br/>
+あるワークロードでは圧縮/解凍に CPU を多く要し、別のワークロードでは複雑なクエリにメモリを多く要するといったケースに対応するため、これらを分離して最適化できる</li>
+</ul>
+</li>
+<li><strong>ネットワークアクセス設定</strong>: アプリやユーザーが特定のサービスにアクセスできないように制限をかけるなど</li>
+</ul>
+<p>一方、同じウェアハウス内のすべてのサービスに共通するものは以下です:</p>
+<ul>
+<li><strong>データ</strong>: すべてのサービスが同じデータを扱うため、同じウェアハウス内のどのサービスで <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">SELECT</code> クエリを実行しても同じ結果が得られる</li>
+<li><strong>Keeper インスタンス</strong>: Keeper はデータのノード間レプリケーションや調整を行うため、同じデータを扱うすべてのサービスは共有の Keeper クラスタを利用する</li>
+<li><strong>バックアップ</strong>: 同じデータを複数のサービスでバックアップしたくはないので、最初に作成されたプライマリサービスのみでバックアップを行う</li>
+<li>現時点では、すべてのサービスが以下を同一にする必要がある:
+<ul>
+<li>クラウドプロバイダ (AWS、GCP、Azure のいずれか)</li>
+<li>リージョン</li>
+<li>ClickHouse のデータベースバージョン</li>
+</ul>
+</li>
+</ul>
+<p>UI 上では、2 つ以上のサービスを持つ最初のウェアハウスが作成されると、同じウェアハウスに属するサービスがグルーピングされて表示されます。下記の例では、2 つのウェアハウスが存在します:</p>
+<ul>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">DWH_pre_prod</code>: 4 つのサービスを持つ</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">DWH_for_tests_us_east_1</code>: 1 つのサービスのみ</li>
+</ul>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_04.png" loading="lazy" src="/uploads/compute_compute_04_93c203d689.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="仕組み" level="3">仕組み<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E4%BB%95%E7%B5%84%E3%81%BF">#</a></span></h3>
+<p>コンピュート-コンピュート分離を実現するには、主に 2 つの問題に対処する必要がありました。1 つは異なるコンピュートグループ間でのデータ同期、もう 1 つはクエリワークロードがサービスごとの境界を守り、同じウェアハウス内の別サービスが持つリソースを使用しないようにすることです。</p>
+<p>ClickHouse Cloud のアーキテクチャ上の 2 つの重要な設計が、このデータ同期を効率的に実現する助けとなっています。<br/>
+1 つ目は <a href="https://clickhouse.com/docs/en/guides/separation-storage-compute">ストレージとコンピュートの分離</a> です。クラウドプロバイダのストレージ（例: S3）上の同じデータを共有できるため、異なるサービス間でデータを同期しやすくなります。<br/>
+2 つ目はテーブルスキーマやメタデータの同期において <a href="https://clickhouse.com/docs/en/cloud/reference/shared-merge-tree">SharedMergeTree テーブルエンジン</a> を使用しており、Keeper フリートを活用した軽量なメタデータ同期を実現している点です。</p>
+<p>さらに、コンピュート分離を実装するためには、<a href="https://github.com/ClickHouse/ClickHouse/issues/53620">replica-group の概念</a> をレプリケートされたデータベース内で利用します。このアプローチにより、分散クエリやパラレルレプリカにおける負荷は各レプリカグループ内に限定され、同じウェアハウス内であっても他サービスのリソースを追加で消費することを防ぎます。この仕組みにより、隔離性と効率性が保たれます。</p>
+<p>これらの技術基盤に加えて、コンピュート-コンピュート分離をフルサポートするため、以下の変更も行いました:</p>
+<ul>
+<li>ウェアハウス内の各サービスを個別に監視し、アイドリングや自動スケールを独立して行えるようにした</li>
+<li>ウェアハウス単位でのネットワーク分離・ストレージ分離をセキュリティのために強化</li>
+<li>同一ウェアハウス内のサービス間でデータベース同期を強制</li>
+<li>読み取り専用サービス (read-only) ではマージや挿入処理を行わないようにし、バックグラウンドジョブ（ミューテーションなど）が読み取り専用サービスに影響を与えないようにした（詳細は「Background operations」節を参照）</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="データベース認証情報" level="3">データベース認証情報<a href="https://clickhouse.com/docs/en/cloud/reference/compute-compute-separation#database-credentials">​</a> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E8%AA%8D%E8%A8%BC%E6%83%85%E5%A0%B1">#</a></span></h3>
+<p>同じウェアハウス内のすべてのサービスは、同じテーブルやビューを共有しているため、ユーザー/ロールやアクセス制御（権限付与）も共有されます。つまり、「サービス 1」で作成されたデータベースユーザーは、「サービス 2」でも同じ権限（テーブルやビューへのアクセスなど）を使ってログイン可能です。ユーザーはサービスごとに異なるエンドポイントを使用する一方、ユーザー名やパスワードは同一となります。<br/>
+言い換えると、<strong>ウェアハウス内のサービス間でユーザー情報は共有される</strong>ということです:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_05.png" loading="lazy" src="/uploads/compute_compute_05_43a6621b33.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="ネットワークアクセス制御" level="3">ネットワークアクセス制御<a href="https://clickhouse.com/docs/en/cloud/reference/compute-compute-separation#network-access-control">​</a> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E5%88%B6%E5%BE%A1">#</a></span></h3>
+<p>ただし、一部のサービスを特定のアプリやアドホックユーザーからアクセスできないようにしたい場合もあるでしょう。これは、ネットワーク制限を設定することで実現できます。既存の通常サービスで行っている設定方法と同様に、ClickHouse Cloud コンソールの対象サービスの <strong>Service</strong> タブで <strong>Settings</strong> に移動し、設定を行います。</p>
+<p>サービスごとに IP フィルタリング設定を適用できるため、どのアプリやユーザーがどのサービスにアクセス可能かを制御できます。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_06.png" loading="lazy" src="/uploads/compute_compute_06_b0c4f114cb.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="読み取り専用-vs-読み書き可能" level="3">読み取り専用 vs 読み書き可能<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E8%AA%AD%E3%81%BF%E5%8F%96%E3%82%8A%E5%B0%82%E7%94%A8-vs-%E8%AA%AD%E3%81%BF%E6%9B%B8%E3%81%8D%E5%8F%AF%E8%83%BD">#</a></span></h3>
+<p>特定のサービスを読み取り専用にし、ウェアハウス内の一部サービスだけで書き込みを行わせたいケースもあります。これは、最初に作成されたプライマリサービス以外のサービスを <em>読み取り専用</em> に設定することで実現できます（最初のサービスは常に書き込み可能である必要があります）。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="compute_compute_07.png" loading="lazy" src="/uploads/compute_compute_07_749da423e7.png"/></span>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="バックグラウンドオペレーション" level="4">バックグラウンドオペレーション<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%83%90%E3%83%83%E3%82%AF%E3%82%B0%E3%83%A9%E3%82%A6%E3%83%B3%E3%83%89%E3%82%AA%E3%83%9A%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">#</a></span></h4>
+<p>ClickHouse は、データ挿入後のマージ処理のように、リソースを大量消費するバックグラウンドオペレーションをいくつか実行します。これらのマージ処理には多くのメモリや CPU リソースが必要となる場合があります。</p>
+<p>コンピュート-コンピュート分離を完全に実現するため、バックグラウンドのマージは書き込み可能 (read-write) なサービスのみで行うようにしました。したがって、重要な読み取りワークロード専用に読み取り専用サービスを用意すれば、そのサービスではマージが実行されず、読み取りパフォーマンスへの影響を回避できます。</p>
+<p>一方、複数の読書き可能 (RW) サービスがある場合、いずれのサービスでも、どのサービスから行われた INSERT に対してもマージを実行する可能性があります。これは、マージ処理自体が、トリガーとなったクエリと直接結びついていないためです。その結果、別のサービスで発生した重い書き込みが、別サービスに影響を及ぼすケースもまれにありえます。将来的には、どの RW サービスがバックグラウンドジョブを実行するかを制御し、クエリを発行したサービスに対応する形で処理を分散できる設定を導入する予定です。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="ウェアハウスの制限事項" level="3">ウェアハウスの制限事項<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%8F%E3%82%A6%E3%82%B9%E3%81%AE%E5%88%B6%E9%99%90%E4%BA%8B%E9%A0%85">#</a></span></h3>
+<p>ウェアハウスは ClickHouse Cloud に大きな柔軟性をもたらしますが、現時点の実装にはいくつかの制限があり、今後これらを取り除いていく予定です:</p>
+<ol>
+<li>
+<p>ウェアハウス内の最初のサービスは常に稼働状態でなければならず、アイドリングさせることはできません。セカンダリサービスが 1 つでも存在する場合、プライマリサービスを停止またはアイドリングにできません。すべてのセカンダリサービスを削除すると、オリジナルのサービスを再び停止やアイドリングにすることが可能です。</p>
+</li>
+<li>
+<p>前述のとおり、すべての読書き可能サービス (RW サービス) はバックグラウンドでマージ操作を実行します。たとえば、サービス 1 で INSERT クエリを実行した場合でも、マージはサービス 2 で行われる可能性があります。つまり、ある RW サービスのワークロードが、別の RW サービスのパフォーマンスに影響を与える場合があります。一方、読み取り専用 (RO) サービスはバックグラウンドでマージを実行しないため、この操作でリソースを消費しません。<br/>
+挿入や変換には単一の RW サービスを用い、他の用途には RO サービスを利用することを検討してください。</p>
+</li>
+<li>
+<p>ある RW サービスに対する挿入 (INSERT) 処理が、アイドリングを有効にしている別の RW サービスをアイドリングできなくする場合があります。これは前のポイントと関連しており、1 つめのサービスの挿入処理に対して、2 つめのサービスがバックグラウンドマージを実行する可能性があるためです。このバックグラウンド処理が実行されている間は、2 つめのサービスはスリープ状態に入れません。マージ処理が完了すれば、そのサービスはアイドリングに移行します。読み取り専用サービスは影響を受けず、遅延なくアイドリングされます。</p>
+</li>
+<li>
+<p><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">CREATE/RENAME/DROP DATABASE</code> クエリは、デフォルト設定のままだと停止中やアイドリング状態のサービスによってブロックされ、クエリが完了しない可能性があります。回避するには、以下のようにセッションまたはクエリレベルで
+<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">distributed_ddl_task_timeout=0</code>
+を設定してデータベース管理クエリを実行してください。</p>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-sql" style="white-space:pre-wrap"><span style="display:flex"><span class="comment linenumber react-syntax-highlighter-line-number" style="display:inline-block;min-width:1.25em;padding-right:1em;text-align:right;user-select:none">1</span><span><span style="color:#88aece">create</span><span> database db_test_ddl_single_query_setting
+</span></span></span><span style="display:flex"><span class="comment linenumber react-syntax-highlighter-line-number" style="display:inline-block;min-width:1.25em;padding-right:1em;text-align:right;user-select:none">2</span><span><span>settings distributed_ddl_task_timeout</span><span class="hljs-operator">=</span><span style="color:#f08d49">0</span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div>
+</pre>
+</li>
+</ol>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="お客様からのフィードバック" level="3">お客様からのフィードバック<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E3%81%8A%E5%AE%A2%E6%A7%98%E3%81%8B%E3%82%89%E3%81%AE%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF">#</a></span></h3>
+<p>ウェアハウスを正式リリースする前に、一部のお客様にプライベートプレビューとして提供し、実際の本番ワークロードでテストしていただきました。以下は、そのユーザーからのフィードバックの一部です:</p>
+<blockquote style="font-size:16px">
+<p style="margin-bottom:8px">"私たちは小規模なプライマリクラスターを用意して書き込み専用とし、大規模なクラスターは読み取り専用にしています。さらにアドホッククラスターを用意しておき、使用していないときはスリープに入るようにしています。アドホックは素晴らしいですね。ユーザーがどんな非効率なクエリを実行しても、本番環境に影響を与えないので助かります。"</p>
+<p>Beehiiv.com</p>
+</blockquote>
+<blockquote style="font-size:16px">
+<p style="margin-bottom:8px">"今のところ順調です！ 今週はプライマリサービスに追加の負荷がかかったのですが、セカンダリサービスにトラフィックを振り分けることで、顧客向けクエリの速度を維持できました。"</p>
+<p>CommonRoom.io</p>
+</blockquote>
+<blockquote style="font-size:16px">
+<p style="margin-bottom:8px">"`query_cache`、`allow_experimental_analyzer`、`allow_experimental_parallel_reading_from_replicas` とあわせてコンピュート-コンピュート分離を本番環境で運用し始めましたが、非常に素晴らしいです。まるで夢のような環境になりました。"</p>
+<p>Vantage.sh</p>
+</blockquote>
+<blockquote style="font-size:16px">
+<p style="margin-bottom:8px">"コンピュート-コンピュート分離の効果は抜群です。テストの結果、現在 BigQuery で 30 分かかっている通常のコンピュートタスクが、30 秒ほどに短縮できました。ワークロードを分離できたおかげです。"</p>
+<p>ABTasty.com</p>
+</blockquote>
+<blockquote style="font-size:16px">
+<p style="margin-bottom:8px">"8 時間かかっていた処理が、今は 30 分以内、あるいはそれ以下に短縮されました。他のサービスへの影響は特にありません。A+ 機能です。"</p>
+<p>Cypress.io</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="今すぐ始めましょう" level="2">今すぐ始めましょう！<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud-jp#%E4%BB%8A%E3%81%99%E3%81%90%E5%A7%8B%E3%82%81%E3%81%BE%E3%81%97%E3%82%87%E3%81%86">#</a></span></h2>
+<p>本記事では、コンピュート-コンピュート分離が ClickHouse Cloud のお客様のテナント分離を高め、リソース消費やコストの全体最適化にどのように役立っているかを紹介しました。</p>
+<p>ClickHouse Cloud の新規ユーザーとしてウェアハウスを体験するには、<a href="https://console.clickhouse.cloud/signUp">こちら</a> から 300 ドル分の無料トライアルをお試しください。既存のユーザーの方は、製品内の案内に従い、ウェアハウスをサポートする新しいティアへ既存のデプロイを移行できます。詳しくは <a href="https://clickhouse.com/docs/en/cloud/manage/jan-2025-faq">FAQ</a> をご覧ください。</p></div></div></article>

@@ -1,0 +1,29 @@
+id: R-018
+name: union_to_union_all_advisory
+tier: 1C
+category: set_operations
+status: proposed
+statement: ДЕТЕКЦИЯ UNION (не UNION ALL) с advisory-рекомендацией заменить.
+preconditions:
+  syntactic:
+  - Query содержит UNION (не UNION ALL)
+  semantic: []
+  data: []
+  user:
+  - Требуется подтверждение, что наборы строк не пересекаются
+proof: 'UNION ≡ UNION ALL + DISTINCT. Когда множества не пересекаются,
+
+  DISTINCT — noop.'
+explain_template: UNION в ClickHouse означает не просто склейку двух потоков, а ещё и удаление дубликатов после объединения. Это требует дополнительной памяти и работы на дедупликацию. Если источники гарантированно не пересекаются, UNION ALL позволяет обойтись без этого дорогостоящего шага.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT id FROM events_2023 UNION SELECT id FROM events_2024
+example_after: SELECT id FROM events_2023 UNION ALL SELECT id FROM events_2024
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: true
+references: []

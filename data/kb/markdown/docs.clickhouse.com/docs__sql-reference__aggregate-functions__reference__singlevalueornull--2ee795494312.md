@@ -1,0 +1,78 @@
+# singleValueOrNull \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- singleValueOrNull
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/singleValueOrNull.md)# singleValueOrNull
+
+## singleValueOrNull[​](#singleValueOrNull "Direct link to singleValueOrNull")
+
+
+Introduced in: v21\.9\.0
+
+
+The aggregate function `singleValueOrNull` is used to implement subquery operators, such as `x = ALL (SELECT ...)`. It checks if there is only one unique non\-NULL value in the data.
+If there is only one unique value, it returns it. If there are zero or at least two distinct values, it returns NULL.
+
+
+**Syntax**
+
+
+
+```
+singleValueOrNull(x)
+
+```
+
+**Arguments**
+
+
+- `x` — A column of any data type except Map, Array or Tuple which cannot be of type Nullable. [`Any`](/docs/sql-reference/data-types)
+
+
+**Returned value**
+
+
+Returns the unique value if there is only one unique non\-NULL value in `x`. Returns `NULL` if there are zero or at least two distinct values. [`Any`](/docs/sql-reference/data-types) or [`NULL`](/docs/sql-reference/syntax#null)
+
+
+**Examples**
+
+
+**Single unique value**
+
+
+
+```
+CREATE TABLE test (x UInt8 NULL) ENGINE=Log;
+INSERT INTO test (x) VALUES (NULL), (NULL), (5), (NULL), (NULL);
+SELECT singleValueOrNull(x) FROM test;
+
+```
+
+
+```
+┌─singleValueOrNull(x)─┐
+│                    5 │
+└──────────────────────┘
+
+```
+
+**Multiple distinct values**
+
+
+
+```
+INSERT INTO test (x) VALUES (10);
+SELECT singleValueOrNull(x) FROM test;
+
+```
+
+
+```
+┌─singleValueOrNull(x)─┐
+│                 ᴺᵁᴸᴸ │
+└──────────────────────┘
+
+```
+[PrevioussimpleLinearRegression](/docs/sql-reference/aggregate-functions/reference/simplelinearregression)[NextskewPop](/docs/sql-reference/aggregate-functions/reference/skewpop)- [singleValueOrNull](#singleValueOrNull)
+Was this page helpful?

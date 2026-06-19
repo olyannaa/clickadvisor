@@ -1,0 +1,17 @@
+\x1b[1mClickAdvisor report\x1b[0m
+\x1b[36mStatement:\x1b[0m main
+\x1b[36mLLM mode:\x1b[0m none
+
+\x1b[32m[1A]\x1b[0m R-001 count_distinct_to_uniqExact
+Use a specialized distinct aggregate for exact cardinality.
+
+Matched:
+  count(DISTINCT user_id)
+
+Rewrite:
+  SELECT uniqExact(user_id) AS distinct_users
+  FROM analytics.events
+  WHERE event_date = toDate('2026-05-01');
+
+Confidence: 0.98
+Estimated impact: low_to_medium

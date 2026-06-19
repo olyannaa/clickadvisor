@@ -1,0 +1,925 @@
+<h1>Functions for Working with H3 Indexes | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/geo" itemprop="item"><span itemprop="name">Geometry</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">H3 Indexes</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/geo/h3.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for Working with H3 Indexes</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3-index">H3 Index<a aria-label="Direct link to H3 Index" class="hash-link" href="#h3-index" title="Direct link to H3 Index">​</a></h2>
+<p><a href="https://h3geo.org/" rel="noopener noreferrer" target="_blank">H3</a> is a geographical indexing system where the Earth's surface is divided into a grid of even hexagonal cells. This system is hierarchical, i. e. each hexagon on the top level ("parent") can be split into seven even but smaller ones ("children"), and so on.</p>
+<p>The level of the hierarchy is called <code>resolution</code> and can receive a value from <code>0</code> till <code>15</code>, where <code>0</code> is the <code>base</code> level with the largest and coarsest cells.</p>
+<p>A latitude and longitude pair can be transformed to a 64-bit H3 index, identifying a grid cell.</p>
+<p>The H3 index is used primarily for bucketing locations and other geospatial manipulations.</p>
+<p>The full description of the H3 system is available at <a href="https://www.uber.com/blog/h3/" rel="noopener noreferrer" target="_blank">the Uber Engineering site</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3isvalid">h3IsValid<a aria-label="Direct link to h3IsValid" class="hash-link" href="#h3isvalid" title="Direct link to h3IsValid">​</a></h2>
+<p>Verifies whether the number is a valid <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3IsValid(h3index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>h3index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">1 — The number is a valid H3 index. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li">0 — The number is not a valid H3 index. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3IsValid(630814730351855103) AS h3IsValid;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─h3IsValid─┐
+│         1 │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getresolution">h3GetResolution<a aria-label="Direct link to h3GetResolution" class="hash-link" href="#h3getresolution" title="Direct link to h3GetResolution">​</a></h2>
+<p>Defines the resolution of the given <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetResolution(h3index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>h3index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li">If the index is not valid, the function returns a random value. Use <a href="#h3isvalid">h3IsValid</a> to verify the index. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetResolution(639821929606596015) AS resolution;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─resolution─┐
+│         14 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3edgeangle">h3EdgeAngle<a aria-label="Direct link to h3EdgeAngle" class="hash-link" href="#h3edgeangle" title="Direct link to h3EdgeAngle">​</a></h2>
+<p>Calculates the average length of an <a href="#h3-index">H3</a> hexagon edge in grades.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3EdgeAngle(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>. Range: <code>[0, 15]</code>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">The average length of an <a href="#h3-index">H3</a> hexagon edge in grades. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3EdgeAngle(10) AS edgeAngle;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───────h3EdgeAngle(10)─┐
+│ 0.0005927224846720883 │
+└───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3edgelengthm">h3EdgeLengthM<a aria-label="Direct link to h3EdgeLengthM" class="hash-link" href="#h3edgelengthm" title="Direct link to h3EdgeLengthM">​</a></h2>
+<p>Calculates the average length of an <a href="#h3-index">H3</a> hexagon edge in meters.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3EdgeLengthM(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>. Range: <code>[0, 15]</code>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">The average edge length of an <a href="#h3-index">H3</a> hexagon in meters. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3EdgeLengthM(15) AS edgeLengthM;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─edgeLengthM─┐
+│ 0.509713273 │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3edgelengthkm">h3EdgeLengthKm<a aria-label="Direct link to h3EdgeLengthKm" class="hash-link" href="#h3edgelengthkm" title="Direct link to h3EdgeLengthKm">​</a></h2>
+<p>Calculates the average length of an <a href="#h3-index">H3</a> hexagon edge in kilometers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3EdgeLengthKm(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>. Range: <code>[0, 15]</code>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">The average length of an <a href="#h3-index">H3</a> hexagon edge in kilometers. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3EdgeLengthKm(15) AS edgeLengthKm;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─edgeLengthKm─┐
+│  0.000509713 │
+└──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="geotoh3">geoToH3<a aria-label="Direct link to geoToH3" class="hash-link" href="#geotoh3" title="Direct link to geoToH3">​</a></h2>
+<p>Returns <a href="#h3-index">H3</a> point index <code>(lat, lon)</code> with specified resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">geoToH3(lat, lon, resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>lat</code> — Latitude. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lon</code> — Longitude. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li">0 in case of error. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p>Note: In ClickHouse v25.4 or older, <code>geoToH3()</code> takes values in order <code>(lon, lat)</code>. As per ClickHouse v25.5, the input values are in order <code>(lat, lon)</code>. The previous behaviour can be restored using setting <code>geotoh3_argument_order = 'lon_lat'</code>.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT geoToH3(55.71290588, 37.79506683, 15) AS h3Index;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────h3Index─┐
+│ 644325524701193974 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3togeo">h3ToGeo<a aria-label="Direct link to h3ToGeo" class="hash-link" href="#h3togeo" title="Direct link to h3ToGeo">​</a></h2>
+<p>Returns the centroid latitude and longitude corresponding to the provided <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToGeo(h3Index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>h3Index</code> — H3 Index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">A tuple consisting of two values: <code>tuple(lat,lon)</code>. <code>lat</code> — Latitude. <a href="/docs/sql-reference/data-types/float">Float64</a>. <code>lon</code> — Longitude. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p>Note: In ClickHouse v24.12 or older, <code>h3ToGeo()</code> returns values in order <code>(lon, lat)</code>. As per ClickHouse v25.1, the returned values are in order <code>(lat, lon)</code>. The previous behaviour can be restored using setting <code>h3togeo_lon_lat_result_order = true</code>.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToGeo(644325524701193974) AS coordinates;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─coordinates───────────────────────────┐
+│ (55.71290243145668,37.79506616830252) │
+└───────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3togeoboundary">h3ToGeoBoundary<a aria-label="Direct link to h3ToGeoBoundary" class="hash-link" href="#h3togeoboundary" title="Direct link to h3ToGeoBoundary">​</a></h2>
+<p>Returns array of pairs <code>(lat, lon)</code>, which corresponds to the boundary of the provided H3 index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToGeoBoundary(h3Index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>h3Index</code> — H3 Index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of pairs '(lat, lon)'. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/float">Float64</a>, <a href="/docs/sql-reference/data-types/float">Float64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToGeoBoundary(644325524701193974) AS coordinates;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─h3ToGeoBoundary(599686042433355775)────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [(37.2713558667319,-121.91508032705622),(37.353926450852256,-121.8622232890249),(37.42834118609435,-121.92354999630156),(37.42012867767779,-122.03773496427027),(37.33755608435299,-122.090428929044),(37.26319797461824,-122.02910130919001)] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3kring">h3kRing<a aria-label="Direct link to h3kRing" class="hash-link" href="#h3kring" title="Direct link to h3kRing">​</a></h2>
+<p>Lists all the <a href="#h3-index">H3</a> hexagons in the raduis of <code>k</code> from the given hexagon in random order.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3kRing(h3index, k)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>h3index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>k</code> — Radius. <a href="/docs/sql-reference/data-types/int-uint">integer</a></li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of H3 indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT arrayJoin(h3kRing(644325529233966508, 1)) AS h3index;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────h3index─┐
+│ 644325529233966508 │
+│ 644325529233966497 │
+│ 644325529233966510 │
+│ 644325529233966504 │
+│ 644325529233966509 │
+│ 644325529233966355 │
+│ 644325529233966354 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3polygontocells">h3PolygonToCells<a aria-label="Direct link to h3PolygonToCells" class="hash-link" href="#h3polygontocells" title="Direct link to h3PolygonToCells">​</a></h2>
+<p>Returns the hexagons (at specified resolution) contained by the provided geometry, either ring or (multi-)polygon.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3PolygonToCells(geometry, resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>geometry</code> can be one of the following <a href="/docs/sql-reference/data-types/geo">Geo Data Types</a> or their underlying primitive types:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/data-types/geo#ring">Ring</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/geo#polygon">Polygon</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/geo#multipolygon">MultiPolygon</a></li>
+</ul>
+</li>
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of the contained H3-indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3PolygonToCells([(-122.4089866999972145,37.813318999983238),(-122.3544736999993603,37.7198061999978478),(-122.4798767000009008,37.8151571999998453)], 7) AS h3index;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────h3index─┐
+│ 608692970769612799 │
+│ 608692971927240703 │
+│ 608692970585063423 │
+│ 608692970819944447 │
+│ 608692970719281151 │
+│ 608692970752835583 │
+│ 608692972027903999 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getbasecell">h3GetBaseCell<a aria-label="Direct link to h3GetBaseCell" class="hash-link" href="#h3getbasecell" title="Direct link to h3GetBaseCell">​</a></h2>
+<p>Returns the base cell number of the <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetBaseCell(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Hexagon base cell number. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetBaseCell(612916788725809151) AS basecell;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─basecell─┐
+│       12 │
+└──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3hexaream2">h3HexAreaM2<a aria-label="Direct link to h3HexAreaM2" class="hash-link" href="#h3hexaream2" title="Direct link to h3HexAreaM2">​</a></h2>
+<p>Returns average hexagon area in square meters at the given resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3HexAreaM2(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Area in square meters. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3HexAreaM2(13) AS area;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─area─┐
+│ 43.9 │
+└──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3hexareakm2">h3HexAreaKm2<a aria-label="Direct link to h3HexAreaKm2" class="hash-link" href="#h3hexareakm2" title="Direct link to h3HexAreaKm2">​</a></h2>
+<p>Returns average hexagon area in square kilometers at the given resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3HexAreaKm2(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Area in square kilometers. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3HexAreaKm2(13) AS area;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────area─┐
+│ 0.0000439 │
+└───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3indexesareneighbors">h3IndexesAreNeighbors<a aria-label="Direct link to h3IndexesAreNeighbors" class="hash-link" href="#h3indexesareneighbors" title="Direct link to h3IndexesAreNeighbors">​</a></h2>
+<p>Returns whether or not the provided <a href="#h3-index">H3</a> indexes are neighbors.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3IndexesAreNeighbors(index1, index2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index1</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>index2</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — Indexes are neighbours. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li"><code>0</code> — Indexes are not neighbours. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3IndexesAreNeighbors(617420388351344639, 617420388352655359) AS n;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─n─┐
+│ 1 │
+└───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3tochildren">h3ToChildren<a aria-label="Direct link to h3ToChildren" class="hash-link" href="#h3tochildren" title="Direct link to h3ToChildren">​</a></h2>
+<p>Returns an array of child indexes for the given <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToChildren(index, resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of the child H3-indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToChildren(599405990164561919, 6) AS children;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─children───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [603909588852408319,603909588986626047,603909589120843775,603909589255061503,603909589389279231,603909589523496959,603909589657714687] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3toparent">h3ToParent<a aria-label="Direct link to h3ToParent" class="hash-link" href="#h3toparent" title="Direct link to h3ToParent">​</a></h2>
+<p>Returns the parent (coarser) index containing the given <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToParent(index, resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Parent H3 index. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToParent(599405990164561919, 3) AS parent;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─────────────parent─┐
+│ 590398848891879423 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3tostring">h3ToString<a aria-label="Direct link to h3ToString" class="hash-link" href="#h3tostring" title="Direct link to h3ToString">​</a></h2>
+<p>Converts the <code>H3Index</code> representation of the index to the string representation.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToString(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">String representation of the H3 index. <a href="/docs/sql-reference/data-types/string">String</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToString(617420388352917503) AS h3_string;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─h3_string───────┐
+│ 89184926cdbffff │
+└─────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="stringtoh3">stringToH3<a aria-label="Direct link to stringToH3" class="hash-link" href="#stringtoh3" title="Direct link to stringToH3">​</a></h2>
+<p>Converts the string representation to the <code>H3Index</code> (UInt64) representation.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">stringToH3(index_str)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index_str</code> — String representation of the H3 index. <a href="/docs/sql-reference/data-types/string">String</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Hexagon index number. Returns 0 on error. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT stringToH3('89184926cc3ffff') AS index;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────index─┐
+│ 617420388351344639 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getresolution-1">h3GetResolution<a aria-label="Direct link to h3GetResolution" class="hash-link" href="#h3getresolution-1" title="Direct link to h3GetResolution">​</a></h2>
+<p>Returns the resolution of the <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetResolution(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetResolution(617420388352917503) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─res─┐
+│   9 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3isresclassiii">h3IsResClassIII<a aria-label="Direct link to h3IsResClassIII" class="hash-link" href="#h3isresclassiii" title="Direct link to h3IsResClassIII">​</a></h2>
+<p>Returns whether <a href="#h3-index">H3</a> index has a resolution with Class III orientation.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3IsResClassIII(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — Index has a resolution with Class III orientation. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li"><code>0</code> — Index doesn't have a resolution with Class III orientation. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3IsResClassIII(617420388352917503) AS res;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─res─┐
+│   1 │
+└─────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3ispentagon">h3IsPentagon<a aria-label="Direct link to h3IsPentagon" class="hash-link" href="#h3ispentagon" title="Direct link to h3IsPentagon">​</a></h2>
+<p>Returns whether this <a href="#h3-index">H3</a> index represents a pentagonal cell.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3IsPentagon(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>1</code> — Index represents a pentagonal cell. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li"><code>0</code> — Index doesn't represent a pentagonal cell. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3IsPentagon(644721767722457330) AS pentagon;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─pentagon─┐
+│        0 │
+└──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getfaces">h3GetFaces<a aria-label="Direct link to h3GetFaces" class="hash-link" href="#h3getfaces" title="Direct link to h3GetFaces">​</a></h2>
+<p>Returns icosahedron faces intersected by a given <a href="#h3-index">H3</a> index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetFaces(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array containing icosahedron faces intersected by a given H3 index. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetFaces(599686042433355775) AS faces;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─faces─┐
+│ [7]   │
+└───────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3cellaream2">h3CellAreaM2<a aria-label="Direct link to h3CellAreaM2" class="hash-link" href="#h3cellaream2" title="Direct link to h3CellAreaM2">​</a></h2>
+<p>Returns the exact area of a specific cell in square meters corresponding to the given input H3 index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3CellAreaM2(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Cell area in square meters. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3CellAreaM2(579205133326352383) AS area;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───────────────area─┐
+│ 4106166334463.9233 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3cellarearads2">h3CellAreaRads2<a aria-label="Direct link to h3CellAreaRads2" class="hash-link" href="#h3cellarearads2" title="Direct link to h3CellAreaRads2">​</a></h2>
+<p>Returns the exact area of a specific cell in square radians corresponding to the given input H3 index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3CellAreaRads2(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Cell area in square radians. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3CellAreaRads2(579205133326352383) AS area;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────────area─┐
+│ 0.10116268528089567 │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3tocenterchild">h3ToCenterChild<a aria-label="Direct link to h3ToCenterChild" class="hash-link" href="#h3tocenterchild" title="Direct link to h3ToCenterChild">​</a></h2>
+<p>Returns the center child (finer) <a href="#h3-index">H3</a> index contained by given <a href="#h3-index">H3</a> at the given resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ToCenterChild(index, resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#h3-index">H3</a> index of the center child contained by given <a href="#h3-index">H3</a> at the given resolution. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ToCenterChild(577023702256844799,1) AS centerToChild;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────centerToChild─┐
+│ 581496515558637567 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3exactedgelengthm">h3ExactEdgeLengthM<a aria-label="Direct link to h3ExactEdgeLengthM" class="hash-link" href="#h3exactedgelengthm" title="Direct link to h3ExactEdgeLengthM">​</a></h2>
+<p>Returns the exact edge length of the unidirectional edge represented by the input h3 index in meters.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ExactEdgeLengthM(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Exact edge length in meters. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ExactEdgeLengthM(1310277011704381439) AS exactEdgeLengthM;;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌───exactEdgeLengthM─┐
+│ 195449.63163407316 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3exactedgelengthkm">h3ExactEdgeLengthKm<a aria-label="Direct link to h3ExactEdgeLengthKm" class="hash-link" href="#h3exactedgelengthkm" title="Direct link to h3ExactEdgeLengthKm">​</a></h2>
+<p>Returns the exact edge length of the unidirectional edge represented by the input h3 index in kilometers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ExactEdgeLengthKm(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Exact edge length in kilometers. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ExactEdgeLengthKm(1310277011704381439) AS exactEdgeLengthKm;;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──exactEdgeLengthKm─┐
+│ 195.44963163407317 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3exactedgelengthrads">h3ExactEdgeLengthRads<a aria-label="Direct link to h3ExactEdgeLengthRads" class="hash-link" href="#h3exactedgelengthrads" title="Direct link to h3ExactEdgeLengthRads">​</a></h2>
+<p>Returns the exact edge length of the unidirectional edge represented by the input h3 index in radians.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3ExactEdgeLengthRads(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Exact edge length in radians. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3ExactEdgeLengthRads(1310277011704381439) AS exactEdgeLengthRads;;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──exactEdgeLengthRads─┐
+│ 0.030677980118976447 │
+└──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3numhexagons">h3NumHexagons<a aria-label="Direct link to h3NumHexagons" class="hash-link" href="#h3numhexagons" title="Direct link to h3NumHexagons">​</a></h2>
+<p>Returns the number of unique H3 indices at the given resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3NumHexagons(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Number of H3 indices. <a href="/docs/sql-reference/data-types/int-uint">Int64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3NumHexagons(3) AS numHexagons;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─numHexagons─┐
+│       41162 │
+└─────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3pointdistm">h3PointDistM<a aria-label="Direct link to h3PointDistM" class="hash-link" href="#h3pointdistm" title="Direct link to h3PointDistM">​</a></h2>
+<p>Returns the "great circle" or "haversine" distance between pairs of GeoCoord points (latitude/longitude) pairs in meters.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3PointDistM(lat1, lon1, lat2, lon2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>lat1</code>, <code>lon1</code> — Latitude and Longitude of point1 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lat2</code>, <code>lon2</code> — Latitude and Longitude of point2 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Haversine or great circle distance in meters.<a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3PointDistM(-10.0 ,0.0, 10.0, 0.0) AS h3PointDistM;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────h3PointDistM─┐
+│ 2223901.039504589 │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3pointdistkm">h3PointDistKm<a aria-label="Direct link to h3PointDistKm" class="hash-link" href="#h3pointdistkm" title="Direct link to h3PointDistKm">​</a></h2>
+<p>Returns the "great circle" or "haversine" distance between pairs of GeoCoord points (latitude/longitude) pairs in kilometers.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3PointDistKm(lat1, lon1, lat2, lon2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>lat1</code>, <code>lon1</code> — Latitude and Longitude of point1 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lat2</code>, <code>lon2</code> — Latitude and Longitude of point2 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Haversine or great circle distance in kilometers. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3PointDistKm(-10.0 ,0.0, 10.0, 0.0) AS h3PointDistKm;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─────h3PointDistKm─┐
+│ 2223.901039504589 │
+└───────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3pointdistrads">h3PointDistRads<a aria-label="Direct link to h3PointDistRads" class="hash-link" href="#h3pointdistrads" title="Direct link to h3PointDistRads">​</a></h2>
+<p>Returns the "great circle" or "haversine" distance between pairs of GeoCoord points (latitude/longitude) pairs in radians.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3PointDistRads(lat1, lon1, lat2, lon2)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>lat1</code>, <code>lon1</code> — Latitude and Longitude of point1 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+<li class="custom-li"><code>lat2</code>, <code>lon2</code> — Latitude and Longitude of point2 in degrees. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Haversine or great circle distance in radians. <a href="/docs/sql-reference/data-types/float">Float64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3PointDistRads(-10.0 ,0.0, 10.0, 0.0) AS h3PointDistRads;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────h3PointDistRads─┐
+│ 0.3490658503988659 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getres0indexes">h3GetRes0Indexes<a aria-label="Direct link to h3GetRes0Indexes" class="hash-link" href="#h3getres0indexes" title="Direct link to h3GetRes0Indexes">​</a></h2>
+<p>Returns an array of all the resolution 0 H3 indexes.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetRes0Indexes()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of all the resolution 0 H3 indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetRes0Indexes AS indexes ;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─indexes─────────────────────────────────────┐
+│ [576495936675512319,576531121047601151,....]│
+└─────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getpentagonindexes">h3GetPentagonIndexes<a aria-label="Direct link to h3GetPentagonIndexes" class="hash-link" href="#h3getpentagonindexes" title="Direct link to h3GetPentagonIndexes">​</a></h2>
+<p>Returns all the pentagon H3 indexes at the specified resolution.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetPentagonIndexes(resolution)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>resolution</code> — Index resolution. Range: <code>[0, 15]</code>. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of all pentagon H3 indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT h3GetPentagonIndexes(3) AS indexes;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─indexes────────────────────────────────────────────────────────┐
+│ [590112357393367039,590464201114255359,590816044835143679,...] │
+└────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3line">h3Line<a aria-label="Direct link to h3Line" class="hash-link" href="#h3line" title="Direct link to h3Line">​</a></h2>
+<p>Returns the line of indices between the two indices that are provided.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3Line(start,end)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>start</code> — Hexagon index number that represents a starting point. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>end</code> — Hexagon index number that represents an ending point. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Array of h3 indexes representing the line of indices between the two provided indices. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3Line(590080540275638271,590103561300344831) AS indexes;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─indexes────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [590080540275638271,590080471556161535,590080883873021951,590106516237844479,590104385934065663,590103630019821567,590103561300344831] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3distance">h3Distance<a aria-label="Direct link to h3Distance" class="hash-link" href="#h3distance" title="Direct link to h3Distance">​</a></h2>
+<p>Returns the distance in grid cells between the two indices that are provided.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3Distance(start,end)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>start</code> — Hexagon index number that represents a starting point. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>end</code> — Hexagon index number that represents an ending point. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Number of grid cells. <a href="/docs/sql-reference/data-types/int-uint">Int64</a>.</li>
+</ul>
+<p>Returns a negative number if finding the distance fails.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3Distance(590080540275638271,590103561300344831) AS distance;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─distance─┐
+│        7 │
+└──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3hexring">h3HexRing<a aria-label="Direct link to h3HexRing" class="hash-link" href="#h3hexring" title="Direct link to h3HexRing">​</a></h2>
+<p>Returns the indexes of the hexagonal ring centered at the provided origin h3Index and length k.</p>
+<p>Returns 0 if no pentagonal distortion was encountered.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3HexRing(index, k)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number that represents the origin. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>k</code> — Distance. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned values</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of H3 indexes. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3HexRing(590080540275638271, toUInt16(1)) AS hexRing;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─hexRing─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [590080815153545215,590080471556161535,590080677714591743,590077585338138623,590077447899185151,590079509483487231] │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getunidirectionaledge">h3GetUnidirectionalEdge<a aria-label="Direct link to h3GetUnidirectionalEdge" class="hash-link" href="#h3getunidirectionaledge" title="Direct link to h3GetUnidirectionalEdge">​</a></h2>
+<p>Returns a unidirectional edge H3 index based on the provided origin and destination and returns 0 on error.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetUnidirectionalEdge(originIndex, destinationIndex)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>originIndex</code> — Origin Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>destinationIndex</code> — Destination Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Unidirectional Edge Hexagon Index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetUnidirectionalEdge(599686042433355775, 599686043507097599) AS edge;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────────────edge─┐
+│ 1248204388774707199 │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3unidirectionaledgeisvalid">h3UnidirectionalEdgeIsValid<a aria-label="Direct link to h3UnidirectionalEdgeIsValid" class="hash-link" href="#h3unidirectionaledgeisvalid" title="Direct link to h3UnidirectionalEdgeIsValid">​</a></h2>
+<p>Determines if the provided H3Index is a valid unidirectional edge index. Returns 1 if it's a unidirectional edge and 0 otherwise.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3UnidirectionalEdgeisValid(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">1 — The H3 index is a valid unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+<li class="custom-li">0 — The H3 index is not a valid unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3UnidirectionalEdgeIsValid(1248204388774707199) AS validOrNot;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─validOrNot─┐
+│          1 │
+└────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getoriginindexfromunidirectionaledge">h3GetOriginIndexFromUnidirectionalEdge<a aria-label="Direct link to h3GetOriginIndexFromUnidirectionalEdge" class="hash-link" href="#h3getoriginindexfromunidirectionaledge" title="Direct link to h3GetOriginIndexFromUnidirectionalEdge">​</a></h2>
+<p>Returns the origin hexagon index from the unidirectional edge H3Index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetOriginIndexFromUnidirectionalEdge(edge)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>edge</code> — Hexagon index number that represents a unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Origin Hexagon Index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetOriginIndexFromUnidirectionalEdge(1248204388774707197) AS origin;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─────────────origin─┐
+│ 599686042433355773 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getdestinationindexfromunidirectionaledge">h3GetDestinationIndexFromUnidirectionalEdge<a aria-label="Direct link to h3GetDestinationIndexFromUnidirectionalEdge" class="hash-link" href="#h3getdestinationindexfromunidirectionaledge" title="Direct link to h3GetDestinationIndexFromUnidirectionalEdge">​</a></h2>
+<p>Returns the destination hexagon index from the unidirectional edge H3Index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetDestinationIndexFromUnidirectionalEdge(edge)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>edge</code> — Hexagon index number that represents a unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Destination Hexagon Index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetDestinationIndexFromUnidirectionalEdge(1248204388774707197) AS destination;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌────────destination─┐
+│ 599686043507097597 │
+└────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getindexesfromunidirectionaledge">h3GetIndexesFromUnidirectionalEdge<a aria-label="Direct link to h3GetIndexesFromUnidirectionalEdge" class="hash-link" href="#h3getindexesfromunidirectionaledge" title="Direct link to h3GetIndexesFromUnidirectionalEdge">​</a></h2>
+<p>Returns the origin and destination hexagon indexes from the given unidirectional edge H3Index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetIndexesFromUnidirectionalEdge(edge)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>edge</code> — Hexagon index number that represents a unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>A tuple consisting of two values <code>tuple(origin,destination)</code>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>origin</code> — Origin Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+<li class="custom-li"><code>destination</code> — Destination Hexagon index number. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p>Returns <code>(0,0)</code> if the provided input is not valid.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetIndexesFromUnidirectionalEdge(1248204388774707199) AS indexes;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─indexes─────────────────────────────────┐
+│ (599686042433355775,599686043507097599) │
+└─────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getunidirectionaledgesfromhexagon">h3GetUnidirectionalEdgesFromHexagon<a aria-label="Direct link to h3GetUnidirectionalEdgesFromHexagon" class="hash-link" href="#h3getunidirectionaledgesfromhexagon" title="Direct link to h3GetUnidirectionalEdgesFromHexagon">​</a></h2>
+<p>Provides all of the unidirectional edges from the provided H3Index.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetUnidirectionalEdgesFromHexagon(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number that represents a unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Array of h3 indexes representing each unidirectional edge. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/int-uint">UInt64</a>).</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetUnidirectionalEdgesFromHexagon(1248204388774707199) AS edges;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─edges─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [1248204388774707199,1320261982812635135,1392319576850563071,1464377170888491007,1536434764926418943,1608492358964346879] │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="h3getunidirectionaledgeboundary">h3GetUnidirectionalEdgeBoundary<a aria-label="Direct link to h3GetUnidirectionalEdgeBoundary" class="hash-link" href="#h3getunidirectionaledgeboundary" title="Direct link to h3GetUnidirectionalEdgeBoundary">​</a></h2>
+<p>Returns the coordinates defining the unidirectional edge.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">h3GetUnidirectionalEdgeBoundary(index)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameter</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>index</code> — Hexagon index number that represents a unidirectional edge. <a href="/docs/sql-reference/data-types/int-uint">UInt64</a>.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Array of pairs '(lon, lat)'. <a href="/docs/sql-reference/data-types/array">Array</a>(<a href="/docs/sql-reference/data-types/float">Float64</a>, <a href="/docs/sql-reference/data-types/float">Float64</a>).</li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql"> SELECT h3GetUnidirectionalEdgeBoundary(1248204388774707199) AS boundary;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─boundary────────────────────────────────────────────────────────────────────────┐
+│ [(37.42012867767779,-122.03773496427027),(37.33755608435299,-122.090428929044)] │
+└─────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/geo/geometry"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Geometry</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/geo/polygons"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Polygons</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#h3-index">H3 Index</a><li><a class="table-of-contents__link toc-highlight" href="#h3isvalid">h3IsValid</a><li><a class="table-of-contents__link toc-highlight" href="#h3getresolution">h3GetResolution</a><li><a class="table-of-contents__link toc-highlight" href="#h3edgeangle">h3EdgeAngle</a><li><a class="table-of-contents__link toc-highlight" href="#h3edgelengthm">h3EdgeLengthM</a><li><a class="table-of-contents__link toc-highlight" href="#h3edgelengthkm">h3EdgeLengthKm</a><li><a class="table-of-contents__link toc-highlight" href="#geotoh3">geoToH3</a><li><a class="table-of-contents__link toc-highlight" href="#h3togeo">h3ToGeo</a><li><a class="table-of-contents__link toc-highlight" href="#h3togeoboundary">h3ToGeoBoundary</a><li><a class="table-of-contents__link toc-highlight" href="#h3kring">h3kRing</a><li><a class="table-of-contents__link toc-highlight" href="#h3polygontocells">h3PolygonToCells</a><li><a class="table-of-contents__link toc-highlight" href="#h3getbasecell">h3GetBaseCell</a><li><a class="table-of-contents__link toc-highlight" href="#h3hexaream2">h3HexAreaM2</a><li><a class="table-of-contents__link toc-highlight" href="#h3hexareakm2">h3HexAreaKm2</a><li><a class="table-of-contents__link toc-highlight" href="#h3indexesareneighbors">h3IndexesAreNeighbors</a><li><a class="table-of-contents__link toc-highlight" href="#h3tochildren">h3ToChildren</a><li><a class="table-of-contents__link toc-highlight" href="#h3toparent">h3ToParent</a><li><a class="table-of-contents__link toc-highlight" href="#h3tostring">h3ToString</a><li><a class="table-of-contents__link toc-highlight" href="#stringtoh3">stringToH3</a><li><a class="table-of-contents__link toc-highlight" href="#h3getresolution-1">h3GetResolution</a><li><a class="table-of-contents__link toc-highlight" href="#h3isresclassiii">h3IsResClassIII</a><li><a class="table-of-contents__link toc-highlight" href="#h3ispentagon">h3IsPentagon</a><li><a class="table-of-contents__link toc-highlight" href="#h3getfaces">h3GetFaces</a><li><a class="table-of-contents__link toc-highlight" href="#h3cellaream2">h3CellAreaM2</a><li><a class="table-of-contents__link toc-highlight" href="#h3cellarearads2">h3CellAreaRads2</a><li><a class="table-of-contents__link toc-highlight" href="#h3tocenterchild">h3ToCenterChild</a><li><a class="table-of-contents__link toc-highlight" href="#h3exactedgelengthm">h3ExactEdgeLengthM</a><li><a class="table-of-contents__link toc-highlight" href="#h3exactedgelengthkm">h3ExactEdgeLengthKm</a><li><a class="table-of-contents__link toc-highlight" href="#h3exactedgelengthrads">h3ExactEdgeLengthRads</a><li><a class="table-of-contents__link toc-highlight" href="#h3numhexagons">h3NumHexagons</a><li><a class="table-of-contents__link toc-highlight" href="#h3pointdistm">h3PointDistM</a><li><a class="table-of-contents__link toc-highlight" href="#h3pointdistkm">h3PointDistKm</a><li><a class="table-of-contents__link toc-highlight" href="#h3pointdistrads">h3PointDistRads</a><li><a class="table-of-contents__link toc-highlight" href="#h3getres0indexes">h3GetRes0Indexes</a><li><a class="table-of-contents__link toc-highlight" href="#h3getpentagonindexes">h3GetPentagonIndexes</a><li><a class="table-of-contents__link toc-highlight" href="#h3line">h3Line</a><li><a class="table-of-contents__link toc-highlight" href="#h3distance">h3Distance</a><li><a class="table-of-contents__link toc-highlight" href="#h3hexring">h3HexRing</a><li><a class="table-of-contents__link toc-highlight" href="#h3getunidirectionaledge">h3GetUnidirectionalEdge</a><li><a class="table-of-contents__link toc-highlight" href="#h3unidirectionaledgeisvalid">h3UnidirectionalEdgeIsValid</a><li><a class="table-of-contents__link toc-highlight" href="#h3getoriginindexfromunidirectionaledge">h3GetOriginIndexFromUnidirectionalEdge</a><li><a class="table-of-contents__link toc-highlight" href="#h3getdestinationindexfromunidirectionaledge">h3GetDestinationIndexFromUnidirectionalEdge</a><li><a class="table-of-contents__link toc-highlight" href="#h3getindexesfromunidirectionaledge">h3GetIndexesFromUnidirectionalEdge</a><li><a class="table-of-contents__link toc-highlight" href="#h3getunidirectionaledgesfromhexagon">h3GetUnidirectionalEdgesFromHexagon</a><li><a class="table-of-contents__link toc-highlight" href="#h3getunidirectionaledgeboundary">h3GetUnidirectionalEdgeBoundary</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

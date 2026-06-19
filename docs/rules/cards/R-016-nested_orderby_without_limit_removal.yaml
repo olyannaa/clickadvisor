@@ -1,0 +1,30 @@
+id: R-016
+name: nested_orderby_without_limit_removal
+tier: 1C
+category: subquery
+status: proposed
+statement: 'Убрать ORDER BY из подзапроса без LIMIT, если внешний запрос
+
+  не зависит от порядка.'
+preconditions:
+  syntactic:
+  - Подзапрос содержит ORDER BY без LIMIT
+  - Внешний запрос не содержит window-функций без partition, не использует arrayJoin по позиции
+  semantic: []
+  data: []
+proof: 'По реляционной алгебре, отношение — неупорядоченное множество.
+
+  ORDER BY без LIMIT — операция, чей результат отбрасывается.'
+explain_template: Во внутреннем подзапросе ORDER BY имеет смысл только если внешний уровень реально зависит от порядка строк, например через LIMIT или оконную семантику. Если внешний запрос этого не использует, ClickHouse тратит ресурсы на сортировку, результат которой затем выбрасывается. Удаление такой сортировки часто убирает одну из самых дорогих операций в плане.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT COUNT(*) FROM (SELECT * FROM events ORDER BY ts)
+example_after: SELECT COUNT(*) FROM events
+expected_speedup:
+  estimate: 5-100× (убирается сортировка O(n log n))
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

@@ -1,0 +1,33 @@
+id: R-003
+name: quantileExact_to_quantileTDigest
+tier: 1B
+category: aggregation_specialization
+status: proposed
+statement: 'Заменить quantileExact(level)(x) на quantileTDigest(level)(x).
+
+  Approximate, error ~0.1% для большинства распределений.'
+preconditions:
+  syntactic:
+  - Вызов quantileExact
+  semantic: []
+  data:
+  - opt-in --allow-approximate
+proof: 'TDigest algorithm (Dunning 2019) даёт квантильную оценку с
+
+  относительной ошибкой ~0.001 для levels в (0.01, 0.99).
+
+  Для extreme quantiles (0.001, 0.999) ошибка <1%.'
+explain_template: Точные квантили требуют хранить или детально сортировать большое количество значений, что на потоке данных стоит дорого. quantileTDigest использует компактную статистическую структуру, которая хорошо аппроксимирует распределение без полного хранения всех точек. Поэтому ClickHouse может считать квантили быстрее и с меньшим расходом памяти, если допустима небольшая ошибка.
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT quantileExact(0.95)(latency) FROM requests
+example_after: SELECT quantileTDigest(0.95)(latency) FROM requests
+expected_speedup:
+  estimate: 10-50× по памяти, 2-5× по скорости
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks:
+- Экстремальные квантили (>0.99 или <0.01) имеют большую погрешность
+opt_in: true
+references: []

@@ -1,0 +1,568 @@
+<h1>Super charging your ClickHouse queries</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">Super charging your ClickHouse queries</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" data-state="closed" href="/authors/tom-schreiber">Tom Schreiber</a></div><div class="text-sm text-neutral-300">Dec 15, 2022 · 21 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><blockquote>
+<p>You can find updated guidance on ClickHouse query optimization for 2026 and beyond in <a href="https://clickhouse.com/resources/engineering/clickhouse-query-optimisation-definitive-guide?utm_medium=clickhouse&amp;utm_source=blog&amp;ref=clickhouse-faster-queries-with-projections-and-primary-indexes">The definitive guide to ClickHouse query optimization</a></p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="introduction" level="2">Introduction<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#introduction">#</a></span></h2>
+<p>ClickHouse is a blazingly <a href="https://benchmark.clickhouse.com/">fast</a> relational database management system optimized for real-time analytics. Even though queries are typically fast enough with little to no tuning, we believe in the principle that no miliseconds should be waisted! In this post we'll give you some tips on how to accelerate your ClickHouse queries and make them even faster than ever, using some practical examples.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="a-quick-clickhouse-query-processing-primer" level="2">A quick ClickHouse query processing primer<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#a-quick-clickhouse-query-processing-primer">#</a></span></h2>
+<p>Tables in ClickHouse are designed to receive millions of row inserts per second and to store very large (100s of Petabytes) volumes of data.</p>
+<p>Fast query speed in ClickHouse is usually achieved by properly utilizing a table’s (sparse) <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes">primary index</a> in order to drastically limit the amount of data ClickHouse needs to read from disk and in order to prevent resorting of data at query time which also can enable short-circuiting when a LIMIT clause is used.</p>
+<p>The <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design">design</a> of the ClickHouse <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design#the-primary-index-has-one-entry-per-granule">primary index</a> is based on the <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm">binary search algorithm</a>, that efficiently (<a href="https://en.wikipedia.org/wiki/Time_complexity">time complexity</a> of O(log2 n)) finds the position of a target value within a sorted array.</p>
+<p>For example, consider the sorted array in the diagram below, where the binary search algorithm is used to find the value 42. The algorithm compares the target value 42 to the middle element of the array. If they are not equal, the half in which the target cannot lie is eliminated, and the search continues on the remaining half, again taking the middle element to compare to the target value, and repeating this until the target value is found:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_01.png" loading="lazy" src="/uploads/speed_01_18537e0585.png"/></span>
+<p>Finding rows in a ClickHouse table with the table’s primary index works in the same way.</p>
+<p>The table’s rows are <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design#data-is-stored-on-disk-ordered-by-primary-key-columns">stored</a> on disk ordered by the table’s <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design#a-table-with-a-primary-key">primary key</a> column(s).</p>
+<p>Based on that row order, the primary index (which is a sorted array like in the diagram above) <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design#the-primary-index-has-one-entry-per-granule">stores</a> the primary key column value(s) from each <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree/#index_granularity">8192nd</a> row of the table.</p>
+<p>In the diagram below, we assume a table with a column ‘numbers’, which is also the primary key column:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_02.png" loading="lazy" src="/uploads/speed_02_c0badb49a2.png"/></span>
+<p>Instead of indexing individual rows, the ClickHouse primary index is indexing blocks of rows (so-called <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design#data-is-organized-into-granules-for-parallel-data-processing">granules</a>).</p>
+<p>With such a primary index, terabytes or even petabytes of data can be skipped and thus searched in a matter of (sub-) seconds.</p>
+<p>The following diagram shows how ClickHouse typically executes a query:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_03.png" loading="lazy" src="/uploads/speed_03_e81146e79a.png"/></span>
+<p>Step 1: The primary index from the involved table is loaded into the main memory.</p>
+<p>Step 2:  <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-design/#the-primary-index-is-used-for-selecting-granules">Typically, via a binary search over the index entries</a>, ClickHouse selects blocks of rows that potentially contain rows matching the query’s WHERE clause.</p>
+<p>Step 3: The selected blocks of rows are streamed in parallel into the ClickHouse query engine for further processing, and the query result is streamed to the caller.</p>
+<p>There are three main tuning knobs for speeding up this query execution workflow in ClickHouse:</p>
+<p>The less data ClickHouse needs to stream from disk to main memory, the faster the query’s execution time will be. The amount of data required to be streamed from disk can be minimized by (1) properly utilizing primary indexes and (2) pre-computing aggregates.</p>
+<p>The streaming and actual processing of the data can be sped up by (3) increasing the level of parallelism used inside the ClickHouse query processing engine.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="1-properly-utilize-primary-indexes" level="2">(1) Properly utilize primary indexes<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#1-properly-utilize-primary-indexes">#</a></span></h2>
+<p>Lets first look at how we can ensure primary indexes are fully utilized to ensure optimal query performance.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="utilize-indexes-for-minimizing-the-amount-of-data-to-be-streamed-into-clickhouse" level="3">Utilize indexes for minimizing the amount of data to be streamed into ClickHouse<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#utilize-indexes-for-minimizing-the-amount-of-data-to-be-streamed-into-clickhouse">#</a></span></h3>
+<p>As a running example, we use the table from our <a href="https://clickhouse.com/docs/en/getting-started/example-datasets/uk-price-paid/">UK Property Price Paid tutorial</a> with 27.64 million rows. This dataset is available within our <a href="https://sql.clickhouse.com?query_id=6IDMHK3OMR1C97J6M9EUQS">sql.clickhouse.com</a> environment.</p>
+<p>We run a query that lists the counties in London for the three highest paid prices:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    price
+FROM uk_price_paid
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+┌─county─────────┬─────price─┐
+│ GREATER LONDON │ 594300000 │
+│ GREATER LONDON │ 569200000 │
+│ GREATER LONDON │ 448500000 │
+└────────────────┴───────────┘
+
+3 rows in set. Elapsed: 0.044 sec. Processed 27.64 million rows, 44.21 MB (634.60 million rows/s., 1.01 GB/s.)
+</div> <a href="https://sql.clickhouse.com?query_id=TEH4J3REPN2FNDRGCYDNM6" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>ClickHouse is doing a full table scan!</p>
+<p>Because the primary index of the table can’t be properly utilized for the query.</p>
+<p>We check the primary key of the table:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SHOW CREATE TABLE uk_price_paid
+
+CREATE TABLE default.uk_price_paid
+(
+    `price` UInt32,
+    `date` Date,
+    `postcode1` LowCardinality(String),
+    `postcode2` LowCardinality(String),
+    `type` Enum8('other' = 0, 'terraced' = 1, 'semi-detached' = 2, 'detached' = 3, 'flat' = 4),
+    `is_new` UInt8,
+    `duration` Enum8('unknown' = 0, 'freehold' = 1, 'leasehold' = 2),
+    `addr1` String,
+    `addr2` String,
+    `street` LowCardinality(String),
+    `locality` LowCardinality(String),
+    `town` LowCardinality(String),
+    `district` LowCardinality(String),
+    `county` LowCardinality(String),
+    `category` UInt8
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/tables/fb100991-4cae-4a92-995a-1ca11416879e/{shard}', '{replica}')
+ORDER BY (postcode1, postcode2, addr1, addr2)
+SETTINGS index_granularity = 8192
+
+1 row in set. Elapsed: 0.001 sec.
+</div> <a href="https://sql.clickhouse.com?query_id=6CZ8TRMMKWHYDE91A3KETE" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>The tables ORDER BY clause determines how the data is ordered on disk, and the primary index entries. The columns in the ORDER BY are postcode1, postcode2, addr1, and addr2.</p>
+<p>Note that ClickHouse uses the sorting key (defined by the ORDER BY clause) as the primary key if the latter is not defined explictly i.e. via a  PRIMARY KEY clause.</p>
+<p>That doesn’t help for the query with the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">town = 'LONDON'</code> predicate.</p>
+<p>If we want to significantly speed up our sample query that filters for rows with a specific town, then we need to use a primary index optimized for that query.</p>
+<p>One <a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-multiple#options-for-creating-additional-primary-indexes">option</a> is to create a second table with a different row order based on a different primary key.</p>
+<p>Because a table can only have one physical order on disk, we need to duplicate the table data into another table.</p>
+<p>We create a second table with the same schema as the original table but with a different primary key, and we copy the data between the tables:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+CREATE TABLE uk_price_paid_oby_town_price
+(
+    price UInt32,
+    date Date,
+    postcode1 LowCardinality(String),
+    postcode2 LowCardinality(String),
+    type Enum8('terraced' = 1, 'semi-detached' = 2, 'detached' = 3, 'flat' = 4, 'other' = 0),
+    is_new UInt8,
+    duration Enum8('freehold' = 1, 'leasehold' = 2, 'unknown' = 0),
+    addr1 String,
+    addr2 String,
+    street LowCardinality(String),
+    locality LowCardinality(String),
+    town LowCardinality(String),
+    district LowCardinality(String),
+    county LowCardinality(String),
+    category UInt8
+)
+ENGINE = MergeTree
+ORDER BY (town, price);
+
+INSERT INTO uk_price_paid_oby_town_price
+SELECT * FROM uk_price_paid;
+
+0 rows in set. Elapsed: 13.033 sec. Processed 52.50 million rows, 2.42 GB (4.03 million rows/s., 185.58 MB/s.)
+</div>
+</pre>
+<p></p>
+<p>We run the query on the second table:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    price
+FROM uk_price_paid_oby_town_price
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+┌─county─────────┬─────price─┐
+│ GREATER LONDON │ 594300000 │
+│ GREATER LONDON │ 569200000 │
+│ GREATER LONDON │ 448500000 │
+└────────────────┴───────────┘
+
+3 rows in set. Elapsed: 0.005 sec. Processed 81.92 thousand rows, 493.76 KB (15.08 million rows/s., 90.87 MB/s.)
+</div> <a href="https://sql.clickhouse.com?query_id=DXP1BNTN6YUGWXRZJET4AM" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>Much better.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="utilize-indexes-for-preventing-resorting-and-enabling-short-circuiting" level="3">Utilize indexes for preventing resorting and enabling short-circuiting<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#utilize-indexes-for-preventing-resorting-and-enabling-short-circuiting">#</a></span></h3>
+<p>In our previous example, ClickHouse is not only streaming much less data from disk but is applying an additional optimization.</p>
+<p>The query is:</p>
+<ul>
+<li>Filtering rows for town = ‘London’</li>
+<li>Ordering the matching rows by price descending</li>
+<li>Getting the top 3 rows</li>
+</ul>
+<p>For this, normally, ClickHouse:</p>
+<ul>
+<li>uses the primary index for selecting blocks that potentially contain ‘London’ rows and streams these rows from disk</li>
+<li>orders these rows in main memory by price</li>
+<li>streams the top 3 rows as the result to the caller</li>
+</ul>
+<p>But, because the ‘London’ rows on disk are stored already ordered by price (see the table DDL’s ORDER BY clause), ClickHouse can just skip the resorting in main memory.</p>
+<p>And ClickHouse can do short-circuiting. All ClickHouse has to do, is to stream the selected blocks of rows from disk in reverse order, and once three matching (town = ‘London’) rows have been streamed, the query is done.</p>
+<p>This is exactly what the <a href="https://clickhouse.com/docs/en/operations/settings/settings/#optimize_read_in_order"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">optimize_read_in_order</code></a> optimization is doing in this case - <span style="text-decoration:underline">preventing resorting of the rows</span> and enabling <span style="text-decoration:underline">short-circuiting</span>.</p>
+<p>This optimization is enabled by default, and when we inspect the logical query plan of the query via <a href="https://clickhouse.com/company/events/query-performance-introspection">EXPLAIN</a>, we can see ReadType: InReverseOrder at the bottom of the plan:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+EXPLAIN actions = 1
+SELECT
+    county,
+    price
+FROM uk_price_paid_oby_town_price
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+
+ Expression (Projection)
+ Actions: INPUT :: 0 -&gt; price UInt32 : 0
+          INPUT :: 1 -&gt; county LowCardinality(String) : 1
+ Positions: 1 0
+   Limit (preliminary LIMIT (without OFFSET))
+   Limit 3
+   Offset 0
+     Sorting (Sorting for ORDER BY)
+     Prefix sort description: price DESC
+     Result sort description: price DESC
+     Limit 3
+       Expression (Before ORDER BY)
+       Actions: INPUT :: 0 -&gt; price UInt32 : 0
+                INPUT :: 1 -&gt; county LowCardinality(String) : 1
+       Positions: 0 1
+         Filter (WHERE)
+         Filter column: equals(town, 'LONDON') (removed)
+         Actions: INPUT :: 0 -&gt; price UInt32 : 0
+                  INPUT : 1 -&gt; town LowCardinality(String) : 1
+                  INPUT :: 2 -&gt; county LowCardinality(String) : 2
+                  COLUMN Const(String) -&gt; 'LONDON' String : 3
+                  FUNCTION equals(town :: 1, 'LONDON' :: 3) -&gt; equals(town, 'LONDON') LowCardinality(UInt8) : 4
+         Positions: 0 2 4
+           ReadFromMergeTree (default.uk_price_paid_oby_town_price)
+           ReadType: InReverseOrder
+           Parts: 6
+           Granules: 267
+
+27 rows in set. Elapsed: 0.002 sec.
+</div> <a href="https://sql.clickhouse.com?query_id=5INADD1EKJOHLERC8VMGAP" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>The <a href="https://clickhouse.com/docs/en/operations/settings/settings/#optimize_read_in_order"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">optimize_read_in_order</code></a> setting can be disabled via the SETTINGS clause of the query. This will cause ClickHouse to stream 2.17 million rows instead of 81.92 thousand rows from disk (still better than a full table scan). The following diagram visualizes the difference in query processing steps:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_04.png" loading="lazy" src="/uploads/speed_04_7942a7d4b2.png"/></span>
+<p>One remaining issue with using a second table with a different row order is keeping the tables in sync. Further below, we will discuss a handy solution for this problem.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="2-pre-compute-aggregates" level="2">(2) Pre-compute aggregates<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#2-pre-compute-aggregates">#</a></span></h2>
+<p>We execute an aggregation query that lists the U.K. counties with the three highest average paid prices:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    avg(price)
+FROM uk_price_paid
+GROUP BY county
+ORDER BY avg(price) DESC
+LIMIT 3
+
+┌─county──────────────────────────────┬─────────avg(price)─┐
+│ WINDSOR AND MAIDENHEAD              │ 383843.17329304793 │
+│ BOURNEMOUTH, CHRISTCHURCH AND POOLE │  383478.9135281004 │
+│ GREATER LONDON                      │  376911.4824869095 │
+└─────────────────────────────────────┴────────────────────┘
+
+3 rows in set. Elapsed: 0.020 sec. Processed 26.25 million rows, 132.57 MB (1.33 billion rows/s., 6.69 GB/s.)
+</div> <a href="https://sql.clickhouse.com?query_id=AEZD2XA3HDMMAJDYTJCZLD" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>In this case, ClickHouse is doing a full table scan because the query aggregates all existing table rows. Therefore the primary index can’t be used to reduce the amount of data streamed from disk.</p>
+<p>However, we could drastically reduce the amount of data streamed from disk (by sacrificing additional disk space) if we could pre-compute the aggregate values for all existing 130 U.K counties in a separate table and update that separate table, whenever the original table data changes.</p>
+<p>The following diagram visualizes this idea:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_05.png" loading="lazy" src="/uploads/speed_05_087f1266a5.png"/></span>
+<p>ClickHouse has a handy new turnkey feature implementing this idea: <a href="https://clickhouse.com/blog/clickhouse-22-2-released/">Projections</a>!</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="use-projections-for-1-and-2" level="2">Use projections for (1) and (2)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#use-projections-for-1-and-2">#</a></span></h2>
+<p>A ClickHouse table can have (multiple) <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree/#projections">projections</a>.</p>
+<p>A projection is an additional (hidden) table that is automatically kept in sync with the original table. The projection can have a different row order (and therefore a different primary index) than the original table, as well as automatically and incrementally pre-compute aggregate values.</p>
+<p>When a query is targeting the original table, then ClickHouse automatically chooses (by sampling the primary keys) a table that can generate the same correct result, but requires the least amount of data to be read. We visualize this concept here:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_06.png" loading="lazy" src="/uploads/speed_06_b7fe19ed6f.png"/></span>
+<p>Projections are somewhat similar to <a href="https://clickhouse.com/docs/en/sql-reference/statements/create/view#materialized-view">Materialized Views</a>, which also allow you to have incremental aggregation and multiple row orders. But unlike Materialized Views, projections are updated atomically and kept consistent with the main table with ClickHouse automatically choosing the optimal version at query time.</p>
+<p>For the original example table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">uk_price_paid</code>, we will create (and populate) two projections.</p>
+<p>In order to keep things tidy and simple in our playground, we first duplicate the table<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word"> uk_price_paid</code> as <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">uk_price_paid_with_projections</code>:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+CREATE TABLE uk_price_paid_with_projections AS uk_price_paid;
+INSERT INTO uk_price_paid_with_projections SELECT * FROM uk_price_paid;
+
+0 rows in set. Elapsed: 4.410 sec. Processed 52.50 million rows, 2.42 GB (11.90 million rows/s., 548.46 MB/s.)
+</div></pre>
+<p></p>
+<p>We create and populate projection <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">prj_oby_town_price</code> – an additional (hidden) table with a primary index, ordering by town and price, to optimize the query that lists the counties in a specific town for the highest paid prices:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+ALTER TABLE uk_price_paid_with_projections
+    ADD PROJECTION prj_oby_town_price
+    (
+        SELECT
+            *
+        ORDER BY
+          town, price
+    );
+
+ALTER TABLE uk_price_paid_with_projections
+    MATERIALIZE PROJECTION prj_oby_town_price SETTINGS mutations_sync = 1;
+
+0 rows in set. Elapsed: 6.028 sec.
+</div></pre>
+<p></p>
+<p>We create and populate projection <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">prj_gby_county</code> – an additional (hidden) table that incrementally pre-computes the avg(price) aggregate values for all existing 130 U.K counties:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+ALTER TABLE uk_price_paid_with_projections
+    ADD PROJECTION prj_gby_county
+    (
+        SELECT
+            county,
+            avg(price)
+        GROUP BY
+           county
+    );
+
+ALTER TABLE uk_price_paid_with_projections
+    MATERIALIZE PROJECTION prj_gby_county SETTINGS mutations_sync = 1;
+
+0 rows in set. Elapsed: 0.123 sec.
+</div></pre>
+<p></p>
+<p>Note that If there is a GROUP BY clause used in a projection (like in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">prj_gby_county</code> above), the underlying storage engine for the (hidden) table <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree/#projection-storage">becomes</a> <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/aggregatingmergetree/">AggregatingMergeTree</a>, and all aggregate functions are converted to <a href="https://clickhouse.com/docs/en/sql-reference/data-types/aggregatefunction">AggregateFunction</a>. This ensures proper incremental data aggregation.</p>
+<p>Also, note the SETTINGS clause that <a href="https://clickhouse.com/docs/en/operations/settings/settings/#mutations_sync">forces synchronous execution</a>.</p>
+<p>This is a visualization of the main table <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">uk_price_paid_with_projections</code> and its two projections:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_07.png" loading="lazy" src="/uploads/speed_07_58a7dc0285.png"/></span>
+<p>If we now run the query that lists the counties in London for the three highest paid prices, we see a dramatic difference in performance:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    price
+FROM uk_price_paid_with_projections
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+┌─county─────────┬─────price─┐
+│ GREATER LONDON │ 594300000 │
+│ GREATER LONDON │ 569200000 │
+│ GREATER LONDON │ 448500000 │
+└────────────────┴───────────┘
+
+3 rows in set. Elapsed: 0.026 sec. Processed 2.17 million rows, 13.03 MB (83.14 million rows/s., 499.14 MB/s.)
+</div> <a href="https://sql.clickhouse.com?query_id=DXP1BNTN6YUGWXRZJET4AM" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>Likewise, for the query that lists the U.K. counties with the three highest average paid prices:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    avg(price)
+FROM uk_price_paid_with_projections
+GROUP BY county
+ORDER BY avg(price) DESC
+LIMIT 3
+
+┌─county──────────────────────────────┬─────────avg(price)─┐
+│ WINDSOR AND MAIDENHEAD              │  398334.9180566017 │
+│ GREATER LONDON                      │  396401.2740568222 │
+│ BOURNEMOUTH, CHRISTCHURCH AND POOLE │ 387441.28323942184 │
+└─────────────────────────────────────┴────────────────────┘
+
+3 rows in set. Elapsed: 0.007 sec.
+</div> <a href="https://sql.clickhouse.com?query_id=DXP1BNTN6YUGWXRZJET4AM" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>Note that both queries target the original table, and that both queries resulted in a full table scan (all 27.64 million rows got streamed from disk) before we created the two projections.</p>
+<p>Also, note that the query that lists the counties in London for the three highest paid prices is streaming 2.17 million rows. When we directly used a second table optimized for this query, only 81.92 thousand rows were streamed from disk.</p>
+<p>The reason for the difference is that currently, the <a href="https://clickhouse.com/docs/en/operations/settings/settings/#optimize_read_in_order"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">optimize_read_in_order</code></a> optimization mentioned above isn’t supported for projections.</p>
+<p>We inspect the <a href="https://clickhouse.com/docs/en/operations/system-tables/query_log/">system.query_log</a> table in order to see that ClickHouse automatically used the two projections for the two queries above (see the projections column below):</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    tables,
+    query,
+    query_duration_ms::String ||  ' ms' AS query_duration,
+    formatReadableQuantity(read_rows) AS read_rows,
+    projections
+FROM clusterAllReplicas(default, system.query_log)
+WHERE (type = 'QueryFinish') AND (tables = ['default.uk_price_paid_with_projections'])
+ORDER BY initial_query_start_time DESC
+LIMIT 2
+FORMAT Vertical
+
+Row 1:
+──────
+tables:         ['default.uk_price_paid_with_projections']
+query:          SELECT
+                  county,
+                  avg(price)
+                FROM uk_price_paid
+                GROUP BY county
+                ORDER BY avg(price) DESC
+                LIMIT 3
+query_duration: 6 ms
+read_rows:      597.00
+projections:    ['default.uk_price_paid.prj_gby_county']
+
+Row 2:
+──────
+tables:         ['default.uk_price_paid_with_projections']
+query:          SELECT
+                  county,
+                  price
+                FROM uk_price_paid
+                WHERE town = 'LONDON'
+                ORDER BY price DESC
+                LIMIT 3
+query_duration: 25 ms
+read_rows:      2.17 million
+projections:    ['default.prj_oby_town_price']
+</div>
+</pre>
+<p></p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="increase-query-processing-parallelism" level="2">Increase query processing parallelism<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#increase-query-processing-parallelism">#</a></span></h2>
+<p>Most analytical queries have a filter, aggregation, and sort stage. Each of these can be parallelized independently and will, by default, use as many threads as CPU cores, thus utilizing the full machine resources for a query (Therefore, in ClickHouse, scaling up is preferred to <a href="https://clickhouse.com/company/events/scaling-clickhouse">scaling out</a>).</p>
+<p>A query sent to ClickHouse <a href="https://clickhouse.com/company/events/query-performance-introspection">gets transformed</a> into a physical query plan, called a query pipeline, which consists of query processing stages that are executed over the data streamed from disk.</p>
+<p>As mentioned in the first paragraph, for executing a query, ClickHouse first uses the primary index for selecting blocks of rows that potentially contain rows matching the query’s WHERE clause.</p>
+<p>The selected blocks of rows are partitioned into n separate data ranges.</p>
+<p>n is dependent on the <a href="https://clickhouse.com/docs/en/operations/settings/settings/#settings-max_threads"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code></a> setting, which by default is set to the number of CPU cores that ClickHouse sees on the machine it is running on.</p>
+<p>In parallel, one thread per data range will read the rows from its range block-wise in a streaming fashion. Most query processing stages from the query pipeline are executed by n threads in parallel in a <a href="https://clickhouse.com/docs/en/sql-reference/statements/select/#implementation-details">streaming fashion</a>.</p>
+<p>We visualize this for a ClickHouse node with 4 CPU cores:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="speed_08.png" loading="lazy" src="/uploads/speed_08_217b9b2201.png"/></span>
+<p>By increasing the <a href="https://clickhouse.com/docs/en/operations/settings/settings/#settings-max_threads"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code></a> setting for a query, the level of parallelism for data processing is increased.</p>
+<p>We can inspect the query pipeline of a query via <a href="https://clickhouse.com/company/events/query-performance-introspection">EXPLAIN</a>:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+EXPLAIN PIPELINE
+SELECT
+    county,
+    price
+FROM uk_price_paid
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+┌─explain─────────────────────────────────┐
+│ (Expression)                            │
+│ ExpressionTransform                     │
+│   (Limit)                               │
+│   Limit                                 │
+│     (Sorting)                           │
+│     MergingSortedTransform 4 → 1        │
+│       MergeSortingTransform × 4         │
+│         LimitsCheckingTransform × 4     │
+│           PartialSortingTransform × 4   │
+│             (Expression)                │
+│             ExpressionTransform × 4     │
+│               (ReadFromMergeTree)       │
+│               MergeTreeThread × 4 0 → 1 │
+└─────────────────────────────────────────┘
+
+13 rows in set. Elapsed: 0.002 sec.
+</div> <a href="https://sql.clickhouse.com?query_id=6EG4PWKERYSYU3BB6BMSDX" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>The plan can be read from bottom to top, and we can see that 4 parallel threads are used for reading/streaming the selected blocks of rows from disk and that most query processing stages from the query pipeline are executed by 4 threads in parallel.</p>
+<p>4 threads because the EXPLAIN query was run on a ClickHouse node with 4 CPU cores, and therefore <a href="https://clickhouse.com/docs/en/operations/settings/settings/#settings-max_threads"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code></a> is set to 4 by default:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT *
+FROM system.settings
+WHERE name = 'max_threads'
+FORMAT Vertical
+
+Row 1:
+──────
+name:        max_threads
+value:       4
+changed:     0
+description: The maximum number of threads to execute the request. By default, it is determined automatically.
+min:         ᴺᵁᴸᴸ
+max:         ᴺᵁᴸᴸ
+readonly:    0
+type:        MaxThreads
+
+1 row in set. Elapsed: 0.009 sec.
+</div>
+</pre>
+<p></p>
+<p>We inspect the query pipeline again for the same query that now has a SETTINGS clause increasing the <a href="https://clickhouse.com/docs/en/operations/settings/settings/#settings-max_threads"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code></a> setting to 20:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+EXPLAIN PIPELINE
+SELECT
+    county,
+    price
+FROM uk_price_paid
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+SETTINGS max_threads = 20
+
+┌─explain──────────────────────────────────┐
+│ (Expression)                             │
+│ ExpressionTransform                      │
+│   (Limit)                                │
+│   Limit                                  │
+│     (Sorting)                            │
+│     MergingSortedTransform 20 → 1        │
+│       MergeSortingTransform × 20         │
+│         LimitsCheckingTransform × 20     │
+│           PartialSortingTransform × 20   │
+│             (Expression)                 │
+│             ExpressionTransform × 20     │
+│               (ReadFromMergeTree)        │
+│               MergeTreeThread × 20 0 → 1 │
+└──────────────────────────────────────────┘
+
+13 rows in set. Elapsed: 0.003 sec.
+</div>
+</pre>
+<p></p>
+<p>Now 20 parallel threads are used for reading/streaming the selected blocks of rows from disk, and most query processing stages from the query pipeline are executed by 20 threads in parallel.</p>
+<p>We run the query with 4 threads (default setting of <a href="https://clickhouse.com/docs/en/operations/settings/settings/#settings-max_threads"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code></a> on the ClickHouse playground):</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    price
+FROM uk_price_paid
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+
+┌─county─────────┬─────price─┐
+│ GREATER LONDON │ 594300000 │
+│ GREATER LONDON │ 569200000 │
+│ GREATER LONDON │ 448500000 │
+└────────────────┴───────────┘
+
+3 rows in set. Elapsed: 0.070 sec. Processed 27.64 million rows, 40.53 MB (393.86 million rows/s., 577.50 MB/s.)
+</div> <a href="https://sql.clickhouse.com?query_id=TEH4J3REPN2FNDRGCYDNM6" style="height:32px;width:32px;text-align:center;line-height:1.3;position:absolute;font-size:24px;top:24px;right:24px;color:#FFFFFF;background:rgba(0,0,0,0.8);border-radius:8px" target="_blank">✎</a>
+</pre>
+<p></p>
+<p>We run the query with 20 threads:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    county,
+    price
+FROM uk_price_paid
+WHERE town = 'LONDON'
+ORDER BY price DESC
+LIMIT 3
+SETTINGS max_threads = 20
+
+┌─county─────────┬─────price─┐
+│ GREATER LONDON │ 594300000 │
+│ GREATER LONDON │ 569200000 │
+│ GREATER LONDON │ 448500000 │
+└────────────────┴───────────┘
+
+3 rows in set. Elapsed: 0.036 sec. Processed 27.64 million rows, 40.00 MB (765.42 million rows/s., 1.11 GB/s.)
+</div>
+</pre>
+<p></p>
+<p>With 20 threads, the query runs about double as fast, but note that this increases the amount of peak memory that will be consumed by the query execution because more data will be streamed in parallel into ClickHouse.</p>
+<p>We check the memory consumption for both query runs by inspecting the <a href="https://clickhouse.com/docs/en/operations/system-tables/query_log/">system.query_log</a> table:</p>
+<pre style="background-color:#222222;border-radius:8px;padding:24px;color:#FFFFFF;display:flex;position:relative;white-space:pre-wrap"><div style="color:#FFFFFF;margin-top:-24px;max-width:98%">
+SELECT
+    query,
+    query_duration_ms::String || ' ms' as query_duration,
+    formatReadableSize(memory_usage) as memory_usage,
+    formatReadableQuantity(read_rows) AS read_rows,
+    formatReadableSize(read_bytes) as read_data
+FROM clusterAllReplicas(default, system.query_log)
+WHERE type = 'QueryFinish' AND tables = ['default.uk_price_paid']
+ORDER BY initial_query_start_time DESC
+LIMIT 2
+FORMAT Vertical
+
+Row 1:
+──────
+query:          SELECT
+                  county,
+                  price
+                FROM uk_price_paid
+                WHERE town = 'LONDON'
+                ORDER BY price DESC
+                LIMIT 3
+                SETTINGS max_threads = 20
+query_duration: 35 ms
+memory_usage:   49.49 MiB
+read_rows:      27.64 million
+read_data:      38.15 MiB
+
+Row 2:
+──────
+query:          SELECT
+                  county,
+                  price
+                FROM uk_price_paid
+                WHERE town = 'LONDON'
+                ORDER BY price DESC
+                LIMIT 3
+query_duration: 69 ms
+memory_usage:   31.01 MiB
+read_rows:      27.64 million
+read_data:      38.65 MiB
+
+2 rows in set. Elapsed: 0.026 sec. Processed 64.00 thousand rows, 5.98 MB (2.46 million rows/s., 230.17 MB/s.)
+</div>
+</pre>
+<p></p>
+<p>With 20 threads, the query consumes about 40% more peak main memory than the same query run with 4 threads.</p>
+<p>Note that with high <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_threads</code> settings resource contention and context switches can become a bottleneck, increasing the max_threads setting, therefore, doesn’t scale linearly.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="summary" level="2">Summary<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-faster-queries-with-projections-and-primary-indexes#summary">#</a></span></h2>
+<p>The ClickHouse query processing architecture is optimized for real-time analytics and comes with default settings that make query processing fast.</p>
+<p>You can optimize performance for specific queries by applying the techniques described above:</p>
+<ul>
+<li>Choose a row order / primary key that includes the fields that you filter on</li>
+<li>Add projections for multiple row orders and incremental aggregation</li>
+<li>Increase the level of query processing parallelism</li>
+</ul>
+<p>This will minimize the amount of data streamed from disk into the query processing engine and speed up streaming and processing of that data.</p></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

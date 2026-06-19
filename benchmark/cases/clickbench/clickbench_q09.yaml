@@ -1,0 +1,21 @@
+case_id: clickbench_q09
+source: clickbench
+sql: 'SELECT RegionID, COUNT(DISTINCT UserID) AS u FROM hits GROUP BY RegionID ORDER
+  BY u DESC LIMIT 10;
+
+  '
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: count_distinct_to_uniqExact
+  detected_by_rule: R-001
+  severity: high
+  description: Query contains `COUNT(DISTINCT UserID)` with a single argument, matching
+    the exact `uniqExact` specialization rule.
+expected_rules_to_fire:
+- R-001
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: 1 confirmed finding(s) after rule-card precondition check.'
+expected_findings_count: 1
+status: reviewed

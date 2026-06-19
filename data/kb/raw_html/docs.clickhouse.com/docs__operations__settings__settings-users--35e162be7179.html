@@ -1,0 +1,328 @@
+<h1>Users and roles settings | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/operations/settings" itemprop="item"><span itemprop="name">Settings</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">User Settings</span><meta content="2" itemprop="position"/></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/operations/settings/settings-users.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Users and roles settings</h1></header><p>The <code>users</code> section of the <code>users.xml</code> configuration file contains user settings.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>ClickHouse also supports <a href="/docs/operations/access-rights#access-control-usage">SQL-driven workflow</a> for managing users. We recommend using it.</p></div></div>
+<p>Structure of the <code>users</code> section:</p>
+<div class="wrapper_EBtA" style="height:1149.8500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;users&gt;
+    &lt;!-- If user name was not specified, 'default' user is used. --&gt;
+    &lt;user_name&gt;
+        &lt;!-- Exactly one authentication method may be specified at the users.user_name level. For example: --&gt;
+        &lt;password&gt;&lt;/password&gt;
+        &lt;!-- Or (exclusive) --&gt;
+        &lt;password_sha256_hex&gt;&lt;/password_sha256_hex&gt;
+ 
+        &lt;!-- Or (exclusive) (N.B. multiple SSH keys are allowed for backwards compatibility) --&gt;
+        &lt;ssh_keys&gt;
+            &lt;ssh_key&gt;
+                &lt;type&gt;ssh-ed25519&lt;/type&gt;
+                &lt;base64_key&gt;AAAAC3NzaC1lZDI1NTE5AAAAIDNf0r6vRl24Ix3tv2IgPmNPO2ATa2krvt80DdcTatLj&lt;/base64_key&gt;
+            &lt;/ssh_key&gt;
+            &lt;ssh_key&gt;
+                &lt;type&gt;ecdsa-sha2-nistp256&lt;/type&gt;
+                &lt;base64_key&gt;AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNxeV2uN5UY6CUbCzTA1rXfYimKQA5ivNIqxdax4bcMXz4D0nSk2l5E1TkR5mG8EBWtmExSPbcEPJ8V7lyWWbA8=&lt;/base64_key&gt;
+            &lt;/ssh_key&gt;
+            &lt;ssh_key&gt;
+                &lt;type&gt;ssh-rsa&lt;/type&gt;
+                &lt;base64_key&gt;AAAAB3NzaC1yc2EAAAADAQABAAABgQCpgqL1SHhPVBOTFlOm0pu+cYBbADzC2jL41sPMawYCJHDyHuq7t+htaVVh2fRgpAPmSEnLEC2d4BEIKMtPK3bfR8plJqVXlLt6Q8t4b1oUlnjb3VPA9P6iGcW7CV1FBkZQEVx8ckOfJ3F+kI5VsrRlEDgiecm/C1VPl0/9M2llW/mPUMaD65cM9nlZgM/hUeBrfxOEqM11gDYxEZm1aRSbZoY4dfdm3vzvpSQ6lrCrkjn3X2aSmaCLcOWJhfBWMovNDB8uiPuw54g3ioZ++qEQMlfxVsqXDGYhXCrsArOVuW/5RbReO79BvXqdssiYShfwo+GhQ0+aLWMIW/jgBkkqx/n7uKLzCMX7b2F+aebRYFh+/QXEj7SnihdVfr9ud6NN3MWzZ1ltfIczlEcFLrLJ1Yq57wW6wXtviWh59WvTWFiPejGjeSjjJyqqB49tKdFVFuBnIU5u/bch2DXVgiAEdQwUrIp1ACoYPq22HFFAYUJrL32y7RxX3PGzuAv3LOc=&lt;/base64_key&gt;
+            &lt;/ssh_key&gt;
+        &lt;/ssh_keys&gt;
+
+        &lt;!-- Or (exclusive) for multiple authentication methods: --&gt;
+        &lt;auth_methods&gt;
+            &lt;method1&gt;
+                &lt;password&gt;&lt;/password&gt;
+            &lt;/method1&gt;
+            &lt;method2&gt;
+                &lt;password_sha256_hex&gt;&lt;/password_sha256_hex&gt;
+            &lt;/method2&gt;
+            &lt;!-- ... --&gt;
+            &lt;methodN&gt;
+                &lt;!-- ... --&gt;
+            &lt;/methodN&gt;
+        &lt;/auth_methods&gt;
+
+        &lt;access_management&gt;0|1&lt;/access_management&gt;
+
+        &lt;networks incl="networks" replace="replace"&gt;
+        &lt;/networks&gt;
+
+        &lt;profile&gt;profile_name&lt;/profile&gt;
+
+        &lt;quota&gt;default&lt;/quota&gt;
+        &lt;default_database&gt;default&lt;/default_database&gt;
+        &lt;databases&gt;
+            &lt;database_name&gt;
+                &lt;table_name&gt;
+                    &lt;filter&gt;expression&lt;/filter&gt;
+                &lt;/table_name&gt;
+            &lt;/database_name&gt;
+        &lt;/databases&gt;
+
+        &lt;grants&gt;
+            &lt;query&gt;GRANT SELECT ON system.*&lt;/query&gt;
+        &lt;/grants&gt;
+    &lt;/user_name&gt;
+    &lt;!-- Other users settings --&gt;
+&lt;/users&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-namepassword">user_name/password<a aria-label="Direct link to user_name/password" class="hash-link" href="#user-namepassword" title="Direct link to user_name/password">​</a></h3>
+<p>Password can be specified in plaintext or in SHA256 (hex format).</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>To assign a password in plaintext (<strong>not recommended</strong>), place it in a <code>password</code> element.</p>
+<p>For example, <code>&lt;password&gt;qwerty&lt;/password&gt;</code>. The password can be left blank.</p>
+</li>
+</ul>
+<a id="password_sha256_hex"></a>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>To assign a password using its SHA256 hash, place it in a <code>password_sha256_hex</code> element.</p>
+<p>For example, <code>&lt;password_sha256_hex&gt;65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5&lt;/password_sha256_hex&gt;</code>.</p>
+<p>Example of how to generate a password from shell:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">PASSWORD=$(base64 &lt; /dev/urandom | head -c8); echo "$PASSWORD"; echo -n "$PASSWORD" | sha256sum | tr -d '-'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The first line of the result is the password. The second line is the corresponding SHA256 hash.</p>
+</li>
+</ul>
+<a id="password_double_sha1_hex"></a>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>For compatibility with MySQL clients, password can be specified in double SHA1 hash. Place it in <code>password_double_sha1_hex</code> element.</p>
+<p>For example, <code>&lt;password_double_sha1_hex&gt;08b4a0f1de6ad37da17359e592c8d74788a83eb0&lt;/password_double_sha1_hex&gt;</code>.</p>
+<p>Example of how to generate a password from shell:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">PASSWORD=$(base64 &lt; /dev/urandom | head -c8); echo "$PASSWORD"; echo -n "$PASSWORD" | sha1sum | tr -d '-' | xxd -r -p | sha1sum | tr -d '-'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The first line of the result is the password. The second line is the corresponding double SHA1 hash.</p>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="totp-authentication-configuration">TOTP Authentication Configuration<a aria-label="Direct link to TOTP Authentication Configuration" class="hash-link" href="#totp-authentication-configuration" title="Direct link to TOTP Authentication Configuration">​</a></h3>
+<p>Time-Based One-Time Password (TOTP) can be used to authenticate ClickHouse users by generating temporary access codes that are valid for a limited time.
+This TOTP authentication method aligns with <a href="https://datatracker.ietf.org/doc/html/rfc6238" rel="noopener noreferrer" target="_blank">RFC 6238</a> standards, making it compatible with popular TOTP applications like Google Authenticator, 1Password and similar tools.
+It can be set up trough the <code>users.xml</code> configuration file in addition to password-based authentication.
+It's not yet supported in SQL-driven Access Control.</p>
+<p>To authenticate using TOTP, users must provide a primary password along with a one-time password generated by their TOTP application via the <code>--one-time-password</code> command line option or concatenated to main password together with a '+' character.
+For example if the primary password is <code>some_password</code> and the generated TOTP code is <code>345123</code>, user may specify <code>--password some_password+345123</code> or <code>--password some_password --one-time-password 345123</code> when connecting to ClickHouse. If no password specified <code>clickhouse-client</code> will prompt for it interactively.</p>
+<p>To enable TOTP authentication for a user, configure the <code>time_based_one_time_password</code> section in <code>users.xml</code>. This section defines the TOTP settings, such as secret, validity period, number of digits, and hash algorithm.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:622.0500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;!-- ... --&gt;
+    &lt;users&gt;
+        &lt;my_user&gt;
+            &lt;!-- Primary password-based authentication: --&gt;
+            &lt;password&gt;some_password&lt;/password&gt;
+            &lt;password_sha256_hex&gt;1464acd6765f91fccd3f5bf4f14ebb7ca69f53af91b0a5790c2bba9d8819417b&lt;/password_sha256_hex&gt;
+            &lt;!-- ... or any other supported authentication method ... --&gt;
+
+            &lt;!-- TOTP authentication configuration --&gt;
+            &lt;time_based_one_time_password&gt;
+                &lt;secret&gt;JBSWY3DPEHPK3PXP&lt;/secret&gt;      &lt;!-- Base32-encoded TOTP secret --&gt;
+                &lt;period&gt;30&lt;/period&gt;                    &lt;!-- Optional: OTP validity period in seconds --&gt;
+                &lt;digits&gt;6&lt;/digits&gt;                     &lt;!-- Optional: Number of digits in the OTP --&gt;
+                &lt;algorithm&gt;SHA1&lt;/algorithm&gt;            &lt;!-- Optional: Hash algorithm: SHA1, SHA256, SHA512 --&gt;
+            &lt;/time_based_one_time_password&gt;
+        &lt;/my_user&gt;
+    &lt;/users&gt;
+&lt;/clickhouse&gt;
+
+Parameters:
+
+- secret - (Required) The base32-encoded secret key used to generate TOTP codes.
+- period - Optional. Sets the validity period of each OTP in seconds. Must be a positive number not exceeding 120. Default is 30.
+- digits - Optional. Specifies the number of digits in each OTP. Must be between 4 and 10. Default is 6.
+- algorithm - Optional. Defines the hash algorithm for generating OTPs. Supported values are SHA1, SHA256, and SHA512. Default is SHA1.
+
+Generating a TOTP Secret
+
+To generate a TOTP-compatible secret for use with ClickHouse, run the following command in the terminal:
+
+```bash
+$ base32 -w32 &lt; /dev/urandom | head -1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This command will produce a base32-encoded secret that can be added to the secret field in users.xml.</p>
+<p>To enable TOTP for a specific user, add to any existing password-based field (like <code>password</code> or <code>password_sha256_hex</code>) another <code>time_based_one_time_password</code> section.</p>
+<p>The <a href="https://linux.die.net/man/1/qrencode" rel="noopener noreferrer" target="_blank">qrencode</a> tool can be used to generate a QR code for the TOTP secret.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">$ qrencode -t ansiutf8 'otpauth://totp/ClickHouse?issuer=ClickHouse&amp;secret=JBSWY3DPEHPK3PXP'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>After configuring TOTP for a user, one-time password can be used as a part of the authentication process as described above.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-sshkey">username/ssh-key<a aria-label="Direct link to username/ssh-key" class="hash-link" href="#user-sshkey" title="Direct link to username/ssh-key">​</a></h3>
+<p>This setting allows authenticating with SSH keys.</p>
+<p>Given a SSH key (as generated by <code>ssh-keygen</code>) like</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDNf0r6vRl24Ix3tv2IgPmNPO2ATa2krvt80DdcTatLj <a class="__cf_email__" data-cfemail="345e5b5c5a74514c55594458511a575b59" href="/cdn-cgi/l/email-protection">[email protected]</a>
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>ssh_key</code> element is expected to be</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;ssh_key&gt;
+     &lt;type&gt;ssh-ed25519&lt;/type&gt;
+     &lt;base64_key&gt;AAAAC3NzaC1lZDI1NTE5AAAAIDNf0r6vRl24Ix3tv2IgPmNPO2ATa2krvt80DdcTatLj&lt;/base64_key&gt;
+ &lt;/ssh_key&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Substitute <code>ssh-ed25519</code> with <code>ssh-rsa</code> or <code>ecdsa-sha2-nistp256</code> for the other supported algorithms.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="multiple-authentication-methods">Multiple Authentication Methods<a aria-label="Direct link to Multiple Authentication Methods" class="hash-link" href="#multiple-authentication-methods" title="Direct link to Multiple Authentication Methods">​</a></h3>
+<p>A single user can be configured with multiple authentication methods using the <code>&lt;auth_methods&gt;</code> element. This allows a user to authenticate with any one of the listed methods — for example, a user could have both a password and an LDAP credential, and logging in with either one would succeed.</p>
+<p>Each child element of <code>&lt;auth_methods&gt;</code> is an arbitrarily-named wrapper that contains exactly one authentication type. The wrapper name (e.g. <code>&lt;method1&gt;</code>, <code>&lt;primary&gt;</code>, <code>&lt;a1&gt;</code>) does not matter; only the inner authentication element is used.</p>
+<p><strong>Example: multiple passwords</strong></p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;users&gt;
+    &lt;my_user&gt;
+        &lt;auth_methods&gt;
+            &lt;primary&gt;
+                &lt;password&gt;password_one&lt;/password&gt;
+            &lt;/primary&gt;
+            &lt;secondary&gt;
+                &lt;password_sha256_hex&gt;65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5&lt;/password_sha256_hex&gt;
+            &lt;/secondary&gt;
+        &lt;/auth_methods&gt;
+    &lt;/my_user&gt;
+&lt;/users&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example: mixed authentication types</strong></p>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;users&gt;
+    &lt;my_user&gt;
+        &lt;auth_methods&gt;
+            &lt;a1&gt;
+                &lt;password&gt;plaintext_pass&lt;/password&gt;
+            &lt;/a1&gt;
+            &lt;a2&gt;
+                &lt;password_sha256_hex&gt;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&lt;/password_sha256_hex&gt;
+            &lt;/a2&gt;
+            &lt;a3&gt;
+                &lt;ldap&gt;
+                    &lt;server&gt;my_ldap_server&lt;/server&gt;
+                &lt;/ldap&gt;
+            &lt;/a3&gt;
+        &lt;/auth_methods&gt;
+    &lt;/my_user&gt;
+&lt;/users&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The following authentication types are supported inside <code>&lt;auth_methods&gt;</code>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong><code>password</code></strong> — plaintext password</li>
+<li class="custom-li"><strong><code>password_sha256_hex</code></strong> — SHA256 password hash</li>
+<li class="custom-li"><strong><code>password_scram_sha256_hex</code></strong> — SCRAM-SHA-256 password hash</li>
+<li class="custom-li"><strong><code>password_double_sha1_hex</code></strong> — double SHA1 password hash</li>
+<li class="custom-li"><strong><code>ldap</code></strong> — LDAP server authentication</li>
+<li class="custom-li"><strong><code>kerberos</code></strong> — Kerberos authentication</li>
+<li class="custom-li"><strong><code>ssl_certificates</code></strong> — SSL certificate authentication</li>
+<li class="custom-li"><strong><code>ssh_keys</code></strong> — SSH key authentication</li>
+<li class="custom-li"><strong><code>http_authentication</code></strong> — HTTP authentication</li>
+</ul>
+<p><strong>Rules and restrictions:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>&lt;auth_methods&gt;</code> <strong>cannot</strong> be used together with authentication methods specified at the user level. Use one style or the other, not both.</li>
+<li class="custom-li"><code>&lt;auth_methods&gt;</code> must contain at least one authentication method.</li>
+<li class="custom-li">Each wrapper element inside <code>&lt;auth_methods&gt;</code> must contain exactly one authentication type (with the exception of <code>&lt;ssh_keys&gt;</code>, which can contain multiple, for backwards compatibility).</li>
+<li class="custom-li">TOTP (<code>&lt;time_based_one_time_password&gt;</code>) is specified at the user level (outside <code>&lt;auth_methods&gt;</code>) and applies to all password-based methods in the list. At least one password-based method is required when TOTP is enabled.</li>
+</ul>
+<p><strong>Example: <code>auth_methods</code> with TOTP</strong></p>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;users&gt;
+    &lt;my_user&gt;
+        &lt;auth_methods&gt;
+            &lt;a1&gt;
+                &lt;password&gt;my_password&lt;/password&gt;
+            &lt;/a1&gt;
+            &lt;a2&gt;
+                &lt;ldap&gt;
+                    &lt;server&gt;ldap_server_1&lt;/server&gt;
+                &lt;/ldap&gt;
+            &lt;/a2&gt;
+        &lt;/auth_methods&gt;
+        &lt;time_based_one_time_password&gt;
+            &lt;secret&gt;JBSWY3DPEHPK3PXP&lt;/secret&gt;
+        &lt;/time_based_one_time_password&gt;
+    &lt;/my_user&gt;
+&lt;/users&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this example, TOTP verification is applied to the password-based method (<code>&lt;password&gt;</code>), while the LDAP method authenticates against the external server independently.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="access_management-user-setting">access_management<a aria-label="Direct link to access_management" class="hash-link" href="#access_management-user-setting" title="Direct link to access_management">​</a></h3>
+<p>This setting enables or disables using of SQL-driven <a href="/docs/operations/access-rights#access-control-usage">access control and account management</a> for the user.</p>
+<p>Possible values:</p>
+<ul class="custom-ul">
+<li class="custom-li">0 — Disabled.</li>
+<li class="custom-li">1 — Enabled.</li>
+</ul>
+<p>Default value: 0.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="grants-user-setting">grants<a aria-label="Direct link to grants" class="hash-link" href="#grants-user-setting" title="Direct link to grants">​</a></h3>
+<p>This setting allows to grant any rights to selected user.
+Each element of the list should be <code>GRANT</code> query without any grantees specified.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;user1&gt;
+    &lt;grants&gt;
+        &lt;query&gt;GRANT SHOW ON *.*&lt;/query&gt;
+        &lt;query&gt;GRANT CREATE ON *.* WITH GRANT OPTION&lt;/query&gt;
+        &lt;query&gt;GRANT SELECT ON system.*&lt;/query&gt;
+    &lt;/grants&gt;
+&lt;/user1&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This setting can't be specified at the same time with
+<code>dictionaries</code>, <code>access_management</code>, <code>named_collection_control</code>, <code>show_named_collections_secrets</code>
+and <code>allow_databases</code> settings.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-namenetworks">user_name/networks<a aria-label="Direct link to user_name/networks" class="hash-link" href="#user-namenetworks" title="Direct link to user_name/networks">​</a></h3>
+<p>List of networks from which the user can connect to the ClickHouse server.</p>
+<p>Each element of the list can have one of the following forms:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><code>&lt;ip&gt;</code> — IP address or network mask.</p>
+<p>Examples: <code>213.180.204.3</code>, <code>10.0.0.1/8</code>, <code>10.0.0.1/255.255.255.0</code>, <code>2a02:6b8::3</code>, <code>2a02:6b8::3/64</code>, <code>2a02:6b8::3/ffff:ffff:ffff:ffff::</code>.</p>
+</li>
+<li class="custom-li">
+<p><code>&lt;host&gt;</code> — Hostname.</p>
+<p>Example: <code>example01.host.ru</code>.</p>
+<p>To check access, a DNS query is performed, and all returned IP addresses are compared to the peer address.</p>
+</li>
+<li class="custom-li">
+<p><code>&lt;host_regexp&gt;</code> — Regular expression for hostnames.</p>
+<p>Example, <code>^example\d\d-\d\d-\d\.host\.ru$</code></p>
+<p>To check access, a <a href="https://en.wikipedia.org/wiki/Reverse_DNS_lookup" rel="noopener noreferrer" target="_blank">DNS PTR query</a> is performed for the peer address and then the specified regexp is applied. Then, another DNS query is performed for the results of the PTR query and all the received addresses are compared to the peer address. We strongly recommend that regexp ends with $.</p>
+</li>
+</ul>
+<p>All results of DNS requests are cached until the server restarts.</p>
+<p><strong>Examples</strong></p>
+<p>To open access for user from any network, specify:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;ip&gt;::/0&lt;/ip&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>It's insecure to open access from any network unless you have a firewall properly configured or the server is not directly connected to Internet.</p></div></div>
+<p>To open access only from localhost, specify:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;ip&gt;::1&lt;/ip&gt;
+&lt;ip&gt;127.0.0.1&lt;/ip&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-nameprofile">user_name/profile<a aria-label="Direct link to user_name/profile" class="hash-link" href="#user-nameprofile" title="Direct link to user_name/profile">​</a></h3>
+<p>You can assign a settings profile for the user. Settings profiles are configured in a separate section of the <code>users.xml</code> file. For more information, see <a href="/docs/operations/settings/settings-profiles">Profiles of Settings</a>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-namequota">user_name/quota<a aria-label="Direct link to user_name/quota" class="hash-link" href="#user-namequota" title="Direct link to user_name/quota">​</a></h3>
+<p>Quotas allow you to track or limit resource usage over a period of time. Quotas are configured in the <code>quotas</code>
+section of the <code>users.xml</code> configuration file.</p>
+<p>You can assign a quotas set for the user. For a detailed description of quotas configuration, see <a href="/docs/operations/quotas">Quotas</a>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-namedatabases">user_name/databases<a aria-label="Direct link to user_name/databases" class="hash-link" href="#user-namedatabases" title="Direct link to user_name/databases">​</a></h3>
+<p>In this section, you can limit rows that are returned by ClickHouse for <code>SELECT</code> queries made by the current user, thus implementing basic row-level security.</p>
+<p><strong>Example</strong></p>
+<p>The following configuration forces that user <code>user1</code> can only see the rows of <code>table1</code> as the result of <code>SELECT</code> queries, where the value of the <code>id</code> field is 1000.</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;user1&gt;
+    &lt;databases&gt;
+        &lt;database_name&gt;
+            &lt;table1&gt;
+                &lt;filter&gt;id = 1000&lt;/filter&gt;
+            &lt;/table1&gt;
+        &lt;/database_name&gt;
+    &lt;/databases&gt;
+&lt;/user1&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>filter</code> can be any expression resulting in a <a href="/docs/sql-reference/data-types/int-uint">UInt8</a>-type value. It usually contains comparisons and logical operators. Rows from <code>database_name.table1</code> where filter results to 0 are not returned for this user. The filtering is incompatible with <code>PREWHERE</code> operations and disables <code>WHERE→PREWHERE</code> optimization.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="roles">Roles<a aria-label="Direct link to Roles" class="hash-link" href="#roles" title="Direct link to Roles">​</a></h2>
+<p>You can create any predefined roles using the <code>roles</code> section of the <code>user.xml</code> configuration file.</p>
+<p>Structure of the <code>roles</code> section:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;roles&gt;
+    &lt;test_role&gt;
+        &lt;grants&gt;
+            &lt;query&gt;GRANT SHOW ON *.*&lt;/query&gt;
+            &lt;query&gt;REVOKE SHOW ON system.*&lt;/query&gt;
+            &lt;query&gt;GRANT CREATE ON *.* WITH GRANT OPTION&lt;/query&gt;
+        &lt;/grants&gt;
+    &lt;/test_role&gt;
+&lt;/roles&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>These roles can also be granted to users from the <code>users</code> section:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;users&gt;
+    &lt;user_name&gt;
+        ...
+        &lt;grants&gt;
+            &lt;query&gt;GRANT test_role&lt;/query&gt;
+        &lt;/grants&gt;
+    &lt;/user_name&gt;
+&lt;users&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/operations/settings/settings-profiles"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Settings profiles</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/operations/named-collections"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">Named collections</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#user-namepassword">user_name/password</a><li><a class="table-of-contents__link toc-highlight" href="#totp-authentication-configuration">TOTP Authentication Configuration</a><li><a class="table-of-contents__link toc-highlight" href="#user-sshkey">username/ssh-key</a><li><a class="table-of-contents__link toc-highlight" href="#multiple-authentication-methods">Multiple Authentication Methods</a><li><a class="table-of-contents__link toc-highlight" href="#access_management-user-setting">access_management</a><li><a class="table-of-contents__link toc-highlight" href="#grants-user-setting">grants</a><li><a class="table-of-contents__link toc-highlight" href="#user-namenetworks">user_name/networks</a><li><a class="table-of-contents__link toc-highlight" href="#user-nameprofile">user_name/profile</a><li><a class="table-of-contents__link toc-highlight" href="#user-namequota">user_name/quota</a><li><a class="table-of-contents__link toc-highlight" href="#user-namedatabases">user_name/databases</a><li><a class="table-of-contents__link toc-highlight" href="#roles">Roles</a></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

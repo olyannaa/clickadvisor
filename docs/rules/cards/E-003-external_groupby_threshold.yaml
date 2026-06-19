@@ -1,0 +1,34 @@
+id: E-003
+name: external_groupby_threshold
+tier: env
+category: memory
+status: proposed
+statement: max_bytes_before_external_group_by должно позволять GROUP BY работать в
+  RAM
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.
+risks: []
+opt_in: false
+references: []
+hardware_preconditions: []
+config_preconditions: []
+workload_preconditions: []
+recommendation:
+  setting: external_groupby_threshold
+  current_value_check: ''
+  recommended_formula: '`max_bytes_before_external_group_by = max_memory_usage * 0.8`'
+  example: ''
+reasoning: Достижение порога → spill на диск (в разы медленнее RAM)

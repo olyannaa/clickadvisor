@@ -1,0 +1,18 @@
+case_id: synthetic_05
+source: synthetic
+sql: |
+  SELECT * FROM events WHERE toDate(created_at) = '2024-01-15'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: to_date_eq_to_datetime_range
+  detected_by_rule: R-005
+  severity: high
+  description: Функция toDate над колонкой в фильтре мешает sargable range-предикату.
+expected_rules_to_fire:
+- R-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-005.
+expected_findings_count: 1
+status: validated

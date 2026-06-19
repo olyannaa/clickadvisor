@@ -1,0 +1,21 @@
+{
+  "statement_id": "main",
+  "explain_kind": "PLAN",
+  "generated_at": "2026-05-25T11:05:00Z",
+  "clickhouse_version": "25.3.2.5",
+  "payload": {
+    "Plan": {
+      "Node Type": "Sorting",
+      "Plans": [
+        {
+          "Node Type": "ReadFromMergeTree",
+          "Description": "analytics.events",
+          "Estimate": {
+            "rows": 84000000,
+            "marks": 10220
+          }
+        }
+      ]
+    }
+  }
+}

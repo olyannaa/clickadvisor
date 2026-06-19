@@ -1,0 +1,82 @@
+# distinctJSONPaths \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- distinctJSONPaths
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/distinctJSONPaths.md)# distinctJSONPaths
+
+## distinctJSONPaths[​](#distinctJSONPaths "Direct link to distinctJSONPaths")
+
+
+Introduced in: v24\.9\.0
+
+
+Calculates a list of distinct paths stored in a [JSON](https://clickhouse.com/docs/sql-reference/data-types/newjson) column.
+
+
+**Syntax**
+
+
+
+```
+distinctJSONPaths(json)
+
+```
+
+**Arguments**
+
+
+- `json` — JSON column. [`JSON`](/docs/sql-reference/data-types/newjson)
+
+
+**Returned value**
+
+
+Returns the sorted list of paths. [`Array(String)`](/docs/sql-reference/data-types/array)
+
+
+**Examples**
+
+
+**Basic usage with nested JSON**
+
+
+
+```
+DROP TABLE IF EXISTS test_json;
+CREATE TABLE test_json(json JSON) ENGINE = Memory;
+INSERT INTO test_json VALUES ('{"a" : 42, "b" : "Hello"}'), ('{"b" : [1, 2, 3], "c" : {"d" : {"e" : "2020-01-01"}}}'), ('{"a" : 43, "c" : {"d" : {"f" : [{"g" : 42}]}}}');
+
+SELECT distinctJSONPaths(json) FROM test_json;
+
+```
+
+
+```
+┌─distinctJSONPaths(json)───┐
+│ ['a','b','c.d.e','c.d.f'] │
+└───────────────────────────┘
+
+```
+
+**With declared JSON paths**
+
+
+
+```
+DROP TABLE IF EXISTS test_json;
+CREATE TABLE test_json(json JSON) ENGINE = Memory;
+INSERT INTO test_json VALUES ('{"a" : 42, "b" : "Hello"}'), ('{"b" : [1, 2, 3], "c" : {"d" : {"e" : "2020-01-01"}}}'), ('{"a" : 43, "c" : {"d" : {"f" : [{"g" : 42}]}}}')
+
+SELECT distinctJSONPaths(json) FROM test_json;
+
+```
+
+
+```
+┌─distinctJSONPaths(json)─┐
+│ ['a','b','c']           │
+└─────────────────────────┘
+
+```
+[PreviousdistinctDynamicTypes](/docs/sql-reference/aggregate-functions/reference/distinctdynamictypes)[NextdistinctJSONPathsAndTypes](/docs/sql-reference/aggregate-functions/reference/distinctJSONPathsAndTypes)- [distinctJSONPaths](#distinctJSONPaths)
+Was this page helpful?

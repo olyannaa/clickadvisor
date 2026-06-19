@@ -1,0 +1,252 @@
+<h1>Projections | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/alter" itemprop="item"><span itemprop="name">ALTER</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">PROJECTION</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/alter/projection.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Projections</h1></header><p>This page discusses what projections are, how you can use them and various options for manipulating projections.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview of projections<a aria-label="Direct link to Overview of projections" class="hash-link" href="#overview" title="Direct link to Overview of projections">​</a></h2>
+<p>Projections store data in a format that optimizes query execution, this feature is useful for:</p>
+<ul class="custom-ul">
+<li class="custom-li">Running queries on a column that is not a part of the primary key</li>
+<li class="custom-li">Pre-aggregating columns, it will reduce both computation and IO</li>
+</ul>
+<p>You can define one or more projections for a table, and during the query analysis the projection with the least data to scan will be selected by ClickHouse without modifying the query provided by the user.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Disk usage</div><p>Projections will create internally a new hidden table, this means that more IO and space on disk will be required.
+For example, if the projection has defined a different primary key, all the data from the original table will be duplicated.</p></div></div>
+<p>You can see more technical details about how projections work internally on this <a href="/docs/guides/best-practices/sparse-primary-indexes#option-3-projections">page</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Using projections<a aria-label="Direct link to Using projections" class="hash-link" href="#examples" title="Direct link to Using projections">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-filtering-without-using-primary-keys">Example filtering without using primary keys<a aria-label="Direct link to Example filtering without using primary keys" class="hash-link" href="#example-filtering-without-using-primary-keys" title="Direct link to Example filtering without using primary keys">​</a></h3>
+<p>Creating the table:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE visits_order
+(
+   `user_id` UInt64,
+   `user_name` String,
+   `pages_visited` Nullable(Float64),
+   `user_agent` String
+)
+ENGINE = MergeTree()
+PRIMARY KEY user_agent
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Using <code>ALTER TABLE</code>, we could add the Projection to an existing table:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE visits_order ADD PROJECTION user_name_projection (
+    SELECT *
+    ORDER BY user_name
+)
+
+ALTER TABLE visits_order MATERIALIZE PROJECTION user_name_projection
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Inserting the data:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO visits_order SELECT
+    number,
+    'test',
+    1.5 * (number / 2),
+    'Android'
+FROM numbers(1, 100);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The Projection will allow us to filter by <code>user_name</code> fast even if in the original Table <code>user_name</code> was not defined as a <code>PRIMARY_KEY</code>.
+At query time, ClickHouse determines that less data will be processed if the projection is used, as the data is ordered by <code>user_name</code>.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    *
+FROM visits_order
+WHERE user_name='test'
+LIMIT 2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To verify that a query is using the projection, we could review the <code>system.query_log</code> table. On the <code>projections</code> field we have the name of the projection used or empty if none has been used:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT query, projections FROM system.query_log WHERE query_id='&lt;query_id&gt;'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-pre-aggregation-query">Example pre-aggregation query<a aria-label="Direct link to Example pre-aggregation query" class="hash-link" href="#example-pre-aggregation-query" title="Direct link to Example pre-aggregation query">​</a></h3>
+<p>Create the table with projection <code>projection_visits_by_user</code>:</p>
+<div class="wrapper_EBtA" style="height:301.6px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE visits
+(
+   `user_id` UInt64,
+   `user_name` String,
+   `pages_visited` Nullable(Float64),
+   `user_agent` String,
+   PROJECTION projection_visits_by_user
+   (
+       SELECT
+           user_agent,
+           sum(pages_visited)
+       GROUP BY user_id, user_agent
+   )
+)
+ENGINE = MergeTree()
+ORDER BY user_agent
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Insert the data:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO visits SELECT
+    number,
+    'test',
+    1.5 * (number / 2),
+    'Android'
+FROM numbers(1, 100);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO visits SELECT
+    number,
+    'test',
+    1. * (number / 2),
+   'IOS'
+FROM numbers(100, 500);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Execute a first query with <code>GROUP BY</code> using the field <code>user_agent</code>.
+This query will not use the projection defined as the pre-aggregation does not match.</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    user_agent,
+    count(DISTINCT user_id)
+FROM visits
+GROUP BY user_agent
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To make use of the projection you can execute queries that select part of, or all of the pre-aggregation and <code>GROUP BY</code> fields:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    user_agent
+FROM visits
+WHERE user_id &gt; 50 AND user_id &lt; 150
+GROUP BY user_agent
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    user_agent,
+    sum(pages_visited)
+FROM visits
+GROUP BY user_agent
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As previously mentioned, you can review the <code>system.query_log</code> table to understand if a projection was used.
+The <code>projections</code> field shows the name of the projection used.
+It will be empty if no projection has been used:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT query, projections FROM system.query_log WHERE query_id='&lt;query_id&gt;'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="projection-indexes">Creating and using projection indexes<a aria-label="Direct link to Creating and using projection indexes" class="hash-link" href="#projection-indexes" title="Direct link to Creating and using projection indexes">​</a></h3>
+<p>Creating a <a href="/docs/engines/table-engines/mergetree-family/mergetree#projection-index">projection index</a>:</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE events
+(
+    `event_time` DateTime,
+    `event_id` UInt64,
+    `user_id` UInt64,
+    `huge_string` String,
+    PROJECTION order_by_user_id INDEX user_id TYPE basic
+)
+ENGINE = MergeTree()
+ORDER BY (event_id);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true" markdown="1"><summary>Creating a projection with explicit <code>_part_offset</code> field</summary><div><div class="collapsibleContent_i85q"><p>Projection indexes can alternatively be created using the following syntax (not recommended):<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE events
+(
+    `event_time` DateTime,
+    `event_id` UInt64,
+    `user_id` UInt64,
+    `huge_string` String,
+    PROJECTION order_by_user_id
+    (
+        SELECT
+            _part_offset
+        ORDER BY user_id
+    )
+)
+ENGINE = MergeTree()
+ORDER BY (event_id);
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></details>
+<p>Inserting some sample data:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO events SELECT * FROM generateRandom() LIMIT 100000;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>_part_offset</code> field preserves its value through merges and mutations, making it valuable for secondary indexing. We can leverage this in queries:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    count()
+FROM events
+WHERE _part_starting_offset + _part_offset IN (
+    SELECT _part_starting_offset + _part_offset
+    FROM events
+    WHERE user_id = 42
+)
+SETTINGS enable_shared_storage_snapshot_in_query = 1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="manipulating-projections">Manipulating projections<a aria-label="Direct link to Manipulating projections" class="hash-link" href="#manipulating-projections" title="Direct link to Manipulating projections">​</a></h2>
+<p>The following operations with <a href="/docs/engines/table-engines/mergetree-family/mergetree#projections">projections</a> are available:</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="add-projection">ADD PROJECTION<a aria-label="Direct link to ADD PROJECTION" class="hash-link" href="#add-projection" title="Direct link to ADD PROJECTION">​</a></h3>
+<p>Use the statement below to add a projection description to a tables metadata:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]name [ON CLUSTER cluster] ADD PROJECTION [IF NOT EXISTS] name ( SELECT &lt;COLUMN LIST EXPR&gt; [GROUP BY] [ORDER BY] ) [WITH SETTINGS ( setting_name1 = setting_value1, setting_name2 = setting_value2, ...)]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="with-settings"><code>WITH SETTINGS</code> Clause<a aria-label="Direct link to with-settings" class="hash-link" href="#with-settings" title="Direct link to with-settings">​</a></h4>
+<p><code>WITH SETTINGS</code> defines <strong>projection-level settings</strong>, which customize how the projection stores data (for example, <code>index_granularity</code> or <code>index_granularity_bytes</code>).
+These correspond directly to <strong>MergeTree table settings</strong>, but apply <strong>only to this projection</strong>.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE t
+ADD PROJECTION p (
+    SELECT x ORDER BY x
+) WITH SETTINGS (
+    index_granularity = 4096,
+    index_granularity_bytes = 1048576
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Projection settings override the effective table settings for the projection, subject to validation rules (e.g., invalid or incompatible overrides will be rejected).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="drop-projection">DROP PROJECTION<a aria-label="Direct link to DROP PROJECTION" class="hash-link" href="#drop-projection" title="Direct link to DROP PROJECTION">​</a></h3>
+<p>Use the statement below to remove a projection description from a tables metadata and delete projection files from disk.
+This is implemented as a <a href="/docs/sql-reference/statements/alter#mutations">mutation</a>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]name [ON CLUSTER cluster] DROP PROJECTION [IF EXISTS] name
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materialize-projection">MATERIALIZE PROJECTION<a aria-label="Direct link to MATERIALIZE PROJECTION" class="hash-link" href="#materialize-projection" title="Direct link to MATERIALIZE PROJECTION">​</a></h3>
+<p>Use the statement below to rebuild the projection <code>name</code> in partition <code>partition_name</code>.
+This is implemented as a <a href="/docs/sql-reference/statements/alter#mutations">mutation</a>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]table [ON CLUSTER cluster] MATERIALIZE PROJECTION [IF EXISTS] name [IN PARTITION partition_name]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="clear-projection">CLEAR PROJECTION<a aria-label="Direct link to CLEAR PROJECTION" class="hash-link" href="#clear-projection" title="Direct link to CLEAR PROJECTION">​</a></h3>
+<p>Use the statement below to delete projection files from disk without removing description.
+This is implemented as a <a href="/docs/sql-reference/statements/alter#mutations">mutation</a>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]table [ON CLUSTER cluster] CLEAR PROJECTION [IF EXISTS] name [IN PARTITION partition_name]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The commands <code>ADD</code>, <code>DROP</code> and <code>CLEAR</code> are lightweight in the sense that they only change metadata or remove files.
+Additionally, they are replicated, and sync projection metadata via ClickHouse Keeper or ZooKeeper.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Projection manipulation is supported only for tables with <a href="/docs/engines/table-engines/mergetree-family/mergetree"><code>*MergeTree</code></a> engine (including <a href="/docs/engines/table-engines/mergetree-family/replication">replicated</a> variants).</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="control-projections-merges">Controlling projection merge behavior<a aria-label="Direct link to Controlling projection merge behavior" class="hash-link" href="#control-projections-merges" title="Direct link to Controlling projection merge behavior">​</a></h3>
+<p>When you execute a query, ClickHouse chooses between reading from the original table or one of its projections.
+The decision to read from the original table or one of its projections is made individually per every table part.
+ClickHouse generally aims to read as little data as possible and employs a couple of tricks to identify the best part to read from, for example, sampling the primary key of a part.
+In some cases, source table parts have no corresponding projection parts.
+This can happen, for example, because creating a projection for a table in SQL is “lazy” by default - it only affects newly inserted data but keeps existing parts unaltered.</p>
+<p>As one of the projections already contains the pre-computed aggregate values, ClickHouse tries to read from the corresponding projection parts to avoid aggregating at query runtime again. If a specific part lacks the corresponding projection part, query execution falls back to the original part.</p>
+<p>But what happens if the rows in the original table change in a non-trivial way by non-trivial data part background merges?
+For example, assume the table is stored using the <code>ReplacingMergeTree</code> table engine.
+If the same row is detected in multiple input parts during merge, only the most recent row version (from the most recently inserted part) will be kept, while all older versions will be discarded.</p>
+<p>Similarly, if the table is stored using the <code>AggregatingMergeTree</code> table engine, the merge operation may fold the same rows in the input parts (based on the primary key values) into a single row to update partial aggregation states.</p>
+<p>Before ClickHouse v24.8, projection parts either silently got out of sync with the main data, or certain operations like updates and deletes could not be run at all as the database automatically threw an exception if the table had projections.</p>
+<p>Since v24.8, a new table-level setting <a href="/docs/operations/settings/merge-tree-settings#deduplicate_merge_projection_mode"><code>deduplicate_merge_projection_mode</code></a> controls the behavior if the aforementioned non-trivial background merge operations occur in parts of the original table.</p>
+<p>Delete mutations are another example of part merge operations that drop rows in the parts of the original table. Since v24.7, we also have a setting to control the behavior w.r.t. delete mutations triggered by lightweight deletes: <a href="/docs/operations/settings/merge-tree-settings#deduplicate_merge_projection_mode"><code>lightweight_mutation_projection_mode</code></a>.</p>
+<p>Below are the possible values for both <code>deduplicate_merge_projection_mode</code> and <code>lightweight_mutation_projection_mode</code>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>throw</code> (default): An exception is thrown, preventing projection parts from going out of sync.</li>
+<li class="custom-li"><code>drop</code>: Affected projection table parts are dropped. Queries will fall back to the original table part for affected projection parts.</li>
+<li class="custom-li"><code>rebuild</code>: The affected projection part is rebuilt to stay consistent with data in the original table part.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="limitations">Limitations<a aria-label="Direct link to Limitations" class="hash-link" href="#limitations" title="Direct link to Limitations">​</a></h2>
+<p>It is not possible to use an <code>ALIAS</code> column in a projection's <code>ORDER BY</code> clause. For example:</p>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE t
+(
+    id UInt64,
+    a UInt32,
+    ab_sum UInt64 ALIAS a + 1,
+--highlight-next-line
+    PROJECTION p (SELECT a ORDER BY ab_sum)
+)
+ENGINE = MergeTree ORDER BY id;
+-- Fails with UNKNOWN_IDENTIFIER
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>ALIAS</code> columns are not physically stored and are computed on-the-fly at query time, so they are unavailable during the projection part write path when the sorting expression is evaluated.</p>
+<p>Instead, use <code>MATERIALIZED</code> columns or inline the expression directly:</p>
+<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- using MATERIALIZED column
+CREATE TABLE t
+(
+    id UInt64,
+    a UInt32,
+    ab_sum UInt64 MATERIALIZED a + 1,
+    PROJECTION p (SELECT a ORDER BY ab_sum)
+)
+ENGINE = MergeTree ORDER BY id;
+
+-- using an inline expression
+CREATE TABLE t
+(
+    id UInt64,
+    a UInt32,
+    PROJECTION p (SELECT a ORDER BY a + 1)
+)
+ENGINE = MergeTree ORDER BY id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="see-also">See also<a aria-label="Direct link to See also" class="hash-link" href="#see-also" title="Direct link to See also">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/blog/clickhouse-release-24-08#control-of-projections-during-merges" rel="noopener noreferrer" target="_blank">"Control Of Projections During Merges" (blog post)</a></li>
+<li class="custom-li"><a href="/docs/data-modeling/projections#using-projections-to-speed-up-UK-price-paid">"Projections" (guide)</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/docs/managing-data/materialized-views-versus-projections" rel="noopener noreferrer" target="_blank">"Materialized Views versus Projections"</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/alter/settings-profile"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">SETTINGS PROFILE</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/alter/view"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">VIEW</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview of projections</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Using projections</a><ul><li><a class="table-of-contents__link toc-highlight" href="#example-filtering-without-using-primary-keys">Example filtering without using primary keys</a><li><a class="table-of-contents__link toc-highlight" href="#example-pre-aggregation-query">Example pre-aggregation query</a><li><a class="table-of-contents__link toc-highlight" href="#projection-indexes">Creating and using projection indexes</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#manipulating-projections">Manipulating projections</a><ul><li><a class="table-of-contents__link toc-highlight" href="#add-projection">ADD PROJECTION</a><li><a class="table-of-contents__link toc-highlight" href="#drop-projection">DROP PROJECTION</a><li><a class="table-of-contents__link toc-highlight" href="#materialize-projection">MATERIALIZE PROJECTION</a><li><a class="table-of-contents__link toc-highlight" href="#clear-projection">CLEAR PROJECTION</a><li><a class="table-of-contents__link toc-highlight" href="#control-projections-merges">Controlling projection merge behavior</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#limitations">Limitations</a><li><a class="table-of-contents__link toc-highlight" href="#see-also">See also</a></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

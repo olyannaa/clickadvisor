@@ -1,0 +1,25 @@
+id: R-009
+name: in_singleton_to_equality
+tier: 1A
+category: predicate_canonicalization
+status: proposed
+statement: WHERE x IN (single_value) → WHERE x = single_value.
+preconditions:
+  syntactic:
+  - IN-список из ровно одного элемента — литерала (не subquery)
+  semantic: []
+  data: []
+proof: x IN (a) ≡ x = a по семантике IN при n=1.
+explain_template: 'IN в ClickHouse — это общий механизм для проверки принадлежности множеству значений. Когда в множестве только один элемент, движку логически не нужен весь этот механизм: это обычное равенство. Простое сравнение легче читать и проще для последующих стадий оптимизации предиката.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE country IN ('RU')
+example_after: WHERE country = 'RU'
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

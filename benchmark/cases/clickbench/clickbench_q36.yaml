@@ -1,0 +1,15 @@
+case_id: clickbench_q36
+source: clickbench
+sql: 'SELECT ClientIP, ClientIP - 1, ClientIP - 2, ClientIP - 3, COUNT(*) AS c FROM
+  hits GROUP BY ClientIP, ClientIP - 1, ClientIP - 2, ClientIP - 3 ORDER BY c DESC
+  LIMIT 10;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

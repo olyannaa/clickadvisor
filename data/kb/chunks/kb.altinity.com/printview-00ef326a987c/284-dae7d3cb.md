@@ -1,0 +1,88 @@
+---
+source: kb.altinity.com
+url: http://altinity.com/
+topic: altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '1.0'
+last_updated: '2026-06-12'
+chunk_index: 284
+total_chunks_in_doc: 478
+---
+
+| 833 B 00:00:00 Altinity_clickhouse-altinity-stable-source/signature | 951 B 00:00:00 !!! Nothing to do ``` It is caused by wrong dependencies resolution. #### Solution with New Package Scheme To update to the latest available version \- just add `clickhouse-server-common`:
+
+```
+yum install clickhouse-client clickhouse-server clickhouse-server-common
+
+```
+This way the latest available version will be installed (even if you will request some other version explicitly).
+
+To install some specific version remove old packages first, then install new ones.
+
+```
+yum erase clickhouse-client clickhouse-server clickhouse-server-common clickhouse-common-static
+version=21.1.7.1
+yum install clickhouse-client-${version} clickhouse-server-${version}
+
+```
+### Downgrade from new version to old one
+
+```
+version=20.8.12.2-1.el7
+yum downgrade  clickhouse-client-${version} clickhouse-server-${version}
+
+```
+will not work:
+
+```
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+ * base: ftp.agh.edu.pl
+ * extras: ftp.agh.edu.pl
+ * updates: centos.wielun.net
+Resolving Dependencies
+--> Running transaction check
+---> Package clickhouse-client.x86_64 0:20.8.12.2-1.el7 will be a downgrade
+---> Package clickhouse-client.noarch 0:21.1.7.1-2 will be erased
+---> Package clickhouse-server.x86_64 0:20.8.12.2-1.el7 will be a downgrade
+--> Processing Dependency: clickhouse-server-common = 20.8.12.2-1.el7 for package: clickhouse-server-20.8.12.2-1.el7.x86_64
+Package clickhouse-server-common-20.8.12.2-1.el7.x86_64 is obsoleted by clickhouse-server-21.1.7.1-2.noarch which is already installed
+--> Processing Dependency: clickhouse-common-static = 20.8.12.2-1.el7 for package: clickhouse-server-20.8.12.2-1.el7.x86_64
+---> Package clickhouse-server.noarch 0:21.1.7.1-2 will be erased
+--> Finished Dependency Resolution
+Error: Package: clickhouse-server-20.8.12.2-1.el7.x86_64 (Altinity_clickhouse-altinity-stable)
+           Requires: clickhouse-common-static = 20.8.12.2-1.el7
+           Installed: clickhouse-common-static-21.1.7.1-2.x86_64 (@clickhouse-stable)
+               clickhouse-common-static = 21.1.7.1-2
+           Available: clickhouse-common-static-1.1.54378-2.x86_64 (clickhouse-stable)
+               clickhouse-common-static = 1.1.54378-2
+Error: Package: clickhouse-server-20.8.12.2-1.el7.x86_64 (Altinity_clickhouse-altinity-stable)
+...
+           Available: clickhouse-server-common-20.8.12.2-1.el7.x86_64 (Altinity_clickhouse-altinity-stable)
+               clickhouse-server-common = 20.8.12.2-1.el7
+ You could try using --skip-broken to work around the problem
+ You could try running: rpm -Va --nofiles --nodigest
+
+```
+#### Solution With Downgrading
+
+Remove packages first, then install older versions:
+
+```
+yum erase clickhouse-client clickhouse-server clickhouse-server-common clickhouse-common-static
+version=20.8.12.2-1.el7
+yum install --setopt=obsoletes=0 clickhouse-client-${version} clickhouse-server-${version}
+
+```
+# 5\.38 \- AWS EC2 Storage
+
+AWS EBS, EFS, FSx, Lustre# EBS
+
+Most native choose for ClickHouse® as fast storage, because it usually guarantees best throughput, IOPS, latency for reasonable price.
+
+[https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs\-optimized.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html)
+
+[https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs\-volume\-types.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html)
+
+## General Purpose SSD volumes
+
+In usual conditions ClickHouse being limited by throughput of volumes and amount of provided IOPS doesn’t make any big difference for performance starting from a certain number. So the most native choice for ClickHouse is gp3 and gp2 volumes.

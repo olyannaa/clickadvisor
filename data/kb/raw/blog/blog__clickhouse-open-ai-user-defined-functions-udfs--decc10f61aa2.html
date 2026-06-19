@@ -1,0 +1,441 @@
+<h1>Using ClickHouse UDFs to integrate with OpenAI models</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">Using ClickHouse UDFs to integrate with OpenAI models</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="Dale McDirmid" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2FDale_Mc_Dirmid_8016f87452.png&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" href="/authors/dale-mcdiarmid">Dale McDiarmid</a></div><div class="text-sm text-neutral-300">Sep 14, 2023 · 21 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><span class="relative mb-9 flex w-full justify-center"><img alt="Open AI.png" loading="lazy" src="/uploads/Open_AI_1b9b4742c7.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="introduction" level="2">Introduction<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#introduction">#</a></span></h2>
+<p>With ClickHouse, users have the capacity to utilize AI models directly in their SQL workloads. This can take the form of enriching data as it’s being inserted, or at query time, to supplement specific results. While many users are comfortable with training their own domain-specific models, this can often be impractical for smaller teams or use cases. In these cases, a pre-built “plug and play” model or service is often sufficient and can deliver good results with minimal effort.</p>
+<p>In this post, we demonstrate:</p>
+<ul>
+<li>How ClickHouse can easily be integrated with third-party APIs using ClickHouse User Defined Functions (UDFs) which provide “AI as a service”</li>
+<li>How these “plug and play” models can be used in ClickHouse directly for tasks such as sentiment analysis, and aggregating against those results for computing metrics like the number of positive and negative posts for a given subject</li>
+</ul>
+<p>Given OpenAI’s recent popularity and high-profile ChatGPT offering, we use OpenAI as an example. However, the simplicity of this approach means it can be easily adapted to competing services.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="user-defined-functions-udfs" level="2">User Defined Functions (UDFs)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#user-defined-functions-udfs">#</a></span></h2>
+<p>UDFs (user defined functions) in ClickHouse take a few forms. In a recent post, we shared <a href="https://clickhouse.com/blog/query-analyze-hugging-face-datasets-with-clickhouse">how you can use a ClickHouse SQL-defined function</a> to query an externally hosted dataset in Hugging Face. While SQL-defined functions like these  are extremely useful for generalizing common SQL tasks, sometimes users need the full functionality of a programming language with which they are familiar. For this, ClickHouse supports <a href="https://clickhouse.com/docs/en/sql-reference/functions/udf">Executable User Defined Functions</a>. These give developers the flexibility to invoke any external executable program or script to process data. In our simple examples below, we’ll use this capability to invoke simple Bash and Python scripts that will query an OpenAI API. We’ll show how the API response can automatically enrich data being inserted or queried by ClickHouse.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="open_ai_udfs.png" loading="lazy" src="/uploads/open_ai_udfs_53eefe62df.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="using-openai" level="2">Using OpenAI<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#using-openai">#</a></span></h2>
+<p>Most users are familiar with OpenAI through its popular ChatGPT service, which has already revolutionized working behaviors and day-to-day tasks. OpenAI offers a REST API for businesses to access the models that power ChatGPT in existing services and automated processes. These services provide everything from chat completion and <a href="https://clickhouse.com/blog/vector-search-clickhouse-p1">embedding generation</a> to image generation and speech-to-text. In our examples, we focus on chat completion, which can be repurposed for more generic tasks, such as entity extraction and sentiment labeling.</p>
+<p><em>Note: All requests to the OpenAI service require a token - passed as the environment variable OPENAI_API_KEY in the examples below. Users can sign up for a trial and get sufficient free credits for the examples here.</em></p>
+<p>As well as being able to act as a chatbot, OpenAI’s completion service also supports tasks such as sentiment analysis and the extraction of structure. For these tasks, the developer has to provide the OpenAI service with relevant instructions to describe the expected behavior via a <a href="https://platform.openai.com/docs/guides/gpt/chat-completions-api">system role</a>. An example REST API request to perform a sentiment analysis on some text might look like the following. Here, we ask the service to classify a forum post. Notice how we need to provide explicit instructions to return only a single token specifying sentiment:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">curl https://api.openai.com/v1/chat/completions \
+  -H <span class="hljs-string">"Content-Type: application/json"</span> \
+  -H <span class="hljs-string">"Authorization: Bearer <span class="hljs-variable">$OPENAI_API_KEY</span>"</span> \
+  -d <span class="hljs-string">'{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+	{
+  	"role": "system",
+  	"content": "You are an AI language model trained to analyze and detect the sentiment of forum comments."
+	},
+	{
+  	"role": "user",
+  	"content": "Analyze the following hackernews comment and determine if the sentiment is: positive, negative or neutral. Return only a single word, either POSITIVE, NEGATIVE or NEUTRAL: I can say for BigQuery and Databricks from personal experience.&lt;p&gt;BigQuery is much slower and is much more expensive for both storage and query.&lt;p&gt;Databricks (Spark) is even slower than that (both io and compute), although you can write custom code&amp;#x2F;use libs.&lt;p&gt;You seem to underestimate how heavily ClickHouse is optimized (e.g. compressed storage)."
+	}
+  ],
+  "temperature": 0,
+  "max_tokens": 256
+}'</span>
+
+{
+  <span class="hljs-string">"id"</span>: <span class="hljs-string">"chatcmpl-7vOWWkKWGN7McODMXJzQB6zzDcx0r"</span>,
+  <span class="hljs-string">"object"</span>: <span class="hljs-string">"chat.completion"</span>,
+  <span class="hljs-string">"created"</span>: 1693913320,
+  <span class="hljs-string">"model"</span>: <span class="hljs-string">"gpt-3.5-turbo-0613"</span>,
+  <span class="hljs-string">"choices"</span>: [
+	{
+  	<span class="hljs-string">"index"</span>: 0,
+  	<span class="hljs-string">"message"</span>: {
+    	<span class="hljs-string">"role"</span>: <span class="hljs-string">"assistant"</span>,
+    	<span class="hljs-string">"content"</span>: <span class="hljs-string">"NEGATIVE"</span>
+  	},
+  	<span class="hljs-string">"finish_reason"</span>: <span class="hljs-string">"stop"</span>
+	}
+  ],
+  <span class="hljs-string">"usage"</span>: {
+	<span class="hljs-string">"prompt_tokens"</span>: 147,
+	<span class="hljs-string">"completion_tokens"</span>: 2,
+	<span class="hljs-string">"total_tokens"</span>: 149
+  }
+}
+</code></pre>
+<p><em>Note we use the more cost-effective <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">gpt-3.5-turbo</code> model here and not the latest <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">gpt-4</code> model. The former is sufficient for example purposes. We leave it to readers to determine its performance levels.</em></p>
+<p>The same service can also be used to extract structure. Suppose we wished to extract the mentioned technologies from the above text as a list of string values. We need to modify the instructions a little:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">curl https://api.openai.com/v1/chat/completions \
+  -H <span class="hljs-string">"Content-Type: application/json"</span> \
+  -H <span class="hljs-string">"Authorization: Bearer <span class="hljs-variable">$OPENAI_API_KEY</span>"</span> \
+  -d <span class="hljs-string">'{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+	{
+  	"role": "system",
+  	"content": "You are an AI language model trained to extract entities from forum comments"
+	},
+	{
+  	"role": "user",
+  	"content": "From the following text extract the many technologies mentioned as a comma seperated list: I can say for BigQuery and Databricks from personal experience.&lt;p&gt;BigQuery is much slower and is much more expensive for both storage and query.&lt;p&gt;Databricks (Spark) is even slower than that (both io and compute), although you can write custom code&amp;#x2F;use libs.&lt;p&gt;You seem to underestimate how heavily ClickHouse is optimized (e.g. compressed storage)."
+	}
+  ],
+  "temperature": 0,
+  "max_tokens": 20
+}'</span>
+
+{
+  <span class="hljs-string">"id"</span>: <span class="hljs-string">"chatcmpl-7vOdLnrZWeax3RxjeUNelCTdGvr8q"</span>,
+  <span class="hljs-string">"object"</span>: <span class="hljs-string">"chat.completion"</span>,
+  <span class="hljs-string">"created"</span>: 1693913743,
+  <span class="hljs-string">"model"</span>: <span class="hljs-string">"gpt-3.5-turbo-0613"</span>,
+  <span class="hljs-string">"choices"</span>: [
+	{
+  	<span class="hljs-string">"index"</span>: 0,
+  	<span class="hljs-string">"message"</span>: {
+    	<span class="hljs-string">"role"</span>: <span class="hljs-string">"assistant"</span>,
+    	<span class="hljs-string">"content"</span>: <span class="hljs-string">"BigQuery, Databricks, Spark, ClickHouse"</span>
+  	},
+  	<span class="hljs-string">"finish_reason"</span>: <span class="hljs-string">"stop"</span>
+	}
+  ],
+  <span class="hljs-string">"usage"</span>: {
+	<span class="hljs-string">"prompt_tokens"</span>: 122,
+	<span class="hljs-string">"completion_tokens"</span>: 11,
+	<span class="hljs-string">"total_tokens"</span>: 133
+  }
+}
+</code></pre>
+<p>A few notes on the above request parameters:</p>
+<ul>
+<li>We set <a href="https://platform.openai.com/docs/api-reference/chat/create#temperature"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">temperature</code></a> to 0 to remove any randomness from the responses. For these use cases, we don’t need creative text - only deterministic text analysis.</li>
+<li>In both cases, we set <a href="https://platform.openai.com/docs/api-reference/chat/create#max_tokens"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">max_tokens</code></a> to determine the length of the response. A<a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them"> token is around ¾ of a word</a>. Hence, we adapted our request.</li>
+</ul>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="dataset" level="2">Dataset<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#dataset">#</a></span></h2>
+<p>For our example dataset, we use Hacker News posts. This dataset, which is available in our public play environment, consists of all posts and comments on the popular Hacker News forum from 2006 to August 2023: around 37 million rows. The table schema is shown below.</p>
+<p>We’re interested in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">title</code> and <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">text</code> columns for our purposes. We leave exploring this dataset as an exercise for the reader, who can follow the instructions <a href="https://github.com/ClickHouse/ClickHouse/issues/29693">here</a> if they wish to load the latest version of this dataset into their own ClickHouse instance. Alternatively, we have provided a <a href="https://datasets-documentation.s3.eu-west-3.amazonaws.com/hackernews/2023-08-18.parquet">Parquet file on S3</a>, which can be loaded using the <a href="https://clickhouse.com/docs/en/sql-reference/table-functions/s3">s3 function</a>, as shown below:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> hackernews
+(
+	`id` UInt32,
+	`deleted` UInt8,
+	`type` Enum8(<span class="hljs-string">'story'</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>, <span class="hljs-string">'comment'</span> <span class="hljs-operator">=</span> <span class="hljs-number">2</span>, <span class="hljs-string">'poll'</span> <span class="hljs-operator">=</span> <span class="hljs-number">3</span>, <span class="hljs-string">'pollopt'</span> <span class="hljs-operator">=</span> <span class="hljs-number">4</span>, <span class="hljs-string">'job'</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>),
+	`<span class="hljs-keyword">by</span>` LowCardinality(String),
+	`<span class="hljs-type">time</span>` DateTime,
+	`text` String,
+	`dead` UInt8,
+	`parent` UInt32,
+	`poll` UInt32,
+	`kids` <span class="hljs-keyword">Array</span>(UInt32),
+	`url` String,
+	`score` Int32,
+	`title` String,
+	`parts` <span class="hljs-keyword">Array</span>(UInt32),
+	`descendants` Int32
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> id
+
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> hackernews <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/hackernews/2023-08-18.parquet'</span>)
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="adding-sentiment" level="2">Adding sentiment<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#adding-sentiment">#</a></span></h2>
+<p>For our example, let's assume we want to add sentiment analysis to our Hacker News data stored in ClickHouse. To do so, we need to invoke the earlier OpenAI REST API via a ClickHouse UDF. The simplicity of this request means even a straightforward bash script may be sufficient, as seen below (the below requires <a href="https://jqlang.github.io/jq/">jq</a>). Further along, we demonstrate how to do this in Python directly.</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-meta">#!/bin/bash</span>
+
+<span class="hljs-keyword">while</span> <span class="hljs-built_in">read</span> read_data; <span class="hljs-keyword">do</span>
+  sentiment=$(curl -s https://api.openai.com/v1/chat/completions \
+  -H <span class="hljs-string">"Content-Type: application/json"</span> \
+  -H <span class="hljs-string">"Authorization: Bearer &lt;insert&gt;"</span> \
+  -d <span class="hljs-string">"{
+  \"model\": \"gpt-3.5-turbo\",
+  \"messages\": [
+    	{
+    	\"role\": \"system\",
+    	\"content\": \"You are an AI language model trained to analyze and detect the sentiment of forum comments.\"
+    	},
+    	{
+    	\"role\": \"user\",
+    	\"content\": \"Analyze the following Hacker News comment and determine if the sentiment is: positive, negative or neutral. Return only a single word, either POSITIVE, NEGATIVE or NEUTRAL: <span class="hljs-variable">${read_data}</span>\"
+    	}
+  ],
+  \"temperature\": 0,
+  \"max_tokens\": 2,
+  \"temperature\": 0
+}"</span> | jq -r <span class="hljs-string">'.choices[0].message.content'</span>)
+  <span class="hljs-built_in">printf</span> <span class="hljs-string">"<span class="hljs-variable">$sentiment</span>"</span>;
+<span class="hljs-keyword">done</span>
+</code></pre>
+<p>This script should be saved in the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">user_scripts</code> directory of ClickHouse as <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">sentiment.sh</code> and made executable. The following entry should also be added to a file <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">openai_functions.xml</code> and saved to the ClickHouse configuration directory (typically <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">/etc/clickhouse-server/</code>).</p>
+<pre><code class="hljs language-xml mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-tag">&lt;<span class="hljs-name">functions</span>&gt;</span>
+       <span class="hljs-tag">&lt;<span class="hljs-name">function</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>sentiment<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>executable<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">format</span>&gt;</span>TabSeparated<span class="hljs-tag">&lt;/<span class="hljs-name">format</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">return_type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">return_type</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>
+             <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+           <span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">command</span>&gt;</span>sentiment.sh<span class="hljs-tag">&lt;/<span class="hljs-name">command</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">command_read_timeout</span>&gt;</span>10000<span class="hljs-tag">&lt;/<span class="hljs-name">command_read_timeout</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">command_write_timeout</span>&gt;</span>10000<span class="hljs-tag">&lt;/<span class="hljs-name">command_write_timeout</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">max_command_execution_time</span>&gt;</span>10000<span class="hljs-tag">&lt;/<span class="hljs-name">max_command_execution_time</span>&gt;</span>
+       <span class="hljs-tag">&lt;/<span class="hljs-name">function</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">functions</span>&gt;</span>
+</code></pre>
+<p>This configuration makes the UDF available to ClickHouse. Other than modifying the timeouts here to allow for the latency of OpenAI requests, we provide a function name, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">sentiment</code>, and specify the input and return types.</p>
+<p>With the above configuration, users can request sentiment for a snippet of text via a simple function call e.g.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> sentiment(<span class="hljs-string">'Learn about the key differences between ClickHouse Cloud and Snowflake and how ClickHouse Cloud outperforms Snowflake across the critical dimensions for real-time analytics: query latency and and cost.'</span>) <span class="hljs-keyword">AS</span> sentiment
+
+┌─sentiment─┐
+│ POSITIVE  │
+└───────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.433</span> sec.
+</code></pre>
+<p>While the above gets us started, a more robust solution with error handling will likely be required.  For this, we may wish to convert the above to Python. The Python script below adds basic error handling and retries with a backoff. The latter here is to specifically address the challenge of OpenAI rate limits - see <a href="/blog/clickhouse-open-ai-user-defined-functions-udfs#handling-latency--rate-limits">Handling latency &amp; rate limits</a> for more details.</p>
+<p>Note the need for the <a href="https://github.com/openai/openai-python">openai</a> and tenacity libraries for handling API requests and rate limiting.</p>
+<pre><code class="hljs language-python mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">#!/usr/bin/python3</span>
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> openai
+<span class="hljs-keyword">from</span> tenacity <span class="hljs-keyword">import</span> (
+   retry,
+   stop_after_attempt,
+   wait_random_exponential,
+)
+
+openai.api_key = <span class="hljs-string">"&lt;INSERT&gt;"</span>
+request_timeout = <span class="hljs-number">3</span>
+
+<span class="hljs-meta">@retry(<span class="hljs-params">wait=wait_random_exponential(<span class="hljs-params"><span class="hljs-built_in">min</span>=<span class="hljs-number">1</span>, <span class="hljs-built_in">max</span>=<span class="hljs-number">60</span></span>), stop=stop_after_attempt(<span class="hljs-params"><span class="hljs-number">20</span></span>)</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">completion_with_backoff</span>(<span class="hljs-params">**kwargs</span>):
+   <span class="hljs-keyword">return</span> openai.ChatCompletion.create(**kwargs)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">extract_sentiment</span>(<span class="hljs-params">text</span>):
+   <span class="hljs-keyword">if</span> text == <span class="hljs-string">""</span>:
+       <span class="hljs-keyword">return</span> <span class="hljs-string">"NEUTRAL"</span>
+   messages = [{<span class="hljs-string">"role"</span>: <span class="hljs-string">"system"</span>,
+                <span class="hljs-string">"content"</span>: <span class="hljs-string">"You are an AI language model trained to analyze and detect the sentiment of hackernews forum comments."</span>},
+               {
+                   <span class="hljs-string">"role"</span>: <span class="hljs-string">"user"</span>,
+                   <span class="hljs-string">"content"</span>: <span class="hljs-string">f"Analyze the following hackernews comment and determine if the sentiment is: positive, negative or neutral. "</span>
+                              <span class="hljs-string">f"Return only a single word, either POSITIVE, NEGATIVE or NEUTRAL: <span class="hljs-subst">{text}</span>"</span>
+               }]
+   <span class="hljs-keyword">try</span>:
+       response = completion_with_backoff(model=<span class="hljs-string">"gpt-3.5-turbo"</span>, messages=messages, max_tokens=<span class="hljs-number">30</span>, temperature=<span class="hljs-number">0</span>, request_timeout=request_timeout)
+       <span class="hljs-keyword">return</span> response.choices[<span class="hljs-number">0</span>].message.content
+   <span class="hljs-keyword">except</span>:
+       <span class="hljs-keyword">return</span> <span class="hljs-string">"ERROR"</span>
+
+<span class="hljs-keyword">for</span> size <span class="hljs-keyword">in</span> sys.stdin:
+   <span class="hljs-comment"># collect a batch for performance</span>
+   <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">int</span>(size)):
+       <span class="hljs-built_in">print</span>(extract_sentiment(sys.stdin.readline().strip()))
+   sys.stdout.flush()
+</code></pre>
+<p><em>The chat-based nature of the service makes evaluating multiple pieces of text for sentiment in a single request challenging. In order to keep these examples simple, we have made a request per row. A more optimized solution may batch requests and ask the endpoint to evaluate a set of text.</em></p>
+<p>The above assumes that any input passed from ClickHouse includes a prefix for the number of rows. This is used to determine the number of times to iterate on the subsequent input. This can allow operations within the Python script to be batched for higher performance.</p>
+<p>Our configuration for the above function has a few additional settings other than defining a unique name, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">setiment_p</code>. We set the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">type</code> to an executable pool to improve throughput performance. This will start the command N times (10 below), allowing multiple simultaneous invocations. The setting <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">send_chunk_header</code> ensures a numeric heading indicating the number of rows to be processed precedes any input. We increase timeout settings in case large blocks of rows are passed.</p>
+<pre><code class="hljs language-xml mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-tag">&lt;<span class="hljs-name">functions</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">function</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>sentiment_p<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>executable_pool<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">pool_size</span>&gt;</span>10<span class="hljs-tag">&lt;/<span class="hljs-name">pool_size</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">send_chunk_header</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">send_chunk_header</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">format</span>&gt;</span>TabSeparated<span class="hljs-tag">&lt;/<span class="hljs-name">format</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">return_type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">return_type</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>
+   	   <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>String<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">command</span>&gt;</span>sentiment.py<span class="hljs-tag">&lt;/<span class="hljs-name">command</span>&gt;</span>
+   	 <span class="hljs-tag">&lt;<span class="hljs-name">command_read_timeout</span>&gt;</span>10000000<span class="hljs-tag">&lt;/<span class="hljs-name">command_read_timeout</span>&gt;</span>
+         <span class="hljs-tag">&lt;<span class="hljs-name">command_write_timeout</span>&gt;</span>10000000<span class="hljs-tag">&lt;/<span class="hljs-name">command_write_timeout</span>&gt;</span>
+         <span class="hljs-tag">&lt;<span class="hljs-name">max_command_execution_time</span>&gt;</span>1000000<span class="hljs-tag">&lt;/<span class="hljs-name">max_command_execution_time</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">function</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">functions</span>&gt;</span>
+</code></pre>
+<p>We can apply either of the above functions to a set of rows for a column. In the example below, we request sentiment for the title and text of 10 rows containing the word ClickHouse.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> text, sentiment_p(text) <span class="hljs-keyword">AS</span> sentiment
+<span class="hljs-keyword">FROM</span> hackernews <span class="hljs-keyword">WHERE</span> text <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span> <span class="hljs-keyword">OR</span> title <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-type">time</span> <span class="hljs-keyword">DESC</span>
+LIMIT <span class="hljs-number">2</span>
+FORMAT Vertical
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+text:  	Yeah ClickHouse <span class="hljs-keyword">is</span> definitely the way <span class="hljs-keyword">to</span> go here. Its ability <span class="hljs-keyword">to</span> serve queries <span class="hljs-keyword">with</span> low latency <span class="hljs-keyword">and</span> high concurrency <span class="hljs-keyword">is</span> <span class="hljs-keyword">in</span> an entirely different league <span class="hljs-keyword">from</span> Snowflake, Redshift, BigQuery, etc.
+sentiment: POSITIVE
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+text:  	There <span class="hljs-keyword">are</span> other databases today that do <span class="hljs-type">real</span> <span class="hljs-type">time</span> analytics (ClickHouse, Apache Druid, StarRocks along <span class="hljs-keyword">with</span> Apache Pinot).  I<span class="hljs-operator">&amp;</span>#x27;d look <span class="hljs-keyword">at</span> the ClickHouse Benchmark <span class="hljs-keyword">to</span> see who <span class="hljs-keyword">are</span> the competitors <span class="hljs-keyword">in</span> that space <span class="hljs-keyword">and</span> their relative performance.
+sentiment: POSITIVE
+
+<span class="hljs-number">2</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">2.763</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.30</span> GB (<span class="hljs-number">13.46</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">4.82</span> GB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<p>The UDF is only executed here once the final results have been collated - meaning only two requests are required. This approach is ideal since the latency of a request to OpenAI is typically much higher than the time for ClickHouse to evaluate the query.</p>
+<p>Taking this further, we can compute the number of positive and negative posts for ClickHouse with a simple aggregation. This incurs more overhead, as we need to make over 1600 invocations of the OpenAI API. This is reflected in the final timing.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	<span class="hljs-built_in">count</span>(),
+	sentiment
+<span class="hljs-keyword">FROM</span> hackernews
+<span class="hljs-keyword">WHERE</span> (text <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>) <span class="hljs-keyword">OR</span> (title <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>)
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> sentiment_p(text) <span class="hljs-keyword">AS</span> sentiment
+FORMAT PrettyCompactMonoBlock
+
+┌─<span class="hljs-built_in">count</span>()─┬─sentiment─┐
+│ 	<span class="hljs-number">192</span> │ NEGATIVE  │
+│ 	<span class="hljs-number">628</span> │ NEUTRAL   │
+│ 	<span class="hljs-number">857</span> │ POSITIVE  │
+└─────────┴───────────┘
+
+<span class="hljs-number">3</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">203.695</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.28</span> GB (<span class="hljs-number">182.48</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">65.21</span> MB<span class="hljs-operator">/</span>s.)
+</code></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="handling-latency--rate-limits" level="3">Handling latency &amp; rate limits<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#handling-latency--rate-limits">#</a></span></h3>
+<p>The usefulness of the OpenAI API is limited by two factors: its latency and the rate limits it imposes. Note that these variables will differ depending on the “plug and play” model chosen. In our examples, we use OpenAI. There are many others to choose from, each with their own tradeoffs.</p>
+<p>Latency will impact the minimum response time of a query. While OpenAI allows multiple concurrent queries to ensure this does not impact throughput, rate limiting will prove more restrictive. We thus recommend users use these APIs either for ad hoc analysis where the function is used on a small subset of results (e.g. our earlier 2 row example), or for enriching data at insert time. Prior to showing an example of the latter, let’s explore the latency and rate limiting limitations.</p>
+<p>We can assess the latency of a response by modifying our sentiment curl request to use a <a href="https://pastila.nl/?1385630d/57a537ca8c6249111eb201f59f72616a#n7YL5DBm6zQBeBOW57i3rw==">simple format file</a>:</p>
+<pre><code class="hljs language-bash mb-9 border border-solid border-neutral-750" style="word-break:break-word">curl -w <span class="hljs-string">"@curl-format.txt"</span> -o /dev/null -s  https://api.openai.com/v1/chat/completions \
+  -H <span class="hljs-string">"Content-Type: application/json"</span> \
+  -H <span class="hljs-string">"Authorization: Bearer <span class="hljs-variable">$OPENAI_API_KEY</span>"</span> \
+  -d <span class="hljs-string">'{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    	{
+    	"role": "system",
+    	"content": "You are an AI language model trained to analyze and detect the sentiment of forum comments."
+    	},
+    	{
+    	"role": "user",
+    	"content": "Analyze the following hackernews comment and determine if the sentiment is: positive, negative or neutral. Return only a single word, either POSITIVE, NEGATIVE or NEUTRAL: I can say for BigQuery and Databricks from personal experience.&lt;p&gt;BigQuery is much slower and is much more expensive for both storage and query.&lt;p&gt;Databricks (Spark) is even slower than that (both io and compute), although you can write custom code&amp;#x2F;use libs.&lt;p&gt;You seem to underestimate how heavily ClickHouse is optimized (e.g. compressed storage)."
+    	}
+  ],
+  "temperature": 0,
+  "max_tokens": 256,
+  "temperature": 0
+}'</span>
+
+time_namelookup:  0.081196s
+time_connect:  0.084907s
+time_appconnect:  0.095853s
+time_pretransfer:  0.095937s
+time_redirect:  0.000000s
+time_starttransfer:  0.095942s
+----------
+time_total:  0.650401s
+
+</code></pre>
+<p>The total latency here of 0.65s limits our query response times, but is mitigated by the fact we have a command pool (10 above) which ClickHouse’s parallelized execution pipeline can exploit. However, this parallelization is in turn restricted by OpenAPI’s rate limits.</p>
+<p>OpenAI is both limited by requests per minute as well as tokens per minute. For our <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">gpt-3.5-turbo</code> model, this is 90k Tokens per Minute (TPM) and 3500 Requests per Minute (RPM).  Rate limits vary per model and account type - further details <a href="https://platform.openai.com/docs/guides/rate-limits/what-are-the-rate-limits-for-our-api">here</a>.</p>
+<p>To address this, we added basic rate limiting to our UDF. The API <a href="https://platform.openai.com/docs/guides/rate-limits/rate-limits-in-headers">returns rate limiting</a> information (i.e. how many tokens and requests are left in the next minute) in headers. While we could develop a rate limiting function to use this information, OpenAI suggests several libraries designed to address this with <a href="https://platform.openai.com/docs/guides/rate-limits/retrying-with-exponential-backoff">exponential backoff</a>. This has the advantage of us not needing to track request and token usage across multiple threads.</p>
+<p>The above timing for our aggregation query (203.695s) suggests either we weren’t fully exploiting our pool of 10 UDF commands, or are being rate limited. Assuming an average latency of 0.65*, fully parallelized, we would expect our total execution time to be closer to 100s here (1600/10 * 0.65 = 104s).</p>
+<p><em>*We assume the Open AI API can maintain this latency irrespective of factors such as variable content length (some comments will be longer than others).</em></p>
+<p>This performance of 100s isn’t achieved because the query is being restricted by rate limiting on the OpenAI API - specifically, the token limit. Each Hacker News comment is on average around 330 words as shown below, or about <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them">around 80 tokens</a> (~4 chars to a token). This does not include our prompt and system text however, which adds an additional 60 tokens. Our ClickHouse related subset also has a higher average token length at 136.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+	round(<span class="hljs-built_in">avg</span>(length(text))) <span class="hljs-keyword">AS</span> num_chars,
+	round(num_chars <span class="hljs-operator">*</span> <span class="hljs-number">0.25</span>) <span class="hljs-keyword">AS</span> num_tokens
+<span class="hljs-keyword">FROM</span> hackernews
+
+┌─num_chars─┬─num_tokens─┐
+│   	<span class="hljs-number">333</span> │     	<span class="hljs-number">83</span> │
+└───────────┴────────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.656</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">12.72</span> GB (<span class="hljs-number">22.44</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">7.68</span> GB<span class="hljs-operator">/</span>s.)
+
+<span class="hljs-keyword">SELECT</span>
+	round(<span class="hljs-built_in">avg</span>(length(text))) <span class="hljs-keyword">AS</span> num_chars,
+	round(num_chars <span class="hljs-operator">*</span> <span class="hljs-number">0.25</span>) <span class="hljs-keyword">AS</span> num_tokens
+<span class="hljs-keyword">FROM</span> hackernews
+<span class="hljs-keyword">WHERE</span> (title <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>) <span class="hljs-keyword">OR</span> (text <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>)
+
+┌─num_chars─┬─num_tokens─┐
+│   	<span class="hljs-number">546</span> │    	<span class="hljs-number">136</span> │
+└───────────┴────────────┘
+
+<span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">1.933</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.28</span> GB (<span class="hljs-number">19.23</span> million <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">6.87</span> GB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">73.49</span> MiB.
+</code></pre>
+<p>While each comment requires one request, resulting in a total of 1600 requests (below the 3500 limit per minute), we have a total of <a href="https://pastila.nl/?00e8b05d/192338b365fd6bbf7654d0457e05cc55#N2cUeyk0TLRXe++EwxyAWg==">900k chars or 229k tokens</a>. When considering our prompt text, this increases to <a href="https://pastila.nl/?0539f3bd/ac17ecf5cded417d2706c678bd8ec230#R1nC2mlEmU38XbOLJNtMrw==">329k tokens</a> (60 extra per request). This is well above the 90k per minute limit. Despite this, if this work was scheduled perfectly, we would expect this request to complete in the 200 secs (329/90 ~ 3.65mins ~ 200s) we experienced.</p>
+<p><strong><em>While a better rate limiting implementation (e.g. based on the <a href="https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm">generic cell rate algorithm</a>) might make more optimal use of Open AI API resources, the request latency will ultimately be limited by our token limits. We could only use the first N tokens, with N selected based on a limit which would ensure the full request limits of 3500/min can be exploited i.e. 90000/3500 ~25 tokens. This was unlikely to be sufficient to establish mentioned technologies on sentiment in our examples however.</em></strong></p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="extraction-at-insert-time" level="3">Extraction at insert time<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#extraction-at-insert-time">#</a></span></h3>
+<p>Given rate limiting and latency, a more preferable means to using the API for querying is to assign a sentiment column at the time of data insertion. With its pool of commands, the Python function is more suited for this type of batch processing. Below, we extract a sentiment when loading rows via an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO</code>. In this example, we insert all ClickHouse-related rows into a dedicated table computing a sentiment column for each. This type of processing is ideal as new rows are inserted, with the Hacker News dataset receiving about 8-10 new rows per minute. Once the column is assigned we enjoy ClickHouse query speeds on our sentiment column, without needing to make API requests.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> hackernews_v2 <span class="hljs-keyword">SELECT</span>
+	<span class="hljs-operator">*</span>,
+	sentiment_p(text) <span class="hljs-keyword">AS</span> sentiment
+<span class="hljs-keyword">FROM</span> hackernews
+<span class="hljs-keyword">WHERE</span> (text <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>) <span class="hljs-keyword">OR</span> (title <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>)
+
+<span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">185.452</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.54</span> GB (<span class="hljs-number">200.44</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">73.00</span> MB<span class="hljs-operator">/</span>s.)
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">count</span>(), sentiment
+<span class="hljs-keyword">FROM</span> hackernews_v2
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> sentiment
+
+┌─<span class="hljs-built_in">count</span>()─┬─sentiment─┐
+│ 	<span class="hljs-number">193</span> │ NEGATIVE  │
+│ 	<span class="hljs-number">850</span> │ POSITIVE  │
+│ 	<span class="hljs-number">634</span> │ NEUTRAL   │
+└─────────┴───────────┘
+
+<span class="hljs-number">3</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">0.003</span> sec. Processed <span class="hljs-number">1.68</span> thousand <span class="hljs-keyword">rows</span>, <span class="hljs-number">1.68</span> KB (<span class="hljs-number">531.10</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">531.10</span> KB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">72.90</span> KiB.
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="extracting-structure" level="2">Extracting structure<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#extracting-structure">#</a></span></h2>
+<p>For completeness, let's also convert our earlier OpenAI request to extract technologies from our post. The bash Python is shown below.</p>
+<pre><code class="hljs language-python mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-comment">#!/usr/bin/python3</span>
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> openai
+<span class="hljs-keyword">from</span> tenacity <span class="hljs-keyword">import</span> (
+   retry,
+   stop_after_attempt,
+   wait_random_exponential,
+)
+
+openai.api_key = <span class="hljs-string">"&lt;INSERT&gt;"</span>
+request_timeout = <span class="hljs-number">3</span>
+
+<span class="hljs-meta">@retry(<span class="hljs-params">wait=wait_random_exponential(<span class="hljs-params"><span class="hljs-built_in">min</span>=<span class="hljs-number">1</span>, <span class="hljs-built_in">max</span>=<span class="hljs-number">60</span></span>), stop=stop_after_attempt(<span class="hljs-params"><span class="hljs-number">20</span></span>)</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">completion_with_backoff</span>(<span class="hljs-params">**kwargs</span>):
+   <span class="hljs-keyword">return</span> openai.ChatCompletion.create(**kwargs)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">extract_topics</span>(<span class="hljs-params">text</span>):
+   <span class="hljs-keyword">if</span> text == <span class="hljs-string">""</span>:
+       <span class="hljs-keyword">return</span> <span class="hljs-string">""</span>
+   messages = [{
+                   <span class="hljs-string">"role"</span>: <span class="hljs-string">"system"</span>,
+                   <span class="hljs-string">"content"</span>: <span class="hljs-string">"You are an AI language model trained to extract entities from Hacker News forum comments."</span>},
+               {
+                   <span class="hljs-string">"role"</span>: <span class="hljs-string">"user"</span>,
+                   <span class="hljs-string">"content"</span>: <span class="hljs-string">f"From the following text extract the technologies mentioned as a comma separated list with no spaces. Return an empty string if there are no technologies: <span class="hljs-subst">{text}</span>"</span>
+               }]
+   <span class="hljs-keyword">try</span>:
+       response = completion_with_backoff(model=<span class="hljs-string">"gpt-3.5-turbo"</span>, messages=messages, max_tokens=<span class="hljs-number">30</span>, temperature=<span class="hljs-number">0</span>,
+                                          request_timeout=request_timeout)
+       <span class="hljs-keyword">return</span> response.choices[<span class="hljs-number">0</span>].message.content.strip()
+   <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+       <span class="hljs-keyword">return</span> <span class="hljs-string">f"ERROR - <span class="hljs-subst">{e}</span>"</span>
+
+<span class="hljs-keyword">for</span> size <span class="hljs-keyword">in</span> sys.stdin:
+   <span class="hljs-comment"># collect a batch for performance</span>
+   <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">int</span>(size)):
+       <span class="hljs-built_in">print</span>(<span class="hljs-string">","</span>.join([tech.strip() <span class="hljs-keyword">for</span> tech <span class="hljs-keyword">in</span> extract_topics(sys.stdin.readline().strip()).split(<span class="hljs-string">","</span>)]))
+   sys.stdout.flush()
+</code></pre>
+<p>After configuring this function using the same parameters as the sentiment UDF, except with the name <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">extract_techs</code>, we can identify the top technologies mentioned with ClickHouse on Hacker News.</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">WITH</span> results <span class="hljs-keyword">AS</span> (
+   	 <span class="hljs-keyword">SELECT</span> extract_techs(text) <span class="hljs-keyword">as</span> techs
+   	 <span class="hljs-keyword">FROM</span> hackernews
+   	 <span class="hljs-keyword">WHERE</span> (text <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>) <span class="hljs-keyword">OR</span> (title <span class="hljs-keyword">LIKE</span> <span class="hljs-string">'%ClickHouse%'</span>)
+)
+<span class="hljs-keyword">SELECT</span>
+    arrayJoin(splitByChar(<span class="hljs-string">','</span>, techs)) <span class="hljs-keyword">AS</span> tech,
+    <span class="hljs-built_in">count</span>() <span class="hljs-keyword">AS</span> c
+<span class="hljs-keyword">FROM</span> results
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> tech
+<span class="hljs-keyword">HAVING</span> tech <span class="hljs-keyword">NOT</span> ILIKE <span class="hljs-string">'%ClickHouse%'</span> <span class="hljs-keyword">AND</span> tech <span class="hljs-operator">!=</span> <span class="hljs-string">''</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> c <span class="hljs-keyword">DESC</span>
+LIMIT <span class="hljs-number">5</span>
+
+┌─tech────────┬───c─┐
+│ Postgres	│  <span class="hljs-number">78</span> │
+│ PostgreSQL  │  <span class="hljs-number">65</span> │
+│ <span class="hljs-keyword">SQL</span>     	│  <span class="hljs-number">63</span> │
+│ TimescaleDB │  <span class="hljs-number">54</span> │
+│ MySQL   	│  <span class="hljs-number">51</span> │
+└─────────────┴─────┘
+
+<span class="hljs-number">5</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> set. Elapsed: <span class="hljs-number">211.358</span> sec. Processed <span class="hljs-number">37.17</span> million <span class="hljs-keyword">rows</span>, <span class="hljs-number">13.28</span> GB (<span class="hljs-number">175.87</span> thousand <span class="hljs-keyword">rows</span><span class="hljs-operator">/</span>s., <span class="hljs-number">62.85</span> MB<span class="hljs-operator">/</span>s.)
+Peak memory usage: <span class="hljs-number">931.95</span> MiB.
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="conclusion" level="2">Conclusion<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/clickhouse-open-ai-user-defined-functions-udfs#conclusion">#</a></span></h2>
+<p>This blog post has shown how ClickHouse can be integrated directly with model providers to enrich and add structure to existing data, using UDFs. While we have used OpenAI for our examples, similar “plug and play” model services should be equivalently simple to integrate.</p></div></div><div class="rich_content rich-text-content mt-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-footer&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. At the end of your 30-day trial, continue with a pay-as-you-go plan, or <a href="/company/contact?loc=blog-cta-footer">contact us</a> to learn more about our volume-based discounts. Visit our <a href="/pricing?loc=blog-cta-header">pricing page</a> for details.</p></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

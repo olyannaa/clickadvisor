@@ -1,0 +1,14 @@
+case_id: clickbench_q08
+source: clickbench
+sql: 'SELECT AdvEngineID, COUNT(*) FROM hits WHERE AdvEngineID <> 0 GROUP BY AdvEngineID
+  ORDER BY COUNT(*) DESC;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

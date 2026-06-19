@@ -1,0 +1,24 @@
+case_id: tpch_q10
+source: tpch
+sql: "SELECT\n    c_custkey,\n    c_name,\n    sum(l_extendedprice * (1 - l_discount)) AS revenue,\n    c_acctbal,\n    n_name,\n    c_address,\n    c_phone,\n    c_comment\nFROM\n    customer,\n    orders,\n    lineitem,\n    nation\nWHERE\n    c_custkey = o_custkey\n    AND l_orderkey = o_orderkey\n    AND o_orderdate >= toDate('1993-10-01')\n    AND o_orderdate < toDate('1993-10-01') + INTERVAL 3 MONTH\n    AND l_returnflag = 'R'\n    AND c_nationkey = n_nationkey\nGROUP BY\n    c_custkey,\n    c_name,\n    c_acctbal,\n    c_phone,\n    n_name,\n    c_address,\n    c_comment\nORDER BY\n    revenue DESC\nLIMIT 20;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM customer, orders, lineitem, nation — implicit JOIN
+- issue_id: I-2
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT (оригинал имел :n 20)
+expected_rules_to_fire:
+- D-002
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q10: Returned Item Reporting.'
+expected_findings_count: 2
+status: reviewed

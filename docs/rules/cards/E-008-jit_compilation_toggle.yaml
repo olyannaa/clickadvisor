@@ -1,0 +1,34 @@
+id: E-008
+name: jit_compilation_toggle
+tier: env
+category: cpu_optimization
+status: proposed
+statement: compile_expressions=1, compile_aggregate_expressions=1 для сложной арифметики
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '21.7'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.
+risks: []
+opt_in: false
+references: []
+hardware_preconditions: []
+config_preconditions: []
+workload_preconditions:
+- CH >= 21.7; workload с нетривиальными expressions
+recommendation:
+  setting: jit_compilation_toggle
+  current_value_check: ''
+  recommended_formula: ''
+  example: ''
+reasoning: JIT даёт 2-5×, но имеет warm-up cost

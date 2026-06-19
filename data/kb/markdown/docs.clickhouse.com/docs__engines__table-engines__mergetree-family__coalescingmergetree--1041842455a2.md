@@ -1,0 +1,152 @@
+# CoalescingMergeTree table engine \| ClickHouse Docs
+
+
+- - [Engines](/docs/engines)- [Table Engines](/docs/engines/table-engines)- [MergeTree Family](/docs/engines/table-engines/mergetree-family)- CoalescingMergeTree
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/coalescingmergetree.md)# CoalescingMergeTree table engine
+
+Available from version 25\.6This table engine is available from version 25\.6 and higher in both OSS and Cloud.
+
+
+This engine inherits from [MergeTree](/docs/engines/table-engines/mergetree-family/mergetree). The key difference is in how data parts are merged: for `CoalescingMergeTree` tables, ClickHouse replaces all rows with the same primary key (or more precisely, the same [sorting key](/docs/engines/table-engines/mergetree-family/mergetree)) with a single row that contains the latest non\-NULL values for each column.
+
+
+This enables column\-level upserts, meaning you can update only specific columns rather than entire rows.
+
+
+`CoalescingMergeTree` is intended for use with Nullable types in non\-key columns. If the columns are not Nullable, the behavior is the same as with [ReplacingMergeTree](/docs/engines/table-engines/mergetree-family/replacingmergetree).
+
+
+## Creating a table[​](#creating-a-table "Direct link to Creating a table")
+
+
+
+```
+CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) ENGINE = CoalescingMergeTree([columns])
+[PARTITION BY expr]
+[ORDER BY expr]
+[SAMPLE BY expr]
+[SETTINGS name=value, ...]
+
+```
+
+For a description of request parameters, see [request description](/docs/sql-reference/statements/create/table).
+
+
+### Parameters of CoalescingMergeTree[​](#parameters-of-coalescingmergetree "Direct link to Parameters of CoalescingMergeTree")
+
+
+#### Columns[​](#columns "Direct link to Columns")
+
+
+`columns` \- Optional. A tuple with the names of columns where values will be united. The provided columns must not be in the partition or sorting key. If `columns` is not specified, ClickHouse unites the values in all columns that are not in the sorting key.
+
+
+### Query clauses[​](#query-clauses "Direct link to Query clauses")
+
+
+When creating a `CoalescingMergeTree` table the same [clauses](/docs/engines/table-engines/mergetree-family/mergetree) are required, as when creating a `MergeTree` table.
+
+
+Deprecated Method for Creating a TableNoteDo not use this method in new projects and, if possible, switch the old projects to the method described above.
+
+
+```
+CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) ENGINE [=] CoalescingMergeTree(date-column [, sampling_expression], (primary, key), index_granularity, [columns])
+
+```
+All of the parameters excepting `columns` have the same meaning as in `MergeTree`.- `columns` — tuple with names of columns values of which will be summed. Optional parameter. For a description, see the text above.
+
+
+
+## Usage example[​](#usage-example "Direct link to Usage example")
+
+
+Consider the following table:
+
+
+
+```
+CREATE TABLE test_table
+(
+    key UInt64,
+    value_int Nullable(UInt32),
+    value_string Nullable(String),
+    value_date Nullable(Date)
+)
+ENGINE = CoalescingMergeTree()
+ORDER BY key
+
+```
+
+Insert data to it:
+
+
+
+```
+INSERT INTO test_table VALUES(1, NULL, NULL, '2025-01-01'), (2, 10, 'test', NULL);
+INSERT INTO test_table VALUES(1, 42, 'win', '2025-02-01');
+INSERT INTO test_table(key, value_date) VALUES(2, '2025-02-01');
+
+```
+
+The result will looks like this:
+
+
+
+```
+SELECT * FROM test_table ORDER BY key;
+
+```
+
+
+```
+┌─key─┬─value_int─┬─value_string─┬─value_date─┐
+│   1 │        42 │ win          │ 2025-02-01 │
+│   1 │      ᴺᵁᴸᴸ │ ᴺᵁᴸᴸ         │ 2025-01-01 │
+│   2 │      ᴺᵁᴸᴸ │ ᴺᵁᴸᴸ         │ 2025-02-01 │
+│   2 │        10 │ test         │       ᴺᵁᴸᴸ │
+└─────┴───────────┴──────────────┴────────────┘
+
+```
+
+Recommended query for correct and final result:
+
+
+
+```
+SELECT * FROM test_table FINAL ORDER BY key;
+
+```
+
+
+```
+┌─key─┬─value_int─┬─value_string─┬─value_date─┐
+│   1 │        42 │ win          │ 2025-02-01 │
+│   2 │        10 │ test         │ 2025-02-01 │
+└─────┴───────────┴──────────────┴────────────┘
+
+```
+
+Using the `FINAL` modifier forces ClickHouse to apply merge logic at query time, ensuring you get the correct, coalesced "latest" value for each column. This is the safest and most accurate method when querying from a CoalescingMergeTree table.
+
+
+NoteAn approach with `GROUP BY` may return incorrect results if the underlying parts have not been fully merged.
+```
+SELECT key, last_value(value_int), last_value(value_string), last_value(value_date)  FROM test_table GROUP BY key; -- Not recommended.
+
+```
+
+
+[PreviousReplacingMergeTree](/docs/engines/table-engines/mergetree-family/replacingmergetree)[NextSummingMergeTree](/docs/engines/table-engines/mergetree-family/summingmergetree)- [Creating a table](#creating-a-table)
+	- [Parameters of CoalescingMergeTree](#parameters-of-coalescingmergetree)- [Query clauses](#query-clauses)- [Usage example](#usage-example)
+Was this page helpful?

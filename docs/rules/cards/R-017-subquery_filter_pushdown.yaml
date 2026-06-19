@@ -1,0 +1,28 @@
+id: R-017
+name: subquery_filter_pushdown
+tier: 1A
+category: subquery
+status: proposed
+statement: Слить фильтры внешнего и внутреннего SELECT через AND.
+preconditions:
+  syntactic:
+  - SELECT ... FROM (SELECT ... WHERE p1) WHERE p2
+  - Внутренний SELECT не содержит agg, window, LIMIT, DISTINCT
+  semantic: []
+  data: []
+proof: 'σ_p2(σ_p1(R)) ≡ σ_p1∧p2(R) —
+
+  дистрибутивность селекции относительно проекции без агрегации.'
+explain_template: Фильтры в ClickHouse выгодно применять как можно раньше, чтобы читать и передавать дальше меньше строк. Если внешний WHERE можно логически объединить с внутренним, движок получает более узкий поток данных уже на раннем этапе. Это помогает и чтению из MergeTree, и последующим стадиям выполнения, потому что промежуточные результаты становятся меньше.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT * FROM (SELECT * FROM t WHERE x > 0) WHERE y < 10
+example_after: SELECT * FROM t WHERE x > 0 AND y < 10
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

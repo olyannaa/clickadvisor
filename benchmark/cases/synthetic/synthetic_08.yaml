@@ -1,0 +1,19 @@
+case_id: synthetic_08
+source: synthetic
+sql: |
+  -- user_id колонка типа UInt64
+  SELECT * FROM users WHERE CAST(user_id AS UInt64) = 12345
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: redundant_cast_on_filter_removal
+  detected_by_rule: R-008
+  severity: medium
+  description: Избыточный CAST над user_id в фильтре не меняет тип и мешает упрощению предиката.
+expected_rules_to_fire:
+- R-008
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-008.
+expected_findings_count: 1
+status: validated

@@ -1,0 +1,29 @@
+id: R-012
+name: constant_predicate_elimination
+tier: 1A
+category: predicate_canonicalization
+status: proposed
+statement: 'Убрать WHERE TRUE, AND TRUE, AND 1=1. Упростить WHERE FALSE
+
+  до empty result.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: 'Булева алгебра: x AND TRUE ≡ x, x AND FALSE ≡ FALSE,
+
+  x OR TRUE ≡ TRUE, x OR FALSE ≡ x.'
+explain_template: Константные предикаты вроде TRUE, FALSE или 1=1 не несут новой информации о данных, они только усложняют булево выражение. Для ClickHouse это означает лишнюю работу в анализаторе и менее чистое условие для последующих оптимизаций. Чем проще и прямее предикат, тем легче движку увидеть реальную селективность фильтра.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE TRUE AND user_id = 5
+example_after: WHERE user_id = 5
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks:
+- x AND NULL ≠ x в SQL. Не применять при NULL в предикате.
+opt_in: false
+references: []

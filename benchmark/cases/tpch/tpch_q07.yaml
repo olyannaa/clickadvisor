@@ -1,0 +1,25 @@
+case_id: tpch_q07
+source: tpch
+sql: "SELECT\n    supp_nation,\n    cust_nation,\n    l_year,\n    sum(volume) AS revenue\nFROM\n    (\n        SELECT\n            n1.n_name AS supp_nation,\n            n2.n_name AS cust_nation,\n            toYear(l_shipdate) AS l_year,\n            l_extendedprice * (1 - l_discount) AS volume\n        FROM\n            supplier,\n            lineitem,\n            orders,\n            customer,\n            nation AS n1,\n            nation AS n2\n        WHERE\n            s_suppkey = l_suppkey\n            AND o_orderkey = l_orderkey\n            AND c_custkey = o_custkey\n            AND s_nationkey = n1.n_nationkey\n            AND c_nationkey = n2.n_nationkey\n            AND ((n1.n_name = 'FRANCE' AND n2.n_name = 'GERMANY') OR (n1.n_name = 'GERMANY' AND n2.n_name = 'FRANCE'))\n            AND l_shipdate BETWEEN toDate('1995-01-01') AND toDate('1996-12-31')\n    ) AS shipping\nGROUP BY\n    supp_nation,\n    cust_nation,\n    l_year\nORDER BY\n    supp_nation,\n    cust_nation,\n\
+  \    l_year;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM supplier, lineitem, orders, customer, nation n1, nation n2 — implicit JOIN
+- issue_id: I-2
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Подзапрос в FROM с вложенностью >2
+expected_rules_to_fire:
+- D-002
+- D-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q7: Volume Shipping Query.'
+expected_findings_count: 2
+status: reviewed

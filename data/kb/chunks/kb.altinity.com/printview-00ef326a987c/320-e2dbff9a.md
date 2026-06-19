@@ -1,0 +1,56 @@
+---
+source: kb.altinity.com
+url: http://altinity.com/
+topic: altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '1.0'
+last_updated: '2026-06-12'
+chunk_index: 320
+total_chunks_in_doc: 478
+---
+
+1. To restore metadata on all cluster nodes by a single command, use `ON CLUSTER` modifier for the RESTORE REPLICA command. 2. You can build a script to run restore replica commands over all replicated tables by query:
+
+```
+select 'SYSTEM RESTORE REPLICA ' || database || '.' || table || ' ON CLUSTER {cluster} ;'
+from system.tables
+where engine ilike 'Replicated%'
+
+```
+2. If you are using a mount point that differs from /var/lib/clickhouse/data, adjust the rsync command accordingly to point to the correct location. For example, suppose you reconfigure the storage path as follows in /etc/clickhouse\-server/config.d/config.xml.
+
+```
+<clickhouse>
+    <!-- Path to data directory, with trailing slash. -->
+    <path>/data1/clickhouse/</path>
+    ...
+</clickhouse>
+
+```
+You’ll need to use `/data1/clickhouse` instead of `/var/lib/clickhouse` in the rsync paths.
+
+3. ClickHouse Docker container image does not have rsync installed. Add it using apt\-get or run sidecar in k8s or run a service pod with volumes attached.
+4. If you running rsync to multiple replicas or planning to use same (Zoo)Keeper ensemble for source and destination ClickHouse servers, you need to remove server uuid file after syncing data with rsync.
+
+```
+rm /var/lib/clickhouse/uuid
+
+```
+Otherwise, it can lead to hard\-to\-debug replication issues. Replicas will break each other’s sessions with (Zoo)Keeper.
+
+# 5\.45 \- DDLWorker and DDL queue problems
+
+Finding and troubleshooting problems in the `distributed_ddl_queue`DDLWorker is a subprocess (thread) of `clickhouse-server` that executes `ON CLUSTER` tasks at the node.
+
+When you execute a DDL query with `ON CLUSTER mycluster` section, the query executor at the current node reads the cluster `mycluster` definition (remote\_servers / system.clusters) and places tasks into Zookeeper znode `task_queue/ddl/...` for members of the cluster `mycluster`.
+
+DDLWorker at all ClickHouse® nodes constantly check this `task_queue` for their tasks, executes them locally, and reports about the results back into `task_queue`.
+
+The common issue is the different hostnames/IPAddresses in the cluster definition and locally.
+
+So if the initiator node puts tasks for a host named Host1\. But the Host1 thinks about own name as localhost or **xdgt634678d** (internal docker hostname) and never sees tasks for the Host1 because is looking tasks for **xdgt634678d.** The same with internal VS external IP addresses.
+
+## DDLWorker thread crashed
+
+That causes ClickHouse to stop executing `ON CLUSTER` tasks.
+
+Check that DDLWorker is alive:

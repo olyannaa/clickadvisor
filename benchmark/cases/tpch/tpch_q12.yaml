@@ -1,0 +1,24 @@
+case_id: tpch_q12
+source: tpch
+sql: "SELECT\n    l_shipmode,\n    sum(CASE\n        WHEN o_orderpriority = '1-URGENT' OR o_orderpriority = '2-HIGH' THEN 1\n        ELSE 0\n    END) AS high_line_count,\n    sum(CASE\n        WHEN o_orderpriority <> '1-URGENT' AND o_orderpriority <> '2-HIGH' THEN 1\n        ELSE 0\n    END) AS low_line_count\nFROM\n    orders,\n    lineitem\nWHERE\n    o_orderkey = l_orderkey\n    AND l_shipmode IN ('MAIL', 'SHIP')\n    AND l_commitdate < l_receiptdate\n    AND l_shipdate < l_commitdate\n    AND l_receiptdate >= toDate('1994-01-01')\n    AND l_receiptdate < toDate('1994-01-01') + INTERVAL 1 YEAR\nGROUP BY\n    l_shipmode\nORDER BY\n    l_shipmode;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM orders, lineitem — implicit JOIN
+- issue_id: I-2
+  type: disjunction_chain_to_in
+  detected_by_rule: R-010
+  severity: high
+  description: l_shipmode = 'MAIL' OR l_shipmode = 'SHIP' → можно заменить на IN
+expected_rules_to_fire:
+- D-002
+- R-010
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q12: Shipping Modes. OR-цепочка на одной колонке.'
+expected_findings_count: 2
+status: reviewed

@@ -1,0 +1,98 @@
+# cramersV \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- cramersV
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/cramersV.md)# cramersV
+
+## cramersV[​](#cramersV "Direct link to cramersV")
+
+
+Introduced in: v22\.1\.0
+
+
+[Cramer's V](https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V) (sometimes referred to as Cramer's phi) is a measure of association between two columns in a table.
+The result of the `cramersV` function ranges from 0 (corresponding to no association between the variables) to 1 and can reach 1 only when each value is completely determined by the other.
+It may be viewed as the association between two variables as a percentage of their maximum possible variation.
+
+
+NoteFor a bias corrected version of Cramer's V see: [cramersVBiasCorrected](/docs/sql-reference/aggregate-functions/reference/cramersvbiascorrected)
+
+
+**Syntax**
+
+
+
+```
+cramersV(column1, column2)
+
+```
+
+**Arguments**
+
+
+- `column1` — First column to be compared. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal`](/docs/sql-reference/data-types/decimal)
+- `column2` — Second column to be compared. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns a value between 0 (corresponding to no association between the columns' values) to 1 (complete association). [`Float64`](/docs/sql-reference/data-types/float)
+
+
+**Examples**
+
+
+**No association between columns**
+
+
+
+```
+SELECT
+    cramersV(a, b)
+FROM
+    (
+        SELECT
+            number % 3 AS a,
+            number % 5 AS b
+        FROM
+            numbers(150)
+    );
+
+```
+
+
+```
+┌─cramersV(a, b)─┐
+│              0 │
+└────────────────┘
+
+```
+
+**High association between columns**
+
+
+
+```
+SELECT
+    cramersV(a, b)
+FROM
+    (
+        SELECT
+            number % 10 AS a,
+            if (number % 12 = 0, (number + 1) % 5, number % 5) AS b
+        FROM
+            numbers(150)
+    );
+
+```
+
+
+```
+┌─────cramersV(a, b)─┐
+│ 0.9066801892162646 │
+└────────────────────┘
+
+```
+[PreviouscovarSampStable](/docs/sql-reference/aggregate-functions/reference/covarsampstable)[NextcramersVBiasCorrected](/docs/sql-reference/aggregate-functions/reference/cramersvbiascorrected)- [cramersV](#cramersV)
+Was this page helpful?

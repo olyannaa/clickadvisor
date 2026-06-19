@@ -1,0 +1,26 @@
+id: R-010
+name: disjunction_chain_to_in
+tier: 1A
+category: predicate_canonicalization
+status: proposed
+statement: Объединить цепочку OR-равенств на одной колонке в IN.
+preconditions:
+  syntactic:
+  - WHERE содержит (col = v1) OR (col = v2) OR ...
+  - Все значения — литералы, все на одной колонке
+  semantic: []
+  data: []
+proof: (x=a₁) ∨ (x=a₂) ∨ ... ∨ (x=aₙ) ≡ x ∈ {a₁,...,aₙ} по семантике IN.
+explain_template: 'Цепочка col = a OR col = b OR col = c описывает одно и то же условие: колонка должна принадлежать фиксированному набору значений. ClickHouse умеет обрабатывать такую форму через IN более канонично, без длинной булевой цепочки. Это упрощает выражение и делает намерение фильтра очевиднее для планировщика и для человека.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE country = 'RU' OR country = 'BY' OR country = 'KZ'
+example_after: WHERE country IN ('RU', 'BY', 'KZ')
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

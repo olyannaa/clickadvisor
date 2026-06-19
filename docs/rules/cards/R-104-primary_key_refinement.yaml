@@ -1,0 +1,28 @@
+id: R-104
+name: primary_key_refinement
+tier: '2'
+category: index_design
+status: proposed
+statement: Уточнить primary key если хвостовые колонки ORDER BY редко используются
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: mark_cache hit rate
+  formula: ''
+  baseline: ''
+  projected: ''

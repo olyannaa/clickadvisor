@@ -1,0 +1,24 @@
+case_id: tpch_q09
+source: tpch
+sql: "SELECT\n    nation,\n    o_year,\n    sum(amount) AS sum_profit\nFROM\n    (\n        SELECT\n            n_name AS nation,\n            toYear(o_orderdate) AS o_year,\n            l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity AS amount\n        FROM\n            part,\n            supplier,\n            lineitem,\n            partsupp,\n            orders,\n            nation\n        WHERE\n            s_suppkey = l_suppkey\n            AND ps_suppkey = l_suppkey\n            AND ps_partkey = l_partkey\n            AND p_partkey = l_partkey\n            AND o_orderkey = l_orderkey\n            AND s_nationkey = n_nationkey\n            AND p_name LIKE '%green%'\n    ) AS profit\nGROUP BY\n    nation,\n    o_year\nORDER BY\n    nation,\n    o_year DESC;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM part, supplier, lineitem, partsupp, orders, nation — 6 таблиц implicit JOIN
+- issue_id: I-2
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: WHERE p_name LIKE '%green%' — leading wildcard, не использует индексы
+expected_rules_to_fire:
+- D-002
+- D-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q9: Product Type Profit Measure. LIKE с leading wildcard.'
+expected_findings_count: 2
+status: reviewed

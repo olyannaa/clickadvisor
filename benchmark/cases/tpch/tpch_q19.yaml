@@ -1,0 +1,25 @@
+case_id: tpch_q19
+source: tpch
+sql: "SELECT\n    sum(l_extendedprice * (1 - l_discount)) AS revenue\nFROM\n    lineitem,\n    part\nWHERE\n    (\n        p_partkey = l_partkey\n        AND p_brand = 'Brand#12'\n        AND p_container IN ('SM CASE', 'SM BOX', 'SM PACK', 'SM PKG')\n        AND l_quantity >= 1 AND l_quantity <= 11\n        AND p_size BETWEEN 1 AND 5\n        AND l_shipmode IN ('AIR', 'AIR REG')\n        AND l_shipinstruct = 'DELIVER IN PERSON'\n    )\n    OR (\n        p_partkey = l_partkey\n        AND p_brand = 'Brand#23'\n        AND p_container IN ('MED BAG', 'MED BOX', 'MED PKG', 'MED PACK')\n        AND l_quantity >= 10 AND l_quantity <= 20\n        AND p_size BETWEEN 1 AND 10\n        AND l_shipmode IN ('AIR', 'AIR REG')\n        AND l_shipinstruct = 'DELIVER IN PERSON'\n    )\n    OR (\n        p_partkey = l_partkey\n        AND p_brand = 'Brand#34'\n        AND p_container IN ('LG CASE', 'LG BOX', 'LG PACK', 'LG PKG')\n        AND l_quantity >= 20 AND l_quantity <= 30\n        AND p_size BETWEEN\
+  \ 1 AND 15\n        AND l_shipmode IN ('AIR', 'AIR REG')\n        AND l_shipinstruct = 'DELIVER IN PERSON'\n    );"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM lineitem, part — implicit JOIN
+- issue_id: I-2
+  type: disjunction_chain_to_in
+  detected_by_rule: R-010
+  severity: high
+  description: p_brand = 'Brand#12' OR p_brand = 'Brand#23' OR p_brand = 'Brand#34' → IN
+expected_rules_to_fire:
+- D-002
+- R-010
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q19: Discounted Revenue.'
+expected_findings_count: 2
+status: reviewed

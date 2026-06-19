@@ -1,0 +1,243 @@
+<h1>CollapsingMergeTree table engine | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines" itemprop="item"><span itemprop="name">Engines</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines" itemprop="item"><span itemprop="name">Table Engines</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/engines/table-engines/mergetree-family" itemprop="item"><span itemprop="name">MergeTree Family</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">CollapsingMergeTree</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/engines/table-engines/mergetree-family/collapsingmergetree.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>CollapsingMergeTree table engine</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="description">Description<a aria-label="Direct link to Description" class="hash-link" href="#description" title="Direct link to Description">​</a></h2>
+<p>The <code>CollapsingMergeTree</code> engine inherits from <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a>
+and adds logic for collapsing rows during the merge process.
+The <code>CollapsingMergeTree</code> table engine asynchronously deletes (collapses)
+pairs of rows if all the fields in a sorting key (<code>ORDER BY</code>) are equivalent except for the special field <code>Sign</code>,
+which can have values of either <code>1</code> or <code>-1</code>.
+Rows without a pair of opposite valued <code>Sign</code> are kept.</p>
+<p>For more details, see the <a href="#table_engine-collapsingmergetree-collapsing">Collapsing</a> section of the document.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This engine may significantly reduce the volume of storage,
+increasing the efficiency of <code>SELECT</code> queries as a consequence.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="parameters">Parameters<a aria-label="Direct link to Parameters" class="hash-link" href="#parameters" title="Direct link to Parameters">​</a></h2>
+<p>All parameters of this table engine, with the exception of the <code>Sign</code> parameter,
+have the same meaning as in <a href="/docs/engines/table-engines/mergetree-family/mergetree"><code>MergeTree</code></a>.</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>Sign</code> — The name given to a column with the type of row where <code>1</code> is a "state" row and <code>-1</code> is a "cancel" row. Type: <a href="/docs/sql-reference/data-types/int-uint">Int8</a>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="creating-a-table">Creating a table<a aria-label="Direct link to Creating a table" class="hash-link" href="#creating-a-table" title="Direct link to Creating a table">​</a></h2>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) 
+ENGINE = CollapsingMergeTree(Sign)
+[PARTITION BY expr]
+[ORDER BY expr]
+[SAMPLE BY expr]
+[SETTINGS name=value, ...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<details class="details_lb9f alert alert--info details_r1OI" data-collapsed="true" markdown="1"><summary>Deprecated Method for Creating a Table</summary><div><div class="collapsibleContent_i85q"><div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The method below is not recommended for use in new projects.
+We advise, if possible, to update old projects to use the new method.</p></div></div><div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+(
+    name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+    name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+    ...
+) 
+ENGINE [=] CollapsingMergeTree(date-column [, sampling_expression], (primary, key), index_granularity, Sign)
+</code></pre></div><div class="activity_PoTP"></div></div><p><code>Sign</code> — The name given to a column with the type of row where <code>1</code> is a "state" row and <code>-1</code> is a "cancel" row. <a href="/docs/sql-reference/data-types/int-uint">Int8</a>.</p></div></div></details>
+<ul class="custom-ul">
+<li class="custom-li">For a description of query parameters, see <a href="/docs/sql-reference/statements/create/table">query description</a>.</li>
+<li class="custom-li">When creating a <code>CollapsingMergeTree</code> table, the same <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-creating-a-table">query clauses</a> are required, as when creating a <code>MergeTree</code> table.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-collapsingmergetree-collapsing">Collapsing<a aria-label="Direct link to Collapsing" class="hash-link" href="#table_engine-collapsingmergetree-collapsing" title="Direct link to Collapsing">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="data">Data<a aria-label="Direct link to Data" class="hash-link" href="#data" title="Direct link to Data">​</a></h3>
+<p>Consider the situation where you need to save continually changing data for some given object.
+It may sound logical to have one row per object and update it anytime something changes,
+however, update operations are expensive and slow for the DBMS because they require rewriting the data in storage.
+If we need to write data quickly, performing large numbers of updates is not an acceptable approach,
+but we can always write the changes of an object sequentially.
+To do so, we make use of the special column <code>Sign</code>.</p>
+<ul class="custom-ul">
+<li class="custom-li">If <code>Sign</code> = <code>1</code> it means that the row is a "state" row: <em>a row containing fields which represent a current valid state</em>.</li>
+<li class="custom-li">If <code>Sign</code> = <code>-1</code> it means that the row is a "cancel" row: <em>a row used for the cancellation of state of an object with the same attributes</em>.</li>
+</ul>
+<p>For example, we want to calculate how many pages users checked on some website and how long they visited them for.
+At some given moment in time, we write the following row with the state of user activity:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>At a later moment in time, we register the change of user activity and write it with the following two rows:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │   -1 │
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The first row cancels the previous state of the object (representing a user in this case).
+It should copy all the sorting key fields for the "canceled" row except for <code>Sign</code>.
+The second row above contains the current state.</p>
+<p>As we need only the last state of user activity, the original "state" row and the "cancel"
+row that we inserted can be deleted as shown below, collapsing the invalid (old) state of an object:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │    1 │ -- old "state" row can be deleted
+│ 4324182021466249494 │         5 │      146 │   -1 │ -- "cancel" row can be deleted
+│ 4324182021466249494 │         6 │      185 │    1 │ -- new "state" row remains
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>CollapsingMergeTree</code> carries out precisely this <em>collapsing</em> behavior while merging of the data parts takes place.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The reason for why two rows are needed for each change
+is further discussed in the <a href="#table_engine-collapsingmergetree-collapsing-algorithm">Algorithm</a> paragraph.</p></div></div>
+<p><strong>The peculiarities of such an approach</strong></p>
+<ol class="custom-ol">
+<li class="custom-li">The program that writes the data should remember the state of an object to be able to cancel it. The "cancel" row should contain copies of sorting key fields of the "state" and the opposite <code>Sign</code>. This increases the initial size of storage but allows us to write the data quickly.</li>
+<li class="custom-li">Long growing arrays in columns reduce the efficiency of the engine due to the increased load for writing. The more straightforward the data, the higher the efficiency.</li>
+<li class="custom-li">The <code>SELECT</code> results depend strongly on the consistency of the object change history. Be accurate when preparing data for inserting. You can get unpredictable results with inconsistent data. For example, negative values for non-negative metrics such as session depth.</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="table_engine-collapsingmergetree-collapsing-algorithm">Algorithm<a aria-label="Direct link to Algorithm" class="hash-link" href="#table_engine-collapsingmergetree-collapsing-algorithm" title="Direct link to Algorithm">​</a></h3>
+<p>When ClickHouse merges data <a href="/docs/concepts/glossary#parts">parts</a>,
+each group of consecutive rows with the same sorting key (<code>ORDER BY</code>) is reduced to no more than two rows,
+the "state" row with <code>Sign</code> = <code>1</code> and the "cancel" row with <code>Sign</code> = <code>-1</code>.
+In other words, in ClickHouse entries collapse.</p>
+<p>For each resulting data part ClickHouse saves:</p>
+<table><thead><tr><th><th><tbody><tr><td>1.<td>The first "cancel" and the last "state" rows, if the number of "state" and "cancel" rows matches and the last row is a "state" row.<tr><td>2.<td>The last "state" row, if there are more "state" rows than "cancel" rows.<tr><td>3.<td>The first "cancel" row, if there are more "cancel" rows than "state" rows.<tr><td>4.<td>None of the rows, in all other cases.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>Additionally, when there are at least two more "state" rows than "cancel"
+rows, or at least two more "cancel" rows than "state" rows, the merge continues.
+ClickHouse, however, treats this situation as a logical error and records it in the server log.
+This error can occur if the same data is inserted more than once.
+Thus, collapsing should not change the results of calculating statistics.
+Changes are gradually collapsed so that in the end only the last state of almost every object is left.</p>
+<p>The <code>Sign</code> column is required because the merging algorithm does not guarantee
+that all the rows with the same sorting key will be in the same resulting data part and even on the same physical server.
+ClickHouse processes <code>SELECT</code> queries with multiple threads, and it cannot predict the order of rows in the result.</p>
+<p>Aggregation is required if there is a need to get completely "collapsed" data from the <code>CollapsingMergeTree</code> table.
+To finalize collapsing, write a query with the <code>GROUP BY</code> clause and aggregate functions that account for the sign.
+For example, to calculate quantity, use <code>sum(Sign)</code> instead of <code>count()</code>.
+To calculate the sum of something, use <code>sum(Sign * x)</code> together <code>HAVING sum(Sign) &gt; 0</code> instead of <code>sum(x)</code>
+as in the <a href="#example-of-use">example</a> below.</p>
+<p>The aggregates <code>count</code>, <code>sum</code> and <code>avg</code> could be calculated this way.
+The aggregate <code>uniq</code> could be calculated if an object has at least one non-collapsed state.
+The aggregates <code>min</code> and <code>max</code> could not be calculated
+because <code>CollapsingMergeTree</code> does not save the history of the collapsed states.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If you need to extract data without aggregation
+(for example, to check whether rows whose newest values match certain conditions are present),
+you can use the <a href="/docs/sql-reference/statements/select/from#final-modifier"><code>FINAL</code></a> modifier for the <code>FROM</code> clause. It will merge the data before returning the result.
+For CollapsingMergeTree, only the latest state row for each key is returned.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-of-use">Example of use<a aria-label="Direct link to Example of use" class="hash-link" href="#example-of-use" title="Direct link to Example of use">​</a></h3>
+<p>Given the following example data:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │    1 │
+│ 4324182021466249494 │         5 │      146 │   -1 │
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's create a table <code>UAct</code> using the <code>CollapsingMergeTree</code>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE UAct
+(
+    UserID UInt64,
+    PageViews UInt8,
+    Duration UInt8,
+    Sign Int8
+)
+ENGINE = CollapsingMergeTree(Sign)
+ORDER BY UserID
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Next we will insert some data:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO UAct VALUES (4324182021466249494, 5, 146, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO UAct VALUES (4324182021466249494, 5, 146, -1),(4324182021466249494, 6, 185, 1)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We use two <code>INSERT</code> queries to create two different data parts.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If we insert the data with a single query, ClickHouse creates only one data part and will not perform any merge ever.</p></div></div>
+<p>We can select the data using:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM UAct
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │   -1 │
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's take a look at the returned data above and see if collapsing occurred...
+With two <code>INSERT</code> queries, we created two data parts.
+The <code>SELECT</code> query was performed in two threads, and we got a random order of rows.
+However, collapsing <strong>did not occur</strong> because there was no merge of the data parts yet
+and ClickHouse merges data parts in the background at an unknown moment which we cannot predict.</p>
+<p>We therefore need an aggregation
+which we perform with the <a href="/docs/sql-reference/aggregate-functions/reference/sum"><code>sum</code></a>
+aggregate function and the <a href="/docs/sql-reference/statements/select/having"><code>HAVING</code></a> clause:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    UserID,
+    sum(PageViews * Sign) AS PageViews,
+    sum(Duration * Sign) AS Duration
+FROM UAct
+GROUP BY UserID
+HAVING sum(Sign) &gt; 0
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┐
+│ 4324182021466249494 │         6 │      185 │
+└─────────────────────┴───────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If we do not need aggregation and want to force collapsing, we can also use the <code>FINAL</code> modifier for <code>FROM</code> clause.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM UAct FINAL
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This way of selecting the data is less efficient and is not recommended for use with large amounts of scanned data (millions of rows).</p></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-of-another-approach">Example of another approach<a aria-label="Direct link to Example of another approach" class="hash-link" href="#example-of-another-approach" title="Direct link to Example of another approach">​</a></h3>
+<p>The idea with this approach is that merges take into account only key fields.
+In the "cancel" row, we can therefore specify negative values
+that equalize the previous version of the row when summing without using the <code>Sign</code> column.</p>
+<p>For this example, we will make use of the sample data below:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         5 │      146 │    1 │
+│ 4324182021466249494 │        -5 │     -146 │   -1 │
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For this approach, it is necessary to change the data types of <code>PageViews</code> and <code>Duration</code> to store negative values.
+We therefore change the values of these columns from <code>UInt8</code> to <code>Int16</code> when we create our table <code>UAct</code> using the
+<code>collapsingMergeTree</code>:</p>
+<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE UAct
+(
+    UserID UInt64,
+    PageViews Int16,
+    Duration Int16,
+    Sign Int8
+)
+ENGINE = CollapsingMergeTree(Sign)
+ORDER BY UserID
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's test the approach by inserting data into our table.</p>
+<p>For examples or small tables, it is, however, acceptable:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO UAct VALUES(4324182021466249494,  5,  146,  1);
+INSERT INTO UAct VALUES(4324182021466249494, -5, -146, -1);
+INSERT INTO UAct VALUES(4324182021466249494,  6,  185,  1);
+
+SELECT * FROM UAct FINAL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    UserID,
+    sum(PageViews) AS PageViews,
+    sum(Duration) AS Duration
+FROM UAct
+GROUP BY UserID
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┐
+│ 4324182021466249494 │         6 │      185 │
+└─────────────────────┴───────────┴──────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT COUNT() FROM UAct
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┐
+│       3 │
+└─────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">OPTIMIZE TABLE UAct FINAL;
+
+SELECT * FROM UAct
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──────────────UserID─┬─PageViews─┬─Duration─┬─Sign─┐
+│ 4324182021466249494 │         6 │      185 │    1 │
+└─────────────────────┴───────────┴──────────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/aggregatingmergetree"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">AggregatingMergeTree</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/engines/table-engines/mergetree-family/versionedcollapsingmergetree"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">VersionedCollapsingMergeTree</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#description">Description</a><li><a class="table-of-contents__link toc-highlight" href="#parameters">Parameters</a><li><a class="table-of-contents__link toc-highlight" href="#creating-a-table">Creating a table</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-collapsingmergetree-collapsing">Collapsing</a><ul><li><a class="table-of-contents__link toc-highlight" href="#data">Data</a><li><a class="table-of-contents__link toc-highlight" href="#table_engine-collapsingmergetree-collapsing-algorithm">Algorithm</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#example-of-use">Example of use</a><li><a class="table-of-contents__link toc-highlight" href="#example-of-another-approach">Example of another approach</a></li></li></ul></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

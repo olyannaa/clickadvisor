@@ -1,0 +1,116 @@
+<h1>remote, remoteSecure | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/table-functions" itemprop="item"><span itemprop="name">Table functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">remote</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/remote.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>remote, remoteSecure</h1></header><p>Table function <code>remote</code> allows to access remote servers on-the-fly, i.e. without creating a <a href="/docs/engines/table-engines/special/distributed">Distributed</a> table. Table function <code>remoteSecure</code> is same as <code>remote</code> but over a secure connection.</p>
+<p>Both functions can be used in <code>SELECT</code> and <code>INSERT</code> queries.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">remote(addresses_expr, [db, table, user [, password], sharding_key])
+remote(addresses_expr, [db.table, user [, password], sharding_key])
+remote(named_collection[, option=value [,..]])
+remoteSecure(addresses_expr, [db, table, user [, password], sharding_key])
+remoteSecure(addresses_expr, [db.table, user [, password], sharding_key])
+remoteSecure(named_collection[, option=value [,..]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="parameters">Parameters<a aria-label="Direct link to Parameters" class="hash-link" href="#parameters" title="Direct link to Parameters">​</a></h2>
+<table><thead><tr><th>Argument<th>Description<tbody><tr><td><code>addresses_expr</code><td>A remote server address or an expression that generates multiple addresses of remote servers. Format: <code>host</code> or <code>host:port</code>.<br/><br/>    The <code>host</code> can be specified as a server name, or as a IPv4 or IPv6 address. An IPv6 address must be specified in <code>[]</code>.<br/><br/>    The <code>port</code> is the TCP port on the remote server. If the port is omitted, it uses <a href="/docs/operations/server-configuration-parameters/settings#tcp_port">tcp_port</a> from the server config file for table function <code>remote</code> (by default, 9000) and <a href="/docs/operations/server-configuration-parameters/settings#tcp_port_secure">tcp_port_secure</a> for table function <code>remoteSecure</code> (by default, 9440).<br/><br/>    For IPv6 addresses, a port is required.<br/><br/>    If only parameter <code>addresses_expr</code> is specified, <code>db</code> and <code>table</code> will use <code>system.one</code> by default.<br/><br/>    Type: <a href="/docs/sql-reference/data-types/string">String</a>.<tr><td><code>db</code><td>Database name. Type: <a href="/docs/sql-reference/data-types/string">String</a>.<tr><td><code>table</code><td>Table name. Type: <a href="/docs/sql-reference/data-types/string">String</a>.<tr><td><code>user</code><td>User name. If not specified, <code>default</code> is used. Type: <a href="/docs/sql-reference/data-types/string">String</a>.<tr><td><code>password</code><td>User password. If not specified, an empty password is used. Type: <a href="/docs/sql-reference/data-types/string">String</a>.<tr><td><code>sharding_key</code><td>Sharding key to support distributing data across nodes. For example: <code>insert into remote('127.0.0.1:9000,127.0.0.2', db, table, 'default', rand())</code>. Type: <a href="/docs/sql-reference/data-types/int-uint">UInt32</a>.</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>Arguments also can be passed using <a href="/docs/operations/named-collections">named collections</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="returned-value">Returned value<a aria-label="Direct link to Returned value" class="hash-link" href="#returned-value" title="Direct link to Returned value">​</a></h2>
+<p>A table located on a remote server.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="usage">Usage<a aria-label="Direct link to Usage" class="hash-link" href="#usage" title="Direct link to Usage">​</a></h2>
+<p>As table functions <code>remote</code> and <code>remoteSecure</code> re-establish the connection for each request, it is recommended to use a <code>Distributed</code> table instead. Also, if hostnames are set, the names are resolved, and errors are not counted when working with various replicas. When processing a large number of queries, always create the <code>Distributed</code> table ahead of time, and do not use the <code>remote</code> table function.</p>
+<p>The <code>remote</code> table function can be useful in the following cases:</p>
+<ul class="custom-ul">
+<li class="custom-li">One-time data migration from one system to another</li>
+<li class="custom-li">Accessing a specific server for data comparison, debugging, and testing, i.e. ad-hoc connections.</li>
+<li class="custom-li">Queries between various ClickHouse clusters for research purposes.</li>
+<li class="custom-li">Infrequent distributed requests that are made manually.</li>
+<li class="custom-li">Distributed requests where the set of servers is re-defined each time.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="addresses">Addresses<a aria-label="Direct link to Addresses" class="hash-link" href="#addresses" title="Direct link to Addresses">​</a></h3>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">example01-01-1
+example01-01-1:9440
+example01-01-1:9000
+localhost
+127.0.0.1
+[::]:9440
+[::]:9000
+[2a02:6b8:0:1111::11]:9000
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Multiple addresses can be comma-separated. In this case, ClickHouse will use distributed processing and send the query to all specified addresses (like shards with different data). Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">example01-01-1,example01-02-1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="selecting-data-from-a-remote-server">Selecting data from a remote server:<a aria-label="Direct link to Selecting data from a remote server:" class="hash-link" href="#selecting-data-from-a-remote-server" title="Direct link to Selecting data from a remote server:">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM remote('127.0.0.1', db.remote_engine_table) LIMIT 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Or using <a href="/docs/operations/named-collections">named collections</a>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE NAMED COLLECTION creds AS
+        host = '127.0.0.1',
+        database = 'db';
+SELECT * FROM remote(creds, table='remote_engine_table') LIMIT 3;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-data-into-a-table-on-a-remote-server">Inserting data into a table on a remote server:<a aria-label="Direct link to Inserting data into a table on a remote server:" class="hash-link" href="#inserting-data-into-a-table-on-a-remote-server" title="Direct link to Inserting data into a table on a remote server:">​</a></h3>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE remote_table (name String, value UInt32) ENGINE=Memory;
+INSERT INTO FUNCTION remote('127.0.0.1', currentDatabase(), 'remote_table') VALUES ('test', 42);
+SELECT * FROM remote_table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="migration-of-tables-from-one-system-to-another">Migration of tables from one system to another:<a aria-label="Direct link to Migration of tables from one system to another:" class="hash-link" href="#migration-of-tables-from-one-system-to-another" title="Direct link to Migration of tables from one system to another:">​</a></h3>
+<p>This example uses one table from a sample dataset.  The database is <code>imdb</code>, and the table is <code>actors</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="on-the-source-clickhouse-system-the-system-that-currently-hosts-the-data">On the source ClickHouse system (the system that currently hosts the data)<a aria-label="Direct link to On the source ClickHouse system (the system that currently hosts the data)" class="hash-link" href="#on-the-source-clickhouse-system-the-system-that-currently-hosts-the-data" title="Direct link to On the source ClickHouse system (the system that currently hosts the data)">​</a></h4>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Verify the source database and table name (<code>imdb.actors</code>)</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">show databases
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">show tables in imdb
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+<li class="custom-li">
+<p>Get the CREATE TABLE statement from the source:</p>
+</li>
+</ul>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">  SELECT create_table_query
+  FROM system.tables
+  WHERE database = 'imdb' AND table = 'actors'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Response</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE imdb.actors (`id` UInt32,
+                          `first_name` String,
+                          `last_name` String,
+                          `gender` FixedString(1))
+                ENGINE = MergeTree
+                ORDER BY (id, first_name, last_name, gender);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="on-the-destination-clickhouse-system">On the destination ClickHouse system<a aria-label="Direct link to On the destination ClickHouse system" class="hash-link" href="#on-the-destination-clickhouse-system" title="Direct link to On the destination ClickHouse system">​</a></h4>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>Create the destination database:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE DATABASE imdb
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+<li class="custom-li">
+<p>Using the CREATE TABLE statement from the source, create the destination:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE imdb.actors (`id` UInt32,
+                          `first_name` String,
+                          `last_name` String,
+                          `gender` FixedString(1))
+                ENGINE = MergeTree
+                ORDER BY (id, first_name, last_name, gender);
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="back-on-the-source-deployment">Back on the source deployment<a aria-label="Direct link to Back on the source deployment" class="hash-link" href="#back-on-the-source-deployment" title="Direct link to Back on the source deployment">​</a></h4>
+<p>Insert into the new database and table created on the remote system.  You will need the host, port, username, password, destination database, and destination table.</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO FUNCTION
+remoteSecure('remote.clickhouse.cloud:9440', 'imdb.actors', 'USER', 'PASSWORD')
+SELECT * from imdb.actors
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="globs-in-addresses">Globbing<a aria-label="Direct link to Globbing" class="hash-link" href="#globs-in-addresses" title="Direct link to Globbing">​</a></h2>
+<p>Patterns in <code>{ }</code> are used to generate a set of shards and to specify replicas. If there are multiple pairs of <code>{ }</code>, then the direct product of the corresponding sets is generated.</p>
+<p>The following pattern types are supported.</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>{a,b,c}</code> - Represents any of alternative strings <code>a</code>, <code>b</code> or <code>c</code>. The pattern is replaced with <code>a</code> in the first shard address and replaced with <code>b</code> in the second shard address and so on. For instance, <code>example0{1,2}-1</code> generates addresses <code>example01-1</code> and <code>example02-1</code>.</li>
+<li class="custom-li"><code>{N..M}</code> - A range of numbers. This pattern generates shard addresses with incrementing indices from <code>N</code> to (and including) <code>M</code>. For instance, <code>example0{1..2}-1</code> generates <code>example01-1</code> and <code>example02-1</code>.</li>
+<li class="custom-li"><code>{0n..0m}</code> - A range of numbers with leading zeroes. This pattern preserves leading zeroes in indices. For instance, <code>example{01..03}-1</code> generates <code>example01-1</code>, <code>example02-1</code> and <code>example03-1</code>.</li>
+<li class="custom-li"><code>{a|b}</code> - Any number of variants separated by a <code>|</code>. The pattern specifies replicas. For instance, <code>example01-{1|2}</code> generates replicas <code>example01-1</code> and <code>example01-2</code>.</li>
+</ul>
+<p>The query will be sent to the first healthy replica. However, for <code>remote</code> the replicas are iterated in the order currently set in the <a href="/docs/operations/settings/settings#load_balancing">load_balancing</a> setting.
+The number of generated addresses is limited by <a href="/docs/operations/settings/settings#table_function_remote_max_addresses">table_function_remote_max_addresses</a> setting.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/redis"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">redis</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/s3"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">s3</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#parameters">Parameters</a><li><a class="table-of-contents__link toc-highlight" href="#returned-value">Returned value</a><li><a class="table-of-contents__link toc-highlight" href="#usage">Usage</a><ul><li><a class="table-of-contents__link toc-highlight" href="#addresses">Addresses</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#selecting-data-from-a-remote-server">Selecting data from a remote server:</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-data-into-a-table-on-a-remote-server">Inserting data into a table on a remote server:</a><li><a class="table-of-contents__link toc-highlight" href="#migration-of-tables-from-one-system-to-another">Migration of tables from one system to another:</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#globs-in-addresses">Globbing</a></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

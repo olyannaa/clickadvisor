@@ -1,0 +1,57 @@
+# EXECUTE AS Statement \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- EXECUTE AS
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/execute_as.md)Not supported in ClickHouse Cloud
+# EXECUTE AS Statement
+
+
+Allows to execute queries on behalf of a different user.
+
+
+## Syntax[​](#syntax "Direct link to Syntax")
+
+
+
+```
+EXECUTE AS target_user;
+EXECUTE AS target_user subquery;
+
+```
+
+The first form (without `subquery`) sets that all the following queries in the current session will be executed on behalf of the specified `target_user`.
+
+
+The second form (with `subquery`) executes only the specified `subquery` on behalf of the specified `target_user`.
+
+
+In order to work both forms require config setting `access_control_improvements.allow_impersonate_user`
+to be set to `1` and the `IMPERSONATE` privilege to be granted. For example, the following commands
+
+
+
+```
+GRANT IMPERSONATE ON user1 TO user2;
+GRANT IMPERSONATE ON * TO user3;
+
+```
+
+allow user `user2` to execute commands `EXECUTE AS user1 ...` and also allow user `user3` to execute commands as any user.
+
+
+While impersonating another user function [currentUser()](/docs/sql-reference/functions/other-functions#currentUser) returns the name of that other user,
+and function [authenticatedUser()](/docs/sql-reference/functions/other-functions#authenticatedUser) returns the name of the user who has been actually authenticated.
+
+
+## Examples[​](#examples "Direct link to Examples")
+
+
+
+```
+SELECT currentUser(), authenticatedUser(); -- outputs "default    default"
+CREATE USER james;
+EXECUTE AS james SELECT currentUser(), authenticatedUser(); -- outputs "james    default"
+
+```
+[PreviousTRUNCATE](/docs/sql-reference/statements/truncate)[NextPARALLEL WITH](/docs/sql-reference/statements/parallel_with)- [Syntax](#syntax)- [Examples](#examples)
+Was this page helpful?

@@ -1,0 +1,247 @@
+<h1>主要5大クラウドデータウェアハウスのコストパフォーマンス比較</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><blockquote>
+<p><strong>要約</strong><br/><br/><strong>Snowflake</strong>、<strong>Databricks</strong>、<strong>ClickHouse Cloud、BigQuery</strong>、<strong>Redshift</strong>を10億行、100億行、1000億行の規模でベンチマークし、各ベンダーの実際のコンピュート課金ルールを適用しました。<br/><br/>
+大規模な分析ワークロードにおいて、<strong>ClickHouse Cloudは他のすべてのシステムよりも桁違いに優れたコストパフォーマンスを提供します</strong>。</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="クラウドウェアハウスのコストパフォーマンスを比較する方法" level="2">クラウドウェアハウスのコストパフォーマンスを比較する方法<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%82%AF%E3%83%A9%E3%82%A6%E3%83%89%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%8F%E3%82%A6%E3%82%B9%E3%81%AE%E3%82%B3%E3%82%B9%E3%83%88%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9%E3%82%92%E6%AF%94%E8%BC%83%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">#</a></span></h2>
+<p>データセットと一連の分析クエリがあります。それらを実行できる複数のクラウドデータウェアハウスがあります。そして質問はシンプルです：</p>
+<blockquote>
+<p><strong>分析ワークロードにおいて、1ドルあたり最も高いパフォーマンスを得られるのはどこか？</strong></p>
+</blockquote>
+<p>価格表ではこれに答えられません。</p>
+<p><a href="/blog/how-cloud-data-warehouses-bill-you">答えられないのです</a>。異なるベンダーはコンピュートの計測方法が異なり、容量の価格設定が異なり、「コンピュートリソース」の定義が異なるため、その数値を額面通りに比較することはできません。</p>
+<p>そこで私たちは、主要な5つのクラウドデータウェアハウスすべてで<em>同じ</em>本番環境由来の分析ワークロードを実行しました：</p>
+<ul>
+<li><strong>Snowflake</strong></li>
+<li><strong>Databricks</strong></li>
+<li><strong>ClickHouse Cloud</strong></li>
+<li><strong>BigQuery</strong></li>
+<li><strong>Redshift</strong></li>
+</ul>
+<p>そして、<strong>10億</strong>、<strong>100億</strong>、<strong>1000億</strong>行という3つのスケールで実行し、データが増えるにつれてコストとパフォーマンスがどのように変化するかを確認しました。</p>
+<p>短いバージョンが必要な場合は、ネタバレをどうぞ：<strong>コストパフォーマンスはシステム間で線形にスケールしません。</strong></p>
+<blockquote>
+<p><strong>ClickHouse Cloudは他のすべてのシステムよりも桁違いに優れたコストパフォーマンスを提供します。</strong></p>
+</blockquote>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs-animation01_small.gif" loading="lazy" src="/uploads/Blog_Costs_animation01_small_de9ac301cc.gif"/></span>
+<p>詳細、チャート、方法論が必要な場合は、読み進めてください。</p>
+<blockquote>
+<p><strong>再現可能なパイプライン</strong>：<br/>この投稿のすべての結果は、<a href="/blog/how-cloud-data-warehouses-bill-you#before-we-dive-in-how-we-calculate-costs-with-bench2cost">Bench2Cost</a>を使用して生成されています。これは、オープンで完全に再現可能なベンチマークパイプラインです。
+Bench2Costは各システムの実際の<strong>コンピュート</strong>課金モデルを生の実行時間に適用するため、コスト比較が正確で検証可能です。
+<br/><br/>
+<strong>ストレージは焦点ではありません</strong>：<br/>
+Bench2Costはすべてのシステムの<strong>ストレージコスト</strong>も計算しますが、ストレージ価格はシンプルで、ベンダー間で類似しており、分析ワークロードのコンピュートと比較して無視できるため、ここでは強調していません。
+<br/><br/>
+<strong>隠れたストレージの勝利</strong>：<br/>
+とはいえ、チャートからリンクされている結果JSONの生の数値を見ると、<strong>ClickHouse Cloudはストレージサイズとストレージコストの両方で他のすべてのシステムを静かに打ち負かしており、多くの場合桁違いです</strong>が、これはこの比較の範囲外です。</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="インタラクティブベンチマークエクスプローラー" level="2">インタラクティブベンチマークエクスプローラー<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%A9%E3%82%AF%E3%83%86%E3%82%A3%E3%83%96%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%97%E3%83%AD%E3%83%BC%E3%83%A9%E3%83%BC">#</a></span></h2>
+<p>静的なチャートはストーリーテリングには最適ですが、完全なデータセットの表面をかすめるだけです。</p>
+<p>そこで、私たちは新しいものを構築しました：<strong>完全にインタラクティブなベンチマークエクスプローラー</strong>を<strong>ブログ内に埋め込みました</strong>。</p>
+<p>ベンダー、ティア、クラスターサイズ、データセットスケールを自由に組み合わせることができます。ランタイム、コスト、コストパフォーマンスランキングを切り替え、この研究の背後にある完全な結果を探索できます。</p>
+<iframe frameborder="0" src="/uploads/benchmark_costs_dashboard_95d2e2ef2b.html" style="width:100%;height:800px"></iframe>
+<p>これらの数値をどのように生成したかを理解したい場合は、すべて投稿の最後にある<a href="/blog/cloud-data-warehouses-cost-performance-comparison#appendix-benchmark-methodology">付録</a>に文書化されています。</p>
+<p>まず10億行から始めて、各スケールでのシステムのパフォーマンスを見ていきましょう。</p>
+<p><em>(付録で説明されているように、各システムを評価するために標準的な43クエリのClickBench分析ワークロードを使用しています。)</em></p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="10億行ベースライン" level="2">10億行：ベースライン<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#10%E5%84%84%E8%A1%8C%E3%83%99%E3%83%BC%E3%82%B9%E3%83%A9%E3%82%A4%E3%83%B3">#</a></span></h2>
+<blockquote>
+<p><strong>10億スケールはベースラインとしてのみ含めていますが、現代のデータプラットフォームにとってより現実的なストレスポイントは100億、1000億、それ以上です。</strong><br/><br/>
+今日の分析ワークロードは、数百億、数千億、さらには数兆行で日常的に動作しています。
+<a href="https://clickhouse.com/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse#proving-the-system-at-scale">Teslaはストレステストのために<strong>1京行以上</strong>をClickHouseに取り込みました</a>、そして<a href="https://clickpy.clickhouse.com/">ClickPy</a>、私たちのPythonクライアントテレメトリデータセットは、すでに <strong><a href="https://sql.clickhouse.com/?query=U0VMRUNUCiAgICAgICAgZm9ybWF0UmVhZGFibGVRdWFudGl0eShzdW0oY291bnQpKSBBUyB0b3RhbCwgdW5pcUV4YWN0KHByb2plY3QpIGFzIHByb2plY3RzIEZST00gcHlwaS5weXBpX2Rvd25sb2Fkcw&amp;run_query=true">2兆行</a></strong> を超えています。</p>
+</blockquote>
+<p>以下の<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-to-read-the-scatter-plot-charts">散布図</a>は、5つのシステムそれぞれについて、10億行のClickBench実行の合計実行時間（横軸）と合計コンピュートコスト（縦軸）を示しています。</p>
+<p><em>(明確さのために目盛りラベルを非表示にしていますが、点の位置は完全に正確なままです。上記のインタラクティブベンチマークエクスプローラーには完全な数値軸が表示されます。)</em></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.008.png" loading="lazy" src="/uploads/Blog_Costs_008_3d74ce58e7.png"/></span>
+<em>(表示される構成は各エンジンの全範囲を表しています。<a href="/blog/cloud-data-warehouses-cost-performance-comparison#what-configurations-we-compare">詳細は付録</a>を参照してください。)</em>
+<p>10億行では、チャートは3つの明確な<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-to-read-the-scatter-plot-charts">象限の動作</a>を明らかにします。</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th>カテゴリ</th><th>システム / ティア</th><th>実行時間</th><th>コスト</th></tr></thead><tbody><tr><td colspan="4"><strong>大きなグループが理想的な象限に該当します — 十分に高速<em>かつ</em>リーズナブルな価格 — しかし、1ドルあたりの価値プロファイルは非常に異なります。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>ClickHouse Cloud</strong> (<a href="https://clickhouse.com/blog/clickhouse-parallel-replicas">9ノード</a>)</td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_1B/aws.9.236.parallel_replicas.json">~23秒</a></td><td>
+<a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_1B/aws.9.236.parallel_replicas.json">~$0.67</a>
+</td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>BigQuery Enterprise（容量）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_1B/result_enriched.json">~38秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_1B/result_enriched.json">~$0.80</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>Redshift Serverless（128 RPU）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_1B/enriched_1b.json">~64秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_1B/enriched_1b.json">~$0.85</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>Databricks（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_Large_enriched.json">~80秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_Large_enriched.json">~$0.62</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>Snowflake（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/large_enriched.json">~127秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/large_enriched.json">~$0.85</a></td></tr><tr><td colspan="4"><strong>これらの2つは許容できる速度を提供しますが、価格が高額です。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code></td><td><strong>Snowflake（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/4xl_enriched.json">~45秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/4xl_enriched.json">~$4.8</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code></td><td><strong>Databricks（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_4X-Large_enriched.json">~59秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_4X-Large_enriched.json">~$6.1</a></td></tr><tr><td colspan="4"><strong>BigQuery On-Demandは高速ですが、TiBあたりのスキャン課金により、メインプロットから完全に外れます。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code>（チャート外）</td><td><strong>BigQuery On-Demand</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_1B/result_enriched.json">~38秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_1B/result_enriched.json">~$16.9</a></td></tr><tr><td colspan="4"><strong>これらのティアは安価ですが、非常に遅いです。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 低コスト</code></td><td><strong>Databricks（2X-Small）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_2X-Small_enriched.json">~712秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_1B/clickbench_2X-Small_enriched.json">~$0.55</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 低コスト</code></td><td><strong>Snowflake（X-Small）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/xs_enriched.json">~785秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_1B/xs_enriched.json">~$0.65</a></td></tr></tbody></table></div>
+<p>コスト効率を直接比較するために、以下のチャートは実行時間とコストを単一のコストパフォーマンススコアに集約しています（<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-we-measure-overall-cost-performance-ranking">方法論の定義</a>）：</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.009.png" loading="lazy" src="/uploads/Blog_Costs_009_18d232f919.png"/></span>
+<p>画像は明確になります：</p>
+<ul>
+<li>
+<p><strong>ClickHouse Cloudは最も強力な総合コストパフォーマンスを提供します</strong>。最も低い<em>実行時間 × コスト</em>値を持ち、他のすべてはそれと比較されます。</p>
+</li>
+<li>
+<p><strong>BigQuery（容量モード）<strong>が次に続き、このデータセットサイズではClickHouseの約</strong>2倍悪い</strong>です。</p>
+</li>
+<li>
+<p><strong>他のほとんどの構成は急速に落ち込みます</strong>。<em>実行時間 × コスト</em>が上昇するにつれて：<strong>3〜4倍悪い</strong>から、より大きなSnowflakeとDatabricksティアでは<strong>2桁の倍数</strong>まで。</p>
+</li>
+</ul>
+<blockquote>
+<p>真のストーリーはデータが増えたときに始まります。<br/><br/>10億行は現代の基準ではまだ小さく、データが100億行と1000億行にスケールするにつれて経済性は急速に変化し、ほとんどのシステムは「高速 &amp; 低コスト」ゾーンから急激に外れ始めます。</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="100億行亀裂が現れ始める" level="2">100億行：亀裂が現れ始める<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#100%E5%84%84%E8%A1%8C%E4%BA%80%E8%A3%82%E3%81%8C%E7%8F%BE%E3%82%8C%E5%A7%8B%E3%82%81%E3%82%8B">#</a></span></h2>
+<p>以下の<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-to-read-the-scatter-plot-charts">散布図</a>は、5つのシステムそれぞれについて、100億行のClickBench実行の合計実行時間（横軸）と合計コンピュートコスト（縦軸）を示しています。</p>
+<p><em>(前述のとおり、視覚的な明確さのために目盛りラベルを非表示にしていますが、点の位置は実際の基礎値を反映しています。上記のインタラクティブベンチマークエクスプローラーには完全な数値軸が含まれています。)</em></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.011.png" loading="lazy" src="/uploads/Blog_Costs_011_a2429a91bc.png"/></span>
+<em>(表示される構成は各エンジンの全範囲を表しています。<a href="/blog/cloud-data-warehouses-cost-performance-comparison#what-configurations-we-compare">詳細は付録</a>を参照してください。)</em>
+<p>100億行では、最初の真の分離が現れます。実行時間が延び、コストが上昇するにつれて、システムは「高速 &amp; 低コスト」<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-to-read-the-scatter-plot-charts">象限</a>から外れ始めます。</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th>カテゴリ</th><th>システム / ティア</th><th>実行時間</th><th>コスト</th></tr></thead><tbody><tr><td colspan="4"><strong>これらは100億行でも理想的な象限にある唯一の2つのシステムですが、速度プロファイルは非常に異なります。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>ClickHouse Cloud</strong> (<a href="https://clickhouse.com/blog/clickhouse-parallel-replicas">20ノード</a>)</td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_10B/aws.20.236.parallel_replicas.json">~67秒</a></td><td>
+<a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_10B/aws.20.236.parallel_replicas.json">~$4.27</a>
+</td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>Databricks（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_Large_enriched.json">~604秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_Large_enriched.json">~$4.70</a></td></tr><tr><td colspan="4"><strong>これらのシステムはまだ合理的に高速ですが、データが増えるにつれて価格が急激に上昇します。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code></td><td><strong>Snowflake（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/4xl_enriched.json">~135秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/4xl_enriched.json">~$14.41</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code></td><td><strong>Databricks（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_4X-Large_enriched.json">~188秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_4X-Large_enriched.json">~$19.28</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code></td><td><strong>BigQuery Enterprise（容量）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_10B/result_enriched.json">~350秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_10B/result_enriched.json">~$11.73</a></td></tr><tr><td colspan="4"><strong>BigQuery On-Demandは合理的に高速に実行されますが、オンデマンド課金モデルによりコストが高く、散布図の軸範囲をはるかに超えています。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 高コスト</code>（チャート外）</td><td><strong>BigQuery On-Demand</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_10B/result_enriched.json">~350秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_10B/result_enriched.json">~$169</a></td></tr><tr><td colspan="4"><strong>コストは低いままですが、実行時間は数分または数時間の範囲に漂います。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 低コスト</code></td><td><strong>Snowflake（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/large_enriched.json">~1,213秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/large_enriched.json">~$8.09</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 低コスト</code></td><td><strong>Snowflake（X-Small）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/xs_enriched.json">~9,547秒（2.6時間）</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_10B/xs_enriched.json">~$7.96</a></td></tr><tr><td colspan="4"><strong>これらの2つは、はるかに高速な代替品よりも遅く<em>、かつ</em>高価です。</strong></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Redshift Serverless（128 RPU）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_10B/enriched_10b.json">~1,068秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_10B/enriched_10b.json">~$13.58</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Databricks（2X-Small）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_2X-Small_enriched.json">~17,558秒（4.9時間）</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_10B/clickbench_2X-Small_enriched.json">~$13.66</a></td></tr></tbody></table></div>
+<p><a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-we-measure-overall-cost-performance-ranking">コストパフォーマンススコア</a>を見ると、分離は明白になります：</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.012.png" loading="lazy" src="/uploads/Blog_Costs_012_7d7df43431.png"/></span>
+<p>100億行でギャップは広がります：</p>
+<ul>
+<li>
+<p><strong>ClickHouse Cloudは明確なリーダーであり続けます</strong>。大きなマージンでトップのコストパフォーマンススポットを維持しています。</p>
+</li>
+<li>
+<p><strong>次善のシステムはすでに大きく遅れています</strong>。ClickHouseよりも<strong>7〜13倍悪い</strong>です（Snowflake 4X-L、Databricks Large、Databricks 4X-Large）。</p>
+</li>
+<li>
+<p><strong>BigQuery Enterprise</strong>はさらに後退し、約<strong>14倍悪い</strong>です。</p>
+</li>
+<li>
+<p>その後、すべてが長い尾に崩壊し、<strong>数十から数百倍悪く</strong>、Redshift Serverless（128 RPU）、Snowflake L、BigQuery On-Demand、Snowflake X-Small、Databricks 2X-Smallが含まれます。</p>
+</li>
+</ul>
+<blockquote>
+<p>100億行では、経済性が急激に分岐します：ClickHouse Cloudは他のすべてのシステムよりも桁違いに優れたコストパフォーマンスを提供します。</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="1000億行真のストレステスト" level="2">1000億行：真のストレステスト<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#1000%E5%84%84%E8%A1%8C%E7%9C%9F%E3%81%AE%E3%82%B9%E3%83%88%E3%83%AC%E3%82%B9%E3%83%86%E3%82%B9%E3%83%88">#</a></span></h2>
+<p>以下の<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-to-read-the-scatter-plot-charts">散布図</a>は、5つのシステムそれぞれについて、1000億行のClickBench実行の合計実行時間（横軸）と合計コンピュートコスト（縦軸）を示しています。</p>
+<p><em>(前述のとおり、視覚的な明確さのために目盛りラベルを非表示にしていますが、点の位置は実際の基礎値を反映しています。上記のインタラクティブベンチマークエクスプローラーには完全な数値軸が含まれています。)</em></p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.014.png" loading="lazy" src="/uploads/Blog_Costs_014_291362ced8.png"/></span>
+<em>(表示される構成は各エンジンの全範囲を表しています。<a href="/blog/cloud-data-warehouses-cost-performance-comparison#what-configurations-we-compare">詳細は付録</a>を参照してください。<strong>両軸は対数スケールであるため、垂直および水平のジャンプは見た目よりもさらに大きいです。</strong>)</em>
+<p>1000億行では、分離は劇的になります。ClickHouse Cloudは、このスケールでも「高速 &amp; 低コスト」領域にしっかりとどまる唯一のシステムです。</p>
+<p>他のすべてのエンジンは現在、「低速 &amp; 高コスト」にしっかりと押し込まれており、実行時間は数分から数時間の範囲で、コストは桁違いに高くなっています。</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th>カテゴリ</th><th>システム / ティア</th><th>実行時間</th><th>コスト</th></tr></thead><tbody><tr><td colspan="4">
+<strong>ClickHouse Cloudは1000億行でも高速<em>かつ</em>低コストを維持する唯一のシステムです。効率ゾーンにある唯一のシステムです。</strong>
+</td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">高速 &amp; 低コスト</code></td><td><strong>ClickHouse Cloud</strong> (<a href="https://clickhouse.com/blog/clickhouse-parallel-replicas">20ノード</a>)</td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_100B/aws.20.236.parallel_replicas.json">~275秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/clickhouse-cloud/results_100B/aws.20.236.parallel_replicas.json">~$17.62</a></td></tr><tr><td colspan="4">
+<strong>他のすべてのシステムは1000億行で低速 &amp; 高コスト象限に入り、ClickHouseよりも遅く<em>、かつ</em>大幅に高価です。</strong>
+</td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Databricks（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_100B/clickbench_4X-Large_enriched.json">~1,049秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_100B/clickbench_4X-Large_enriched.json">~$107.69</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Snowflake（4X-Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_100B/4xl_enriched.json">~1,212秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_100B/4xl_enriched.json">~$129.26</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>BigQuery Enterprise（容量）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_100B/result_enriched.json">~3,870秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_100B/result_enriched.json">~$126.52</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code>（チャート外）</td><td><strong>BigQuery On-Demand</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_100B/result_enriched.json">~3,870秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/bigquery/results_100B/result_enriched.json">~$1,692.84</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Redshift Serverless（128 RPU）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_100B/enriched_100b.json">~5,016秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/redshift-serverless/results_100B/enriched_100b.json">~$55.06</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Databricks（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_100B/clickbench_Large_enriched.json">~11,821秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/databricks/results_100B/clickbench_Large_enriched.json">~$91.94</a></td></tr><tr><td><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">低速 &amp; 高コスト</code></td><td><strong>Snowflake（Large）</strong></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_100B/large_enriched.json">~21,119秒</a></td><td><a href="https://github.com/ClickHouse/examples/blob/main/blog-examples/Bench2Cost/snowflake/results_100B/large_enriched.json">~$140.80</a></td></tr></tbody></table></div>
+<p><em>(SnowflakeとDatabricksの最小ウェアハウスサイズはここには示されていません。1000億行では数日間実行されるため、この比較の範囲をはるかに超えています。)</em></p>
+<p>そして<a href="/blog/cloud-data-warehouses-cost-performance-comparison#how-we-measure-overall-cost-performance-ranking">コストパフォーマンススコア</a>ビューは、ギャップを見逃すことを不可能にします：</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs.015.png" loading="lazy" src="/uploads/Blog_Costs_015_a93e315273.png"/></span>
+<p>1000億行では、コストパフォーマンスのスプレッドが大幅に増加します：</p>
+<ul>
+<li>
+<p><strong>ClickHouse Cloudは明確なリーダーであり続けます（最高の総合コストパフォーマンス）。</strong></p>
+</li>
+<li>
+<p>次善のシステム、 <strong>Databricks（4X-Large）</strong> は、<strong>23倍悪い</strong>まで落ちます。</p>
+</li>
+<li>
+<p><strong>Snowflake（4X-L）<strong>は</strong>32倍悪い</strong>で続きます。</p>
+</li>
+<li>
+<p><strong>BigQuery Enterprise、Redshift Serverless（128 RPU）、Databricks（Large）、Snowflake（L）<strong>は</strong>数百倍悪い</strong>範囲に入ります。</p>
+</li>
+<li>
+<p><strong>BigQuery On-Demand</strong>はチャートの底に崩壊し、<strong>1,350倍悪い</strong>です。</p>
+</li>
+</ul>
+<blockquote>
+<p>私たちが<strong>1000億行</strong>で止めたのは、ClickHouse Cloudが限界に達したからではなく、<a href="https://clickpy.clickhouse.com/">達していませんでした</a>、同じベンチマークを<strong>1兆行</strong>以上に押し上げることが、他のほとんどのシステムにとって<strong>法外に高価</strong>であるか、または数日間の実行イベントになるからです。<br/><br/>1000億では、いくつかのウェアハウスはすでに単一のClickBench実行で <strong>$100〜$1,700</strong>のコンピュート請求を発生させており、より小さなティアは数日間実行されます。</p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="最高のコストパフォーマンスを提供するのは誰ですか" level="2">最高のコストパフォーマンスを提供するのは誰ですか？<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E6%9C%80%E9%AB%98%E3%81%AE%E3%82%B3%E3%82%B9%E3%83%88%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9%E3%82%92%E6%8F%90%E4%BE%9B%E3%81%99%E3%82%8B%E3%81%AE%E3%81%AF%E8%AA%B0%E3%81%A7%E3%81%99%E3%81%8B">#</a></span></h2>
+<p>私たちはシンプルな質問から始めました。今、データでそれに答えることができます：</p>
+<blockquote>
+<p>分析ワークロードにおいて、1ドルあたり最も高いパフォーマンスを得られるのはどこか？</p>
+</blockquote>
+<p>より大きなスケール — 100億、そして1000億行 — に押し上げると、トレンドは明白になります：すべての主要なクラウドデータウェアハウスが「低速 &amp; 高コスト」に向かって漂います。</p>
+<p><strong>1つを除いて。</strong></p>
+<p>1000億行のストレステストを含むすべてのスケールで、<strong>ClickHouse Cloudは「高速 &amp; 低コスト」にとどまる唯一のシステムです</strong>。他のすべてのシステムは遅く、高価、またはその両方になります。</p>
+<br/>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-Costs-animation01_small.gif" loading="lazy" src="/uploads/Blog_Costs_animation01_small_de9ac301cc.gif"/></span>
+<br/>
+<blockquote>
+<p><strong>大規模な分析ワークロードにおいて、ClickHouse Cloudは他のすべてのシステムよりも桁違いに優れたコストパフォーマンスを提供します。</strong></p>
+</blockquote>
+<p>そして、ここにキッカーがあります：SnowflakeとDatabricksはすでに、提供する最大のウェアハウスサイズで、ハードリミットに達していました。</p>
+<p>ClickHouse Cloudにはそのような上限はありません。</p>
+<p>私たちが20コンピュートノードで止めたのは、ClickHouse Cloudが限界に達したからではなく、結論がすでに決定的だったからです。</p>
+<p>ベンチマークをどのように実行したかを正確に確認したい場合は、完全な方法論が以下の付録に含まれています。</p>
+<p><br/><br/></p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="付録ベンチマーク方法論" level="2">付録：ベンチマーク方法論<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E4%BB%98%E9%8C%B2%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF%E6%96%B9%E6%B3%95%E8%AB%96">#</a></span></h2>
+<p>このセクションは、5つのシステムすべてでベンチマークを実行し、価格を正規化した方法の完全な詳細を提供します。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="ベンチマークセットアップ" level="3">ベンチマークセットアップ<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97">#</a></span></h3>
+<p>この分析は<a href="https://benchmark.clickhouse.com/">ClickBench</a>に基づいており、<strong><a href="https://github.com/ClickHouse/ClickBench/?tab=readme-ov-file#overview">本番環境由来の匿名化されたデータセット</a><strong>と</strong>43の現実的な分析クエリ</strong>（クリックストリーム、ログ、ダッシュボードなど）を使用しており、合成データではありません。</p>
+<p>しかし、標準データセットは約1億行で、現在の基準では小さいです。今日のデータセットは頻繁に数十億、数兆、さらには数京で動作します。<a href="https://clickhouse.com/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse#proving-the-system-at-scale">Teslaは負荷テストのために1京行以上をClickHouseに取り込みました</a>、そして<a href="https://clickpy.clickhouse.com/">ClickPy</a>、私たちのPythonクライアントテレメトリデータセットは、すでに<a href="https://sql.clickhouse.com/?query=U0VMRUNUCiAgICAgICAgZm9ybWF0UmVhZGFibGVRdWFudGl0eShzdW0oY291bnQpKSBBUyB0b3RhbCwgdW5pcUV4YWN0KHByb2plY3QpIGFzIHByb2plY3RzIEZST00gcHlwaS5weXBpX2Rvd25sb2Fkcw&amp;run_query=true">2兆行</a>を超えています。</p>
+<p>データが増えるにつれてコストとパフォーマンスがどのように進化するかを理解するために、<strong>ClickBenchを10億、100億、1000億行に拡張し</strong>、3つのスケールすべてで完全な43クエリベンチマークを再実行しました。</p>
+<p><em>結果を公正で再現可能に保つために、標準的な<a href="https://github.com/ClickHouse/ClickBench/?tab=readme-ov-file#overview">ClickBenchルール</a>に従いました：チューニングなし、エンジン固有の最適化なし、最小/最大コンピュート設定の変更なし。これにより、すべての結果が、ハンドチューニングやワークロード固有のトリック（例：マテリアライズドビューで集計を事前計算）なしで、各システムが箱から出してどのように動作するかを反映することを保証します。</em></p>
+<p>互換性のない課金モデルを持つシステム間で結果を比較可能にするために、コンパニオン投稿の<a href="/blog/how-cloud-data-warehouses-bill-you#before-we-dive-in-how-we-calculate-costs-with-bench2cost">Bench2Costフレームワーク</a>を使用しました。これは、生のクエリごとの実行時間を取得し、各ベンダーの実際のコンピュート価格モデルを適用し、すべてのシステム上のすべてのクエリの<strong>実行時間とコンピュートコスト</strong>、さらに<strong>ストレージコストとシステムメタデータ</strong>を含む統一されたデータセットを生成します。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="比較する構成" level="3">比較する構成<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E6%AF%94%E8%BC%83%E3%81%99%E3%82%8B%E6%A7%8B%E6%88%90">#</a></span></h3>
+<p>インタラクティブベンチマークエクスプローラーでは<em>すべての</em>ティアとクラスターサイズを比較できますが、この投稿では、比較をシンプルで一貫性のあるものにしています：</p>
+<ul>
+<li>
+<p><strong><a href="/blog/how-cloud-data-warehouses-bill-you#snowflake">Snowflake</a>と<a href="/blog/how-cloud-data-warehouses-bill-you#databricks-sql-serverless">Databricks</a></strong>：それぞれ3つのウェアハウスサイズ、<strong>最小</strong>、<strong>中規模サイズ</strong>、<strong>最大</strong>のEnterpriseティアサイズを含め、完全な実用的なスペクトルをカバーします。<em>（Snowflake固有の詳細、Gen 2ウェアハウス、QAS、新しいウェアハウスサイズについては、以下のメモを参照してください。）</em></p>
+</li>
+<li>
+<p><strong><a href="/blog/how-cloud-data-warehouses-bill-you#clickhouse-cloud">ClickHouse Cloud</a></strong>：ClickHouse Cloudには固定されたウェアハウス形状がないため、「小/中/大」ティアは存在しません。代わりに、データセットサイズごとに<strong>1つの固定されたClickHouse Cloud Enterpriseティア構成</strong>を使用します。</p>
+</li>
+<li>
+<p><strong><a href="/blog/how-cloud-data-warehouses-bill-you#bigquery">BigQuery</a></strong>：BigQueryはチャートに2回表示されます。これは、クラスターサイズの概念を持たない完全なサーバーレスシステムですが、2つの課金モデルを提供しているためです。ワークロードを1回実行し（2000スロットのベース容量で）、その後、同じ実行時間をEnterprise（使用された<strong>スロット容量ベース</strong>）価格と<strong>オンデマンド</strong>（スキャンされたTiBあたり）価格の両方を使用して価格設定します。</p>
+</li>
+<li>
+<p><strong><a href="/blog/how-cloud-data-warehouses-bill-you#redshift-serverless">Redshift Serverless</a></strong>：Redshift Serverlessは1回表示されます。これは同様にウェアハウスサイズやティアを持たないためです。<strong>デフォルトの128 RPUベース構成</strong>を使用します。</p>
+</li>
+</ul>
+<p>すべての価格は、該当する場合、同じクラウドプロバイダーとリージョン（AWS us-east）で取得されます。BigQueryは例外で、GCP us-eastを使用します。</p>
+<p>ベンダーが複数の価格ティアを提供する場合（例：Enterprise対Standard/Basic）、一貫性のためにEnterpriseティアを使用しますが、相対的なコストパフォーマンスの違いはティア間で広く同じままです。インタラクティブベンチマークエクスプローラーで代替ティアを探索することで、これを確認できます。</p>
+<p>これにより、10億、100億、1000億行にわたって公正で、解釈可能で、一貫した比較が維持されます。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="snowflake-gen2qas新しいウェアハウスサイズinteractiveウェアハウスに関する注記" level="3">Snowflake Gen2、QAS、新しいウェアハウスサイズ、Interactiveウェアハウスに関する注記<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#snowflake-gen2qas%E6%96%B0%E3%81%97%E3%81%84%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%8F%E3%82%A6%E3%82%B9%E3%82%B5%E3%82%A4%E3%82%BAinteractive%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%8F%E3%82%A6%E3%82%B9%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E6%B3%A8%E8%A8%98">#</a></span></h3>
+<p>このベンチマークでは、<strong>Snowflakeの標準Gen 1ウェアハウス</strong>を使用しました。これは今日ほとんどのリージョンでデフォルトの構成のままです。</p>
+<p><a href="https://docs.snowflake.com/en/en/user-guide/warehouses-gen2">Gen 2ウェアハウス</a>は、同じTシャツサイズで<a href="https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf">25〜35%多くのクレジット/時間を消費</a>し、その可用性はクラウド/リージョンによって異なるため、Gen 1に焦点を当てることで、環境間で一貫した比較を維持します。</p>
+<p>また、<strong>SnowflakeのQuery Acceleration Service（<a href="https://docs.snowflake.com/en/user-guide/query-acceleration-service">QAS</a>）を有効にしませんでした</strong>。<br/>
+QASはウェアハウスの上に<strong>サーバーレスバーストコンピュート</strong>を追加し、スパイキーまたはスキャンヘビーなクエリフラグメントを加速できますが、<a href="https://docs.snowflake.com/en/user-guide/query-acceleration-service#query-acceleration-service-cost">追加の課金ディメンションを導入する</a>ため、クリーンなベースライン比較を維持するために、この研究では除外しています。</p>
+<p>Snowflakeは<strong>4X-Largeよりも大きいウェアハウスサイズ</strong>も導入しました - <a href="https://docs.snowflake.com/en/user-guide/warehouses-overview#warehouse-size">具体的には</a><strong>5X-Large</strong>と<strong>6X-Large</strong>です。これらは<a href="https://docs.snowflake.com/en/release-notes/performance-improvements-2024">2024年初頭に開始</a>され、その後クラウド全体に拡大しましたが、4X-Largeは最も広く使用される上位ティアのままであるため、ここでは最大サイズとして選択しました。</p>
+<p>Snowflakeの<a href="https://docs.snowflake.com/en/user-guide/interactive">Interactiveウェアハウス</a>（プレビュー）は、低レイテンシ、高同時実行ワークロードに最適化されています。これらは標準ウェアハウスよりも<a href="https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf">1時間あたりの価格が低い</a>です（例：XSで0.6対1クレジット/時間）が、<a href="https://docs.snowflake.com/en/user-guide/interactive#limitations-of-interactive-warehouses">SELECTクエリに5秒のタイムアウトを強制</a>し、<a href="https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations">1時間の最小課金期間</a>を持ち、各再開は完全な最小料金をトリガーします。</p>
+<blockquote>
+<p>Snowflakeは多くの相互作用するパフォーマンス変数を提供します — Gen 1対Gen 2、QAS、5XL/6XLティア、Interactiveウェアハウス。最初のベンチマークでこれらを混合することを意図的に避け、比較をクリーンに保ちました。Snowflake固有のフォローアップ記事で、これらの構成を深く探索します。</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="ホット対コールドランタイムに関する注記" level="3">ホット対コールドランタイムに関する注記<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%83%9B%E3%83%83%E3%83%88%E5%AF%BE%E3%82%B3%E3%83%BC%E3%83%AB%E3%83%89%E3%83%A9%E3%83%B3%E3%82%BF%E3%82%A4%E3%83%A0%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E6%B3%A8%E8%A8%98">#</a></span></h3>
+<p>ClickBenchに沿って、<strong>ホット</strong>ランタイムを報告します。これは3回の実行のうちの最良のものとして定義され、すべての場所でクエリ結果キャッシュを<strong>無効にしました</strong>。コールドスタートベンチマークは含まれていません：クラウドウェアハウスは非常に異なるデータキャッシング動作を公開し、ほとんどはOS レベルのページキャッシュのリセットやオンデマンドでのコンピュートの再起動を許可しません。コールド条件は標準化できないため、公正で再現可能な結果のいずれも生成しません。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="ネイティブストレージ形式に関する注記" level="3">ネイティブストレージ形式に関する注記<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%83%8D%E3%82%A4%E3%83%86%E3%82%A3%E3%83%96%E3%82%B9%E3%83%88%E3%83%AC%E3%83%BC%E3%82%B8%E5%BD%A2%E5%BC%8F%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E6%B3%A8%E8%A8%98">#</a></span></h3>
+<p>このベンチマークの各システムは、<strong>そのクエリエンジンのネイティブストレージ形式</strong>を使用して評価されます。たとえば、ClickHouse CloudのMergeTree、DatabricksのDelta Lake、Snowflakeの独自のマイクロパーティション形式、BigQueryのCapacitorカラムナーストレージです。これにより、各エンジンが設計および最適化された条件下で測定されることを保証します。</p>
+<p>補足として、SnowflakeやClickHouse Cloudを含むいくつかのシステムは、Delta Lake、Apache Iceberg、またはApache Hudiなどのオープンテーブル形式を直接クエリすることもできます。ただし、この研究は厳密にネイティブパフォーマンスとコストに焦点を当てています。オープンテーブル形式でこれらのエンジンを比較する別のベンチマークが計画されています。お楽しみに。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="メータリング粒度に関する注記" level="3">メータリング粒度に関する注記<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E3%83%A1%E3%83%BC%E3%82%BF%E3%83%AA%E3%83%B3%E3%82%B0%E7%B2%92%E5%BA%A6%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E6%B3%A8%E8%A8%98">#</a></span></h3>
+<p>5つのシステムすべてで比較を一貫して保つために、1つの簡略化を行います：</p>
+<p><strong>すべてのシステムが完璧な秒単位の粒度でコンピュートを課金しているかのように扱います。</strong></p>
+<p>実際には、<a href="/blog/how-cloud-data-warehouses-bill-you">コンパニオン投稿</a>で詳述されているように：</p>
+<ul>
+<li>
+<p>Snowflake、Databricks、ClickHouse Cloudは、アイドルタイムアウト後にのみ課金を停止し、それぞれがウェアハウス/サービスが実行されているときに<strong>1分間の最小料金</strong>を持っています。</p>
+</li>
+<li>
+<p>BigQueryとRedshift Serverlessは使用を<strong>秒単位</strong>で計測しますが、それでも<strong>最小料金ウィンドウ</strong>を適用します（例：BigQueryのスロット消費の1分間最小、Redshift ServerlessのRPU使用の1分間最小）。</p>
+</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="範囲と機能の違いに関する注記" level="3">範囲と機能の違いに関する注記<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E7%AF%84%E5%9B%B2%E3%81%A8%E6%A9%9F%E8%83%BD%E3%81%AE%E9%81%95%E3%81%84%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E6%B3%A8%E8%A8%98">#</a></span></h3>
+<p>この分析は1つの質問を見ています：</p>
+<blockquote>
+<p>データがスケールするにつれて、分析ワークロードを実行するのにいくらかかるか？</p>
+</blockquote>
+<p>比較をクリーンに保つために、意図的に43クエリベンチマークの<strong>コンピュートコストのみに焦点を当てています</strong>。より広範なプラットフォーム機能（ガバナンス、エコシステム統合、ワークロード管理、レイクハウス機能、MLツールなど）を比較しようと<strong>しません</strong>。これらは間接的にベンダーがコンピュートの価格をどのように設定するかに影響を与える可能性がありますが。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="総合コストパフォーマンスランキングの測定方法" level="3">「総合コストパフォーマンスランキング」の測定方法<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E7%B7%8F%E5%90%88%E3%82%B3%E3%82%B9%E3%83%88%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9%E3%83%A9%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0%E3%81%AE%E6%B8%AC%E5%AE%9A%E6%96%B9%E6%B3%95">#</a></span></h3>
+<p>完全に異なる課金モデルを持つシステムを比較するために、1つのシンプルでスケール独立なメトリックを使用します：</p>
+<p><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">コストパフォーマンススコア = 実行時間 × コスト</code></p>
+<p><em>(小さい方が良い)</em></p>
+<p>このメトリックは、コストパフォーマンスランキングの背後にある直感を捉えています：</p>
+<ul>
+<li><strong>高速なシステムはより良いスコアを獲得します</strong></li>
+<li><strong>低コストのシステムはより良いスコアを獲得します</strong></li>
+<li><strong>低速または高コストのシステムはすぐに膨張します</strong></li>
+<li><strong>コストとランタイムは複合します</strong>。非効率性は互いに掛け算されます</li>
+</ul>
+<p>これは私たちが気にする質問に直接答えます：</p>
+<blockquote>
+<p><strong>このシステムがワークロードを完了するのにどれくらい高価か？</strong></p>
+</blockquote>
+<p>すべての結果を正規化して、<strong>最良のシステムがベースライン（1×）になり</strong>、他のすべてのシステムは<strong>N×悪い</strong>として表示され、ランキングを一目で比較しやすくします。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="散布図チャートの読み方" level="3">散布図チャートの読み方<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/cloud-data-warehouses-cost-performance-comparison-jp#%E6%95%A3%E5%B8%83%E5%9B%B3%E3%83%81%E3%83%A3%E3%83%BC%E3%83%88%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9">#</a></span></h3>
+<p>上記のセクションで使用している「合計実行時間対合計コンピュートコスト」散布図の読み方に関する2つの簡単なメモ：</p>
+<ul>
+<li>
+<p><strong>両軸は対数スケールを使用しています。</strong> システム間の違いは、より大きなデータ量で桁違いに及ぶため、対数-対数ビューはすべてを読みやすく保ちます。</p>
+</li>
+<li>
+<p><strong>プロットを一目で解釈しやすくするために、4つの象限を重ねました</strong>（「高速 &amp; 低コスト」、「高速 &amp; 高コスト」など）。これらの象限は<strong>純粋に視覚的</strong>です。これらは中央値または統計的カットポイントに基づいて<strong>いません</strong>。読者を方向付けるシンプルな方法です。</p>
+</li>
+</ul>
+<p>興味深いのは、データセットが増えるにつれてシステムが象限間をどのように移動するかです。</p></div></div><div class="rich_content rich-text-content mt-8 leading-6"><p><a href="https://clickhouse.cloud/signUp?loc=blog-cta-footer&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog">Get started</a> with ClickHouse Cloud today and receive $300 in credits. At the end of your 30-day trial, continue with a pay-as-you-go plan, or <a href="/company/contact?loc=blog-cta-footer">contact us</a> to learn more about our volume-based discounts. Visit our <a href="/pricing?loc=blog-cta-header">pricing page</a> for details.</p></div></article>

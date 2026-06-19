@@ -1,0 +1,53 @@
+---
+source: kb.altinity.com
+url: https://docs.altinity.com/operationsguide/clickhouse-zookeeper/zookeeper-installation/
+topic: engines-altinity-knowledge-base-for-clickhouse
+ch_version_introduced: '1.0'
+last_updated: '2026-06-12'
+chunk_index: 5
+total_chunks_in_doc: 42
+---
+
+set show_table_uuid_in_table_create_qquery_if_not_nil=1 ; SHOW CREATE TABLE xxx; /* or SELECT create_table_query FROM system.tables WHERE ... */ ``` ### Q. Should I use Atomic or Ordinary for new setups? All things inside ClickHouse itself should work smoothly with `Atomic`.
+
+But some external tools \- backup tools, things involving other kinds of direct manipulations with ClickHouse files \& folders may have issues with `Atomic`.
+
+`Ordinary` layout on the filesystem is simpler. And the issues which address Atomic (lock\-free renames, drops, atomic exchange of table) are not so critical in most cases.
+
+|  | Ordinary | Atomic |
+| --- | --- | --- |
+| filesystem layout | very simple | more complicated |
+| external tool support(like `clickhouse-backup`) | good / mature | good / mature |
+| some DDL queries (DROP / RENAME) mayhang for a long time (waiting for some other things) | yes 👎 | no 👍 |
+| Possibility to swap 2 tables | renamea to a\_old,b to a,a\_old to b;Operation is not atomic, andcan break in the middle (while chances are low). | EXCHANGE TABLES t1 AND t2Atomic, have no intermediate states. |
+| uuid in zookeeper path | Not possible to use.The typical pattern is to add version suffix to zookeeper path when you need to createthe new version of the same table. | You can use uuid in zookeeper paths.That requires some extra care when you expand the cluster, and makes zookeeper paths harder to map to real table.But allows to to do any kind of manipulations on tables (rename, recreate with same name etc). |
+| Materialized view without TO syntax(!we recommend using TO syntax always!) | .inner.mv\_nameThe name is predictable, easy to match with MV. | .inner\_id.{uuid}The name is unpredictable, hard to match with MV (maybe problematic for MV chains, and similar scenarios) |
+
+## Using Ordinary by default instead of Atomic
+
+```
+---
+title: "cat /etc/clickhouse-server/users.d/disable_atomic_database.xml "
+linkTitle: "cat /etc/clickhouse-server/users.d/disable_atomic_database.xml "
+description: >
+    cat /etc/clickhouse-server/users.d/disable_atomic_database.xml
+---
+<?xml version="1.0"?>
+<clickhouse>
+    <profiles>
+        <default>
+            <default_database_engine>Ordinary</default_database_engine>
+        </default>
+    </profiles>
+</clickhouse>
+
+```
+## Other sources
+
+Presentation [https://youtu.be/1LVJ\_WcLgF8?t\=2744](https://youtu.be/1LVJ_WcLgF8?t=2744)
+
+[https://github.com/ClickHouse/clickhouse\-presentations/blob/master/meetup46/database\_engines.pdf](https://github.com/ClickHouse/clickhouse-presentations/blob/master/meetup46/database_engines.pdf)
+
+# 1\.1 \- How to Convert Ordinary to Atomic
+
+## New, official way

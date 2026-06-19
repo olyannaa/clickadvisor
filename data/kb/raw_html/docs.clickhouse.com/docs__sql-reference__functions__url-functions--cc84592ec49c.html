@@ -1,0 +1,897 @@
+<h1>Functions for working with URLs | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">URLs</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/url-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for working with URLs</h1></header><h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a aria-label="Direct link to Overview" class="hash-link" href="#overview" title="Direct link to Overview">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The functions mentioned in this section are optimized for maximum performance and for the most part do not follow the RFC-3986 standard.
+Functions which implement RFC-3986 have <code>RFC</code> appended to their function name and are generally slower.</p></div></div>
+<p>You can generally use the non-<code>RFC</code> function variants when working with publicly registered domains that contain neither user strings nor <code>@</code> symbols.
+The table below details which symbols in a URL can (<code>✔</code>) or cannot (<code>✗</code>) be parsed by the respective <code>RFC</code> and non-<code>RFC</code> variants:</p>
+<table><thead><tr><th>Symbol<th>non-<code>RFC</code><th><code>RFC</code><tbody><tr><td>' '<td>✗<td>✗<tr><td>\t<td>✗<td>✗<tr><td>&lt;<td>✗<td>✗<tr><td>&gt;<td>✗<td>✗<tr><td>%<td>✗<td>✔*<tr><td>{<td>✗<td>✗<tr><td>}<td>✗<td>✗<tr><td>|<td>✗<td>✗<tr><td>\\<td>✗<td>✗<tr><td>^<td>✗<td>✗<tr><td>~<td>✗<td>✔*<tr><td>[<td>✗<td>✗<tr><td>]<td>✗<td>✔<tr><td>;<td>✗<td>✔*<tr><td>=<td>✗<td>✔*<tr><td>&amp;<td>✗<td>✔*</td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<p>symbols marked <code>*</code> are sub-delimiters in RFC 3986 and allowed for user info following the <code>@</code> symbol.</p>
+<p>There are two types of URL functions:</p>
+<ul class="custom-ul">
+<li class="custom-li">Functions that extract parts of a URL. If the relevant part isn't present in a URL, an empty string is returned.</li>
+<li class="custom-li">Functions that remove part of a URL. If the URL does not have anything similar, the URL remains unchanged.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The functions below are generated from the <code>system.functions</code> system table.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="URLHierarchy">URLHierarchy<a aria-label="Direct link to URLHierarchy" class="hash-link" href="#URLHierarchy" title="Direct link to URLHierarchy">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns an array containing the URL, truncated at the end by the symbols <code>/</code>, <code>?</code> and <code>#</code> in the path and query string. Consecutive separator characters are counted as one. The result includes the protocol and host as the first element, with progressively longer paths forming a hierarchy.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">URLHierarchy(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — The URL to process. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of progressively longer URLs forming a hierarchy. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT URLHierarchy('https://example.com/a/b?c=1')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['https://example.com/','https://example.com/a/','https://example.com/a/b','https://example.com/a/b?c=1']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="URLPathHierarchy">URLPathHierarchy<a aria-label="Direct link to URLPathHierarchy" class="hash-link" href="#URLPathHierarchy" title="Direct link to URLPathHierarchy">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns an array containing the path component of the URL, truncated at the end by the symbols <code>/</code>, <code>?</code> and <code>#</code>. Unlike <code>URLHierarchy</code>, the result does not include the protocol and host — it starts from the path. Consecutive separator characters are counted as one.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">URLPathHierarchy(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — The URL to process. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of progressively longer URL path components forming a hierarchy. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT URLPathHierarchy('https://example.com/a/b?c=1')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['/a/','/a/b','/a/b?c=1']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutFragment">cutFragment<a aria-label="Direct link to cutFragment" class="hash-link" href="#cutFragment" title="Direct link to cutFragment">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Removes the fragment identifier, including the number sign, from a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutFragment(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the URL with fragment identifier removed. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutFragment('http://example.com/path?query=value#fragment123');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutFragment('http://example.com/path?query=value#fragment123')─┐
+│ http://example.com/path?query=value                            │
+└────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutQueryString">cutQueryString<a aria-label="Direct link to cutQueryString" class="hash-link" href="#cutQueryString" title="Direct link to cutQueryString">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Removes the query string, including the question mark from a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutQueryString(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the URL with query string removed. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutQueryString('http://example.com/path?query=value&amp;param=123#fragment');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutQueryString('http://example.com/path?query=value&amp;param=123#fragment')─┐
+│ http://example.com/path#fragment                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutQueryStringAndFragment">cutQueryStringAndFragment<a aria-label="Direct link to cutQueryStringAndFragment" class="hash-link" href="#cutQueryStringAndFragment" title="Direct link to cutQueryStringAndFragment">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Removes the query string and fragment identifier, including the question mark and number sign, from a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutQueryStringAndFragment(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the URL with query string and fragment identifier removed. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutQueryStringAndFragment('http://example.com/path?query=value&amp;param=123#fragment');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutQueryStringAndFragment('http://example.com/path?query=value&amp;param=123#fragment')─┐
+│ http://example.com/path                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomain">cutToFirstSignificantSubdomain<a aria-label="Direct link to cutToFirstSignificantSubdomain" class="hash-link" href="#cutToFirstSignificantSubdomain" title="Direct link to cutToFirstSignificantSubdomain">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the <a href="/docs/sql-reference/functions/url-functions#firstSignificantSubdomain">first significant subdomain</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomain(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain if possible, otherwise returns an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    cutToFirstSignificantSubdomain('https://news.clickhouse.com.tr/'),
+    cutToFirstSignificantSubdomain('www.tr'),
+    cutToFirstSignificantSubdomain('tr');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomain('https://news.clickhouse.com.tr/')─┬─cutToFirstSignificantSubdomain('www.tr')─┬─cutToFirstSignificantSubdomain('tr')─┐
+│ clickhouse.com.tr                                                 │ tr                                       │                                      │
+└───────────────────────────────────────────────────────────────────┴──────────────────────────────────────────┴──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainCustom">cutToFirstSignificantSubdomainCustom<a aria-label="Direct link to cutToFirstSignificantSubdomainCustom" class="hash-link" href="#cutToFirstSignificantSubdomainCustom" title="Direct link to cutToFirstSignificantSubdomainCustom">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain. Accepts custom <a href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains" rel="noopener noreferrer" target="_blank">TLD list</a> name. This function can be useful if you need a fresh TLD list or if you have a custom list.</p>
+<p><strong>Configuration example</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yaml"><code class="language-yaml">&lt;!-- &lt;top_level_domains_path&gt;/var/lib/clickhouse/top_level_domains/&lt;/top_level_domains_path&gt; --&gt;
+&lt;top_level_domains_lists&gt;
+    &lt;!-- https://publicsuffix.org/list/public_suffix_list.dat --&gt;
+    &lt;public_suffix_list&gt;public_suffix_list.dat&lt;/public_suffix_list&gt;
+    &lt;!-- NOTE: path is under top_level_domains_path --&gt;
+&lt;/top_level_domains_lists&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomainCustom(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>tld_list_name</code> — Name of the custom TLD list configured in ClickHouse. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Using custom TLD list for non-standard domains</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutToFirstSignificantSubdomainCustom('bar.foo.there-is-no-such-domain', 'public_suffix_list')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">foo.there-is-no-such-domain
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainCustomRFC">cutToFirstSignificantSubdomainCustomRFC<a aria-label="Direct link to cutToFirstSignificantSubdomainCustomRFC" class="hash-link" href="#cutToFirstSignificantSubdomainCustomRFC" title="Direct link to cutToFirstSignificantSubdomainCustomRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain.
+Accepts custom <a href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains" rel="noopener noreferrer" target="_blank">TLD list</a> name.
+This function can be useful if you need a fresh TLD list or if you have a custom list.
+Similar to <a href="#cutToFirstSignificantSubdomainCustom">cutToFirstSignificantSubdomainCustom</a> but conforms to RFC 3986.</p>
+<p><strong>Configuration example</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;!-- &lt;top_level_domains_path&gt;/var/lib/clickhouse/top_level_domains/&lt;/top_level_domains_path&gt; --&gt;
+&lt;top_level_domains_lists&gt;
+    &lt;!-- https://publicsuffix.org/list/public_suffix_list.dat --&gt;
+    &lt;public_suffix_list&gt;public_suffix_list.dat&lt;/public_suffix_list&gt;
+    &lt;!-- NOTE: path is under top_level_domains_path --&gt;
+&lt;/top_level_domains_lists&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomainCustomRFC(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process according to RFC 3986. - <code>tld_list_name</code> — Name of the custom TLD list configured in ClickHouse.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutToFirstSignificantSubdomainCustomRFC('www.foo', 'public_suffix_list');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomainCustomRFC('www.foo', 'public_suffix_list')─────┐
+│ www.foo                                                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainCustomWithWWW">cutToFirstSignificantSubdomainCustomWithWWW<a aria-label="Direct link to cutToFirstSignificantSubdomainCustomWithWWW" class="hash-link" href="#cutToFirstSignificantSubdomainCustomWithWWW" title="Direct link to cutToFirstSignificantSubdomainCustomWithWWW">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain without stripping 'www'. Accepts custom TLD list name. It can be useful if you need a fresh TLD list or if you have a custom list.</p>
+<p><strong>Configuration example</strong></p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yaml"><code class="language-yaml">&lt;!-- &lt;top_level_domains_path&gt;/var/lib/clickhouse/top_level_domains/&lt;/top_level_domains_path&gt; --&gt;
+&lt;top_level_domains_lists&gt;
+    &lt;!-- https://publicsuffix.org/list/public_suffix_list.dat --&gt;
+    &lt;public_suffix_list&gt;public_suffix_list.dat&lt;/public_suffix_list&gt;
+    &lt;!-- NOTE: path is under top_level_domains_path --&gt;
+&lt;/top_level_domains_lists&gt;
+    
+
+**Syntax**
+
+```sql
+cutToFirstSignificantSubdomainCustomWithWWW(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process. - <code>tld_list_name</code> — Name of the custom TLD list configured in ClickHouse.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Part of the domain that includes top-level subdomains up to the first significant subdomain without stripping 'www'. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutToFirstSignificantSubdomainCustomWithWWW('www.foo', 'public_suffix_list');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomainCustomWithWWW('www.foo', 'public_suffix_list')─┐
+│ www.foo                                                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainCustomWithWWWRFC">cutToFirstSignificantSubdomainCustomWithWWWRFC<a aria-label="Direct link to cutToFirstSignificantSubdomainCustomWithWWWRFC" class="hash-link" href="#cutToFirstSignificantSubdomainCustomWithWWWRFC" title="Direct link to cutToFirstSignificantSubdomainCustomWithWWWRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain without stripping <code>www</code>.
+Accepts custom TLD list name.
+It can be useful if you need a fresh TLD list or if you have a custom list.
+Similar to <a href="#cutToFirstSignificantSubdomainCustomWithWWW">cutToFirstSignificantSubdomainCustomWithWWW</a> but conforms to <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a>.</p>
+<p><strong>Configuration example</strong></p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;!-- &lt;top_level_domains_path&gt;/var/lib/clickhouse/top_level_domains/&lt;/top_level_domains_path&gt; --&gt;
+&lt;top_level_domains_lists&gt;
+    &lt;!-- https://publicsuffix.org/list/public_suffix_list.dat --&gt;
+    &lt;public_suffix_list&gt;public_suffix_list.dat&lt;/public_suffix_list&gt;
+    &lt;!-- NOTE: path is under top_level_domains_path --&gt;
+&lt;/top_level_domains_lists&gt;
+    
+
+**Syntax**
+
+```sql
+cutToFirstSignificantSubdomainCustomWithWWWRFC(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process according to RFC 3986. - <code>tld_list_name</code> — Name of the custom TLD list configured in ClickHouse.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain without stripping <code>www</code>. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>RFC 3986 parsing preserving www with custom TLD list</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutToFirstSignificantSubdomainCustomWithWWWRFC('https://www.subdomain.example.custom', 'public_suffix_list')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">www.example.custom
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainRFC">cutToFirstSignificantSubdomainRFC<a aria-label="Direct link to cutToFirstSignificantSubdomainRFC" class="hash-link" href="#cutToFirstSignificantSubdomainRFC" title="Direct link to cutToFirstSignificantSubdomainRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the <a href="/docs/sql-reference/functions/url-functions#firstSignificantSubdomain">"first significant subdomain"</a>. Similar to <a href="#cutToFirstSignificantSubdomain"><code>cutToFirstSignificantSubdomain</code></a> but conforms to <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomainRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process according to RFC 3986. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain if possible, otherwise returns an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    cutToFirstSignificantSubdomain('http://user:<a class="__cf_email__" data-cfemail="7c0c1d0f0f0b130e183c19041d110c1019521f1311" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080'),
+    cutToFirstSignificantSubdomainRFC('http://user:<a class="__cf_email__" data-cfemail="7d0d1c0e0e0a120f193d18051c100d1118531e1210" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomain('http://user:<a class="__cf_email__" data-cfemail="4939283a3a3e263b2d092c31282439252c672a2624" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080')─┬─cutToFirstSignificantSubdomainRFC('http://user:<a class="__cf_email__" data-cfemail="f68697858581998492b6938e979b869a93d895999b" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080')─┐
+│                                                                         │ example.com                                                                │
+└─────────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainWithWWW">cutToFirstSignificantSubdomainWithWWW<a aria-label="Direct link to cutToFirstSignificantSubdomainWithWWW" class="hash-link" href="#cutToFirstSignificantSubdomainWithWWW" title="Direct link to cutToFirstSignificantSubdomainWithWWW">​</a></h2>
+<p>Introduced in: v20.12.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the "first significant subdomain", without stripping '<a href="http://www" rel="noopener noreferrer" target="_blank">www</a>.'.</p>
+<p>Similar to <a href="#cutToFirstSignificantSubdomain"><code>cutToFirstSignificantSubdomain</code></a> but preserves the '<a href="http://www" rel="noopener noreferrer" target="_blank">www</a>.'<!-- --> prefix if present.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomainWithWWW(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain (with www) if possible, otherwise returns an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    cutToFirstSignificantSubdomainWithWWW('https://news.clickhouse.com.tr/'),
+    cutToFirstSignificantSubdomainWithWWW('www.tr'),
+    cutToFirstSignificantSubdomainWithWWW('tr');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomainWithWWW('https://news.clickhouse.com.tr/')─┬─cutToFirstSignificantSubdomainWithWWW('www.tr')─┬─cutToFirstSignificantSubdomainWithWWW('tr')─┐
+│ clickhouse.com.tr                                                        │ www.tr                                          │                                             │
+└──────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────┴─────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutToFirstSignificantSubdomainWithWWWRFC">cutToFirstSignificantSubdomainWithWWWRFC<a aria-label="Direct link to cutToFirstSignificantSubdomainWithWWWRFC" class="hash-link" href="#cutToFirstSignificantSubdomainWithWWWRFC" title="Direct link to cutToFirstSignificantSubdomainWithWWWRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the part of the domain that includes top-level subdomains up to the "first significant subdomain", without stripping 'www'. Similar to <a href="#cutToFirstSignificantSubdomainWithWWW"><code>cutToFirstSignificantSubdomainWithWWW</code></a> but conforms to <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutToFirstSignificantSubdomainWithWWWRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL or domain string to process according to RFC 3986.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the part of the domain that includes top-level subdomains up to the first significant subdomain (with 'www') if possible, otherwise returns an empty string <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    cutToFirstSignificantSubdomainWithWWW('http:%2F%<a class="__cf_email__" data-cfemail="34067243434343431a5a5b42557459555d581a4641" href="/cdn-cgi/l/email-protection">[email protected]</a>/economicheskiy'),
+    cutToFirstSignificantSubdomainWithWWWRFC('http:%2F%<a class="__cf_email__" data-cfemail="93a1d5e4e4e4e4e4bdfdfce5f2d3fef2faffbde1e6" href="/cdn-cgi/l/email-protection">[email protected]</a>/economicheskiy');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutToFirstSignificantSubdomainWithWWW('http:%2F%<a class="__cf_email__" data-cfemail="a391e5d4d4d4d4d48dcdccd5c2e3cec2cacf8dd1d6" href="/cdn-cgi/l/email-protection">[email protected]</a>/economicheskiy')─┬─cutToFirstSignificantSubdomainWithWWWRFC('http:%2F%<a class="__cf_email__" data-cfemail="fac8bc8d8d8d8d8dd494958c9bba979b9396d4888f" href="/cdn-cgi/l/email-protection">[email protected]</a>/economicheskiy')─┐
+│                                                                                       │ mail.ru                                                                                  │
+└───────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutURLParameter">cutURLParameter<a aria-label="Direct link to cutURLParameter" class="hash-link" href="#cutURLParameter" title="Direct link to cutURLParameter">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Removes the <code>name</code> parameter from a URL, if present.
+This function does not encode or decode characters in parameter names, e.g. <code>Client ID</code> and <code>Client%20ID</code> are treated as different parameter names.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutURLParameter(url, name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>name</code> — Name of URL parameter. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>URL with <code>name</code> URL parameter removed. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    cutURLParameter('http://bigmir.net/?a=b&amp;c=d&amp;e=f#g', 'a') AS url_without_a,
+    cutURLParameter('http://bigmir.net/?a=b&amp;c=d&amp;e=f#g', ['c', 'e']) AS url_without_c_and_e;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─url_without_a────────────────┬─url_without_c_and_e──────┐
+│ http://bigmir.net/?c=d&amp;e=f#g │ http://bigmir.net/?a=b#g │
+└──────────────────────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cutWWW">cutWWW<a aria-label="Direct link to cutWWW" class="hash-link" href="#cutWWW" title="Direct link to cutWWW">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Removes the leading <code>www.</code>, if present, from the URL's domain.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">cutWWW(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the URL with leading <code>www.</code> removed from the domain. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT cutWWW('http://www.example.com/path?query=value#fragment');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─cutWWW('http://www.example.com/path?query=value#fragment')─┐
+│ http://example.com/path?query=value#fragment               │
+└────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="decodeURLComponent">decodeURLComponent<a aria-label="Direct link to decodeURLComponent" class="hash-link" href="#decodeURLComponent" title="Direct link to decodeURLComponent">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Takes a URL-encoded string as input and decodes it back to its original, readable form.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">decodeURLComponent(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the decoded URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT decodeURLComponent('http://127.0.0.1:8123/?query=SELECT%201%3B') AS DecodedURL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─DecodedURL─────────────────────────────┐
+│ http://127.0.0.1:8123/?query=SELECT 1; │
+└────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="decodeURLFormComponent">decodeURLFormComponent<a aria-label="Direct link to decodeURLFormComponent" class="hash-link" href="#decodeURLFormComponent" title="Direct link to decodeURLFormComponent">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Decodes URL-encoded strings using form encoding rules (<a href="https://www.rfc-editor.org/rfc/rfc1866.html" rel="noopener noreferrer" target="_blank">RFC-1866</a>), where <code>+</code> signs are converted to spaces and percent-encoded characters are decoded.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">decodeURLFormComponent(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the decoded URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT decodeURLFormComponent('http://127.0.0.1:8123/?query=SELECT%201+2%2B3') AS DecodedURL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─DecodedURL────────────────────────────────┐
+│ http://127.0.0.1:8123/?query=SELECT 1 2+3 │
+└───────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="domain">domain<a aria-label="Direct link to domain" class="hash-link" href="#domain" title="Direct link to domain">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Extracts the hostname from a URL.</p>
+<p>The URL can be specified with or without a protocol.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">domain(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the host name if the input string can be parsed as a URL, otherwise an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT domain('svn+ssh://some.svn-hosting.com:80/repo/trunk');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─domain('svn+ssh://some.svn-hosting.com:80/repo/trunk')─┐
+│ some.svn-hosting.com                                   │
+└────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="domainRFC">domainRFC<a aria-label="Direct link to domainRFC" class="hash-link" href="#domainRFC" title="Direct link to domainRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Extracts the hostname from a URL.
+Similar to <a href="#domain"><code>domain</code></a>, but <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a> conformant.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">domainRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the host name if the input string can be parsed as a URL, otherwise an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    domain('http://user:<a class="__cf_email__" data-cfemail="7f0f1e0c0c08100d1b3f1a071e120f131a511c1012" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment'),
+    domainRFC('http://user:<a class="__cf_email__" data-cfemail="5a2a3b29292d35283e1a3f223b372a363f74393537" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─domain('http://user:<a class="__cf_email__" data-cfemail="e999889a9a9e869b8da98c91888499858cc78a8684" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment')─┬─domainRFC('http://user:<a class="__cf_email__" data-cfemail="1d6d7c6e6e6a726f795d78657c706d7178337e7270" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment')─┐
+│                                                                           │ example.com                                                                  │
+└───────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="domainWithoutWWW">domainWithoutWWW<a aria-label="Direct link to domainWithoutWWW" class="hash-link" href="#domainWithoutWWW" title="Direct link to domainWithoutWWW">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the domain of a URL without leading <code>www.</code> if present.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">domainWithoutWWW(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the domain name if the input string can be parsed as a URL (without leading <code>www.</code>), otherwise an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT domainWithoutWWW('http://<a class="__cf_email__" data-cfemail="9cecfde9f0dcebebebb2f9e4fdf1ecf0f9b2fff3f1" href="/cdn-cgi/l/email-protection">[email protected]</a>:80/');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─domainWithoutWWW('http://<a class="__cf_email__" data-cfemail="314150445d714646461f5449505c415d541f525e5c" href="/cdn-cgi/l/email-protection">[email protected]</a>:80/')─┐
+│ example.com                                         │
+└─────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="domainWithoutWWWRFC">domainWithoutWWWRFC<a aria-label="Direct link to domainWithoutWWWRFC" class="hash-link" href="#domainWithoutWWWRFC" title="Direct link to domainWithoutWWWRFC">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the domain without leading <code>www.</code> if present. Similar to <a href="#domainWithoutWWW"><code>domainWithoutWWW</code></a> but conforms to <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">domainWithoutWWWRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the domain name if the input string can be parsed as a URL (without leading <code>www.</code>), otherwise an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    domainWithoutWWW('http://user:<a class="__cf_email__" data-cfemail="92e2f3e1e1e5fde0f6d2e5e5e5bcf7eaf3ffe2fef7bcf1fdff" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment'),
+    domainWithoutWWWRFC('http://user:<a class="__cf_email__" data-cfemail="b6c6d7c5c5c1d9c4d2f6c1c1c198d3ced7dbc6dad398d5d9db" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─domainWithoutWWW('http://user:<a class="__cf_email__" data-cfemail="2858495b5b5f475a4c685f5f5f064d50494558444d064b4745" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment')─┬─domainWithoutWWWRFC('http://user:<a class="__cf_email__" data-cfemail="5323322020243c2137132424247d362b323e233f367d303c3e" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/path?query=value#fragment')─┐
+│                                                                                         │ example.com                                                                                │
+└─────────────────────────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="encodeURLComponent">encodeURLComponent<a aria-label="Direct link to encodeURLComponent" class="hash-link" href="#encodeURLComponent" title="Direct link to encodeURLComponent">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>Takes a regular string and converts it into a URL-encoded (percent-encoded) format where special characters are replaced with their percent-encoded equivalents.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">encodeURLComponent(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the encoded URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT encodeURLComponent('http://127.0.0.1:8123/?query=SELECT 1;') AS EncodedURL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─EncodedURL───────────────────────────────────────────────┐
+│ http%3A%2F%2F127.0.0.1%3A8123%2F%3Fquery%3DSELECT%201%3B │
+└──────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="encodeURLFormComponent">encodeURLFormComponent<a aria-label="Direct link to encodeURLFormComponent" class="hash-link" href="#encodeURLFormComponent" title="Direct link to encodeURLFormComponent">​</a></h2>
+<p>Introduced in: v22.3.0</p>
+<p>Encodes strings using form encoding rules (<a href="https://www.rfc-editor.org/rfc/rfc1866.html" rel="noopener noreferrer" target="_blank">RFC-1866</a>), where spaces are converted to + signs and special characters are percent-encoded.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">encodeURLFormComponent(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the encoded URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT encodeURLFormComponent('http://127.0.0.1:8123/?query=SELECT 1 2+3') AS EncodedURL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─EncodedURL────────────────────────────────────────────────┐
+│ http%3A%2F%2F127.0.0.1%3A8123%2F%3Fquery%3DSELECT+1+2%2B3 │
+└───────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractURLParameter">extractURLParameter<a aria-label="Direct link to extractURLParameter" class="hash-link" href="#extractURLParameter" title="Direct link to extractURLParameter">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the value of the <code>name</code> parameter in the URL, if present, otherwise an empty string is returned.
+If there are multiple parameters with this name, the first occurrence is returned.
+The function assumes that the parameter in the <code>url</code> parameter is encoded in the same way as in the <code>name</code> argument.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractURLParameter(url, name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>name</code> — Parameter name. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the value of the URL parameter with the specified name. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractURLParameter('http://example.com/?param1=value1&amp;param2=value2', 'param1');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─extractURLPa⋯, 'param1')─┐
+│ value1                   │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractURLParameterNames">extractURLParameterNames<a aria-label="Direct link to extractURLParameterNames" class="hash-link" href="#extractURLParameterNames" title="Direct link to extractURLParameterNames">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns an array of name strings corresponding to the names of URL parameters.
+The values are not decoded.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractURLParameterNames(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of name strings corresponding to the names of URL parameters. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractURLParameterNames('http://example.com/?param1=value1&amp;param2=value2');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─extractURLPa⋯m2=value2')─┐
+│ ['param1','param2']      │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractURLParameters">extractURLParameters<a aria-label="Direct link to extractURLParameters" class="hash-link" href="#extractURLParameters" title="Direct link to extractURLParameters">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns an array of <code>name=value</code> strings corresponding to the URL parameters.
+The values are not decoded.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractURLParameters(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of <code>name=value</code> strings corresponding to the URL parameters. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT extractURLParameters('http://example.com/?param1=value1&amp;param2=value2');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─extractURLParame⋯&amp;param2=value2')─┐
+│ ['param1=value1','param2=value2'] │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="firstSignificantSubdomain">firstSignificantSubdomain<a aria-label="Direct link to firstSignificantSubdomain" class="hash-link" href="#firstSignificantSubdomain" title="Direct link to firstSignificantSubdomain">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the "first significant subdomain".</p>
+<p>The first significant subdomain is a second-level domain if it is 'com', 'net', 'org', or 'co'.
+Otherwise, it is a third-level domain.</p>
+<p>For example, firstSignificantSubdomain('<a href="https://news.clickhouse.com/" rel="noopener noreferrer" target="_blank">https://news.clickhouse.com/</a>') = 'clickhouse', firstSignificantSubdomain ('<a href="https://news.clickhouse.com.tr/" rel="noopener noreferrer" target="_blank">https://news.clickhouse.com.tr/</a>') = 'clickhouse'.</p>
+<p>The list of "insignificant" second-level domains and other implementation details may change in the future.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">firstSignificantSubdomain(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<p><strong>firstSignificantSubdomain</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT firstSignificantSubdomain('https://news.clickhouse.com/')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response"></code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="firstSignificantSubdomainCustom">firstSignificantSubdomainCustom<a aria-label="Direct link to firstSignificantSubdomainCustom" class="hash-link" href="#firstSignificantSubdomainCustom" title="Direct link to firstSignificantSubdomainCustom">​</a></h2>
+<p>Introduced in: v21.1.0</p>
+<p>Returns the first significant subdomain of a URL using a custom TLD (Top-Level Domain) list. The custom TLD list name refers to a configuration that defines which domain suffixes should be treated as top-level domains. This is useful for non-standard TLD hierarchies. The function uses a simplified URL parsing algorithm that assumes the protocol and everything following are stripped.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">firstSignificantSubdomainCustom(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — The URL to extract the subdomain from. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>tld_list_name</code> — Name of the custom TLD list from the configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the first significant subdomain. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT firstSignificantSubdomainCustom('https://news.example.com', 'public_suffix_list')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">example
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="firstSignificantSubdomainCustomRFC">firstSignificantSubdomainCustomRFC<a aria-label="Direct link to firstSignificantSubdomainCustomRFC" class="hash-link" href="#firstSignificantSubdomainCustomRFC" title="Direct link to firstSignificantSubdomainCustomRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Similar to <code>firstSignificantSubdomainCustom</code> but uses RFC 3986 compliant URL parsing instead of the simplified algorithm.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">firstSignificantSubdomainCustomRFC(url, tld_list_name)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — The URL to extract the subdomain from. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>tld_list_name</code> — Name of the custom TLD list from the configuration. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the first significant subdomain. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic usage</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT firstSignificantSubdomainCustomRFC('https://news.example.com', 'public_suffix_list')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">example
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="firstSignificantSubdomainRFC">firstSignificantSubdomainRFC<a aria-label="Direct link to firstSignificantSubdomainRFC" class="hash-link" href="#firstSignificantSubdomainRFC" title="Direct link to firstSignificantSubdomainRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the "first significant subdomain" according to RFC 1034.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">firstSignificantSubdomainRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">None.</li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p><strong>Examples</strong></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="fragment">fragment<a aria-label="Direct link to fragment" class="hash-link" href="#fragment" title="Direct link to fragment">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the fragment identifier without the initial hash symbol.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">fragment(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the fragment identifier without the initial hash symbol. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT fragment('https://clickhouse.com/docs/getting-started/quick-start/cloud#1-create-a-clickhouse-service');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─fragment('http⋯ouse-service')─┐
+│ 1-create-a-clickhouse-service │
+└───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="netloc">netloc<a aria-label="Direct link to netloc" class="hash-link" href="#netloc" title="Direct link to netloc">​</a></h2>
+<p>Introduced in: v20.5.0</p>
+<p>Extracts network locality (<code>username:password@host:port</code>) from a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">netloc(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns <code>username:password@host:port</code> from a given URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT netloc('http://<a class="__cf_email__" data-cfemail="91e1f0e4fdd1e6e6e6bff4e9f0fce1fdf4bff2fefc" href="/cdn-cgi/l/email-protection">[email protected]</a>:80/');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─netloc('http⋯e.com:80/')─┐
+│ <a class="__cf_email__" data-cfemail="9eeeffebf2dee9e9e9b0fbe6fff3eef2fbb0fdf1f3" href="/cdn-cgi/l/email-protection">[email protected]</a>:80  │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="path">path<a aria-label="Direct link to path" class="hash-link" href="#path" title="Direct link to path">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the path without query string from a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">path(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the path of the URL without query string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT path('https://clickhouse.com/docs/sql-reference/functions/url-functions/?query=value');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─path('https://clickhouse.com/en/sql-reference/functions/url-functions/?query=value')─┐
+│ /docs/sql-reference/functions/url-functions/                                         │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="pathFull">pathFull<a aria-label="Direct link to pathFull" class="hash-link" href="#pathFull" title="Direct link to pathFull">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>The same as <a href="#path"><code>path</code></a>, but includes the query string and fragment of the URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">pathFull(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the path of the URL including query string and fragment. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT pathFull('https://clickhouse.com/docs/sql-reference/functions/url-functions/?query=value#section');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─pathFull('https://clickhouse.com⋯unctions/?query=value#section')─┐
+│ /docs/sql-reference/functions/url-functions/?query=value#section │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="port">port<a aria-label="Direct link to port" class="hash-link" href="#port" title="Direct link to port">​</a></h2>
+<p>Introduced in: v20.5.0</p>
+<p>Returns the port of a URL, or the <code>default_port</code> if the URL contains no port or cannot be parsed.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">port(url[, default_port])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>default_port</code> — Optional. The default port number to be returned. <code>0</code> by default. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the port of the URL, or the default port if there is no port in the URL or in case of a validation error. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT port('https://clickhouse.com:8443/docs'), port('https://clickhouse.com/docs', 443);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─port('https://clickhouse.com:8443/docs')─┬─port('https://clickhouse.com/docs', 443)─┐
+│                                     8443 │                                      443 │
+└──────────────────────────────────────────┴──────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="portRFC">portRFC<a aria-label="Direct link to portRFC" class="hash-link" href="#portRFC" title="Direct link to portRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Returns the port or <code>default_port</code> if the URL contains no port or cannot be parsed.
+Similar to <a href="#port"><code>port</code></a>, but <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a> conformant.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">portRFC(url[, default_port])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>default_port</code> — Optional. The default port number to be returned. <code>0</code> by default. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the port or the default port if there is no port in the URL or in case of a validation error. <a href="/docs/sql-reference/data-types/int-uint"><code>UInt16</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT port('http://user:<a class="__cf_email__" data-cfemail="a7d7c6d4d4d0c8d5c3e7c2dfc6cad7cbc289c4c8ca" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/'), portRFC('http://user:<a class="__cf_email__" data-cfemail="f888998b8b8f978a9cb89d80999588949dd69b9795" href="/cdn-cgi/l/email-protection">[email protected]</a>:8080/');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─port('http:/⋯com:8080/')─┬─portRFC('htt⋯com:8080/')─┐
+│                        0 │                     8080 │
+└──────────────────────────┴──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="protocol">protocol<a aria-label="Direct link to protocol" class="hash-link" href="#protocol" title="Direct link to protocol">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Extracts the protocol from a URL.</p>
+<p>Examples of typical returned values: http, https, ftp, mailto, tel, magnet.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">protocol(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the protocol of the URL, or an empty string if it cannot be determined. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT protocol('https://clickhouse.com/');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─protocol('https://clickhouse.com/')─┐
+│ https                               │
+└─────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="queryString">queryString<a aria-label="Direct link to queryString" class="hash-link" href="#queryString" title="Direct link to queryString">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the query string of a URL without the initial question mark, <code>#</code> and everything after <code>#</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">queryString(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the query string of the URL without the initial question mark and fragment. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT queryString('https://clickhouse.com/docs?query=value&amp;param=123#section');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─queryString(⋯3#section')─┐
+│ query=value&amp;param=123    │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="queryStringAndFragment">queryStringAndFragment<a aria-label="Direct link to queryStringAndFragment" class="hash-link" href="#queryStringAndFragment" title="Direct link to queryStringAndFragment">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Returns the query string and fragment identifier of a URL.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">queryStringAndFragment(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the query string and fragment identifier of the URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT queryStringAndFragment('https://clickhouse.com/docs?query=value&amp;param=123#section');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─queryStringAnd⋯=123#section')─┐
+│ query=value&amp;param=123#section │
+└───────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="topLevelDomain">topLevelDomain<a aria-label="Direct link to topLevelDomain" class="hash-link" href="#topLevelDomain" title="Direct link to topLevelDomain">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Extracts the the top-level domain from a URL.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The URL can be specified with or without a protocol.
+For example:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">svn+ssh://some.svn-hosting.com:80/repo/trunk
+some.svn-hosting.com:80/repo/trunk
+https://clickhouse.com/time/
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">topLevelDomain(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the domain name if the input string can be parsed as a URL. Otherwise, an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT topLevelDomain('svn+ssh://www.some.svn-hosting.com:80/repo/trunk');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─topLevelDomain('svn+ssh://www.some.svn-hosting.com:80/repo/trunk')─┐
+│ com                                                                │
+└────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="topLevelDomainRFC">topLevelDomainRFC<a aria-label="Direct link to topLevelDomainRFC" class="hash-link" href="#topLevelDomainRFC" title="Direct link to topLevelDomainRFC">​</a></h2>
+<p>Introduced in: v22.10.0</p>
+<p>Extracts the the top-level domain from a URL.
+Similar to <a href="#topLevelDomain"><code>topLevelDomain</code></a>, but conforms to <a href="https://datatracker.ietf.org/doc/html/rfc3986" rel="noopener noreferrer" target="_blank">RFC 3986</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">topLevelDomainRFC(url)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>url</code> — URL. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Domain name if the input string can be parsed as a URL. Otherwise, an empty string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT topLevelDomain('http://foo:foo%<a class="__cf_email__" data-cfemail="55616437342715333a3a7b363a38" href="/cdn-cgi/l/email-protection">[email protected]</a>'), topLevelDomainRFC('http://foo:foo%<a class="__cf_email__" data-cfemail="8ebabfeceffccee8e1e1a0ede1e3" href="/cdn-cgi/l/email-protection">[email protected]</a>');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─topLevelDomain('http://foo:foo%<a class="__cf_email__" data-cfemail="11252073706351777e7e3f727e7c" href="/cdn-cgi/l/email-protection">[email protected]</a>')─┬─topLevelDomainRFC('http://foo:foo%<a class="__cf_email__" data-cfemail="51656033302311373e3e7f323e3c" href="/cdn-cgi/l/email-protection">[email protected]</a>')─┐
+│                                                │ com                                               │
+└────────────────────────────────────────────────┴───────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/uniqtheta-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">uniqTheta</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/uuid-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">UUIDs</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#overview">Overview</a><li><a class="table-of-contents__link toc-highlight" href="#URLHierarchy">URLHierarchy</a><li><a class="table-of-contents__link toc-highlight" href="#URLPathHierarchy">URLPathHierarchy</a><li><a class="table-of-contents__link toc-highlight" href="#cutFragment">cutFragment</a><li><a class="table-of-contents__link toc-highlight" href="#cutQueryString">cutQueryString</a><li><a class="table-of-contents__link toc-highlight" href="#cutQueryStringAndFragment">cutQueryStringAndFragment</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomain">cutToFirstSignificantSubdomain</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainCustom">cutToFirstSignificantSubdomainCustom</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainCustomRFC">cutToFirstSignificantSubdomainCustomRFC</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainCustomWithWWW">cutToFirstSignificantSubdomainCustomWithWWW</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainCustomWithWWWRFC">cutToFirstSignificantSubdomainCustomWithWWWRFC</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainRFC">cutToFirstSignificantSubdomainRFC</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainWithWWW">cutToFirstSignificantSubdomainWithWWW</a><li><a class="table-of-contents__link toc-highlight" href="#cutToFirstSignificantSubdomainWithWWWRFC">cutToFirstSignificantSubdomainWithWWWRFC</a><li><a class="table-of-contents__link toc-highlight" href="#cutURLParameter">cutURLParameter</a><li><a class="table-of-contents__link toc-highlight" href="#cutWWW">cutWWW</a><li><a class="table-of-contents__link toc-highlight" href="#decodeURLComponent">decodeURLComponent</a><li><a class="table-of-contents__link toc-highlight" href="#decodeURLFormComponent">decodeURLFormComponent</a><li><a class="table-of-contents__link toc-highlight" href="#domain">domain</a><li><a class="table-of-contents__link toc-highlight" href="#domainRFC">domainRFC</a><li><a class="table-of-contents__link toc-highlight" href="#domainWithoutWWW">domainWithoutWWW</a><li><a class="table-of-contents__link toc-highlight" href="#domainWithoutWWWRFC">domainWithoutWWWRFC</a><li><a class="table-of-contents__link toc-highlight" href="#encodeURLComponent">encodeURLComponent</a><li><a class="table-of-contents__link toc-highlight" href="#encodeURLFormComponent">encodeURLFormComponent</a><li><a class="table-of-contents__link toc-highlight" href="#extractURLParameter">extractURLParameter</a><li><a class="table-of-contents__link toc-highlight" href="#extractURLParameterNames">extractURLParameterNames</a><li><a class="table-of-contents__link toc-highlight" href="#extractURLParameters">extractURLParameters</a><li><a class="table-of-contents__link toc-highlight" href="#firstSignificantSubdomain">firstSignificantSubdomain</a><li><a class="table-of-contents__link toc-highlight" href="#firstSignificantSubdomainCustom">firstSignificantSubdomainCustom</a><li><a class="table-of-contents__link toc-highlight" href="#firstSignificantSubdomainCustomRFC">firstSignificantSubdomainCustomRFC</a><li><a class="table-of-contents__link toc-highlight" href="#firstSignificantSubdomainRFC">firstSignificantSubdomainRFC</a><li><a class="table-of-contents__link toc-highlight" href="#fragment">fragment</a><li><a class="table-of-contents__link toc-highlight" href="#netloc">netloc</a><li><a class="table-of-contents__link toc-highlight" href="#path">path</a><li><a class="table-of-contents__link toc-highlight" href="#pathFull">pathFull</a><li><a class="table-of-contents__link toc-highlight" href="#port">port</a><li><a class="table-of-contents__link toc-highlight" href="#portRFC">portRFC</a><li><a class="table-of-contents__link toc-highlight" href="#protocol">protocol</a><li><a class="table-of-contents__link toc-highlight" href="#queryString">queryString</a><li><a class="table-of-contents__link toc-highlight" href="#queryStringAndFragment">queryStringAndFragment</a><li><a class="table-of-contents__link toc-highlight" href="#topLevelDomain">topLevelDomain</a><li><a class="table-of-contents__link toc-highlight" href="#topLevelDomainRFC">topLevelDomainRFC</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

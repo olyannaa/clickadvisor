@@ -1,0 +1,249 @@
+<h1>Manipulating Partitions and Parts | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/alter" itemprop="item"><span itemprop="name">ALTER</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">PARTITION</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/alter/partition.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Manipulating Partitions and Parts</h1></header><p>The following operations with <a href="/docs/engines/table-engines/mergetree-family/custom-partitioning-key">partitions</a> are available:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#detach-partitionpart">DETACH PARTITION|PART</a> — Moves a partition or part to the <code>detached</code> directory and forget it.</li>
+<li class="custom-li"><a href="#drop-partitionpart">DROP PARTITION|PART</a> — Deletes a partition or part.</li>
+<li class="custom-li"><a href="#drop-detached-partitionpart">DROP DETACHED PARTITION|PART</a> - Delete a part or all parts of a partition from <code>detached</code>.</li>
+<li class="custom-li"><a href="#forget-partition">FORGET PARTITION</a> — Deletes a partition metadata from zookeeper if it's empty.</li>
+<li class="custom-li"><a href="#attach-partitionpart">ATTACH PARTITION|PART</a> — Adds a partition or part from the <code>detached</code> directory to the table.</li>
+<li class="custom-li"><a href="#attach-partition-from">ATTACH PARTITION FROM</a> — Copies the data partition from one table to another and adds.</li>
+<li class="custom-li"><a href="#replace-partition">REPLACE PARTITION</a> — Copies the data partition from one table to another and replaces.</li>
+<li class="custom-li"><a href="#move-partition-to-table">MOVE PARTITION TO TABLE</a> — Moves the data partition from one table to another.</li>
+<li class="custom-li"><a href="#clear-column-in-partition">CLEAR COLUMN IN PARTITION</a> — Resets the value of a specified column in a partition.</li>
+<li class="custom-li"><a href="#clear-index-in-partition">CLEAR INDEX IN PARTITION</a> — Resets the specified secondary index in a partition.</li>
+<li class="custom-li"><a href="#freeze-partition">FREEZE PARTITION</a> — Creates a backup of a partition.</li>
+<li class="custom-li"><a href="#unfreeze-partition">UNFREEZE PARTITION</a> — Removes a backup of a partition.</li>
+<li class="custom-li"><a href="#fetch-partitionpart">FETCH PARTITION|PART</a> — Downloads a part or partition from another server.</li>
+<li class="custom-li"><a href="#move-partitionpart">MOVE PARTITION|PART</a> — Move partition/data part to another disk or volume.</li>
+<li class="custom-li"><a href="#update-in-partition">UPDATE IN PARTITION</a> — Update data inside the partition by condition.</li>
+<li class="custom-li"><a href="#delete-in-partition">DELETE IN PARTITION</a> — Delete data inside the partition by condition.</li>
+<li class="custom-li"><a href="#rewrite-parts">REWRITE PARTS</a> — Rewrite parts in the table (or specific partition) completely.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="detach-partitionpart">DETACH PARTITION|PART<a aria-label="Direct link to DETACH PARTITION|PART" class="hash-link" href="#detach-partitionpart" title="Direct link to DETACH PARTITION|PART">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] DETACH PARTITION|PART partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Moves all data for the specified partition to the <code>detached</code> directory. The server forgets about the detached data partition as if it does not exist. The server will not know about this data until you make the <a href="#attach-partitionpart">ATTACH</a> query.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE mt DETACH PARTITION '2020-11-21';
+ALTER TABLE mt DETACH PART 'all_2_2_0';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Read about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<p>After the query is executed, you can do whatever you want with the data in the <code>detached</code> directory — delete it from the file system, or just leave it.</p>
+<p>This query is replicated – it moves the data to the <code>detached</code> directory on all replicas. Note that you can execute this query only on a leader replica. To find out if a replica is a leader, perform the <code>SELECT</code> query to the <a href="/docs/operations/system-tables/replicas">system.replicas</a> table. Alternatively, it is easier to make a <code>DETACH</code> query on all replicas - all the replicas throw an exception, except the leader replicas (as multiple leaders are allowed).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="drop-partitionpart">DROP PARTITION|PART<a aria-label="Direct link to DROP PARTITION|PART" class="hash-link" href="#drop-partitionpart" title="Direct link to DROP PARTITION|PART">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] DROP PARTITION|PART partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Deletes the specified partition from the table. This query tags the partition as inactive and deletes data completely, approximately in 10 minutes.</p>
+<p>Read about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<p>The query is replicated – it deletes data on all replicas.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE mt DROP PARTITION '2020-11-21';
+ALTER TABLE mt DROP PART 'all_4_4_0';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="drop-detached-partitionpart">DROP DETACHED PARTITION|PART<a aria-label="Direct link to DROP DETACHED PARTITION|PART" class="hash-link" href="#drop-detached-partitionpart" title="Direct link to DROP DETACHED PARTITION|PART">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] DROP DETACHED PARTITION|PART ALL|partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Removes the specified part or all parts of the specified partition from <code>detached</code>.
+Read more about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="forget-partition">FORGET PARTITION<a aria-label="Direct link to FORGET PARTITION" class="hash-link" href="#forget-partition" title="Direct link to FORGET PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name FORGET PARTITION partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Removes all metadata about an empty partition from ZooKeeper. Query fails if partition is not empty or unknown. Make sure to execute only for partitions that will never be used again.</p>
+<p>Read about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE mt FORGET PARTITION '20201121';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="attach-partitionpart">ATTACH PARTITION|PART<a aria-label="Direct link to ATTACH PARTITION|PART" class="hash-link" href="#attach-partitionpart" title="Direct link to ATTACH PARTITION|PART">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name ATTACH PARTITION|PART partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Adds data to the table from the <code>detached</code> directory. It is possible to add data for an entire partition or for a separate part. Examples:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE visits ATTACH PARTITION 201901;
+ALTER TABLE visits ATTACH PART 201901_2_2_0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Read more about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<p>This query is replicated. The replica-initiator checks whether there is data in the <code>detached</code> directory.
+If data exists, the query checks its integrity. If everything is correct, the query adds the data to the table.</p>
+<p>If the non-initiator replica, receiving the attach command, finds the part with the correct checksums in its own <code>detached</code> folder, it attaches the data without fetching it from other replicas.
+If there is no part with the correct checksums, the data is downloaded from any replica having the part.</p>
+<p>You can put data to the <code>detached</code> directory on one replica and use the <code>ALTER ... ATTACH</code> query to add it to the table on all replicas.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="attach-partition-from">ATTACH PARTITION FROM<a aria-label="Direct link to ATTACH PARTITION FROM" class="hash-link" href="#attach-partition-from" title="Direct link to ATTACH PARTITION FROM">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table2 [ON CLUSTER cluster] ATTACH PARTITION partition_expr FROM table1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query copies the data partition from <code>table1</code> to <code>table2</code>.</p>
+<p>Note that:</p>
+<ul class="custom-ul">
+<li class="custom-li">Data will be deleted neither from <code>table1</code> nor from <code>table2</code>.</li>
+<li class="custom-li"><code>table1</code> may be a temporary table.</li>
+</ul>
+<p>For the query to run successfully, the following conditions must be met:</p>
+<ul class="custom-ul">
+<li class="custom-li">Both tables must have the same structure.</li>
+<li class="custom-li">Both tables must have the same partition key, the same order by key and the same primary key.</li>
+<li class="custom-li">Both tables must have the same storage policy.</li>
+<li class="custom-li">The destination table must include all indices and projections from the source table. If the <code>enforce_index_structure_match_on_partition_manipulation</code> setting is enabled in destination table, the indices and projections must be identical. Otherwise, the destination table can have a superset of the source table's indices and projections.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="replace-partition">REPLACE PARTITION<a aria-label="Direct link to REPLACE PARTITION" class="hash-link" href="#replace-partition" title="Direct link to REPLACE PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table2 [ON CLUSTER cluster] REPLACE PARTITION partition_expr FROM table1
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query copies the data partition from <code>table1</code> to <code>table2</code> and replaces the existing partition in <code>table2</code>. The operation is atomic.</p>
+<p>Note that:</p>
+<ul class="custom-ul">
+<li class="custom-li">Data won't be deleted from <code>table1</code>.</li>
+<li class="custom-li"><code>table1</code> may be a temporary table.</li>
+</ul>
+<p>For the query to run successfully, the following conditions must be met:</p>
+<ul class="custom-ul">
+<li class="custom-li">Both tables must have the same structure.</li>
+<li class="custom-li">Both tables must have the same partition key, the same order by key and the same primary key.</li>
+<li class="custom-li">Both tables must have the same storage policy.</li>
+<li class="custom-li">The destination table must include all indices and projections from the source table. If the <code>enforce_index_structure_match_on_partition_manipulation</code> setting is enabled in destination table, the indices and projections must be identical. Otherwise, the destination table can have a superset of the source table's indices and projections.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="move-partition-to-table">MOVE PARTITION TO TABLE<a aria-label="Direct link to MOVE PARTITION TO TABLE" class="hash-link" href="#move-partition-to-table" title="Direct link to MOVE PARTITION TO TABLE">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_source [ON CLUSTER cluster] MOVE PARTITION partition_expr TO TABLE table_dest
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query moves the data partition from the <code>table_source</code> to <code>table_dest</code> with deleting the data from <code>table_source</code>.</p>
+<p>For the query to run successfully, the following conditions must be met:</p>
+<ul class="custom-ul">
+<li class="custom-li">Both tables must have the same structure.</li>
+<li class="custom-li">Both tables must have the same partition key, the same order by key and the same primary key.</li>
+<li class="custom-li">Both tables must have the same storage policy.</li>
+<li class="custom-li">Both tables must be the same engine family (replicated or non-replicated).</li>
+<li class="custom-li">The destination table must include all indices and projections from the source table. If the <code>enforce_index_structure_match_on_partition_manipulation</code> setting is enabled in destination table, the indices and projections must be identical. Otherwise, the destination table can have a superset of the source table's indices and projections.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="clear-column-in-partition">CLEAR COLUMN IN PARTITION<a aria-label="Direct link to CLEAR COLUMN IN PARTITION" class="hash-link" href="#clear-column-in-partition" title="Direct link to CLEAR COLUMN IN PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] CLEAR COLUMN column_name IN PARTITION partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Resets all values in the specified column in a partition. If the <code>DEFAULT</code> clause was determined when creating a table, this query sets the column value to a specified default value.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE visits CLEAR COLUMN hour in PARTITION 201902
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="freeze-partition">FREEZE PARTITION<a aria-label="Direct link to FREEZE PARTITION" class="hash-link" href="#freeze-partition" title="Direct link to FREEZE PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] FREEZE [PARTITION partition_expr] [WITH NAME 'backup_name']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This query creates a local backup of a specified partition. If the <code>PARTITION</code> clause is omitted, the query creates the backup of all partitions at once.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The entire backup process is performed without stopping the server.</p></div></div>
+<p>Note that for old-styled tables you can specify the prefix of the partition name (for example, <code>2019</code>) - then the query creates the backup for all the corresponding partitions. Read about setting the partition expression in a section <a href="#how-to-set-partition-expression">How to set the partition expression</a>.</p>
+<p>At the time of execution, for a data snapshot, the query creates hardlinks to a table data. Hardlinks are placed in the directory <code>/var/lib/clickhouse/shadow/N/...</code>, where:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>/var/lib/clickhouse/</code> is the working ClickHouse directory specified in the config.</li>
+<li class="custom-li"><code>N</code> is the incremental number of the backup.</li>
+<li class="custom-li">if the <code>WITH NAME</code> parameter is specified, then the value of the <code>'backup_name'</code> parameter is used instead of the incremental number.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If you use <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-multiple-volumes">a set of disks for data storage in a table</a>, the <code>shadow/N</code> directory appears on every disk, storing data parts that matched by the <code>PARTITION</code> expression.</p></div></div>
+<p>The same structure of directories is created inside the backup as inside <code>/var/lib/clickhouse/</code>. The query performs <code>chmod</code> for all files, forbidding writing into them.</p>
+<p>After creating the backup, you can copy the data from <code>/var/lib/clickhouse/shadow/</code> to the remote server and then delete it from the local server. Note that the <code>ALTER t FREEZE PARTITION</code> query is not replicated. It creates a local backup only on the local server.</p>
+<p>The query creates backup almost instantly (but first it waits for the current queries to the corresponding table to finish running).</p>
+<p><code>ALTER TABLE t FREEZE PARTITION</code> copies only the data, not table metadata. To make a backup of table metadata, copy the file <code>/var/lib/clickhouse/metadata/database/table.sql</code></p>
+<p>To restore data from a backup, do the following:</p>
+<ol class="custom-ol">
+<li class="custom-li">Create the table if it does not exist. To view the query, use the .sql file (replace <code>ATTACH</code> in it with <code>CREATE</code>).</li>
+<li class="custom-li">Copy the data from the <code>data/database/table/</code> directory inside the backup to the <code>/var/lib/clickhouse/data/database/table/detached/</code> directory.</li>
+<li class="custom-li">Run <code>ALTER TABLE t ATTACH PARTITION</code> queries to add the data to a table.</li>
+</ol>
+<p>Restoring from a backup does not require stopping the server.</p>
+<p>The query processes parts in parallel, the number of threads is regulated by the <code>max_threads</code> setting.</p>
+<p>For more information about backups and restoring data, see section <a href="/docs/operations/backup/overview">"Backup and Restore in ClickHouse"</a> section.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="unfreeze-partition">UNFREEZE PARTITION<a aria-label="Direct link to UNFREEZE PARTITION" class="hash-link" href="#unfreeze-partition" title="Direct link to UNFREEZE PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] UNFREEZE [PARTITION 'part_expr'] WITH NAME 'backup_name'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Removes <code>frozen</code> partitions with the specified name from the disk. If the <code>PARTITION</code> clause is omitted, the query removes the backup of all partitions at once.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="clear-index-in-partition">CLEAR INDEX IN PARTITION<a aria-label="Direct link to CLEAR INDEX IN PARTITION" class="hash-link" href="#clear-index-in-partition" title="Direct link to CLEAR INDEX IN PARTITION">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] CLEAR INDEX index_name IN PARTITION partition_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The query works similar to <code>CLEAR COLUMN</code>, but it resets an index instead of a column data.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="fetch-partitionpart">FETCH PARTITION|PART<a aria-label="Direct link to FETCH PARTITION|PART" class="hash-link" href="#fetch-partitionpart" title="Direct link to FETCH PARTITION|PART">​</a></h2>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] FETCH PARTITION|PART partition_expr FROM 'path-in-zookeeper'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Downloads a partition from another server. This query only works for the replicated tables.</p>
+<p>The query does the following:</p>
+<ol class="custom-ol">
+<li class="custom-li">Downloads the partition|part from the specified shard. In 'path-in-zookeeper' you must specify a path to the shard in ZooKeeper.</li>
+<li class="custom-li">Then the query puts the downloaded data to the <code>detached</code> directory of the <code>table_name</code> table. Use the <a href="#attach-partitionpart">ATTACH PARTITION|PART</a> query to add the data to the table.</li>
+</ol>
+<p>For example:</p>
+<ol class="custom-ol">
+<li class="custom-li">FETCH PARTITION</li>
+</ol>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE users FETCH PARTITION 201902 FROM '/clickhouse/tables/01-01/visits';
+ALTER TABLE users ATTACH PARTITION 201902;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ol class="custom-ol" start="2">
+<li class="custom-li">FETCH PART</li>
+</ol>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE users FETCH PART 201901_2_2_0 FROM '/clickhouse/tables/01-01/visits';
+ALTER TABLE users ATTACH PART 201901_2_2_0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that:</p>
+<ul class="custom-ul">
+<li class="custom-li">The <code>ALTER ... FETCH PARTITION|PART</code> query isn't replicated. It places the part or partition to the <code>detached</code> directory only on the local server.</li>
+<li class="custom-li">The <code>ALTER TABLE ... ATTACH</code> query is replicated. It adds the data to all replicas. The data is added to one of the replicas from the <code>detached</code> directory, and to the others - from neighboring replicas.</li>
+</ul>
+<p>Before downloading, the system checks if the partition exists and the table structure matches. The most appropriate replica is selected automatically from the healthy replicas.</p>
+<p>Although the query is called <code>ALTER TABLE</code>, it does not change the table structure and does not immediately change the data available in the table.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="move-partitionpart">MOVE PARTITION|PART<a aria-label="Direct link to MOVE PARTITION|PART" class="hash-link" href="#move-partitionpart" title="Direct link to MOVE PARTITION|PART">​</a></h2>
+<p>Moves partitions or data parts to another volume or disk for <code>MergeTree</code>-engine tables. See <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-multiple-volumes">Using Multiple Block Devices for Data Storage</a>.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE table_name [ON CLUSTER cluster] MOVE PARTITION|PART partition_expr TO DISK|VOLUME 'disk_name'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>ALTER TABLE t MOVE</code> query:</p>
+<ul class="custom-ul">
+<li class="custom-li">Not replicated, because different replicas can have different storage policies.</li>
+<li class="custom-li">Returns an error if the specified disk or volume is not configured. Query also returns an error if conditions of data moving, that specified in the storage policy, can't be applied.</li>
+<li class="custom-li">Can return an error in the case, when data to be moved is already moved by a background process, concurrent <code>ALTER TABLE t MOVE</code> query or as a result of background data merging. A user shouldn't perform any additional actions in this case.</li>
+</ul>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE hits MOVE PART '20190301_14343_16206_438' TO VOLUME 'slow'
+ALTER TABLE hits MOVE PARTITION '2019-09-01' TO DISK 'fast_ssd'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="update-in-partition">UPDATE IN PARTITION<a aria-label="Direct link to UPDATE IN PARTITION" class="hash-link" href="#update-in-partition" title="Direct link to UPDATE IN PARTITION">​</a></h2>
+<p>Manipulates data in the specifies partition matching the specified filtering expression. Implemented as a <a href="/docs/sql-reference/statements/alter#mutations">mutation</a>.</p>
+<p>Syntax:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]table [ON CLUSTER cluster] UPDATE column1 = expr1 [, ...] [IN PARTITION partition_expr] WHERE filter_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example">Example<a aria-label="Direct link to Example" class="hash-link" href="#example" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- using partition name
+ALTER TABLE mt UPDATE x = x + 1 IN PARTITION 2 WHERE p = 2;
+
+-- using partition id
+ALTER TABLE mt UPDATE x = x + 1 IN PARTITION ID '2' WHERE p = 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="see-also">See Also<a aria-label="Direct link to See Also" class="hash-link" href="#see-also" title="Direct link to See Also">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/statements/alter/partition#update-in-partition">UPDATE</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="delete-in-partition">DELETE IN PARTITION<a aria-label="Direct link to DELETE IN PARTITION" class="hash-link" href="#delete-in-partition" title="Direct link to DELETE IN PARTITION">​</a></h2>
+<p>Deletes data in the specifies partition matching the specified filtering expression. Implemented as a <a href="/docs/sql-reference/statements/alter#mutations">mutation</a>.</p>
+<p>Syntax:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE [db.]table [ON CLUSTER cluster] DELETE [IN PARTITION partition_expr] WHERE filter_expr
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-1">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-1" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- using partition name
+ALTER TABLE mt DELETE IN PARTITION 2 WHERE p = 2;
+
+-- using partition id
+ALTER TABLE mt DELETE IN PARTITION ID '2' WHERE p = 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="rewrite-parts">REWRITE PARTS<a aria-label="Direct link to REWRITE PARTS" class="hash-link" href="#rewrite-parts" title="Direct link to REWRITE PARTS">​</a></h2>
+<p>This will rewrite the parts from scratch, using all new settings. This makes sense because table-level settings like <code>use_const_adaptive_granularity</code> are applied only for newly written parts by default.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-rewrite-parts">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-rewrite-parts" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE mt REWRITE PARTS;
+ALTER TABLE mt REWRITE PARTS IN PARTITION 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="see-also-1">See Also<a aria-label="Direct link to See Also" class="hash-link" href="#see-also-1" title="Direct link to See Also">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/statements/alter/delete">DELETE</a></li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-to-set-partition-expression">How to Set Partition Expression<a aria-label="Direct link to How to Set Partition Expression" class="hash-link" href="#how-to-set-partition-expression" title="Direct link to How to Set Partition Expression">​</a></h2>
+<p>You can specify the partition expression in <code>ALTER ... PARTITION</code> queries in different ways:</p>
+<ul class="custom-ul">
+<li class="custom-li">As a value from the <code>partition</code> column of the <code>system.parts</code> table. For example, <code>ALTER TABLE visits DETACH PARTITION 201901</code>.</li>
+<li class="custom-li">Using the keyword <code>ALL</code>. It can be used only with DROP/DETACH/ATTACH/ATTACH FROM. For example, <code>ALTER TABLE visits ATTACH PARTITION ALL</code>.</li>
+<li class="custom-li">As a tuple of expressions or constants that matches (in types) the table partitioning keys tuple. In the case of a single element partitioning key, the expression should be wrapped in the <code>tuple (...)</code> function. For example, <code>ALTER TABLE visits DETACH PARTITION tuple(toYYYYMM(toDate('2019-01-25')))</code>.</li>
+<li class="custom-li">Using the partition ID. Partition ID is a string identifier of the partition (human-readable, if possible) that is used as the names of partitions in the file system and in ZooKeeper. The partition ID must be specified in the <code>PARTITION ID</code> clause, in a single quotes. For example, <code>ALTER TABLE visits DETACH PARTITION ID '201901'</code>.</li>
+<li class="custom-li">In the <a href="#attach-partitionpart">ALTER ATTACH PART</a> and <a href="#drop-detached-partitionpart">DROP DETACHED PART</a> query, to specify the name of a part, use string literal with a value from the <code>name</code> column of the <a href="/docs/operations/system-tables/detached_parts">system.detached_parts</a> table. For example, <code>ALTER TABLE visits ATTACH PART '201901_1_1_0'</code>.</li>
+</ul>
+<p>Usage of quotes when specifying the partition depends on the type of partition expression. For example, for the <code>String</code> type, you have to specify its name in quotes (<code>'</code>). For the <code>Date</code> and <code>Int*</code> types no quotes are needed.</p>
+<p>All the rules above are also true for the <a href="/docs/sql-reference/statements/optimize">OPTIMIZE</a> query. If you need to specify the only partition when optimizing a non-partitioned table, set the expression <code>PARTITION tuple()</code>. For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">OPTIMIZE TABLE table_not_partitioned PARTITION tuple() FINAL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>IN PARTITION</code> specifies the partition to which the <a href="/docs/sql-reference/statements/alter/update">UPDATE</a> or <a href="/docs/sql-reference/statements/alter/delete">DELETE</a> expressions are applied as a result of the <code>ALTER TABLE</code> query. New parts are created only from the specified partition. In this way, <code>IN PARTITION</code> helps to reduce the load when the table is divided into many partitions, and you only need to update the data point-by-point.</p>
+<p>The examples of <code>ALTER ... PARTITION</code> queries are demonstrated in the tests <a href="https://github.com/ClickHouse/ClickHouse/blob/master/tests/queries/0_stateless/00502_custom_partitioning_local.sql" rel="noopener noreferrer" target="_blank"><code>00502_custom_partitioning_local</code></a> and <a href="https://github.com/ClickHouse/ClickHouse/blob/master/tests/queries/0_stateless/00502_custom_partitioning_replicated_zookeeper.sql" rel="noopener noreferrer" target="_blank"><code>00502_custom_partitioning_replicated_zookeeper</code></a>.</p></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/alter/column"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">COLUMN</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/alter/setting"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">SETTING</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#detach-partitionpart">DETACH PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#drop-partitionpart">DROP PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#drop-detached-partitionpart">DROP DETACHED PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#forget-partition">FORGET PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#attach-partitionpart">ATTACH PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#attach-partition-from">ATTACH PARTITION FROM</a><li><a class="table-of-contents__link toc-highlight" href="#replace-partition">REPLACE PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#move-partition-to-table">MOVE PARTITION TO TABLE</a><li><a class="table-of-contents__link toc-highlight" href="#clear-column-in-partition">CLEAR COLUMN IN PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#freeze-partition">FREEZE PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#unfreeze-partition">UNFREEZE PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#clear-index-in-partition">CLEAR INDEX IN PARTITION</a><li><a class="table-of-contents__link toc-highlight" href="#fetch-partitionpart">FETCH PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#move-partitionpart">MOVE PARTITION|PART</a><li><a class="table-of-contents__link toc-highlight" href="#update-in-partition">UPDATE IN PARTITION</a><ul><li><a class="table-of-contents__link toc-highlight" href="#example">Example</a><li><a class="table-of-contents__link toc-highlight" href="#see-also">See Also</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#delete-in-partition">DELETE IN PARTITION</a><ul><li><a class="table-of-contents__link toc-highlight" href="#example-1">Example</a></li></ul><li><a class="table-of-contents__link toc-highlight" href="#rewrite-parts">REWRITE PARTS</a><ul><li><a class="table-of-contents__link toc-highlight" href="#example-rewrite-parts">Example</a><li><a class="table-of-contents__link toc-highlight" href="#see-also-1">See Also</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#how-to-set-partition-expression">How to Set Partition Expression</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

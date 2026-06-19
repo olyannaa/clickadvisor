@@ -1,0 +1,28 @@
+id: R-008
+name: redundant_cast_on_filter_removal
+tier: 1C
+category: sargable
+status: proposed
+statement: Убрать CAST(col AS T) если col уже типа T в схеме таблицы.
+preconditions:
+  syntactic:
+  - WHERE содержит CAST(x AS T) или toT(x) где x — колонка
+  semantic:
+  - Тип колонки в схеме равен T (точное равенство)
+  data: []
+proof: 'Идемпотентность приведения типа к самому себе:
+
+  CAST(x AS T) = x при typeOf(x) = T.'
+explain_template: Если колонка уже имеет нужный тип, лишний CAST ничего не меняет для результата, но меняет форму выражения. В ClickHouse это важно, потому что индекс и анализатор лучше работают с прямым сравнением колонки, чем с вычисляемой функцией над ней. Убирая redundant cast, мы возвращаем фильтр к более простому и оптимизируемому виду.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'WHERE CAST(user_id AS UInt64) = 12345  -- user_id: UInt64'
+example_after: WHERE user_id = 12345
+expected_speedup:
+  estimate: 2-100× (восстанавливается primary key index)
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

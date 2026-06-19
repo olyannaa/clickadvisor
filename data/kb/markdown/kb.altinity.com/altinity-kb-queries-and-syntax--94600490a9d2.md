@@ -1,0 +1,119 @@
+# Queries \& Syntax \| Altinity® Knowledge Base for ClickHouse®
+
+
+1. Queries \& Syntax
+# Queries \& Syntax
+
+Learn about ClickHouse® queries \& syntax, including Joins \& Window Functions.##### [GROUP BY](/altinity-kb-queries-and-syntax/group-by/)
+
+Learn about the GROUP BY clause in ClickHouse®
+
+##### [Adjustable table partitioning](/altinity-kb-queries-and-syntax/variable-partitioning/)
+
+An approach that allows you to redefine partitioning without table creation
+
+##### [DateTime64](/altinity-kb-queries-and-syntax/datetime64/)
+
+##### [DISTINCT \& GROUP BY \& LIMIT 1 BY what the difference](/altinity-kb-queries-and-syntax/distinct-vs-group-by-vs-limit-by/)
+
+##### [Imprecise parsing of literal Decimal or Float64](/altinity-kb-queries-and-syntax/literal-decimal-or-float/)
+
+##### [Multiple aligned date columns in PARTITION BY expression](/altinity-kb-queries-and-syntax/multiple-date-column-in-partition-key/)
+
+How to put multiple correlated date\-like columns in partition key without generating a lot of partitions in case not exact match between them.
+
+##### [Row policies overhead (hiding 'removed' tenants)](/altinity-kb-queries-and-syntax/row_policy_using_dictionary/)
+
+One more approach to hide (delete) rows in ClickHouse®
+
+##### [Why is simple \`SELECT count()\` Slow in ClickHouse®?](/altinity-kb-queries-and-syntax/slow_select_count/)
+
+##### [Collecting query execution flamegraphs using system.trace\_log](/altinity-kb-queries-and-syntax/trace_log/)
+
+##### [Using array functions to mimic window\-functions alike behavior](/altinity-kb-queries-and-syntax/array-functions-as-window/)
+
+##### [\-State \& \-Merge combinators](/altinity-kb-queries-and-syntax/state-and-merge-combinators/)
+
+##### [ALTER MODIFY COLUMN is stuck, the column is inaccessible.](/altinity-kb-queries-and-syntax/altinity-kb-alter-modify-column-is-stuck-the-column-is-inaccessible/)
+
+##### [ANSI SQL mode](/altinity-kb-queries-and-syntax/ansi-sql-mode/)
+
+##### [Async INSERTs](/altinity-kb-queries-and-syntax/async-inserts/)
+
+Comprehensive guide to ClickHouse Async INSERTs \- configuration, best practices, and monitoring
+
+##### [Atomic insert](/altinity-kb-queries-and-syntax/atomic-insert/)
+
+##### [ClickHouse® Projections](/altinity-kb-queries-and-syntax/projections-examples/)
+
+Using this ClickHouse feature to optimize queries
+
+##### [Cumulative Anything](/altinity-kb-queries-and-syntax/cumulative-unique/)
+
+##### [Data types on disk and in RAM](/altinity-kb-queries-and-syntax/data-types-on-disk-and-in-ram/)
+
+##### [DELETE via tombstone column](/altinity-kb-queries-and-syntax/delete-via-tombstone-column/)
+
+##### [EXPLAIN query](/altinity-kb-queries-and-syntax/explain-query/)
+
+##### [Fill missing values at query time](/altinity-kb-queries-and-syntax/fill-missing-values-at-query-time/)
+
+##### [FINAL clause speed](/altinity-kb-queries-and-syntax/altinity-kb-final-clause-speed/)
+
+##### [Join with Calendar using Arrays](/altinity-kb-queries-and-syntax/join-with-calendar-using-arrays/)
+
+##### [JOINs](/altinity-kb-queries-and-syntax/joins/)
+
+##### [JSONExtract to parse many attributes at a time](/altinity-kb-queries-and-syntax/jsonextract-to-parse-many-attributes-at-a-time/)
+
+##### [KILL QUERY](/altinity-kb-queries-and-syntax/altinity-kb-kill-query/)
+
+##### [Lag / Lead](/altinity-kb-queries-and-syntax/lag-lead/)
+
+##### [Machine learning in ClickHouse](/altinity-kb-queries-and-syntax/machine-learning-in-clickhouse/)
+
+##### [Mutations](/altinity-kb-queries-and-syntax/mutations/)
+
+ALTER UPDATE / DELETE
+
+##### [OPTIMIZE vs OPTIMIZE FINAL](/altinity-kb-queries-and-syntax/altinity-kb-optimize-vs-optimize-final/)
+
+##### [Parameterized views](/altinity-kb-queries-and-syntax/altinity-kb-parameterized-views/)
+
+##### [Use both projection and raw data in single query](/altinity-kb-queries-and-syntax/partial-projection-optimization/)
+
+How to write queries, which will use both data from projection and raw table.
+
+##### [PIVOT / UNPIVOT](/altinity-kb-queries-and-syntax/pivot-unpivot/)
+
+##### [Possible deadlock avoided. Client should retry](/altinity-kb-queries-and-syntax/altinity-kb-possible-deadlock-avoided.-client-should-retry/)
+
+##### [Roaring bitmaps for calculating retention](/altinity-kb-queries-and-syntax/roaring-bitmaps-for-calculating-retention/)
+
+##### [SAMPLE by](/altinity-kb-queries-and-syntax/altinity-kb-sample-by/)
+
+##### [Sampling Example](/altinity-kb-queries-and-syntax/sampling-example/)
+
+##### [Simple aggregate functions \& combinators](/altinity-kb-queries-and-syntax/simplestateif-or-ifstate-for-simple-aggregate-functions/)
+
+##### [Skip indexes](/altinity-kb-queries-and-syntax/skip-indexes/)
+
+##### [Time zones](/altinity-kb-queries-and-syntax/time-zones/)
+
+##### [Time\-series alignment with interpolation](/altinity-kb-queries-and-syntax/ts-interpolation/)
+
+##### [Top N \& Remain](/altinity-kb-queries-and-syntax/top-n-and-remain/)
+
+##### [Troubleshooting](/altinity-kb-queries-and-syntax/troubleshooting/)
+
+Tips for ClickHouse® troubleshooting
+
+##### [TTL](/altinity-kb-queries-and-syntax/ttl/)
+
+##### [UPDATE via Dictionary](/altinity-kb-queries-and-syntax/update-via-dictionary/)
+
+##### [Values mapping](/altinity-kb-queries-and-syntax/values-mapping/)
+
+##### [Window functions](/altinity-kb-queries-and-syntax/window-functions/)
+
+Last modified 2024\.07\.29: [Site cleanup, mostly minor changes (3e41a19\)](https://github.com/Altinity/altinityknowledgebase/commit/3e41a19644b66d46db743db20321bd5b94b545df)

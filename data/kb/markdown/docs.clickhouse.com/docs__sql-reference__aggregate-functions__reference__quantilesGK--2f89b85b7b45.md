@@ -1,0 +1,90 @@
+# quantilesGK \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- quantilesGK
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/quantilesGK.md)# quantilesGK
+
+## quantilesGK[​](#quantilesGK "Direct link to quantilesGK")
+
+
+Introduced in: v23\.4\.0
+
+
+Computes multiple [quantiles](https://en.wikipedia.org/wiki/Quantile) of a numeric data sequence at different levels simultaneously using the [Greenwald\-Khanna](http://infolab.stanford.edu/~datar/courses/cs361a/papers/quantiles.pdf) algorithm.
+
+
+This function works similarly with [`quantileGK`](/docs/sql-reference/aggregate-functions/reference/quantileGK) but allows computing multiple quantile levels in a single pass, which is more efficient than calling individual quantile functions.
+
+
+The Greenwald\-Khanna algorithm is an algorithm used to compute quantiles on a stream of data in a highly efficient manner.
+It was introduced by Michael Greenwald and Sanjeev Khanna in 2001\.
+The algorithm is highly efficient, taking only O(log n) space and O(log log n) time per item (where n is the size of the input).
+It is also highly accurate, providing approximate quantile values with controllable accuracy.
+
+
+**Syntax**
+
+
+
+```
+quantilesGK(accuracy, level1, level2, ...)(expr)
+
+```
+
+**Parameters**
+
+
+- `accuracy` — Accuracy of quantiles. Constant positive integer. Larger accuracy value means less error. For example, if the accuracy argument is set to 100, the computed quantiles will have an error no greater than 1% with high probability. There is a trade\-off between the accuracy of the computed quantiles and the computational complexity of the algorithm. [`UInt*`](/docs/sql-reference/data-types/int-uint)
+- `level` — Levels of quantiles. One or more constant floating\-point numbers from 0 to 1\. [`Float*`](/docs/sql-reference/data-types/float)
+
+
+**Arguments**
+
+
+- `expr` — Expression over the column values resulting in numeric data types, Date or DateTime. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal) or [`Date`](/docs/sql-reference/data-types/date) or [`DateTime`](/docs/sql-reference/data-types/datetime)
+
+
+**Returned value**
+
+
+Array of quantiles of the specified levels in the same order as the levels were specified. [`Array(Float64)`](/docs/sql-reference/data-types/array) or [`Array(Date)`](/docs/sql-reference/data-types/array) or [`Array(DateTime)`](/docs/sql-reference/data-types/array)
+
+
+**Examples**
+
+
+**Computing multiple quantiles with GK algorithm**
+
+
+
+```
+SELECT quantilesGK(1, 0.25, 0.5, 0.75)(number + 1) FROM numbers(1000);
+
+```
+
+
+```
+┌─quantilesGK(1, 0.25, 0.5, 0.75)(plus(number, 1))─┐
+│ [1, 1, 1]                                        │
+└──────────────────────────────────────────────────┘
+
+```
+
+**Higher accuracy quantiles**
+
+
+
+```
+SELECT quantilesGK(100, 0.25, 0.5, 0.75)(number + 1) FROM numbers(1000);
+
+```
+
+
+```
+┌─quantilesGK(100, 0.25, 0.5, 0.75)(plus(number, 1))─┐
+│ [251, 498, 741]                                    │
+└────────────────────────────────────────────────────┘
+
+```
+[PreviousquantilesExactInclusive](/docs/sql-reference/aggregate-functions/reference/quantilesExactInclusive)[NextquantilesTimingWeighted](/docs/sql-reference/aggregate-functions/reference/quantilestimingweighted)- [quantilesGK](#quantilesGK)
+Was this page helpful?

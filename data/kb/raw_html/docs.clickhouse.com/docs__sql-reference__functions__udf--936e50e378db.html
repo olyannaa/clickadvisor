@@ -1,0 +1,305 @@
+<h1>User Defined Functions (UDFs) | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">UDF</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/udf.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>UDFs User Defined Functions</h1></header>
+<p>ClickHouse supports several types of user defined functions (UDFs):</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="#executable-user-defined-functions">Executable UDFs</a> start an external program or script (Python, Bash, etc.) and stream blocks of data to it over STDIN / STDOUT. Use them to integrate existing code or tooling without recompiling ClickHouse. They have higher per‑call overhead compared to in‑process options and are best for heavier logic or where a different runtime is required.</li>
+<li class="custom-li"><a href="#sql-user-defined-functions">SQL UDFs</a> are defined with <code>CREATE FUNCTION</code> purely in SQL. They are inlined/expanded into the query plan (no process boundary), making them lightweight and ideal for reusing expression logic or simplifying complex calculated columns.</li>
+<li class="custom-li"><a href="#webassembly-user-defined-functions">Experimental WebAssembly UDFs</a> run code compiled to WebAssembly inside a sandbox within the server process. They offer lower per‑call overhead than external executables with better isolation than native extensions, making them suitable for custom algorithms written in languages that can target WASM (e.g. C/C++/Rust).</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="executable-user-defined-functions">Executable User Defined Functions<a aria-label="Direct link to Executable User Defined Functions" class="hash-link" href="#executable-user-defined-functions" title="Direct link to Executable User Defined Functions">​</a></h2>
+<div class="privatePreviewBadge_X7M9"><div class="privatePreviewIcon_tSxw" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M5.33301 6.66667V4.66667V4.66667C5.33301 3.194 6.52701 2 7.99967 2V2C9.47234 2 10.6663 3.194 10.6663 4.66667V4.66667V6.66667" stroke="#FEFFC2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.00033 9.33337V11.3334" stroke="#FEFFC2" stroke-linecap="round" stroke-linejoin="round"></path><path clip-rule="evenodd" d="M11.333 14H4.66634C3.92967 14 3.33301 13.4033 3.33301 12.6666V7.99996C3.33301 7.26329 3.92967 6.66663 4.66634 6.66663H11.333C12.0697 6.66663 12.6663 7.26329 12.6663 7.99996V12.6666C12.6663 13.4033 12.0697 14 11.333 14Z" fill-rule="evenodd" stroke="#FEFFC2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>Private preview</div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This feature is supported in private preview in ClickHouse Cloud.
+Please contact ClickHouse Support at <a href="https://clickhouse.cloud/support" rel="noopener noreferrer" target="_blank">https://clickhouse.cloud/support</a> to access.</p></div></div>
+<p>ClickHouse can call any external executable program or script to process data.</p>
+<p>The configuration of executable user defined functions can be located in one or more xml-files.
+The path to the configuration is specified in the <a href="/docs/operations/server-configuration-parameters/settings#user_defined_executable_functions_config"><code>user_defined_executable_functions_config</code></a> parameter.</p>
+<p>A function configuration contains the following settings:</p>
+<table><thead><tr><th>Parameter<th>Description<th>Required<th>Default Value<tbody><tr><td><code>name</code><td>A function name<td>Yes<td>-<tr><td><code>command</code><td>Script name to execute or command if <code>execute_direct</code> is false<td>Yes<td>-<tr><td><code>argument</code><td>Argument description with the <code>type</code>, and optional <code>name</code> of an argument. Each argument is described in a separate setting. Specifying name is necessary if argument names are part of serialization for user defined function format like <a href="/docs/interfaces/formats/Native">Native</a> or <a href="/docs/interfaces/formats/JSONEachRow">JSONEachRow</a><td>Yes<td><code>c</code> + argument_number<tr><td><code>format</code><td>A <a href="/docs/interfaces/formats">format</a> in which arguments are passed to the command. The command output is expected to use the same format too<td>Yes<td>-<tr><td><code>return_type</code><td>The type of a returned value<td>Yes<td>-<tr><td><code>return_name</code><td>Name of returned value. Specifying return name is necessary if return name is part of serialization for user defined function format like <a href="/docs/interfaces/formats/Native">Native</a> or <a href="/docs/interfaces/formats/JSONEachRow">JSONEachRow</a><td>Optional<td><code>result</code><tr><td><code>type</code><td>An executable type. If <code>type</code> is set to <code>executable</code> then single command is started. If it is set to <code>executable_pool</code> then a pool of commands is created<td>Yes<td>-<tr><td><code>max_command_execution_time</code><td>Maximum execution time in seconds for processing block of data. This setting is valid for <code>executable_pool</code> commands only<td>Optional<td><code>10</code><tr><td><code>command_termination_timeout</code><td>Time in seconds during which a command should finish after its pipe is closed. After that time <code>SIGTERM</code> is sent to the process executing the command<td>Optional<td><code>10</code><tr><td><code>command_read_timeout</code><td>Timeout for reading data from command stdout in milliseconds<td>Optional<td><code>10000</code><tr><td><code>command_write_timeout</code><td>Timeout for writing data to command stdin in milliseconds<td>Optional<td><code>10000</code><tr><td><code>pool_size</code><td>The size of a command pool<td>Optional<td><code>16</code><tr><td><code>send_chunk_header</code><td>Controls whether to send row count before sending a chunk of data to process<td>Optional<td><code>false</code><tr><td><code>execute_direct</code><td>If <code>execute_direct</code> = <code>1</code>, then <code>command</code> will be searched inside user_scripts folder specified by <a href="/docs/operations/server-configuration-parameters/settings#user_scripts_path">user_scripts_path</a>. Additional script arguments can be specified using whitespace separator. Example: <code>script_name arg1 arg2</code>. If <code>execute_direct</code> = <code>0</code>, <code>command</code> is passed as argument for <code>bin/sh -c</code><td>Optional<td><code>1</code><tr><td><code>lifetime</code><td>The reload interval of a function in seconds. If it is set to <code>0</code> then the function is not reloaded<td>Optional<td><code>0</code><tr><td><code>deterministic</code><td>If the function is deterministic (returns the same result for the same input)<td>Optional<td><code>false</code><tr><td><code>stderr_reaction</code><td>How to handle the command's stderr output. Values: <code>none</code> (ignore), <code>log</code> (log all stderr immediately), <code>log_first</code> (log first 4 KiB after exit), <code>log_last</code> (log last 4 KiB after exit), <code>throw</code> (throw exception immediately on any stderr output). When using <code>log_first</code> or <code>log_last</code> with a non-zero exit code, the stderr content is included in the exception message<td>Optional<td><code>log_last</code><tr><td><code>check_exit_code</code><td>If true, ClickHouse will check the exit code of the command. A non-zero exit code causes an exception<td>Optional<td><code>true</code></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<p>The command must read arguments from <code>STDIN</code> and must output the result to <code>STDOUT</code>. The command must process arguments iteratively. That is after processing a chunk of arguments it must wait for the next chunk.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="executable-user-defined-functions">Executable User Defined Functions<a aria-label="Direct link to Executable User Defined Functions" class="hash-link" href="#executable-user-defined-functions" title="Direct link to Executable User Defined Functions">​</a></h2>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="udf-inline">UDF from inline script<a aria-label="Direct link to UDF from inline script" class="hash-link" href="#udf-inline" title="Direct link to UDF from inline script">​</a></h3>
+<p>Create <code>test_function_sum</code> manually specifying <code>execute_direct</code> to <code>0</code> using either XML or YAML configuration.</p>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">XML<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">YAML</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>File <code>test_function.xml</code> (<code>/etc/clickhouse-server/test_function.xml</code> with default path settings).<div class="wrapper_EBtA" style="height:358.15000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;functions&gt;
+    &lt;function&gt;
+        &lt;type&gt;executable&lt;/type&gt;
+        &lt;name&gt;test_function_sum&lt;/name&gt;
+        &lt;return_type&gt;UInt64&lt;/return_type&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+            &lt;name&gt;lhs&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+            &lt;name&gt;rhs&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;format&gt;TabSeparated&lt;/format&gt;
+        &lt;command&gt;cd /; clickhouse-local --input-format TabSeparated --output-format TabSeparated --structure 'x UInt64, y UInt64' --query "SELECT x + y FROM table"&lt;/command&gt;
+        &lt;execute_direct&gt;0&lt;/execute_direct&gt;
+        &lt;deterministic&gt;true&lt;/deterministic&gt;
+    &lt;/function&gt;
+&lt;/functions&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>File <code>test_function.yaml</code> (<code>/etc/clickhouse-server/test_function.yaml</code> with default path settings).<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yml"><code class="language-yml">functions:
+  type: executable
+  name: test_function_sum
+  return_type: UInt64
+  argument:
+    - type: UInt64
+      name: lhs
+    - type: UInt64
+      name: rhs
+  format: TabSeparated
+  command: 'cd /; clickhouse-local --input-format TabSeparated --output-format TabSeparated --structure ''x UInt64, y UInt64'' --query "SELECT x + y FROM table"'
+  execute_direct: 0
+  deterministic: true
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<br/>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT test_function_sum(2, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─test_function_sum(2, 2)─┐
+│                       4 │
+└─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="udf-python">UDF from Python script<a aria-label="Direct link to UDF from Python script" class="hash-link" href="#udf-python" title="Direct link to UDF from Python script">​</a></h3>
+<p>In this example we create a UDF which reads a value from <code>STDIN</code> and returns it as a string.</p>
+<p>Create <code>test_function</code> using either XML OR YAML configuration.</p>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">XML<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">YAML</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>File <code>test_function.xml</code> (<code>/etc/clickhouse-server/test_function.xml</code> with default path settings).<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;functions&gt;
+    &lt;function&gt;
+        &lt;type&gt;executable&lt;/type&gt;
+        &lt;name&gt;test_function_python&lt;/name&gt;
+        &lt;return_type&gt;String&lt;/return_type&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+            &lt;name&gt;value&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;format&gt;TabSeparated&lt;/format&gt;
+        &lt;command&gt;test_function.py&lt;/command&gt;
+    &lt;/function&gt;
+&lt;/functions&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>File <code>test_function.yaml</code> (<code>/etc/clickhouse-server/test_function.yaml</code> with default path settings).<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yml"><code class="language-yml">functions:
+  type: executable
+  name: test_function_python
+  return_type: String
+  argument:
+    - type: UInt64
+      name: value
+  format: TabSeparated
+  command: test_function.py
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<br/>
+<p>Create a script file <code>test_function.py</code> inside <code>user_scripts</code> folder (<code>/var/lib/clickhouse/user_scripts/test_function.py</code> with default path settings).</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-python"><code class="language-python">#!/usr/bin/python3
+
+import sys
+
+if __name__ == '__main__':
+    for line in sys.stdin:
+        print("Value " + line, end='')
+        sys.stdout.flush()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT test_function_python(toUInt64(2));
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─test_function_python(2)─┐
+│ Value 2                 │
+└─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="udf-stdin">Read two values from <code>STDIN</code> and return their sum as a JSON object<a aria-label="Direct link to udf-stdin" class="hash-link" href="#udf-stdin" title="Direct link to udf-stdin">​</a></h3>
+<p>Create <code>test_function_sum_json</code> with named arguments and format <a href="/docs/interfaces/formats/JSONEachRow">JSONEachRow</a> using either XML or YAML configuration.</p>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">XML<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">YAML</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>File <code>test_function.xml</code> (<code>/etc/clickhouse-server/test_function.xml</code> with default path settings).<div class="wrapper_EBtA" style="height:339.3px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;functions&gt;
+    &lt;function&gt;
+        &lt;type&gt;executable&lt;/type&gt;
+        &lt;name&gt;test_function_sum_json&lt;/name&gt;
+        &lt;return_type&gt;UInt64&lt;/return_type&gt;
+        &lt;return_name&gt;result_name&lt;/return_name&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+            &lt;name&gt;argument_1&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+            &lt;name&gt;argument_2&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;format&gt;JSONEachRow&lt;/format&gt;
+        &lt;command&gt;test_function_sum_json.py&lt;/command&gt;
+    &lt;/function&gt;
+&lt;/functions&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>File <code>test_function.yaml</code> (<code>/etc/clickhouse-server/test_function.yaml</code> with default path settings).<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yml"><code class="language-yml">functions:
+  type: executable
+  name: test_function_sum_json
+  return_type: UInt64
+  return_name: result_name
+  argument:
+    - type: UInt64
+      name: argument_1
+    - type: UInt64
+      name: argument_2
+  format: JSONEachRow
+  command: test_function_sum_json.py
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<br/>
+<p>Create script file <code>test_function_sum_json.py</code> inside the <code>user_scripts</code> folder (<code>/var/lib/clickhouse/user_scripts/test_function_sum_json.py</code> with default path settings).</p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-python"><code class="language-python">#!/usr/bin/python3
+
+import sys
+import json
+
+if __name__ == '__main__':
+    for line in sys.stdin:
+        value = json.loads(line)
+        first_arg = int(value['argument_1'])
+        second_arg = int(value['argument_2'])
+        result = {'result_name': first_arg + second_arg}
+        print(json.dumps(result), end='\n')
+        sys.stdout.flush()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT test_function_sum_json(2, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─test_function_sum_json(2, 2)─┐
+│                            4 │
+└──────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="udf-parameters-in-command">Use parameters in <code>command</code> setting<a aria-label="Direct link to udf-parameters-in-command" class="hash-link" href="#udf-parameters-in-command" title="Direct link to udf-parameters-in-command">​</a></h3>
+<p>Executable user defined functions can take constant parameters configured in <code>command</code> setting (this works only for user defined functions with <code>executable</code> type).
+It also requires the <code>execute_direct</code> option to ensure no shell argument expansion vulnerability.</p>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">XML<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">YAML</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>File <code>test_function_parameter_python.xml</code> (<code>/etc/clickhouse-server/test_function_parameter_python.xml</code> with default path settings).<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;functions&gt;
+    &lt;function&gt;
+        &lt;type&gt;executable&lt;/type&gt;
+        &lt;execute_direct&gt;true&lt;/execute_direct&gt;
+        &lt;name&gt;test_function_parameter_python&lt;/name&gt;
+        &lt;return_type&gt;String&lt;/return_type&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt64&lt;/type&gt;
+        &lt;/argument&gt;
+        &lt;format&gt;TabSeparated&lt;/format&gt;
+        &lt;command&gt;test_function_parameter_python.py {test_parameter:UInt64}&lt;/command&gt;
+    &lt;/function&gt;
+&lt;/functions&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>File <code>test_function_parameter_python.yaml</code> (<code>/etc/clickhouse-server/test_function_parameter_python.yaml</code> with default path settings).<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yml"><code class="language-yml">functions:
+  type: executable
+  execute_direct: true
+  name: test_function_parameter_python
+  return_type: String
+  argument:
+    - type: UInt64
+  format: TabSeparated
+  command: test_function_parameter_python.py {test_parameter:UInt64}
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<br/>
+<p>Create script file <code>test_function_parameter_python.py</code> inside the <code>user_scripts</code> folder (<code>/var/lib/clickhouse/user_scripts/test_function_parameter_python.py</code> with default path settings).</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-python"><code class="language-python">#!/usr/bin/python3
+
+import sys
+
+if __name__ == "__main__":
+    for line in sys.stdin:
+        print("Parameter " + str(sys.argv[1]) + " value " + str(line), end="")
+        sys.stdout.flush()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT test_function_parameter_python(1)(2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─test_function_parameter_python(1)(2)─┐
+│ Parameter 1 value 2                  │
+└──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="udf-shell-script">UDF from shell script<a aria-label="Direct link to UDF from shell script" class="hash-link" href="#udf-shell-script" title="Direct link to UDF from shell script">​</a></h3>
+<p>In this example, we create a shell script that multiplies each value by 2.</p>
+<div class="tabs-container tabList_TRJ7"><ul aria-orientation="horizontal" class="scrollableElement_Qqzp tabs tabList_TRJ7" role="tablist"><li aria-selected="true" class="tabs__item tabItem_hGfb tabs__item--active" role="tab" tabindex="0">XML<li aria-selected="false" class="tabs__item tabItem_hGfb" role="tab" tabindex="-1">YAML</li></li></ul><div class="margin-top--md"><div class="tabItem_Ymn6" role="tabpanel"><p>File <code>test_function_shell.xml</code> (<code>/etc/clickhouse-server/test_function_shell.xml</code> with default path settings).<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;functions&gt;
+    &lt;function&gt;
+        &lt;type&gt;executable&lt;/type&gt;
+        &lt;name&gt;test_shell&lt;/name&gt;
+        &lt;return_type&gt;String&lt;/return_type&gt;
+        &lt;argument&gt;
+            &lt;type&gt;UInt8&lt;/type&gt;
+            &lt;name&gt;value&lt;/name&gt;
+        &lt;/argument&gt;
+        &lt;format&gt;TabSeparated&lt;/format&gt;
+        &lt;command&gt;test_shell.sh&lt;/command&gt;
+    &lt;/function&gt;
+&lt;/functions&gt;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div><div class="tabItem_Ymn6" hidden="" role="tabpanel"><p>File <code>test_function_shell.yaml</code> (<code>/etc/clickhouse-server/test_function_shell.yaml</code> with default path settings).<div class="wrapper_EBtA" style="height:169.65px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-yml"><code class="language-yml">functions:
+  type: executable
+  name: test_shell
+  return_type: String
+  argument:
+    - type: UInt8
+      name: value
+  format: TabSeparated
+  command: test_shell.sh
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div></div>
+<br/>
+<p>Create a script file <code>test_shell.sh</code> inside the <code>user_scripts</code> folder (<code>/var/lib/clickhouse/user_scripts/test_shell.sh</code> with default path settings).</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">#!/bin/bash
+
+while read read_data;
+    do printf "$(expr $read_data \* 2)\n";
+done
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT test_shell(number) FROM numbers(10);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">    ┌─test_shell(number)─┐
+ 1. │ 0                  │
+ 2. │ 2                  │
+ 3. │ 4                  │
+ 4. │ 6                  │
+ 5. │ 8                  │
+ 6. │ 10                 │
+ 7. │ 12                 │
+ 8. │ 14                 │
+ 9. │ 16                 │
+10. │ 18                 │
+    └────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="error-handling">Error Handling<a aria-label="Direct link to Error Handling" class="hash-link" href="#error-handling" title="Direct link to Error Handling">​</a></h2>
+<p>Some functions might throw an exception if the data is invalid.
+In this case, the query is canceled and an error text is returned to the client.
+For distributed processing, when an exception occurs on one of the servers, the other servers also attempt to abort the query.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="evaluation-of-argument-expressions">Evaluation of Argument Expressions<a aria-label="Direct link to Evaluation of Argument Expressions" class="hash-link" href="#evaluation-of-argument-expressions" title="Direct link to Evaluation of Argument Expressions">​</a></h2>
+<p>In almost all programming languages, one of the arguments might not be evaluated for certain operators.
+This is usually the operators <code>&amp;&amp;</code>, <code>||</code>, and <code>?:</code>.
+In ClickHouse, arguments of functions (operators) are always evaluated.
+This is because entire parts of columns are evaluated at once, instead of calculating each row separately.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="performing-functions-for-distributed-query-processing">Performing Functions for Distributed Query Processing<a aria-label="Direct link to Performing Functions for Distributed Query Processing" class="hash-link" href="#performing-functions-for-distributed-query-processing" title="Direct link to Performing Functions for Distributed Query Processing">​</a></h2>
+<p>For distributed query processing, as many stages of query processing as possible are performed on remote servers, and the rest of the stages (merging intermediate results and everything after that) are performed on the requestor server.</p>
+<p>This means that functions can be performed on different servers.
+For example, in the query <code>SELECT f(sum(g(x))) FROM distributed_table GROUP BY h(y),</code></p>
+<ul class="custom-ul">
+<li class="custom-li">if a <code>distributed_table</code> has at least two shards, the functions 'g' and 'h' are performed on remote servers, and the function 'f' is performed on the requestor server.</li>
+<li class="custom-li">if a <code>distributed_table</code> has only one shard, all the 'f', 'g', and 'h' functions are performed on this shard's server.</li>
+</ul>
+<p>The result of a function usually does not depend on which server it is performed on. However, sometimes this is important.
+For example, functions that work with dictionaries use the dictionary that exists on the server they are running on.
+Another example is the <code>hostName</code> function, which returns the name of the server it is running on in order to make <code>GROUP BY</code> by servers in a <code>SELECT</code> query.</p>
+<p>If a function in a query is performed on the requestor server, but you need to perform it on remote servers, you can wrap it in an 'any' aggregate function or add it to a key in <code>GROUP BY</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="sql-user-defined-functions">SQL User Defined Functions<a aria-label="Direct link to SQL User Defined Functions" class="hash-link" href="#sql-user-defined-functions" title="Direct link to SQL User Defined Functions">​</a></h2>
+<p>Custom functions from lambda expressions can be created using the <a href="/docs/sql-reference/statements/create/function">CREATE FUNCTION</a> statement. To delete these functions use the <a href="/docs/sql-reference/statements/drop#drop-function">DROP FUNCTION</a> statement.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="webassembly-user-defined-functions">WebAssembly User Defined Functions<a aria-label="Direct link to WebAssembly User Defined Functions" class="hash-link" href="#webassembly-user-defined-functions" title="Direct link to WebAssembly User Defined Functions">​</a></h2>
+<div class="cloudNotSupportedBadge_FcNk"><div class="cloudNotSupportedIcon_DxHk" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M6.33366 12.6666L12.3739 12.6667C13.6593 12.6667 14.7073 11.6187 14.7073 10.3334C14.7073 9.04804 13.6593 8.00003 12.3739 8.00003C12.3739 8.00003 12.3337 7.66659 12.0003 7.33325M10.667 5.33322C8.00033 2.33325 4.45395 4.78537 4.14195 6.68203C2.55728 6.7627 1.29395 8.06203 1.29395 9.6667C1.29395 11.3234 2.66699 12.6666 4.00033 12.6666" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M2.66699 14L12.0003 4.66663" stroke="#660099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div>Not supported in ClickHouse Cloud</div>
+<div class="experimentalBadge_YmgE"><div class="experimentalIcon_rfgE" style="margin-right:8px;margin-top:4px"><svg fill="none" height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 2H10.5" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M9.50015 2V6.19625L13.4283 12.7425C13.4738 12.8183 13.4985 12.9049 13.4996 12.9934C13.5008 13.0818 13.4785 13.169 13.435 13.246C13.3914 13.323 13.3283 13.3871 13.2519 13.4317C13.1755 13.4764 13.0886 13.4999 13.0002 13.5H3.00015C2.91164 13.5 2.8247 13.4766 2.74822 13.432C2.67174 13.3874 2.60847 13.3233 2.56487 13.2463C2.52126 13.1693 2.49889 13.082 2.50004 12.9935C2.50119 12.905 2.52582 12.8184 2.5714 12.7425L6.50015 6.19625V2" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path><path d="M4.47656 9.56754C5.30344 9.41254 6.47656 9.47942 7.99969 10.25C10.0153 11.2707 11.4216 11.0569 12.2184 10.7282" stroke="#4F2B00" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"></path></svg></div>Experimental feature. <u><a href="/docs/beta-and-experimental-features#experimental-features">Learn more.</a></u></div>
+<p>WebAssembly User Defined Functions (WASM UDFs) allow you to run custom code compiled to WebAssembly inside the ClickHouse server process.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="quick-start">Quick Start<a aria-label="Direct link to Quick Start" class="hash-link" href="#quick-start" title="Direct link to Quick Start">​</a></h3>
+<p>Enable experimental WebAssembly support in your ClickHouse configuration:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;allow_experimental_webassembly_udf&gt;true&lt;/allow_experimental_webassembly_udf&gt;
+&lt;/clickhouse&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Insert your compiled WASM module into the system table:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO system.webassembly_modules (name, code)
+SELECT 'my_module', base64Decode('AGFzbQEAAAA...');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Create a function using your WASM module:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE FUNCTION my_function
+LANGUAGE WASM
+ABI ROW_DIRECT
+FROM 'my_module'
+ARGUMENTS (x UInt32, y UInt32)
+RETURNS UInt32;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Use the function in your queries:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT my_function(10, 20);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="more-information">More Information<a aria-label="Direct link to More Information" class="hash-link" href="#more-information" title="Direct link to More Information">​</a></h3>
+<p>Refer to the documentation on <a href="/docs/sql-reference/functions/wasm_udf">WebAssembly User Defined Functions</a> for more details.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="related-content">Related Content<a aria-label="Direct link to Related Content" class="hash-link" href="#related-content" title="Direct link to Related Content">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/blog/user-defined-functions-clickhouse-udfs" rel="noopener noreferrer" target="_blank">User-defined functions in ClickHouse Cloud</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/type-conversion-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Type conversion</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/ulid-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">ULIDs</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#executable-user-defined-functions">Executable User Defined Functions</a><li><a class="table-of-contents__link toc-highlight" href="#executable-user-defined-functions">Executable User Defined Functions</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><ul><li><a class="table-of-contents__link toc-highlight" href="#udf-inline">UDF from inline script</a><li><a class="table-of-contents__link toc-highlight" href="#udf-python">UDF from Python script</a><li><a class="table-of-contents__link toc-highlight" href="#udf-stdin">Read two values from <code>STDIN</code> and return their sum as a JSON object</a><li><a class="table-of-contents__link toc-highlight" href="#udf-parameters-in-command">Use parameters in <code>command</code> setting</a><li><a class="table-of-contents__link toc-highlight" href="#udf-shell-script">UDF from shell script</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#error-handling">Error Handling</a><li><a class="table-of-contents__link toc-highlight" href="#evaluation-of-argument-expressions">Evaluation of Argument Expressions</a><li><a class="table-of-contents__link toc-highlight" href="#performing-functions-for-distributed-query-processing">Performing Functions for Distributed Query Processing</a><li><a class="table-of-contents__link toc-highlight" href="#sql-user-defined-functions">SQL User Defined Functions</a><li><a class="table-of-contents__link toc-highlight" href="#webassembly-user-defined-functions">WebAssembly User Defined Functions</a><ul><li><a class="table-of-contents__link toc-highlight" href="#quick-start">Quick Start</a><li><a class="table-of-contents__link toc-highlight" href="#more-information">More Information</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#related-content">Related Content</a></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

@@ -1,0 +1,229 @@
+# 2025年5月ニュースレター
+
+
+こんにちは、そして2025年5月ClickHouseニュースレターへようこそ！
+
+
+今月は、ClickHouseがどのように「怠惰」になったのか、Microsoft Clarity分析プラットフォームがClickHouseを選んだ理由、MCP/リアルタイム分析パネル、ClickHouseによる視聴者維持率の指標などについて深く掘り下げます！
+
+
+## 注目のコミュニティメンバー：Can Tian [\#](/jp/blog/202505-newsletter-jp#featured-community-member)
+
+
+今月の注目のコミュニティメンバーは、DeepLのシニアデータプラットフォームエンジニアであるCan Tian氏です。
+
+
+![featured_may.png](/uploads/featured_may_690bc9b49f.png)
+Can Tian氏は、Python、C\+\+、および最新のインフラストラクチャツールを使用して、スケーラブルなクラウドネイティブデータシステムを構築してきた経験があります。DeepL、FactoryPal、Springer Natureでの経験を通じて、データエンジニアリングから分析、プラットフォーム設計まで幅広く手掛けてきました。
+
+
+Can氏は、[dbt\-clickhouseに大きな貢献](https://github.com/ClickHouse/dbt-clickhouse/pulls?q=is:pr+author:canbekley)をしており、増分「マイクロバッチ」戦略のサポートの追加、分散増分モデルのスキーマ変更処理の実装、レプリケートされたデータベースの`ON CLUSTER`ステートメントに関連する重要な問題の修正などを行っています。
+
+
+➡️ [LinkedInでCan氏をフォローする](https://www.linkedin.com/in/canbekleyici/)
+
+
+## 今後のイベント [\#](/jp/blog/202505-newsletter-jp#upcoming-events)
+
+
+5月29日にサンフランシスコで開催される[ClickHouseユーザーカンファレンス、Open House](https://clickhouse.com/openhouse?utm_source=marketo&utm_medium=email&utm_campaign=newsletter)まであと2週間です。素晴らしい講演者のラインナップは増え続けています。
+
+
+LyftのエンジニアであるJeana Choi氏とRitesh Varyani氏は、ClickHouseをニアリアルタイムおよびサブセカンド分析にどのように使用し、迅速な意思決定を可能にしているかについて説明します。
+
+
+[Open Houseに登録する](https://clickhouse.com/openhouse?utm_source=marketo&utm_medium=email&utm_campaign=newsletter)
+
+
+### グローバルイベント [\#](/jp/blog/202505-newsletter-jp#%E3%82%B0%E3%83%AD%E3%83%BC%E3%83%90%E3%83%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+
+
+- [v25\.5コミュニティコール](https://clickhouse.com/company/events/v25-5-community-release-call) \- 5月22日
+
+
+### 無料トレーニング [\#](/jp/blog/202505-newsletter-jp#%E7%84%A1%E6%96%99%E3%83%88%E3%83%AC%E3%83%BC%E3%83%8B%E3%83%B3%E3%82%B0)
+
+
+- [ClickHouse FastTrackトレーニング](https://clickhouse.com/company/events/202505-emea-amsterdam-inperson-clickhouse-developer-fast-track) \- アムステルダム \- 5月12日
+- [ClickHouse Observabilityトレーニング](https://clickhouse.com/company/events/202505-emea-amsterdam-inperson-clickhouse-for-observability) \- アムステルダム \- 5月13日
+- [ClickHouse Fundamentalsトレーニング](https://clickhouse.com/company/news-events) \- バーチャル \- 5月14日
+- [ClickHouse Developer FastTrackトレーニング](https://clickhouse.com/company/events/202505-emea-munich-inperson-developer-fast-track) \- ミュンヘン \- 5月14日
+- [ClickHouse Developerトレーニング \- バーチャル](https://clickhouse.com/company/events/202505-amer-clickhouse-developer) \- 5月21日
+- [ClickHouse Fundamentals \- バーチャル](https://clickhouse.com/company/events/clickhouse-fundamentals) \- 5月20日、5月22日、6月11日
+- [ClickHouse Developerトレーニング \- バーチャル](https://clickhouse.com/company/events/202505-amer-clickhouse-developer) \- 5月21日～22日
+- [対面ClickHouseクエリ最適化ワークショップ \- サンフランシスコ](https://clickhouse.com/company/events/202505-open-house-query-optimization) \- 5月28日
+- [対面ClickHouse Developer終日トレーニング \- サンフランシスコ](https://clickhouse.com/company/events/202505-open-house-clickhouse-developer) \- 5月28日
+- [ClickHouseとのデータレイク統合 \- バーチャル](https://clickhouse.com/company/events/202506-emea-clickhouse-datalake) \- 6月5日
+
+
+### AMERのイベント [\#](/jp/blog/202505-newsletter-jp#amer%E3%81%AE%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+
+
+- [オースティンClickHouse Meetup \-](https://www.meetup.com/clickhouse-austin-user-group/events/307289908) 5月13日
+- [Microsoft Build \- シアトル](https://clickhouse.com/company/events/2025-05-Amer-Microsoft-Build) \- 5月19日～21日
+- [シアトルClickHouse Meetup](https://www.meetup.com/clickhouse-seattle-user-group/events/307622716/) \- 5月20日
+- [AWS Summit Washington D.C.](https://clickhouse.com/company/events/2025-07-Amer-AWSSummit-washingtondc) \- 6月10日～11日
+- [ワシントンD.C. ClickHouse Meetup \-](https://www.meetup.com/clickhouse-dc-user-group/events/307622954) 6月12日
+- [Confluent Financial Services Leaders Summit、ニューヨーク](https://clickhouse.com/company/events/202507-Amer-confluent-financialserviceleaderssummit) \- 6月10日
+- [アトランタClickHouse Meetup](https://clickhouse.com/company/events/202503-amer-atl-meetup) \- 7月8日
+- [ニューヨークClickHouse Meetup](https://clickhouse.com/company/events/202503-amer-NY-meetup) \- 7月15日
+- [AWS Summitトロント](https://clickhouse.com/company/events/2025-09-Amer-AWSSummit-Toronto) \- 9月4日
+- [AWS Summitロサンゼルス](https://clickhouse.com/company/events/2025-09-Amer-AWSSummit-LosAngeles) \- 9月17日
+
+
+### EMEAのイベント [\#](/jp/blog/202505-newsletter-jp#emea%E3%81%AE%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+
+
+- [ミュンヘンハッピーアワー](https://clickhouse.com/company/events/202505-EMEA-Munich-HappyHour) \- 5月14日
+- [AWS Summitドバイ](https://clickhouse.com/company/events/202505-EMEA-Dubai-AWS-Summit) \- 5月21日
+- [AWS Summitテルアビブ](https://clickhouse.com/company/events/202505-EMEA-TelAviv-AWS-Summit) \- 5月28日
+- [AWS Summitストックホルム](https://aws.amazon.com/events/summits/stockholm/) \- 6月4日
+- [AWS Summitハンブルク](https://aws.amazon.com/events/summits/hamburg/) \- 6月5日
+- [AWS Summitマドリード](https://aws.amazon.com/es/events/summits/madrid/) \- 6月11日
+- [Tech BBQコペンハーゲン](https://techbbq.dk/) \- 8月27日～28日
+- [AWS Summitチューリッヒ](https://aws.amazon.com/events/summits/zurich/) \- 9月11日
+- [BigData London](https://www.bigdataldn.com/) \- 9月24日～25日
+- [PyDataアムステルダム](https://amsterdam.pydata.org/) \- 9月24日～25日
+
+
+### APACのイベント [\#](/jp/blog/202505-newsletter-jp#apac%E3%81%AE%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+
+
+- [DevOpsDaysシンガポール](https://clickhouse.com/company/events/2025-05-APJ-Singapore-DevOpsDays) \- 5月15日
+- [Data Engineering Summit](https://des.analyticsindiamag.com/)、ベンガルール \- 5月15日～16日
+- [深センClickHouse Meetup](https://www.huodongxing.com/event/7803892350511) \- 5月17日
+- [AWS Summitシンガポール](https://clickhouse.com/company/events/2025-05-APJ-AWSSummit-Singapore) \- 5月29日
+- [AWS Summitシドニー](https://clickhouse.com/company/events/2025-06-APJ-AWSSummit-Sydney) \- 6月4日～5日
+- [東京Meetup \- AI Night!](https://www.meetup.com/clickhouse-tokyo-user-group/events/307689645/) \- 6月5日
+- [KubeCon \+ CloudNativeCon Japan](https://clickhouse.com/company/events/2025-06-APJ-Tokyo-KubeCon-Japan) \- 6月16日～17日
+- [AWS Summit Japan](https://clickhouse.com/company/events/2025-06-APJ-AWSSummit-Tokyo) \- 6月25日～26日
+
+
+## 25\.4リリース [\#](/jp/blog/202505-newsletter-jp#release)
+
+
+![0_may.png](/uploads/0_may_8f18386369.png)
+25\.4リリースの私のお気に入りの機能を選ぶのは難しいですが、もし選ばなければならないとしたら、レイジーマテリアライゼーションでしょう。この最適化により、必要な時まで列データの読み取りが遅延され、クエリが大幅に高速化されます。詳細については、次のセクションで説明します！
+
+
+読み取り専用ディスク上のMergeTreeテーブルは、状態をリフレッシュして新しいデータパーツをロードできるようになり、これにより、ClickHouseネイティブのデータレイクを効果的に作成できます。このリリースには、特定のワークロードに対して同時に実行されるスレッド数を制限できるCPUスロットスケジューリングも含まれています。
+
+
+最後に、[clickhouse\-local](https://clickhouse.com/docs/operations/utilities/clickhouse-local)には、デフォルトデータベースのテーブルが永続化されるという、素晴らしいQoL（Quality of Life）アップデートがあります！
+
+
+➡️ [リリース投稿を読む](https://clickhouse.com/blog/clickhouse-release-25-04)
+
+
+## ClickHouseがより「怠惰」に（そしてより速く）：レイジーマテリアライゼーションの導入 [\#](/jp/blog/202505-newsletter-jp#clickhouse-lazier)
+
+
+![1_may.png](/uploads/1_may_2efada319d.png)
+レイジーマテリアライゼーション機能は、Tom Schreiber氏によって徹底的に解説されました。つまり、その仕組みと役立つユースケースを詳細に説明する記事です。
+
+
+Tom氏は、ClickHouseの既存のI/O効率の構成要素から始め、レイヤーごとに実際のクエリを実行し、レイジーマテリアライゼーションが起動してパフォーマンスを劇的に最適化するまでを説明しています。
+
+
+➡️ [ブログ投稿を読む](https://clickhouse.com/blog/clickhouse-gets-lazier-and-faster-introducing-lazy-materialization)
+
+
+## Microsoft ClarityがClickHouseを選んだ理由 [\#](/jp/blog/202505-newsletter-jp#microsoft-clarity)
+
+
+![2_may.png](/uploads/2_may_9e6f34ff9b.png)
+Microsoft Clarityは、Webサイトやアプリの所有者が、視覚的なスナップショットとユーザーインタラクションデータを通じてユーザーの行動を理解するのに役立つ無料の分析ツールです。ヒートマップ、セッションレコーディング、インサイトを提供します。
+
+
+MicrosoftがClarityを無料の公共サービスとして提供することを決定した際、インフラストラクチャを刷新する必要がありました。ElasticsearchとSparkを使用した元の概念実証では、数百万のプロジェクトと数千兆のイベントという予想される規模に対応できませんでした。システムは遅く、取り込みスループットが低く、大規模になると非常に高価になる可能性がありました。
+
+
+彼らはClickHouseをソリューションとして採用し、ブログでは、その選択の理由、解決に役立った問題、そして途中で遭遇した課題について説明しています。
+
+
+➡️ [ブログ投稿を読む](https://clarity.microsoft.com/blog/why-microsoft-clarity-chose-clickhouse/)
+
+
+## AgentHouseの紹介 [\#](/jp/blog/202505-newsletter-jp#agenthouse)
+
+
+![3_may.png](/uploads/3_may_0f0842e7a2.png)
+Dmitry Pavlov氏は、Claude Sonnet大規模言語モデルを使用してClickHouseデータセットと対話できるチャットベースのデモ環境であるAgentHouseを発表しました。
+
+
+内部的には[LibreChat](https://www.librechat.ai/)を使用しており、質問に対するテキスト回答だけでなく、インタラクティブなグラフも取得できます。
+
+
+➡️ [ブログ投稿を読む](https://clickhouse.com/blog/agenthouse-demo-clickhouse-llm-mcp)
+
+
+## UUIDレンジバケットによる10億行のClickHouseインサートの処理方法 [\#](/jp/blog/202505-newsletter-jp#billion-row-inserts)
+
+
+![4_may.png](/uploads/4_may_f3dcb03f83.png)
+CloudQueryは、1回の操作で2500万件を超える大量のデータをClickHouseに取り込む際に課題に直面しました。これらの大規模なインサートは、ClickHouseがディスクに書き出す前にデータセット全体をメモリに実体化するため、メモリ不足のエラーを引き起こしました。
+
+
+この問題を解決するために、彼らはUUID範囲に基づいて大きなインサートをより小さく管理しやすいチャンクに分割する「Insert\-Splitter」アルゴリズムを開発しました。このアプローチは、ClickHouseのUUIDソートの動作のため、慎重な実装が必要でした。
+
+
+しかし、うまくいきました！2600万行の単一のインサートを4つのバランスの取れたバケットに分割することで、処理速度を犠牲にすることなく、ピーク時のメモリ使用量を75％削減できました。
+
+
+➡️ [ブログ投稿を読む](https://www.cloudquery.io/blog/how-we-handle-billion-row-clickhouse-inserts-with-uuid-range-bucketing)
+
+
+## ClickPipesのMySQL CDCコネクタがプライベートプレビューで利用可能に [\#](/jp/blog/202505-newsletter-jp#mysql-cdc-connector)
+
+
+![5_may.png](/uploads/5_may_6a272d293f.png)
+最近、ClickPipesにおけるMySQL Change Data Capture（CDC）コネクタのプライベートプレビューを発表しました。
+
+
+これにより、顧客は数回クリックするだけでMySQLデータベースをClickHouse Cloudにレプリケートし、ClickHouseの驚異的な高速分析を活用できます。MySQLの実行場所に関係なく、継続的なレプリケーションとMySQLからの1回限りの移行の両方に対応します。
+
+
+➡️ [ブログ投稿を読む](https://clickhouse.com/blog/mysql-cdc-connector-clickpipes-private-preview)
+
+
+## ClickHouseによるブートストラップ [\#](/jp/blog/202505-newsletter-jp#bootstrapping-clickhouse)
+
+
+![Bootstrapping with ClickHouse Apr 2025.webp](/uploads/Bootstrapping_with_Click_House_Apr_2025_62bddc39a6.webp)
+AB TastyのWilliam Attache氏は、ブートストラップデータを使用する一部の統計アルゴリズムをClickHouse SQLで直接実装することで高速化したいと考えました。
+
+
+このブログでは、ClickHouseのネイティブ関数を使用した彼の試行錯誤のプロセスを紹介し、最初の乱数戦略が失敗した理由と、最終的にSQLベースの回避策とPythonユーザー定義関数を使用して問題を解決した方法を説明しています。
+
+
+➡️ [ブログ投稿を読む](https://medium.com/the-ab-tasty-tech-blog/bootstrapping-with-clickhouse-c1750a9ec6d2)
+
+
+## Vimeo：大規模な視聴者維持率分析の裏側 [\#](/jp/blog/202505-newsletter-jp#vimeo-viewer-retention-analysis)
+
+
+![7_may.png](/uploads/7_may_92519b28fd.png)
+動画クリエイターとして、この記事は非常に興味深いものでした。視聴回数は基本的なフィードバックを提供しますが、視聴者維持率（各瞬間で視聴を続けている視聴者の割合）を理解することで、コンテンツのパフォーマンスに関するより深い洞察が得られます。
+
+
+Vimeoのブログ投稿では、ClickHouseを使用して高度な維持率分析システムをどのように構築したかが明らかにされています。絶対的な視聴回数を保存するのではなく、視聴パターンを変化（視聴者がセグメントの視聴を開始したときに\+1、停止したときに\-1）として記録し、ウィンドウ関数を使用して毎秒の累積視聴回数を計算しています。
+
+
+また、AIを活用したインサイトレイヤーも構築しており、AIのコンテキストウィンドウが過負荷になるのを防ぐために、ウィンドウ平均とランレングスエンコーディングを通じて維持率データを事前処理しています。注意深く作成されたプロンプトエンジニアリングと組み合わせることで、視聴者のエンゲージメントパターンに関する簡潔で実用的なインサイトを生成できます。
+
+
+➡️ [ブログ投稿を読む](https://medium.com/vimeo-engineering-blog/behind-viewer-retention-analytics-at-scale-8dbbb5ae7ae2)
+
+
+## ビデオコーナー [\#](/jp/blog/202505-newsletter-jp#video-corner)
+
+
+- スケールアウト配信プラットフォームであるBuildkiteのスタッフエンジニア、Gordon Chan氏が、[テスト分析へのClickHouse採用の道のり](https://www.youtube.com/watch?v=iw2kVH-vSH0)を共有しました。
+- Last9の開発者エバンジェリストであるPrathamesh Sonpatki氏が、内部でClickHouseを使用するオブザーバビリティプラットフォームの構築から得られた[オブザーバビリティの課題とソリューションに関する洞察](https://www.youtube.com/watch?v=AYT0O3Al8-U)を共有しました。
+- Ryadh Dahimene氏が、さまざまな企業の専門家を招き、[リアルタイム分析の交差点におけるモデルコンテキストプロトコル（MCP）](https://clickhouse.com/videos/mcp-real-time-analytics-panel)に関するパネルディスカッションを主催しました。参加者には、Anthropic、ClickHouse、RunReveal、Five One、A16Zの代表者が含まれていました。
+- 既存のテーブルで[マテリアライズドビューをバックフィルする方法](https://clickhouse.com/videos/backfill-materialized-view)を示すビデオを作成しました。
+- また、[AWS Glueカタログを介してApache Icebergテーブルをクエリする方法](https://clickhouse.com/videos/iceberg-aws-glue-clickhouse)も紹介しました。
+- 最後に、[ClickHouseのJSONデータ型](https://clickhouse.com/videos/json-data-type)を説明する短いビデオがあります。
+
+
+➡️ \<a href\="[https://medium.com/the\-ab\-tasty\-tech\-](https://medium.com/the-ab-tasty-tech-)

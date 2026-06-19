@@ -1,0 +1,104 @@
+<h1>Time64 | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/data-types" itemprop="item"><span itemprop="name">Data types</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">Time64</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/data-types/time64.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Time64</h1></header><p>Data type <code>Time64</code> represents a time-of-day with fractional seconds.
+It has no calendar date components (day, month, year).
+The <code>precision</code> parameter defines the number of fractional digits and therefore the tick size.</p>
+<p>Tick size (precision): 10<sup>-precision</sup> seconds. Valid range: 0..9. Common choices are 3 (milliseconds), 6 (microseconds), and 9 (nanoseconds).</p>
+<p><strong>Syntax:</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">Time64(precision)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Internally, <code>Time64</code> stores a signed 64-bit decimal (Decimal64) number of fractional seconds.
+The tick resolution is determined by the <code>precision</code> parameter.
+Time zones are not supported: specifying a time zone with <code>Time64</code> will throw an error.</p>
+<p>Unlike <code>DateTime64</code>, <code>Time64</code> does not store a date component.
+See also <a href="/docs/sql-reference/data-types/time"><code>Time</code></a>.</p>
+<p>Text representation range: [-999:59:59.000, 999:59:59.999] for <code>precision = 3</code>. In general, the minimum is <code>-999:59:59</code> and the maximum is <code>999:59:59</code> with up to <code>precision</code> fractional digits (for <code>precision = 9</code>, the minimum is <code>-999:59:59.999999999</code>).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="implementation-details">Implementation details<a aria-label="Direct link to Implementation details" class="hash-link" href="#implementation-details" title="Direct link to Implementation details">​</a></h2>
+<p><strong>Representation</strong>.
+Signed <code>Decimal64</code> value counting fractional second with <code>precision</code> fractional digits.</p>
+<p><strong>Normalization</strong>.
+When parsing strings to <code>Time64</code>, the time components are normalized and not validated.
+For example, <code>25:70:70</code> is interpreted as <code>26:11:10</code>.</p>
+<p><strong>Negative values</strong>.
+Leading minus signs are supported and preserved.
+Negative values typically arise from arithmetic operations on <code>Time64</code> values.
+For <code>Time64</code>, negative inputs are preserved for both text (e.g., <code>'-01:02:03.123'</code>) and numeric inputs (e.g., <code>-3723.123</code>).</p>
+<p><strong>Saturation</strong>.
+The time-of-day component is capped to the range [-999:59:59.xxx, 999:59:59.xxx] when converting to components or serialising to text.
+The stored numeric value may exceed this range; however, any component extraction (hours, minutes, seconds) and textual representation use the saturated value.</p>
+<p><strong>Time zones</strong>.
+<code>Time64</code> does not support time zones.
+Specifying a time zone when creating a <code>Time64</code> type or value throws an error.
+Likewise, attempts to apply or change the time zone on <code>Time64</code> columns is not supported and results in an error.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<ol class="custom-ol">
+<li class="custom-li">Creating a table with a <code>Time64</code>-type column and inserting data into it:</li>
+</ol>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE tab64
+(
+    `event_id` UInt8,
+    `time` Time64(3)
+)
+ENGINE = TinyLog;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Parse Time64
+-- - from string,
+-- - from a number of seconds since 00:00:00 (fractional part according to precision).
+INSERT INTO tab64 VALUES (1, '14:30:25'), (2, 52225.123), (3, '14:30:25');
+
+SELECT * FROM tab64 ORDER BY event_id;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─event_id─┬────────time─┐
+1. │        1 │ 14:30:25.000 │
+2. │        2 │ 14:30:25.123 │
+3. │        3 │ 14:30:25.000 │
+   └──────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ol class="custom-ol" start="2">
+<li class="custom-li">Filtering on <code>Time64</code> values</li>
+</ol>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM tab64 WHERE time = toTime64('14:30:25', 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─event_id─┬────────time─┐
+1. │        1 │ 14:30:25.000 │
+2. │        3 │ 14:30:25.000 │
+   └──────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM tab64 WHERE time = toTime64(52225.123, 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─event_id─┬────────time─┐
+1. │        2 │ 14:30:25.123 │
+   └──────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: <code>toTime64</code> parses numeric literals as seconds with a fractional part according to the specified precision, so provide the intended fractional digits explicitly.</p>
+<ol class="custom-ol" start="3">
+<li class="custom-li">Inspecting the resulting type:</li>
+</ol>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT CAST('14:30:25.250' AS Time64(3)) AS column, toTypeName(column) AS type;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌────────column─┬─type──────┐
+1. │ 14:30:25.250 │ Time64(3) │
+   └───────────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="addition-with-date">Addition with Date<a aria-label="Direct link to Addition with Date" class="hash-link" href="#addition-with-date" title="Direct link to Addition with Date">​</a></h2>
+<p>A <a href="/docs/sql-reference/data-types/time64">Time64</a> value can be added to a <a href="/docs/sql-reference/data-types/date">Date</a> or <a href="/docs/sql-reference/data-types/date32">Date32</a> value to produce a <a href="/docs/sql-reference/data-types/datetime64">DateTime64</a> with the same scale as the <code>Time64</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET use_legacy_to_time = 0;
+SELECT toDate('2024-07-15') + toTime64('14:30:25.123456', 6) AS dt, toTypeName(dt);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">   ┌─────────────────────────dt─┬─toTypeName(dt)─┐
+1. │ 2024-07-15 14:30:25.123456 │ DateTime64(6)  │
+   └────────────────────────────┴────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>See <a href="/docs/sql-reference/operators#date-time-addition">Date and Time Addition</a> for details on all supported combinations and result types.</p>
+<p><strong>See Also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/functions/type-conversion-functions">Type conversion functions</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/date-time-functions">Functions for working with dates and times</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#date_time_input_format">The <code>date_time_input_format</code> setting</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#date_time_output_format">The <code>date_time_output_format</code> setting</a></li>
+<li class="custom-li"><a href="/docs/operations/server-configuration-parameters/settings#timezone">The <code>timezone</code> server configuration parameter</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#session_timezone">The <code>session_timezone</code> setting</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/operators#operators-for-working-with-dates-and-times">Operators for working with dates and times</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/date"><code>Date</code> data type</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/time"><code>Time</code> data type</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/data-types/datetime"><code>DateTime</code> data type</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/data-types/datetime"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">DateTime</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/data-types/datetime64"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">DateTime64</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#implementation-details">Implementation details</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#addition-with-date">Addition with Date</a></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

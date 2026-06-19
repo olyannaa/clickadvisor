@@ -1,0 +1,26 @@
+id: R-015
+name: distinct_after_groupby_removal
+tier: 1A
+category: subquery
+status: proposed
+statement: Убрать DISTINCT если все DISTINCT-колонки — подмножество GROUP BY ключей.
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: 'Результат GROUP BY (c1, c2) по определению уникален по (c1, c2).
+
+  DISTINCT поверх — noop.'
+explain_template: 'После GROUP BY результат уже уникален по ключам группировки: движок физически строит по ним одно агрегатное состояние на группу. Если сверху добавить DISTINCT по тем же колонкам, ClickHouse получает ещё один шаг дедупликации, который ничего не меняет по смыслу. Это просто лишняя фаза обработки поверх уже уникального результата.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT DISTINCT a, b FROM (SELECT a, b, COUNT(*) FROM t GROUP BY a, b)
+example_after: SELECT a, b FROM t GROUP BY a, b
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

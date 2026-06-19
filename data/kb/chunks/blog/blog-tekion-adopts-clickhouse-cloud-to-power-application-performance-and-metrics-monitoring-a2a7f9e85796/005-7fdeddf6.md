@@ -1,0 +1,31 @@
+---
+source: blog
+url: https://tekion.com/
+topic: tekion-adopts-clickhouse-cloud-to-power-application-performance-and-metrics-monitoring
+ch_version_introduced: auto
+last_updated: '2026-06-12'
+chunk_index: 5
+total_chunks_in_doc: 5
+---
+
+required has reduced by 25% resulting in substantial cost savings. This means faster job execution times, and the ability to process larger datasets with the same infrastructure due to more efficient utilization of resources. ## Query Performance [\#](/blog/tekion-adopts-clickhouse-cloud-to-power-application-performance-and-metrics-monitoring#query-performance)
+
+ClickHouse performance allows for significantly faster query execution and retrieval of data even for large datasets, resulting in truly real\-time, interactive experience for the users. Query latency dropped by more than a factor of 10 while lookback doubled \- it’s now at 500 milliseconds when querying up to 14 days, while in the previous set\-up, queries took 8 seconds and then timed\-out after a 7\-day window. Users can now query data over extended time frames and analyze raw data in real\-time, rather than relying on pre\-aggregated formats. It means deeper insights, enabling Tekion to adapt to evolving customer needs and market trends.
+
+## Conclusion [\#](/blog/tekion-adopts-clickhouse-cloud-to-power-application-performance-and-metrics-monitoring#conclusion)
+
+Optimizing observability data stack is an ongoing journey, and a culture of continuous improvement is in Tekion’s DNA. While the team started with migrating APM and Metrics to ClickHouse Cloud, logging, audit reporting, and internal planning dashboards are in consideration for future opportunities to consolidate. Ved closes with: “We really love ClickHouse, and the team talks very highly about support. We'll keep partnering. It's a very interesting technology, it already makes a huge difference and in future we hope to use it more widely.”
+
+Share this postCopy URLShare on Y CombinatorShare on TwitterShare on BlueSkyShare on FacebookShare on LinkedIn### Subscribe to our newsletter
+
+Stay informed on feature releases, product roadmap, support, and cloud offerings!Loading form...## Recent posts
+
+[View all Blogs](/blog)![](/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&w=828&q=75)Product### [Agents can now provision ClickHouse and Postgres on ClickHouse Cloud](/blog/stripe-projects)
+
+Chloé Carasso dit Carson · Jun 10, 2026![](/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&w=828&q=75)Product### [Datadog and ClickHouse partner to bring full\-fidelity data to modern observability](/blog/datadog-and-clickhouse-partner)
+
+ClickHouse · Jun 10, 2026![](/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&w=828&q=75)Product### [ClickHouse Agents: Claude\-powered agentic analytics, now in public beta](/blog/clickhouse-agents-beta)
+
+Ryadh Dahimene · Jun 9, 2026![](/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&w=828&q=75)User stories### [How QRT powers real\-time research and risk management at petabyte scale](/blog/qrt)
+
+ClickHouse · Jun 9, 2026Follow us[![X](/socials/x.svg)X](https://x.com/ClickhouseDB "X")[![Bluesky](/socials/bluesky.svg)Bluesky](https://bsky.app/profile/clickhouse.com "Bluesky")[![Slack](/socials/slack.svg)Slack](/slack "Slack")[![GitHub](/socials/github.svg)GitHub](https://github.com/ClickHouse/ClickHouse "GitHub")[![Telegram](/socials/telegram.svg)Telegram](https://telegram.me/clickhouse_en "Telegram")[![Meetup](/socials/meetup.svg)Meetup](https://www.meetup.com/pro/clickhouse "Meetup")[![Rss](/socials/rss.svg)Rss](/rss.xml "Rss")

@@ -1,0 +1,30 @@
+case_id: tpch_q16
+source: tpch
+sql: "SELECT\n    p_brand,\n    p_type,\n    p_size,\n    count(DISTINCT ps_suppkey) AS supplier_cnt\nFROM\n    partsupp,\n    part\nWHERE\n    p_partkey = ps_partkey\n    AND p_brand <> 'Brand#45'\n    AND p_type NOT LIKE 'MEDIUM POLISHED%'\n    AND p_size IN (49, 14, 23, 45, 19, 3, 36, 9)\n    AND ps_suppkey NOT IN (\n        SELECT\n            s_suppkey\n        FROM\n            supplier\n        WHERE\n            s_comment LIKE '%Customer%Complaints%'\n    )\nGROUP BY\n    p_brand,\n    p_type,\n    p_size\nORDER BY\n    supplier_cnt DESC,\n    p_brand,\n    p_type,\n    p_size;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: NOT IN подзапрос — вложенность
+- issue_id: I-2
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: p_type NOT LIKE 'MEDIUM POLISHED%' — паттерн с wildcard
+- issue_id: I-3
+  type: disjunction_chain_to_in
+  detected_by_rule: R-010
+  severity: high
+  description: p_size = 49 OR p_size = 14 OR ... (8 значений) → можно заменить на IN
+expected_rules_to_fire:
+- D-013
+- D-005
+- R-010
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q16: Parts/Supplier Relationship.'
+expected_findings_count: 3
+status: reviewed

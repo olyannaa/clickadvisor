@@ -1,0 +1,70 @@
+# SET ROLE Statement \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- SET ROLE
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/set-role.md)# SET ROLE Statement
+
+Activates roles for the current user.
+
+
+
+```
+SET ROLE {DEFAULT | NONE | role [,...] | ALL | ALL EXCEPT role [,...]}
+
+```
+
+## SET DEFAULT ROLE[​](#set-default-role "Direct link to SET DEFAULT ROLE")
+
+
+Sets default roles to a user.
+
+
+Default roles are automatically activated at user login. You can set as default only the previously granted roles. If the role isn't granted to a user, ClickHouse throws an exception.
+
+
+
+```
+SET DEFAULT ROLE {NONE | role [,...] | ALL | ALL EXCEPT role [,...]} TO {user|CURRENT_USER} [,...]
+
+```
+
+## Examples[​](#examples "Direct link to Examples")
+
+
+Set multiple default roles to a user:
+
+
+
+```
+SET DEFAULT ROLE role1, role2, ... TO user
+
+```
+
+Set all the granted roles as default to a user:
+
+
+
+```
+SET DEFAULT ROLE ALL TO user
+
+```
+
+Purge default roles from a user:
+
+
+
+```
+SET DEFAULT ROLE NONE TO user
+
+```
+
+Set all the granted roles as default except for specific roles `role1` and `role2`:
+
+
+
+```
+SET DEFAULT ROLE ALL EXCEPT role1, role2 TO user
+
+```
+[PreviousSET](/docs/sql-reference/statements/set)[NextTRUNCATE](/docs/sql-reference/statements/truncate)- [SET DEFAULT ROLE](#set-default-role)- [Examples](#examples)
+Was this page helpful?

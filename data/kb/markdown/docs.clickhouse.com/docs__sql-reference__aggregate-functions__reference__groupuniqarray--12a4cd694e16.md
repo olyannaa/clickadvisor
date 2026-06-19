@@ -1,0 +1,85 @@
+# groupUniqArray \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- groupUniqArray
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/groupUniqArray.md)# groupUniqArray
+
+## groupUniqArray[​](#groupUniqArray "Direct link to groupUniqArray")
+
+
+Introduced in: v1\.1\.0
+
+
+Creates an array from different argument values.
+The memory consumption of this function is the same as for the [`uniqExact`](/docs/sql-reference/aggregate-functions/reference/uniqexact) function.
+
+
+**Syntax**
+
+
+
+```
+groupUniqArray(x)
+groupUniqArray(max_size)(x)
+
+```
+
+**Parameters**
+
+
+- `max_size` — Limits the size of the resulting array to `max_size` elements. `groupUniqArray(1)(x)` is equivalent to `[any(x)]`. [`UInt64`](/docs/sql-reference/data-types/int-uint)
+
+
+**Arguments**
+
+
+- `x` — Expression. [`Any`](/docs/sql-reference/data-types)
+
+
+**Returned value**
+
+
+Returns an array of unique values. [`Array`](/docs/sql-reference/data-types/array)
+
+
+**Examples**
+
+
+**Usage example**
+
+
+
+```
+CREATE TABLE t (x UInt8) ENGINE = Memory;
+INSERT INTO t VALUES (1), (2), (1), (3), (2), (4);
+
+SELECT groupUniqArray(x) FROM t;
+
+```
+
+
+```
+┌─groupUniqArray(x)─┐
+│ [1,2,3,4]         │
+└───────────────────┘
+
+```
+
+**With max\_size parameter**
+
+
+
+```
+SELECT groupUniqArray(2)(x) FROM t;
+
+```
+
+
+```
+┌─groupUniqArray(2)(x)─┐
+│ [1,2]                │
+└──────────────────────┘
+
+```
+[PreviousgroupConcat](/docs/sql-reference/aggregate-functions/reference/groupconcat)[NextintervalLengthSum](/docs/sql-reference/aggregate-functions/reference/intervalLengthSum)- [groupUniqArray](#groupUniqArray)
+Was this page helpful?

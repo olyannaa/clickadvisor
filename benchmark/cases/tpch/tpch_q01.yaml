@@ -1,0 +1,18 @@
+case_id: tpch_q01
+source: tpch
+sql: "SELECT\n    l_returnflag,\n    l_linestatus,\n    sum(l_quantity) AS sum_qty,\n    sum(l_extendedprice) AS sum_base_price,\n    sum(l_extendedprice * (1 - l_discount)) AS sum_disc_price,\n    sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) AS sum_charge,\n    avg(l_quantity) AS avg_qty,\n    avg(l_extendedprice) AS avg_price,\n    avg(l_discount) AS avg_disc,\n    count(*) AS count_order\nFROM\n    lineitem\nWHERE\n    l_shipdate <= toDate('1998-12-01') - INTERVAL 90 DAY\nGROUP BY\n    l_returnflag,\n    l_linestatus\nORDER BY\n    l_returnflag,\n    l_linestatus;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: select_star_not_applicable
+  detected_by_rule: D-004
+  severity: medium
+  description: Запрос возвращает агрегаты без LIMIT — результат мал (2-3 строки), но паттерн отсутствия LIMIT детектируется
+expected_rules_to_fire:
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q1: Pricing Summary. GROUP BY l_returnflag, l_linestatus — мало уникальных значений, результат небольшой. ORDER BY без LIMIT.'
+expected_findings_count: 1
+status: reviewed

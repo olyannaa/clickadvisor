@@ -1,0 +1,18 @@
+case_id: synthetic_01
+source: synthetic
+sql: |
+  SELECT COUNT(DISTINCT user_id) FROM events
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: count_distinct_to_uniqExact
+  detected_by_rule: R-001
+  severity: high
+  description: COUNT(DISTINCT user_id) можно заменить на uniqExact(user_id).
+expected_rules_to_fire:
+- R-001
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-001.
+expected_findings_count: 1
+status: validated

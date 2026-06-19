@@ -1,0 +1,31 @@
+id: R-107
+name: codec_recommendation
+tier: '2'
+category: storage_layout
+status: proposed
+statement: Рекомендовать кодек на основе типа данных
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: ''
+  baseline: ''
+  projected: ''
+ddl_template: '`ALTER TABLE t MODIFY COLUMN col TYPE T CODEC(...)`'
+decision_tree: time-series int → DoubleDelta+ZSTD; high-card int → T64; float → Gorilla;
+  default → ZSTD

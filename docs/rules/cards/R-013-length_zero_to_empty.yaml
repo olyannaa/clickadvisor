@@ -1,0 +1,31 @@
+id: R-013
+name: length_zero_to_empty
+tier: 1A
+category: string_operations
+status: proposed
+statement: 'length(s) = 0 → empty(s)
+
+  length(s) > 0 → notEmpty(s)
+
+  length(s) != 0 → notEmpty(s)'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: 'По определению ClickHouse: empty(s) ≡ length(s) = 0.
+
+  Это документированная эквивалентность в string functions.'
+explain_template: Функции empty и notEmpty в ClickHouse — это специальные проверки для пустых строк и коллекций, а не просто синтаксический сахар. Они выражают намерение напрямую, тогда как length(s) > 0 сначала требует вычислить длину, а потом сравнить её с нулём. Специализированная форма обычно проще для выполнения и понятнее при чтении запроса.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE length(comment) > 0
+example_after: WHERE notEmpty(comment)
+expected_speedup:
+  estimate: 1.5-3× на длинных строках
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-functions#empty

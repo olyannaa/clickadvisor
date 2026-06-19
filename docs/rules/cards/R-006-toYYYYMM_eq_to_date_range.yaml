@@ -1,0 +1,28 @@
+id: R-006
+name: toYYYYMM_eq_to_date_range
+tier: 1A
+category: sargable
+status: proposed
+statement: 'Аналогично R-005, но для toYYYYMM, toYYYYMMDD, toMonth,
+
+  toStartOfMonth, toStartOfYear.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: 'Каждая из этих функций — «округление вниз до границы интервала».
+
+  Equality с константой эквивалентно range над интервалом.'
+explain_template: Функции вроде toYYYYMM и toStartOfMonth вычисляют производное значение от исходной даты или времени. Для ClickHouse это означает, что фильтр уже не смотрит напрямую на колонку ORDER BY, а значит pruning работает хуже. Если переписать условие в явный диапазон дат, движок снова может отсекать ненужные granules и parts.
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE toYYYYMM(event_date) = 202401
+example_after: WHERE event_date >= '2024-01-01' AND event_date < '2024-02-01'
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

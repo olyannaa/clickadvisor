@@ -1,0 +1,20 @@
+case_id: clickbench_q20
+source: clickbench
+sql: 'SELECT UserID FROM hits WHERE UserID = 435090932899640449;
+
+  '
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: Top-level SELECT returns detailed rows without LIMIT, DISTINCT, or
+    top-level aggregation.
+expected_rules_to_fire:
+- D-004
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: 1 confirmed finding(s) after rule-card precondition check.'
+expected_findings_count: 1
+status: reviewed

@@ -1,0 +1,51 @@
+<h1>Netflixがペタバイト規模のロギングシステムをClickHouseでどう最適化したか</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="flex overflow-hidden rounded-lg"><div class="w-1 flex-shrink-0 flex-grow-0 bg-primary-300"></div><div class="flex-1 bg-neutral-700 p-4 lg:p-6"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc mb-4 !text-2xl">まとめ</h2><div class="rich_content rich-text-content toc-ignore leading-6"><ul>
+<li>Netflixは毎日5ペタバイト、毎秒1,060万イベントのログをClickHouseで処理</li>
+<li><strong>最適化①（取り込み）</strong>: 生成型レキサーによるフィンガープリンティングで8〜10倍高速化（216μs → 23μs）</li>
+<li><strong>最適化②（シリアライゼーション）</strong>: ネイティブプロトコル＋LZ4圧縮でCPU・メモリ効率を大幅改善</li>
+<li><strong>最適化③（クエリ）</strong>: タグマップを31シャードに分割し、クエリ時間を3秒 → 700ms以下に短縮</li>
+<li>ログは生成から20秒以内に検索可能、エンジニアがリアルタイムでデバッグできる環境を実現</li>
+</ul></div></div></div><div class="rich_content rich-text-content leading-6"><p>「Netflixでは、すべてをスケールが牽引しています」とエンジニアのDaniel Muino氏は語ります。これは冗談ではありません。</p>
+<p>Netflixの最大の名前空間において、ロギングシステムは毎日5ペタバイトという驚異的なデータを取り込んでいます。平均で毎秒1,060万イベントを処理し、ピーク時には1,250万に達します(「何かおかしなことが起こっていない限りはですが――その場合はさらに高くなることもあります」とDaniel氏は言います)。各イベントの平均サイズは約5 KBです。Netflixに40,000以上存在する各マイクロサービスのニーズに応じて、ログは2週間から2年まで保持されます。</p>
+<p>そしてシステムは圧倒的に書き込みが多いにもかかわらず、毎秒500〜1,000という見事なクエリ数を処理しています。これらのクエリは、エンジニアが問題をデバッグし、マイクロサービスを監視し、190カ国の3億人以上の加入者に向けてプラットフォームを稼働し続けるために使用しているものです。</p>
+<p>このスケールが大半のロギングプラットフォームを圧倒するものであることは間違いありません。このようなインタラクティブ性を実現する――数秒で検索可能なログ、瞬時に感じられるクエリ――には、適切なデータベース(ClickHouse!)だけでなく、慎重に設計された一連の最適化が必要でした。</p>
+<p><a href="https://www.youtube.com/watch?v=LgGNxPl6c9k">2025年7月にロスガトスで開催されたClickHouseミートアップ</a>で、Daniel氏は、Netflixのペタバイト規模のロギングを高速かつコスト効率の高いものにした3つのブレークスルーを含め、チームがどのようにそれを実現したかを共有してくれました。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="netflixのロギングアーキテクチャの内側" level="2">Netflixのロギングアーキテクチャの内側<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#netflix%E3%81%AE%E3%83%AD%E3%82%AE%E3%83%B3%E3%82%B0%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%81%AE%E5%86%85%E5%81%B4">#</a></span></h2>
+<p>Netflixのロギング構成は「かなりシンプルで、特に変わったところはありません」とDaniel氏は言います。「ただ、それを機能させるためには、多くの選択をしなければなりませんでした。」</p>
+<p>ログは数千のマイクロサービスから軽量なサイドカーを通じて流れ、イベントを取り込みクラスターに転送します。短いバッファを経た後、データはAmazon S3に書き込まれ、Amazon Kinesisにメッセージが配置されて下流処理がトリガーされます。そこから中央のハブアプリケーションがデータを消費し、別々の名前空間にルーティングして、適切なストレージ階層に書き込みます。</p>
+<p>ClickHouseはシステムの中心にホット階層として位置しています。速度が重要となる最近のログを保存し、高速なクエリとインタラクティブなデバッグを実現します。「ClickHouseのおかげで、このデータを非常に新鮮な状態で提供できます」とDaniel氏は言います。「途中で行うすべてのバッファリングは、私たちにあまり影響を与えません。」</p>
+<p>履歴データについては、Netflixは Apache Iceberg を使用しており、より大きな時間スケールでコスト効率の高い長期保存とクエリ機能を提供します。両方の階層の上には、クエリAPIがどの名前空間を検索するかを自動的に決定するため、エンジニアは内部で何が起きているかを意識することなく、統合されたビューを得られます。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Netflix ClickHouseアーキテクチャ" loading="lazy" src="/uploads/Image_503743030_3300x1808_ce7d291bde.jpg"/></span>
+<p>
+Netflixのロギングアーキテクチャ。ホットデータ用のClickHouseと長期保存用のIcebergを組み合わせている。
+</p>
+<p>その結果、システムはほぼ瞬時に動作するように感じられます。ログは通常、生成から20秒以内に検索可能となり、Netflixの5分のSLAをはるかに上回ります。場合によっては、エンジニアは2秒のレイテンシでライブログをストリーミングすることもできます。イベントをクリックして開いたり、JSONペイロードを展開したり、フィンガープリントハッシュで数百万のメッセージをグループ化したり、周辺のログをドリルダウンしたり――これらすべてをクエリの完了を待つことなく行えます。</p>
+<p>しかしDaniel氏が説明するように、このレベルのインタラクティブ性は一夜にして実現したわけではありません。取り込み、シリアライゼーション、クエリの3つの大きな最適化が、システムを今日の姿へと変えたのです。</p>
+<div class="my-6"><div class="rounded-lg bg-white/10 p-4"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader toc-ignore" id="test" level="3">ClickStackについて学ぶ<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#test">#</a></span></h3><p>OpenTelemetryをスケールで活用するために構築された、ClickHouse搭載のオープンソース可観測性スタックを探求しましょう。</p><a class="w-full" href="https://clickhouse.com/use-cases/observability?loc=blog-o11y-global-cta&amp;utm_source=clickhouse&amp;utm_medium=web&amp;utm_campaign=blog" target="_self"><button class="styles_button__3smpn mt-6 w-full font-medium" data-type="primary"><span class="flex items-center whitespace-nowrap">詳しく見る</span></button></a></div></div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="最適化-1-取り込み---フィンガープリンティング" level="2">最適化 #1: 取り込み - フィンガープリンティング<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#%E6%9C%80%E9%81%A9%E5%8C%96-1-%E5%8F%96%E3%82%8A%E8%BE%BC%E3%81%BF---%E3%83%95%E3%82%A3%E3%83%B3%E3%82%AC%E3%83%BC%E3%83%97%E3%83%AA%E3%83%B3%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0">#</a></span></h2>
+<p>ログを有用にするためには、Netflixはまず類似メッセージをグループ化する必要があります。フィンガープリンティングと呼ばれるこのプロセスは、エンジニアがほぼ同一の何百万ものエントリーを1つのパターンに集約することで、ノイズを切り抜けるのを助けます。これがなければ、Netflixの規模でログを検索することは、控えめに言っても圧倒的なものになるでしょう。</p>
+<p>初期段階では、チームはログメッセージをグループに分類するために機械学習モデルを試しました。理論的には機能しましたが、実際にはリソースを使いすぎました。「非常に高価で、非常に遅く、製品全体が機能しなくなりました」とDaniel氏は振り返ります。</p>
+<p>次にチームは正規表現に移り、ログテキスト内のパターンをマッチングし、値を汎用トークンに置き換えました。これは助けになりましたが、正規表現では毎秒1,000万イベントには追いつけませんでした。「生のテキストからエンティティを認識することは、コンパイラが長らく行ってきたことです」とDaniel氏は説明します。「基本的には同じ問題に同じ解決策があります――レキサーが必要なのです。」</p>
+<p>そこでチームは、JFlex(最適化されたトークナイザーを生成するJavaツール)を使用して、フィンガープリンティングを生成型レキサーとして再構築しました。実行時に複雑な正規表現を評価する代わりに、新しいシステムはパターンを効率的なコードにコンパイルします。その成果は絶大で、スループットは8〜10倍に増加し、平均フィンガープリンティング時間は216マイクロ秒から23マイクロ秒に低下しました。99パーセンタイルでさえ、レイテンシは大幅に低くなりました。</p>
+<p>「大きな勝利でした」とDaniel氏は語ります。「そして、基本的にはただ書き直しただけでした。」その書き直しはシステムの最大の取り込みボトルネックの1つを解消し、Netflixがスケーリングを続けるための余地を与えました。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="最適化-2-ハブ---シリアライゼーション" level="2">最適化 #2: ハブ - シリアライゼーション<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#%E6%9C%80%E9%81%A9%E5%8C%96-2-%E3%83%8F%E3%83%96---%E3%82%B7%E3%83%AA%E3%82%A2%E3%83%A9%E3%82%A4%E3%82%BC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">#</a></span></h2>
+<p>ログがフィンガープリント化されると、それでも毎秒数百万のレートでClickHouseに書き込む必要があります。ここでNetflixは別のボトルネックに直面しました――シリアライゼーションです。</p>
+<p>チームの最初の実装は<a href="https://clickhouse.com/docs/integrations/language-clients/java/jdbc">JDBC</a>バッチ挿入に依存していました。シンプルで馴染みやすかったものの、非効率でもありました。すべてのプリペアドステートメントが、クライアントにデータベースとスキーマやシリアライゼーションの詳細を交渉させ、スケールが悪いオーバーヘッドを追加していました。「もっと改善できると思いました」とDaniel氏は言います。</p>
+<p>そこでチームは抽象化スタックの一段下に降り、ClickHouseの低レベルJavaクライアントが公開する<a href="https://clickhouse.com/docs/interfaces/formats/RowBinary">RowBinary</a>フォーマットを使用しました。これは、データを列ごとに手動でシリアライズすることを意味しました――マップ長を書き込み、<a href="https://clickhouse.com/docs/sql-reference/data-types/datetime64">DateTime64</a>をエポックからのナノ秒としてエンコードし、その他の癖を処理しました。これによって「大きなパフォーマンスの向上」が得られたとDaniel氏は言いますが、それでもまだ十分ではありませんでした。</p>
+<p>「CPUとアロケーションのプロファイルを見たとき、本当に気になりました」と彼は言います。「なぜ私が望んでいる以上の作業をしているのか? なぜ私が望んでいる以上のメモリを使っているのか?」</p>
+<p>ブレークスルーは、Daniel氏が<a href="https://clickhouse.com/blog/clickhouse-input-format-matchup-which-is-fastest-most-efficient">入力フォーマットをベンチマークするClickHouseのブログ記事</a>を読んだときに訪れました。ネイティブプロトコルは一貫してRowBinaryを上回るパフォーマンスを示しましたが、Javaクライアントはそれをサポートしていませんでした。サポートしていたのは<a href="https://clickhouse.com/docs/integrations/go">Goクライアント</a>だけでした。「だから私はGoクライアントをリバースエンジニアリングしました」とDaniel氏は言います。</p>
+<p>Netflixは、ネイティブプロトコルを使用してLZ4で圧縮されたブロックを生成し、ClickHouseに直接送信する独自のエンコーダーを構築しました。その結果、CPU使用率の低下、メモリ効率の向上、そしてRowBinaryと同等(場合によってはそれ以上)のスループットが得られました。</p>
+<p>「完璧ではありません。完成したばかりなので」とDaniel氏は言います。「でも、以前と同等のレベルに達していて、最適化の余地はまだまだあります。」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="最適化-3-クエリ---カスタムタグ" level="2">最適化 #3: クエリ - カスタムタグ<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#%E6%9C%80%E9%81%A9%E5%8C%96-3-%E3%82%AF%E3%82%A8%E3%83%AA---%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%82%BF%E3%82%B0">#</a></span></h2>
+<p>取り込みとシリアライゼーションが主に書き込み中心の課題だったのに対し、3つ目のボトルネックは読み込み側にありました。Netflixのエンジニアはタグに大きく依存しています――各ログイベントに付加される動的なキーと値のペアで、マイクロサービス、リクエストID、その他のカスタム属性でフィルタリングできるようにするものです。便利である一方、タグはシステムの最大の頭痛の種の1つにもなりました。</p>
+<p>「カスタムタグは私たちにとって大きな問題です」とDaniel氏は語ります。「ユーザーが一般的に使用する中で、最もコストの高いクエリです、ダントツで。」</p>
+<p>当初、タグはシンプルな<a href="https://clickhouse.com/docs/sql-reference/data-types/map">Map(String, String)</a>として保存されていました。内部的には、ClickHouseはマップをキーと値の2つの並列配列として表現します。各ルックアップはそれらの配列を線形スキャンする必要がありました。1時間あたり最大25,000のユニークなタグキーと数千万のユニークな値があるNetflixのスケールでは、クエリのパフォーマンスは急速に低下しました。</p>
+<p>Daniel氏はClickHouseの作成者Alexei Milovidov氏と話し合い、彼は<a href="https://clickhouse.com/docs/sql-reference/data-types/lowcardinality">LowCardinality型</a>の使用を提案しました。それはキーには有効でしたが、値はあまりにも多すぎたため、問題の半分しか解決できませんでした。「LowCardinality値はオプションになりませんでした」とDaniel氏は指摘します。</p>
+<p>解決策は驚くほどシンプルでした――マップをシャード化することです。タグキーを31個の小さなマップにハッシュ化することで、クエリはすべてのキーをスキャンする代わりに、適切なシャードに直接ジャンプできるようになりました。</p>
+<p>違いは絶大でした。かつて3秒かかっていたフィルタリングクエリは1.3秒に低下しました。フィルター+プロジェクションのクエリは、ほぼ3秒から700ミリ秒未満に低下しました。どちらの場合も、スキャンされるデータ量は5倍から8倍小さくなりました。</p>
+<p>「以前は多くの問題を引き起こしていたクエリが、今ではそこそこ大丈夫になりました」とDaniel氏は言います。そしてNetflixのスケールでは、と彼は付け加えます、「それは大きな、大きな勝利です。」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="シンプルさの美しさ" level="2">シンプルさの美しさ<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/netflix-petabyte-scale-logging-jp#%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%81%95%E3%81%AE%E7%BE%8E%E3%81%97%E3%81%95">#</a></span></h2>
+<p>これら3つの最適化――フィンガープリンティングの再考、シリアライゼーションの書き直し、そしてクエリの再形成――を組み合わせることで、ボトルネックが解消され、NetflixのロギングシステムはどこにあるClickHouse展開の中でも最大かつ最速のものの1つとして確固たる地位を築きました。</p>
+<p>エンジニアを遅らせるどころか、Netflixの超人的なスケールにおいてさえ、システムは軽量でインタラクティブに感じられるようになりました。そのような応答性は、障害対応に追われるか、世界中の何億人もの視聴者のためにサービスをスムーズに稼働し続けるかの違いを生み出すことができます。</p>
+<p>最終的にDaniel氏は、チームの成功を巧妙なトリックよりも、規律ある エンジニアリングのおかげだと評価しています。「鍵は、最小限の作業で済むようにいかに物事をシンプルにするか、ということに尽きます」と彼は言います。</p>
+<p>チームのデータオペレーションを変革しませんか? <a href="https://clickhouse.com/cloud">ClickHouse Cloudを30日間無料でお試しください</a>。</p></div></div></article>

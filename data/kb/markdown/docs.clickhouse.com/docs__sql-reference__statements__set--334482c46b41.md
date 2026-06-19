@@ -1,0 +1,104 @@
+# SET Statement \| ClickHouse Docs
+
+
+- - [Introduction](/docs/sql-reference)- [Statements](/docs/sql-reference/statements)- SET
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/set.md)# SET Statement
+
+
+```
+SET param = value
+
+```
+
+Assigns `value` to the `param` [setting](/docs/operations/settings/overview) for the current session. You cannot change [server settings](/docs/operations/server-configuration-parameters/settings) this way.
+
+
+You can also set all the values from the specified settings profile in a single query.
+
+
+
+```
+SET profile = 'profile-name-from-the-settings-file'
+
+```
+
+For boolean settings set to true, you can use a shorthand syntax by omitting the value assignment. When only the setting name is specified, it is automatically set to `1` (true).
+
+
+
+```
+-- These are equivalent:
+SET force_index_by_date = 1
+SET force_index_by_date
+
+```
+
+## SET TIME ZONE[​](#set-time-zone "Direct link to SET TIME ZONE")
+
+
+
+```
+SET TIME ZONE [=] 'timezone'
+
+```
+
+Sets the session time zone. This is an alias for `SET session_timezone = 'timezone'`, provided for compatibility with PostgreSQL and other SQL databases.
+
+
+Many SQL clients, ORMs, and JDBC drivers automatically issue `SET TIME ZONE` when connecting. This syntax allows such tools to work with ClickHouse without custom workarounds.
+
+
+
+```
+SET TIME ZONE 'UTC';
+SET TIME ZONE 'Europe/Amsterdam';
+SET TIME ZONE 'America/New_York';
+
+-- Verify the current session time zone
+SELECT getSetting('session_timezone');
+
+```
+
+The timezone value must be a valid name from the [IANA Time Zone Database](https://www.iana.org/time-zones). An invalid timezone name will result in an error.
+
+
+For more information about the `session_timezone` setting, see [session\_timezone](/docs/operations/settings/settings#session_timezone).
+
+
+## Setting query parameters[​](#setting-query-parameters "Direct link to Setting query parameters")
+
+
+The `SET` statement can also be used to define query parameters by prefixing the parameter name with `param_`.
+Query parameters allow you to write generic queries with placeholders that are replaced with actual values at execution time.
+
+
+
+```
+SET param_name = value
+
+```
+
+To use a query parameter in your query, reference it with the syntax `{name: datatype}`:
+
+
+
+```
+SET param_id = 42;
+SET param_name = 'John';
+
+SELECT * FROM users
+WHERE id = {id: UInt32}
+AND name = {name: String};
+
+```
+
+Query parameters are particularly useful when the same query needs to be executed multiple times with different values.
+
+
+For more detailed information about query parameters, including usage with the `Identifier` type, see [Defining and Using Query Parameters](/docs/sql-reference/syntax#defining-and-using-query-parameters).
+
+
+For more information, see [Settings](/docs/operations/settings/settings).
+
+[PreviousEXCHANGE](/docs/sql-reference/statements/exchange)[NextSET ROLE](/docs/sql-reference/statements/set-role)- [SET TIME ZONE](#set-time-zone)- [Setting query parameters](#setting-query-parameters)
+Was this page helpful?

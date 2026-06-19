@@ -1,0 +1,30 @@
+id: R-109
+name: join_reorder_small_on_right
+tier: '2'
+category: query_plan
+status: proposed
+statement: Меньшая таблица должна быть справа (загружается в RAM)
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - size правой > size левой по system.parts
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: размер правой таблицы в uncompressed bytes
+  formula: ''
+  baseline: ''
+  projected: ''

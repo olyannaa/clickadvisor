@@ -1,0 +1,14 @@
+\x1b[1mClickAdvisor report\x1b[0m
+\x1b[36mStatement:\x1b[0m main
+
+\x1b[33m[2]\x1b[0m PREWHERE opportunity
+Selective predicate on low-width columns may be pushed into PREWHERE.
+
+Signals:
+  - ReadFromMergeTree on wide payload column
+  - event_type and event_date filters are selective candidates
+
+Recommendation:
+  Consider rewriting to a shape that allows PREWHERE on event_type/event_date.
+
+Estimated impact: medium

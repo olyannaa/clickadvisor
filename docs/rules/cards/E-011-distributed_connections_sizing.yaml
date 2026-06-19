@@ -1,0 +1,72 @@
+id: E-011
+name: distributed_connections_sizing
+tier: env
+category: cluster
+status: proposed
+statement: max_distributed_connections = количество шардов × pool factor
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.
+risks: []
+opt_in: false
+references: []
+hardware_preconditions: []
+config_preconditions: []
+workload_preconditions: []
+recommendation:
+  setting: distributed_connections_sizing
+  current_value_check: ''
+  recommended_formula: '`max_distributed_connections = num_shards * 5` --- ## Фаза
+    7. Бенчмарк — наполнение разметкой {#фаза-7} ### Действие 7.1. Скачай источники
+    ```bash # TPC-H git clone https://github.com/dragansah/tpch-dbgen /tmp/tpch-dbgen
+    cp /tmp/tpch-dbgen/queries/*.sql benchmark/cases/tpch/raw/ # ClickBench git clone
+    https://github.com/ClickHouse/ClickBench /tmp/clickbench cp /tmp/clickbench/clickhouse/queries.sql
+    benchmark/cases/clickbench/raw/ # JOB-Benchmark git clone https://github.com/gregrahn/join-order-benchmark
+    /tmp/job cp /tmp/job/*.sql benchmark/cases/job/raw/ ``` ### Действие 7.2. Шаблон
+    размеченного case ```yaml case_id: B-001 source: TPC-H Q03 sql: | SELECT l_orderkey,
+    sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem
+    WHERE ... schema_files: - schemas/tpch.sql known_issues: - issue_id: I-1 type:
+    missing_prewhere detected_by_rule: R-108 severity: high description: "Селективный
+    предикат c_mktsegment=''BUILDING'' не в PREWHERE" - issue_id: I-2 type: join_order_suboptimal
+    detected_by_rule: R-109 severity: medium expected_rules_to_fire: - R-108 - R-109
+    - D-003 expected_findings_count: 3 notes: | Стандартный TPC-H Q03. Baseline для
+    проверки classifier. ``` ### Действие 7.3. Целевой объём разметки | Источник |
+    Кейсов | Приоритет | |---|---|---| | TPC-H | 22 | Высокий — размечаешь всё | |
+    Synthetic | 20 | Высокий — по одному на каждое правило R-001..R-018 + 2 на детекторы
+    | | GitHub issues | 20 | Высокий — реальные кейсы | | ClickBench | 43 | Средний
+    — отмечай trivial в notes | | JOB | 30 | Средний — самые сложные по JOIN | **Итого:
+    ~135 кейсов** ### Действие 7.4. Валидация ```bash poetry run python scripts/benchmark/validate_cases.py
+    # Должно быть 0 ошибок схемы ``` --- ## Фаза 8. Финальное review {#фаза-8} ###
+    Действие 8.1. Промпт для Codex ``` Проверь репозиторий ClickAdvisor на консистентность
+    knowledge base. 1. /docs/rules/cards/*.yaml — запусти scripts/rules/validate_catalog.py.
+    2. Проверь инварианты: - Tier 1A: data-preconditions пустые - Tier 1B: opt_in:
+    true - Tier 2: cost_model секция заполнена - Detectors: false_positives заполнены
+    - Env: risks заполнены 3. Reference integrity: HEAD-запросы на все URL в references.
+    4. Coverage check: последние 50 closed issues на github.com/ ClickHouse/ClickHouse?q=label:performance
+    — для каждого оцени, должно ли одно из 54 правил его поймать. Выдай: % покрытия
+    + список не-покрытых root causes. 5. Conflict check: найди пары правил, где preconditions
+    пересекаются и recommendations противоречат. 6. Бенчмарк: все expected_rules_to_fire
+    из benchmark/cases/ существуют в catalog. Выдай отчёт по всем 6 пунктам. ``` ###
+    Действие 8.2. Закрой red flags - Покрытие < 70% → добавь правила в недостающие
+    категории - Конфликты → добавь в карточки `conflicts_with: [R-XXX]` --- ## Что
+    получаешь на выходе {#выход} ``` /data/kb/chunks/         3000-4500 чанков /docs/rules/cards/       54
+    заполненные карточки /benchmark/cases/        ~135 размеченных кейсов /scripts/                crawlers
+    + validators /docs/adr/               9+ ADR ``` --- ## Точки самостоятельного
+    ресёрча {#ресёрч} | Пункт | Где ресёрчить | |---|---| | R-014: точная вероятность
+    коллизий cityHash64 | clickhouse.com/blog (поиск "cityHash"), kb.altinity.com
+    | | Tier 2 cost-model формулы | clickhouse.com/docs/optimize, src/Processors/QueryPlan
+    | | E-006: актуальные дефолты merge settings | clickhouse.com/docs/operations/settings/merge-tree-settings
+    | | Coverage check по github issues | Действие 8.1 пункт 4 |'
+  example: ''

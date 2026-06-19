@@ -1,0 +1,63 @@
+<h1>TeslaがClickHouseで構築した、1,000兆規模のオブザーバビリティ・プラットフォーム</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p>地球上には、Teslaほどのスケールで事業を展開している企業はほとんど存在しません。巨大なギガファクトリーから重要なエネルギーシステム、世界中に広がるコネクテッドカーのネットワークまで、これだけ多くの可動要素を同期させるには、あらゆる場所で何が起こっているのかをリアルタイムに観測できる体制が必要です。</p>
+<p>「Teslaは小さな企業ではありません」と語るのは、シニアスタッフソフトウェアエンジニアのAlon Tal氏です。「私たちは膨大な量のメトリクス（指標）を生成しています。それらのデータを、長期的な分析や予測、異常検知といった目的に活用したいのです。」</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="unnamed (1).jpg" loading="lazy" src="/uploads/unnamed_1_25d5e12aef.jpg"/></span>
+<p>新たなオブザーバビリティ（可観測性）システムの構築が必要になったとき、Alon氏とそのチームは、よく知られた選択肢を検討しました。しかしPrometheusのようなツールは、理論的には素晴らしいものであっても、Teslaの規模には対応できないものでした。
+「水平方向にはスケールできませんし、垂直方向にも限界があります」と彼は説明します。「しかも、単一サーバー構成であるため、私たちの可用性の要件を満たすことができません。システムがダウンすれば、メトリクスは失われます。それは私たちにとって完全に受け入れられないことです。」</p>
+<p>彼らが必要としていたのは、より高速で、より耐久性があり、よりスケーラブルなシステムでした。毎秒数千万行のデータを取り込み、数年分のデータを保持し、高負荷でも応答性を維持できるシステムです。そこで彼らが選んだのがClickHouseでした。そしてこれを使って、Prometheusのようなシンプルさを持ちながら、ClickHouseのパフォーマンスと信頼性を備えた**Teslaスケールのプラットフォーム「Comet」**を構築したのです。</p>
+<p>このケーススタディでは、TeslaがどのようにしてCometを構築したのか、なぜその基盤としてClickHouseを選んだのか、そして1,000兆行規模の負荷テストによって、このシステムがTeslaの厳しい要件をはるかに超えるスケーラビリティを持つことが実証された経緯について紹介します。</p>
+<blockquote>
+<p>Alon氏がClickHouse初の2025年Open Houseユーザーカンファレンスで語った内容をご覧ください。<a href="https://clickhouse.com/videos/tesla">動画を見る</a></p>
+</blockquote>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="妥協できない条件の数々" level="2">妥協できない条件の数々<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse-jp#%E5%A6%A5%E5%8D%94%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84%E6%9D%A1%E4%BB%B6%E3%81%AE%E6%95%B0%E3%80%85">#</a></span></h2>
+<p>最初から、チームには明確な要件リストがありました。最も重要だったのは、「スケーラビリティ」だとAlon氏は語ります。Teslaにとって、それは<strong>大量のデータをリアルタイムに処理でき、データ量が増えても問題なく追従できるシステム</strong>であることを意味していました。</p>
+<p>可用性も同じくらい重要でした。
+「Teslaでは、メトリクスを失うことが現実世界に物理的な影響を与える可能性があります」とAlon氏は言います。これだけ重要なものを扱っている以上、システムは絶対に落ちてはならないのです。</p>
+<p>データ保持もまた優先事項でした。チームは、数ヶ月、あるいは数年にわたる過去のデータを振り返ってパターンを見つけ、問題を予測する必要がありました。耐久性は当然求められる要件であり、一度受け入れられたメトリクスは、たとえシステムが再起動しても失われてはなりません。そして<strong>スピードは妥協できない項目</strong>でした。「誰だって遅いダッシュボードなんて使いたくありません。特に障害対応中ならなおさらです」とAlon氏は言います。</p>
+<p>柔軟性も重視されました。複雑な問いを投げかけたり、カスタム分析を実行したり、さまざまな内部ユースケースをサポートしたりするための自由が必要だったのです。
+「私たちは自分たちのデータに対して、興味深い問いを自由に投げかけられるようにしたい。単純なドメイン固有言語に縛られたくないんです。」</p>
+<p>そして最後に、すべてが<strong>PromQLと互換性がある必要がありました</strong>。PromQLはTeslaがメトリクス分析に使っているクエリ言語です。
+「これは私たちのエンジニアが慣れていて、好んで使っている言語です」とAlon氏は説明します。加えて、すでに社内には膨大な数の既存ダッシュボードやアラートルールが存在していました。「それを全部再実装したいなんて、誰も思っていませんでした。」</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouseという選択" level="2">ClickHouseという選択<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse-jp#clickhouse%E3%81%A8%E3%81%84%E3%81%86%E9%81%B8%E6%8A%9E">#</a></span></h2>
+<p>オブザーバビリティ・システムの構築を進めるにあたって、まずいくつか明らかな出発点がありました。
+「PromQLのことを考えると、すぐに頭に浮かぶのはPrometheusです」とAlon氏は言います。PrometheusはPromQLのリファレンス実装であり、広く使われていて、使いやすいシステムです。しかし、Teslaのスケールやその他の要件を考えると、Prometheusは選択肢にはなり得ませんでした。
+「だから私たちは、自分たちで新しく構築することに決めたんです」と彼は語ります。</p>
+<p>最初にして「最も基本的」な決定事項は、<strong>データをどこに保存するか</strong>ということでした。チームはいくつかのツールを比較しましたが、性能と柔軟性の面で際立っていたのがClickHouseでした。</p>
+<blockquote>
+<p>「私たちの考えでは、ClickHouseにあるデータは他のどの場所にあるデータよりも優れています」とAlon氏は言います。「他のシステムでは、データを自在に分割して分析したり、興味深い問いを投げかけたり、それに対して納得のいく時間内に答えを得ることはできません。」</p>
+</blockquote>
+<p>「ClickHouseはすべての要件を満たしています」と彼は付け加えます。「可用性、スピード、耐久性――私たちが求めるものはすべて揃っています。」
+さらに、ClickHouseには思わぬ利点もありました。それは、<a href="https://clickhouse.com/docs/sql-reference/functions/udf">実行可能なユーザー定義関数（UDF）</a> のサポートです。
+この機能は特に便利だったとAlon氏は述べます。「SQLで表現するのが難しいこともあります。UDFがあることで、うまく抜け道ができたんです。」</p>
+<p>最終的に、この選択は明らかでした。ClickHouseはTeslaが求めるスケールでの性能を提供し、強力でありながらも親しみやすいシステムを構築するための自信を与えてくれたのです。
+「ClickHouseと競合できるシステムは他に存在しません」とAlon氏は語ります。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="cometのアーキテクチャの内部" level="2">Cometのアーキテクチャの内部<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse-jp#comet%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%81%AE%E5%86%85%E9%83%A8">#</a></span></h2>
+<p>ClickHouseを基盤に、Alon氏とそのチームは、Teslaの要求に応えられるアーキテクチャの設計に取りかかりました。その成果がCometであり、大量のメトリクスを扱うために特化して設計されたプラットフォームです。Cometは、2つの主要なパイプラインを持っています。1つは大量のデータを取り込むためのもの、もう1つはPromQLクエリをその場で変換し実行するためのものです。</p>
+<p>データ取り込みのパイプラインでは、Teslaのインフラ全体に配置されたOpenTelemetryのコレクターが、Kafka互換のキューに向けてメトリクスを送信します。そこから、完全に社内で開発された一連のETL処理が、OTLPフォーマットのデータを構造化された行データに変換し、バッチ処理してClickHouseに書き込みます。このアーキテクチャは、負荷が急増した場合でも安定した性能を維持しながら、簡単にスケールアウトできるよう設計されています。Alon氏は、「これは非常にスケーラブルなパイプラインです」と述べています。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="tesla2.png" loading="lazy" src="/uploads/tesla2_05960a7b2d.png"/></span>
+<p>Cometの取り込みパイプラインは、KafkaとOTLPを使用してメトリクスをClickHouseにバッチ処理しています。</p>
+<p>しかし、Cometを真に強力にしているのは、トランスパイラです。これは、PromQLをリアルタイムでClickHouse SQLに変換するエンジンです。これによってCometは非常に高い性能を発揮します。Teslaのエンジニアたちは、新しいクエリ言語を学ぶ必要はありません。従来通りにPromQLを書き続けながら、ClickHouseの持つスピードと柔軟性をそのまま活用できるのです。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="tesla3.png" loading="lazy" src="/uploads/tesla3_645ba8ac56.png"/></span>
+<p>CometはPromQLをClickHouse SQLに変換し、Grafanaやアラートツールとの互換性を保っています。</p>
+<p>クエリが実行されると、Cometは結果をPrometheusのAPIレスポンスと<strong>バイト単位で一致する</strong>ように整形します。これは、Teslaがすでに使っているダッシュボードやアラート、その他のツールが、特別な書き換えや接続設定なしにそのまま使えることを意味します。Alon氏は、「誰も、これが標準のPrometheus環境ではないと気づきません」と語ります。</p>
+<p>信頼性を維持するために、専用のテストスイートが用意されており、PrometheusとCometの両方で同一のPromQLクエリを実行し、結果が完全に一致することを確認しています。また、アラート機能のレイヤーも以前と同じルールや統合に対応しており、再実装は一切不要です。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="スケールにおける実証" level="2">スケールにおける実証<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse-jp#%E3%82%B9%E3%82%B1%E3%83%BC%E3%83%AB%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B%E5%AE%9F%E8%A8%BC">#</a></span></h2>
+<blockquote>
+<p>最終的な結果：1,000兆行以上のデータを取り込みました――「トラブルは一度もなく、不具合もゼロ。メモリ使用量は一定、CPU使用量も一定。まさに見事としか言いようがありませんでした。」</p>
+</blockquote>
+<p>現在、Cometは毎秒数千万行のデータを取り込んでいます。「そして、システムはまだ最大負荷に達していません」とAlon氏は述べ、社内の複数のチームがまだ導入を進めている段階であることを指摘しました。</p>
+<p>時系列データの観点では、Teslaはほとんどのシステムが対応できないようなスケールで運用しています。各時系列は、関連するメトリクスサンプルのストリームを表しており、時間の経過とともに、Teslaはそれを数百億シリーズ単位で蓄積してきました。そして、各シリーズには膨大な個別のデータポイントが含まれているため、総行数は指数関数的に増加します。「この時点で、Cometの競合となるようなシステムにとっては既に大きな課題となります」とAlon氏は言います。「それらのシステムは、高カーディナリティな時系列に極端に弱いのです。」</p>
+<p>現在Cometは、数十兆件のサンプルを保存しています。そしてAlonは、「これよりもはるかに大きなスケールに対応できるという強い自信があります」と述べます。これは誇張ではありません。それを実証するため、彼らは1秒あたり10億行という取り込み速度を11日間連続で維持しました。最終的な取り込み行数は、<strong>1,000兆行以上</strong>に達しました――「不具合は一切なし、障害もゼロ。メモリ使用量は変化せず、CPU使用率も一定。まさに見惚れるような動作でした。」</p>
+<blockquote>
+<p>ClickHouseがどのようにして大規模なオブザーバビリティを支えているのか、<a href="https://clickhouse.com/use-cases/observability">ClickStack</a> をご覧ください。</p>
+</blockquote>
+<span class="relative mb-9 flex w-full justify-center"><img alt="tesla4.jpg" loading="lazy" src="/uploads/tesla4_9b16a90718.jpg"/></span>
+<p>集計クエリは、Cometが1,000兆行以上の取り込みを達成したことを示しており、「障害は一切なかった」とされています。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="teslaとclickhouseのこれから" level="2">TeslaとClickHouseのこれから<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/how-tesla-built-quadrillion-scale-observability-platform-on-clickhouse-jp#tesla%E3%81%A8clickhouse%E3%81%AE%E3%81%93%E3%82%8C%E3%81%8B%E3%82%89">#</a></span></h2>
+<p>Cometが大規模な運用でも安定して稼働している現在、Teslaはすでに新たなユースケースへの展開を始めています。たとえば、<strong>分散トレーシング</strong>のような分野です。彼らは、同じトランスパイラベースのアプローチを利用して<strong>TraceQL</strong>をサポートし、エンジニアがトレースデータをメトリクスと同じように簡単にクエリできるようにしました。</p>
+<p>チームはまた、Cometを<strong>オープンソース化する構想</strong>も模索しています。「もしそれが実現できれば、誰もがCometを試してみることができるようになります」とAlon氏は語ります。</p>
+<p>Cometは、Teslaで日々行われている技術革新の好例です。ClickHouseを基盤とし、PromQLで利用可能な形で提供され、巨大な工場から世界中の何百万台もの接続車両まで、あらゆるものをリアルタイムで可視化します。Cometは、Teslaスケールのオブザーバビリティを実現するためにエンジニアたちが必要とするツールを提供しています。</p>
+<p>「ClickHouseに取り組んでいるすべての方々に感謝したいです」とAlon氏はOpen Houseで語りました。「皆さんが素晴らしい製品を作ってくれているおかげで、私たちのプロジェクトは実現しました。」</p>
+<div class="relative styles_responsiveEmbed__qDlEx"><div class="absolute inset-0 flex bg-black"><div class="m-auto aspect-square w-10 animate-spin rounded-full border-4 border-primary-300/20 border-t-primary-300"></div></div><div></div></div>
+<br/>
+<p>ClickHouseがあなたのチームのデータ運用をどのように変革できるのか、詳しくは <a href="https://clickhouse.com/cloud">ClickHouse Cloudを30日間無料でお試しください</a>。</p></div></div></article>

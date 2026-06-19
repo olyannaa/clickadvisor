@@ -1,0 +1,369 @@
+<h1>Functions for splitting strings | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions/regular-functions" itemprop="item"><span itemprop="name">Regular functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">String splitting</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/functions/splitting-merging-functions.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>Functions for splitting strings</h1></header>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The documentation below is generated from the <code>system.functions</code> system table.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="alphaTokens">alphaTokens<a aria-label="Direct link to alphaTokens" class="hash-link" href="#alphaTokens" title="Direct link to alphaTokens">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Selects substrings of consecutive bytes from the ranges <code>a-z</code> and <code>A-Z</code> and returns an array of the selected substrings.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">alphaTokens(s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>splitByAlpha</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. When <code>max_substrings &gt; 0</code>, the number of returned substrings will be no more than <code>max_substrings</code>, otherwise the function will return as many substrings as possible. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of selected substrings of <code>s</code>. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT alphaTokens('abca1abc');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─alphaTokens('abca1abc')─┐
+│ ['abca','abc']          │
+└─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="arrayStringConcat">arrayStringConcat<a aria-label="Direct link to arrayStringConcat" class="hash-link" href="#arrayStringConcat" title="Direct link to arrayStringConcat">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Concatenates string representations of values listed in the array with the provided separator, which is an optional parameter set to an empty string by default.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">arrayStringConcat(arr[, separator])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>array_to_string</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>arr</code> — The array to concatenate. <a href="/docs/sql-reference/data-types/array"><code>Array(T)</code></a></li>
+<li class="custom-li"><code>separator</code> — Optional. Separator string. By default an empty string. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the concatenated string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT arrayStringConcat(['12/05/2021', '12:50:00'], ' ') AS DateString;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─DateString──────────┐
+│ 12/05/2021 12:50:00 │
+└─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extractAllGroupsVertical">extractAllGroupsVertical<a aria-label="Direct link to extractAllGroupsVertical" class="hash-link" href="#extractAllGroupsVertical" title="Direct link to extractAllGroupsVertical">​</a></h2>
+<p>Introduced in: v20.5.0</p>
+<p>Matches all groups of a string using a regular expression and returns an array of arrays, where each array includes matching fragments from every group, grouped in order of appearance in the input string.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">extractAllGroupsVertical(s, regexp)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Aliases</strong>: <code>extractAllGroups</code></p>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — Input string to extract from. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>regexp</code> — Regular expression to match by. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>const FixedString</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of arrays, where each inner array contains the captured groups from one match. Each match produces an array with elements corresponding to the capturing groups in the regular expression (group 1, group 2, etc.). If no matches are found, returns an empty array. <a href="/docs/sql-reference/data-types/array"><code>Array(Array(String))</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">WITH '&lt; Server: nginx
+&lt; Date: Tue, 22 Jan 2019 00:26:14 GMT
+&lt; Content-Type: text/html; charset=UTF-8
+&lt; Connection: keep-alive
+' AS s
+SELECT extractAllGroupsVertical(s, '&lt; ([\\w\\-]+): ([^\\r\\n]+)');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">[['Server','nginx'],['Date','Tue, 22 Jan 2019 00:26:14 GMT'],['Content-Type','text/html; charset=UTF-8'],['Connection','keep-alive']]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ngrams">ngrams<a aria-label="Direct link to ngrams" class="hash-link" href="#ngrams" title="Direct link to ngrams">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Splits a UTF-8 string into n-grams of length <code>N</code>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ngrams(s, N)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — Input string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>N</code> — The n-gram length. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8/16/32/64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array with n-grams. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT ngrams('ClickHouse', 3);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['Cli','lic','ick','ckH','kHo','Hou','ous','use']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reverseBySeparator">reverseBySeparator<a aria-label="Direct link to reverseBySeparator" class="hash-link" href="#reverseBySeparator" title="Direct link to reverseBySeparator">​</a></h2>
+<p>Introduced in: v26.2.0</p>
+<p>Reverses the order of substrings in a string separated by a specified separator.
+This function splits the string by the separator, reverses the order of the resulting parts,
+and joins them back using the same separator. It is useful for parsing domain names,
+file paths, or other hierarchical data where you need to reverse the order of components.</p>
+<p>Examples:</p>
+<ul class="custom-ul">
+<li class="custom-li">reverseBySeparator('<a href="https://www.google.com" rel="noopener noreferrer" target="_blank">www.google.com</a>')<!-- --> returns 'com.google.www'</li>
+<li class="custom-li">reverseBySeparator('a/b/c', '/') returns 'c/b/a'</li>
+<li class="custom-li">reverseBySeparator('x::y::z', '::') returns 'z::y::x'</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">reverseBySeparator(string[, separator])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>string</code> — The input string to reverse the order of its parts. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>separator</code> — The separator string used to identify parts. If not provided, uses '.' (dot). Default: '.' <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns a string with substrings ordered from right to left of the original string, joined by the same separator. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Basic domain reversal</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('www.google.com')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'com.google.www'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Path reversal</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('a/b/c', '/')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'c/b/a'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Custom separator</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('x::y::z', '::')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'z::y::x'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Edge case with dots</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('.a.b.', '.')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'.b.a.'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Single element</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('single')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'single'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Empty separator</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT reverseBySeparator('abcde', '')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">'edcba'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="splitByChar">splitByChar<a aria-label="Direct link to splitByChar" class="hash-link" href="#splitByChar" title="Direct link to splitByChar">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Splits a string separated by a specified constant string <code>separator</code> of exactly one character into an array of substrings.
+Empty substrings may be selected if the separator occurs at the beginning or end of the string, or if there are multiple consecutive separators.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Setting <a href="/docs/operations/settings/settings#splitby_max_substrings_includes_remaining_string"><code>splitby_max_substrings_includes_remaining_string</code></a> (default: <code>0</code>) controls if the remaining string is included in the last element of the result array when argument <code>max_substrings &gt; 0</code>.</p></div></div>
+<p>Empty substrings may be selected when:</p>
+<ul class="custom-ul">
+<li class="custom-li">A separator occurs at the beginning or end of the string</li>
+<li class="custom-li">There are multiple consecutive separators</li>
+<li class="custom-li">The original string <code>s</code> is empty</li>
+</ul>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">splitByChar(separator, s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>separator</code> — The separator must be a single-byte character. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. If <code>max_substrings &gt; 0</code>, the returned array will contain at most <code>max_substrings</code> substrings, otherwise the function will return as many substrings as possible. The default value is <code>0</code>.  <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of selected substrings. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByChar(',', '1,2,3,abcde');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─splitByChar(⋯2,3,abcde')─┐
+│ ['1','2','3','abcde']    │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="splitByNonAlpha">splitByNonAlpha<a aria-label="Direct link to splitByNonAlpha" class="hash-link" href="#splitByNonAlpha" title="Direct link to splitByNonAlpha">​</a></h2>
+<p>Introduced in: v21.9.0</p>
+<p>Splits a string separated by whitespace and punctuation characters into an array of substrings.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Setting <a href="/docs/operations/settings/settings#splitby_max_substrings_includes_remaining_string"><code>splitby_max_substrings_includes_remaining_string</code></a> (default: <code>0</code>) controls if the remaining string is included in the last element of the result array when argument <code>max_substrings &gt; 0</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">splitByNonAlpha(s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. When <code>max_substrings &gt; 0</code>, the returned substrings will be no more than <code>max_substrings</code>, otherwise the function will return as many substrings as possible. Default value: <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of selected substrings of <code>s</code>. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByNonAlpha('<a class="__cf_email__" data-cfemail="16636573645672797b777f783875797b" href="/cdn-cgi/l/email-protection">[email protected]</a>');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['user','domain','com']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="splitByRegexp">splitByRegexp<a aria-label="Direct link to splitByRegexp" class="hash-link" href="#splitByRegexp" title="Direct link to splitByRegexp">​</a></h2>
+<p>Introduced in: v21.6.0</p>
+<p>Splits a string which is separated by the provided regular expression into an array of substrings.
+If the provided regular expression is empty, it will split the string into an array of single characters.
+If no match is found for the regular expression, the string won't be split.</p>
+<p>Empty substrings may be selected when:</p>
+<ul class="custom-ul">
+<li class="custom-li">a non-empty regular expression match occurs at the beginning or end of the string</li>
+<li class="custom-li">there are multiple consecutive non-empty regular expression matches</li>
+<li class="custom-li">the original string string is empty while the regular expression is not empty.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Setting <a href="/docs/operations/settings/settings#splitby_max_substrings_includes_remaining_string"><code>splitby_max_substrings_includes_remaining_string</code></a> (default: <code>0</code>) controls if the remaining string is included in the last element of the result array when argument <code>max_substrings &gt; 0</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">splitByRegexp(regexp, s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>regexp</code> — Regular expression. Constant. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. When <code>max_substrings &gt; 0</code>, the returned substrings will be no more than <code>max_substrings</code>, otherwise the function will return as many substrings as possible. Default value: <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of the selected substrings of <code>s</code>. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByRegexp('\\d+', 'a12bc23de345f');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─splitByRegex⋯c23de345f')─┐
+│ ['a12bc23de345f']        │
+└──────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Empty regexp</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByRegexp('', 'abcde');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─splitByRegexp('', 'abcde')─┐
+│ ['a','b','c','d','e']      │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="splitByString">splitByString<a aria-label="Direct link to splitByString" class="hash-link" href="#splitByString" title="Direct link to splitByString">​</a></h2>
+<p>Introduced in: v1.1.0</p>
+<p>Splits a string with a constant <code>separator</code> consisting of multiple characters into an array of substrings.
+If the string <code>separator</code> is empty, it will split the string <code>s</code> into an array of single characters.</p>
+<p>Empty substrings may be selected when:</p>
+<ul class="custom-ul">
+<li class="custom-li">A non-empty separator occurs at the beginning or end of the string</li>
+<li class="custom-li">There are multiple consecutive non-empty separators</li>
+<li class="custom-li">The original string <code>s</code> is empty while the separator is not empty</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Setting <a href="/docs/operations/settings/settings#splitby_max_substrings_includes_remaining_string"><code>splitby_max_substrings_includes_remaining_string</code></a> (default: <code>0</code>) controls if the remaining string is included in the last element of the result array when argument <code>max_substrings &gt; 0</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">splitByString(separator, s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>separator</code> — The separator. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. When <code>max_substrings &gt; 0</code>, the returned substrings will be no more than <code>max_substrings</code>, otherwise the function will return as many substrings as possible. Default value: <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of selected substrings of <code>s</code> <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByString(', ', '1, 2 3, 4,5, abcde');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─splitByStrin⋯4,5, abcde')─┐
+│ ['1','2 3','4,5','abcde'] │
+└───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Empty separator</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByString('', 'abcde');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">┌─splitByString('', 'abcde')─┐
+│ ['a','b','c','d','e']      │
+└────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="splitByWhitespace">splitByWhitespace<a aria-label="Direct link to splitByWhitespace" class="hash-link" href="#splitByWhitespace" title="Direct link to splitByWhitespace">​</a></h2>
+<p>Introduced in: v21.9.0</p>
+<p>Splits a string which is separated by whitespace characters into an array of substrings.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>Setting <a href="/docs/operations/settings/settings#splitby_max_substrings_includes_remaining_string"><code>splitby_max_substrings_includes_remaining_string</code></a> (default: <code>0</code>) controls if the remaining string is included in the last element of the result array when argument <code>max_substrings &gt; 0</code>.</p></div></div>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">splitByWhitespace(s[, max_substrings])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>s</code> — The string to split. <a href="/docs/sql-reference/data-types/string"><code>String</code></a></li>
+<li class="custom-li"><code>max_substrings</code> — Optional. When <code>max_substrings &gt; 0</code>, the returned substrings will be no more than <code>max_substrings</code>, otherwise the function will return as many substrings as possible. Default value: <code>0</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>Int64</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns an array of the selected substrings of <code>s</code>. <a href="/docs/sql-reference/data-types/array"><code>Array(String)</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Usage example</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT splitByWhitespace('  1!  a,  b.  ');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['1!','a,','b.']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tokens">tokens<a aria-label="Direct link to tokens" class="hash-link" href="#tokens" title="Direct link to tokens">​</a></h2>
+<p>Introduced in: v21.11.0</p>
+<p>Splits a string into tokens using the given tokenizer.</p>
+<p>Available tokenizers:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>splitByNonAlpha</code> splits strings along non-alphanumeric ASCII characters (also see function <a href="/docs/sql-reference/functions/splitting-merging-functions#splitByNonAlpha">splitByNonAlpha</a>).</li>
+<li class="custom-li"><code>splitByString(S)</code> splits strings along certain user-defined separator strings <code>S</code> (also see function <a href="/docs/sql-reference/functions/splitting-merging-functions#splitByString">splitByString</a>). The separators can be specified using an optional parameter, for example, <code>tokens(value, 'splitByString', [', ', '; ', '\n', '\\'])</code>. Note that each string can consist of multiple characters (<code>', '</code> in the example). The default separator list, if not specified explicitly, is a single whitespace <code>[' ']</code>.</li>
+<li class="custom-li"><code>asciiCJK</code> splits strings into tokens using Unicode word boundary rules (similar to UAX #29). ASCII alphanumeric characters and underscores form tokens with connectors (<code>:</code> for letters, <code>.</code> and <code>'</code> for same-type characters). Non-ASCII Unicode characters become single-character tokens.</li>
+<li class="custom-li"><code>ngrams(N)</code> splits strings into equally large <code>N</code>-grams (also see function <a href="/docs/sql-reference/functions/splitting-merging-functions#ngrams">ngrams</a>). The ngram length can be specified using an optional integer parameter between 1 and 8, for example, <code>tokens(value, 'ngrams', 3)</code>. The default ngram size, if not specified explicitly, is 3.</li>
+<li class="custom-li"><code>sparseGrams(min_length, max_length, min_cutoff_length)</code> splits strings into variable-length n-grams of at least <code>min_length</code> and at most <code>max_length</code> (inclusive) characters (also see function <a href="/docs/sql-reference/functions/string-functions#sparseGrams">sparseGrams</a>). Unless specified explicitly, <code>min_length</code> and <code>max_length</code> default to 3 and 100. If parameter <code>min_cutoff_length</code> is provided, only n-grams with length greater or equal than <code>min_cutoff_length</code> are returned. Compared to <code>ngrams(N)</code>, the <code>sparseGrams</code> tokenizer produces variable-length N-grams, allowing for a more flexible representation of the original text. For example, <code>tokens(value, 'sparseGrams', 3, 5, 4)</code> internally generates 3-, 4-, 5-grams from the input string but only the 4- and 5-grams are returned.</li>
+<li class="custom-li"><code>array</code> performs no tokenization, i.e. every row value is a token (also see function <a href="/docs/sql-reference/functions/array-functions#array">array</a>).</li>
+</ul>
+<p>In case of the <code>splitByString</code> tokenizer, if the tokens do not form a <a href="https://en.wikipedia.org/wiki/Prefix_code" rel="noopener noreferrer" target="_blank">prefix code</a>, you likely want that the matching prefers longer separators first.
+To do so, pass the separators in order of descending length.
+For example, with separators = <code>['%21', '%']</code> string <code>%21abc</code> would be tokenized as <code>['abc']</code>, whereas separators = <code>['%', '%21']</code> would tokenize to <code>['21ac']</code> (which is likely not what you wanted).</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tokens(value) -- 'splitByNonAlpha' tokenizer
+tokens(value, 'splitByNonAlpha')
+tokens(value, 'splitByString'[, separators])
+tokens(value, 'asciiCJK')
+tokens(value, 'ngrams'[, n])
+tokens(value, 'sparseGrams'[, min_length, max_length[, min_cutoff_length]])
+tokens(value, 'array')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>value</code> — The input string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>tokenizer</code> — The tokenizer to use. Valid arguments are <code>splitByNonAlpha</code>, <code>splitByString</code>, <code>asciiCJK</code>, <code>ngrams</code>, <code>sparseGrams</code>, and <code>array</code>. Optional, if not set explicitly, defaults to <code>splitByNonAlpha</code>. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>n</code> — Only relevant if argument <code>tokenizer</code> is <code>ngrams</code>: An optional parameter which defines the length of the ngrams. If not set explicitly, defaults to <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>separators</code> — Only relevant if argument <code>tokenizer</code> is <code>split</code>: An optional parameter which defines the separator strings. If not set explicitly, defaults to <code>[' ']</code>. <a href="/docs/sql-reference/data-types/array"><code>const Array(String)</code></a></li>
+<li class="custom-li"><code>min_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the minimum gram length, defaults to 3. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>max_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the maximum gram length, defaults to 100. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>min_cutoff_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the minimum cutoff length. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the resulting array of tokens from input string. <a href="/docs/sql-reference/data-types/array"><code>Array</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Default tokenizer</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tokens('test1,;\\\\ test2,;\\\\ test3,;\\\\   test4') AS tokens;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['test1','test2','test3','test4']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Ngram tokenizer</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tokens('abc def', 'ngrams', 3) AS tokens;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['abc','bc ','c d',' de','def']
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tokensForLikePattern">tokensForLikePattern<a aria-label="Direct link to tokensForLikePattern" class="hash-link" href="#tokensForLikePattern" title="Direct link to tokensForLikePattern">​</a></h2>
+<p>Introduced in: v26.3.0</p>
+<p>Splits a LIKE pattern string into tokens using the specified tokenizer.</p>
+<p>Unlike the <code>tokens</code> function, this function is aware of LIKE pattern semantics
+(such as leading and trailing wildcard characters) and applies tokenizer-specific
+rules to extract meaningful tokens for pattern matching.</p>
+<p>It supports the same argument sets as the <code>tokens</code> function; additional
+arguments after <code>tokenizer</code> are interpreted according to the selected
+tokenizer (for example, <code>n</code> for <code>ngrams</code>, <code>separators</code> for <code>splitByString</code>,
+and <code>min_length</code> / <code>max_length</code> [/ <code>min_cutoff_length</code>] for <code>sparseGrams</code>).</p>
+<p>This function is primarily intended for debugging and testing purposes,
+and is used internally to analyze tokenization behavior for LIKE patterns.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">tokensForLikePattern(value[, tokenizer[, tokenizer_specific_arguments...]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Arguments</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>value</code> — The input string. <a href="/docs/sql-reference/data-types/string"><code>String</code></a> or <a href="/docs/sql-reference/data-types/fixedstring"><code>FixedString</code></a></li>
+<li class="custom-li"><code>tokenizer</code> — The tokenizer to use. Valid arguments are <code>splitByNonAlpha</code>, <code>splitByString</code>, <code>asciiCJK</code>, <code>ngrams</code>, <code>sparseGrams</code>, and <code>array</code>. Optional, if not set explicitly, defaults to <code>splitByNonAlpha</code>. <a href="/docs/sql-reference/data-types/string"><code>const String</code></a></li>
+<li class="custom-li"><code>n</code> — Only relevant if argument <code>tokenizer</code> is <code>ngrams</code>: An optional parameter which defines the length of the ngrams. If not set explicitly, defaults to <code>3</code>. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>separators</code> — Only relevant if argument <code>tokenizer</code> is <code>split</code>: An optional parameter which defines the separator strings. If not set explicitly, defaults to <code>[' ']</code>. <a href="/docs/sql-reference/data-types/array"><code>const Array(String)</code></a></li>
+<li class="custom-li"><code>min_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the minimum gram length, defaults to 3. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>max_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the maximum gram length, defaults to 100. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+<li class="custom-li"><code>min_cutoff_length</code> — Only relevant if argument <code>tokenizer</code> is <code>sparseGrams</code>: An optional parameter which defines the minimum cutoff length. <a href="/docs/sql-reference/data-types/int-uint"><code>const UInt8</code></a></li>
+</ul>
+<p><strong>Returned value</strong></p>
+<p>Returns the resulting array of tokens from input string. <a href="/docs/sql-reference/data-types/array"><code>Array</code></a></p>
+<p><strong>Examples</strong></p>
+<p><strong>Default tokenizer</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT tokensForLikePattern('%test1,test2,test3%') AS tokens;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">['test2']
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/functions/rounding-functions"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Rounding</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/functions/string-functions"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">String</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#alphaTokens">alphaTokens</a><li><a class="table-of-contents__link toc-highlight" href="#arrayStringConcat">arrayStringConcat</a><li><a class="table-of-contents__link toc-highlight" href="#extractAllGroupsVertical">extractAllGroupsVertical</a><li><a class="table-of-contents__link toc-highlight" href="#ngrams">ngrams</a><li><a class="table-of-contents__link toc-highlight" href="#reverseBySeparator">reverseBySeparator</a><li><a class="table-of-contents__link toc-highlight" href="#splitByChar">splitByChar</a><li><a class="table-of-contents__link toc-highlight" href="#splitByNonAlpha">splitByNonAlpha</a><li><a class="table-of-contents__link toc-highlight" href="#splitByRegexp">splitByRegexp</a><li><a class="table-of-contents__link toc-highlight" href="#splitByString">splitByString</a><li><a class="table-of-contents__link toc-highlight" href="#splitByWhitespace">splitByWhitespace</a><li><a class="table-of-contents__link toc-highlight" href="#tokens">tokens</a><li><a class="table-of-contents__link toc-highlight" href="#tokensForLikePattern">tokensForLikePattern</a></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

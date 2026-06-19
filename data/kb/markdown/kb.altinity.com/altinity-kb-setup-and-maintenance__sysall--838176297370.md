@@ -1,0 +1,177 @@
+# sysall database (system tables on a cluster level) \| Altinity® Knowledge Base for ClickHouse®
+
+
+1. [Setup \& maintenance](/altinity-kb-setup-and-maintenance/)
+2. sysall database
+# sysall database (system tables on a cluster level)
+
+## Requirements
+
+The idea is that you have a macros `cluster` with cluster name.
+
+For example you have a cluster named `production` and this cluster includes all ClickHouse® nodes.
+
+
+```
+$ cat /etc/clickhouse-server/config.d/clusters.xml
+<?xml version="1.0" ?>
+<yandex>
+    <remote_servers>
+        <production>
+          <shard>
+...
+
+```
+And you need to have a macro `cluster` set to `production`:
+
+
+```
+cat /etc/clickhouse-server/config.d/macros.xml
+<?xml version="1.0" ?>
+<yandex>
+    <macros>
+        <cluster>production</cluster>
+        <replica>....</replica>
+        ....
+    </macros>
+</yandex>
+
+```
+Now you should be able to query all nodes using `clusterAllReplicas`:
+
+
+```
+SELECT
+    hostName(),
+    FQDN(),
+    materialize(uptime()) AS uptime
+FROM clusterAllReplicas('{cluster}', system.one)
+SETTINGS skip_unavailable_shards = 1
+
+┌─hostName()─┬─FQDN()──────────────┬──uptime─┐
+│ chhost1    │ chhost1.localdomain │ 1071574 │
+│ chhost2    │ chhost2.localdomain │ 1071517 │
+└────────────┴─────────────────────┴─────────┘
+
+```
+`skip_unavailable_shards` is necessary to query a system with some nodes are down.
+
+## Script to create DB objects
+
+
+```
+clickhouse-client -q 'show tables from system'> list
+for i in `cat list`; do echo "CREATE OR REPLACE VIEW sysall."$i" as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system."$i") SETTINGS skip_unavailable_shards = 1;"; done;
+
+```
+
+```
+CREATE DATABASE sysall;
+
+CREATE OR REPLACE VIEW sysall.cluster_state AS
+SELECT
+    shard_num,
+    replica_num,
+    host_name,
+    host_address,
+    port,
+    errors_count,
+    uptime,
+    if(uptime > 0, 'UP', 'DOWN') AS node_state
+FROM system.clusters
+LEFT JOIN
+(
+    SELECT
+        replaceRegexpOne(hostName(),'-(\d+)-0$','-\1') AS host_name,  -- remove trailing 0
+        FQDN() AS fqdn,
+        materialize(uptime()) AS uptime
+    FROM clusterAllReplicas('{cluster}', system.one)
+) as hosts_info USING (host_name)
+WHERE cluster = getMacro('cluster')
+SETTINGS skip_unavailable_shards = 1;
+
+CREATE OR REPLACE VIEW sysall.asynchronous_inserts as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.asynchronous_inserts) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.asynchronous_metrics as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.asynchronous_metrics) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.backups as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.backups) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.clusters as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.clusters) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.columns as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.columns) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.current_roles as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.current_roles) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.data_skipping_indices as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.data_skipping_indices) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.databases as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.databases) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.detached_parts as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.detached_parts) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.dictionaries as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.dictionaries) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.disks as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.disks) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.distributed_ddl_queue as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.distributed_ddl_queue) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.distribution_queue as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.distribution_queue) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.dropped_tables as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.dropped_tables) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.enabled_roles as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.enabled_roles) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.errors as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.errors) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.events as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.events) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.filesystem_cache as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.filesystem_cache) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.grants as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.grants) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.jemalloc_bins as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.jemalloc_bins) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.macros as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.macros) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.merge_tree_settings as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.merge_tree_settings) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.merges as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.merges) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.metrics as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.metrics) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.moves as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.moves) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.mutations as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.mutations) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.named_collections as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.named_collections) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.parts as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.parts) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.parts_columns as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.parts_columns) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.privileges as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.privileges) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.processes as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.processes) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.projection_parts as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.projection_parts) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.projection_parts_columns as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.projection_parts_columns) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.query_cache as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.query_cache) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.query_log as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.query_log) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.quota_limits as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.quota_limits) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.quota_usage as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.quota_usage) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.quotas as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.quotas) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.quotas_usage as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.quotas_usage) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.replicas as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.replicas) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.replicated_fetches as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.replicated_fetches) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.replicated_merge_tree_settings as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.replicated_merge_tree_settings) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.replication_queue as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.replication_queue) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.role_grants as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.role_grants) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.roles as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.roles) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.row_policies as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.row_policies) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.server_settings as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.server_settings) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.settings as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.settings) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.settings_profile_elements as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.settings_profile_elements) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.settings_profiles as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.settings_profiles) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.storage_policies as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.storage_policies) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.tables as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.tables) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.user_directories as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.user_directories) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.user_processes as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.user_processes) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.users as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.users) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.warnings as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.warnings) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.zookeeper as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.zookeeper) SETTINGS skip_unavailable_shards = 1;
+CREATE OR REPLACE VIEW sysall.zookeeper_connection as select hostName() nodeHost, FQDN() nodeFQDN, * from clusterAllReplicas('{cluster}', system.zookeeper_connection) SETTINGS skip_unavailable_shards = 1;
+
+```
+## Some examples
+
+
+```
+select * from sysall.cluster_state;
+┌─shard_num─┬─replica_num─┬─host_name───────────┬─host_address─┬─port─┬─errors_count─┬──uptime─┬─node_state─┐
+│         1 │           1 │ chhost1.localdomain │ 10.253.86.2  │ 9000 │            0 │ 1071788 │ UP         │
+│         2 │           1 │ chhost2.localdomain │ 10.253.215.2 │ 9000 │            0 │ 1071731 │ UP         │
+│         3 │           1 │ chhost3.localdomain │ 10.252.83.8  │ 9999 │            0 │       0 │ DOWN       │
+└───────────┴─────────────┴─────────────────────┴──────────────┴──────┴──────────────┴─────────┴────────────┘
+
+
+SELECT
+    nodeFQDN,
+    path,
+    formatReadableSize(free_space) AS free,
+    formatReadableSize(total_space) AS total
+FROM sysall.disks
+┌─nodeFQDN────────────┬─path─────────────────┬─free───────┬─total──────┐
+│ chhost1.localdomain │ /var/lib/clickhouse/ │ 511.04 GiB │ 937.54 GiB │
+│ chhost2.localdomain │ /var/lib/clickhouse/ │ 495.77 GiB │ 937.54 GiB │
+└─────────────────────┴──────────────────────┴────────────┴────────────┘
+
+```
+Last modified 2024\.10\.04: [Update sysall.md (ba90ccc)](https://github.com/Altinity/altinityknowledgebase/commit/ba90ccc21d0d47f53d5e54cdf7a93a50096ff0f0)

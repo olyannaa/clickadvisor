@@ -1,0 +1,82 @@
+# Permissions for queries \| ClickHouse Docs
+
+
+- - [Settings](/docs/operations/settings)- Permissions for queries
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/operations/settings/permissions-for-queries.md)# Permissions for queries
+
+Queries in ClickHouse can be divided into several types:
+
+
+1. Read data queries: `SELECT`, `SHOW`, `DESCRIBE`, `EXISTS`.
+2. Write data queries: `INSERT`, `OPTIMIZE`.
+3. Change settings query: `SET`, `USE`.
+4. [DDL](https://en.wikipedia.org/wiki/Data_definition_language) queries: `CREATE`, `ALTER`, `RENAME`, `ATTACH`, `DETACH`, `DROP` `TRUNCATE`.
+5. `KILL QUERY`.
+
+
+The following settings regulate user permissions by the type of query:
+
+
+## readonly[​](#readonly "Direct link to readonly")
+
+
+Restricts permissions for read data, write data, and change settings queries.
+
+
+When set to 1, allows:
+
+
+- All types of read queries (like SELECT and equivalent queries).
+- Queries that modify only session context (like USE).
+
+
+When set to 2, allows the above plus:
+
+
+- SET and CREATE TEMPORARY TABLE
+
+
+TipQueries like EXISTS, DESCRIBE, EXPLAIN, SHOW PROCESSLIST, etc are equivalent to SELECT, because they just do select from system tables.
+
+
+Possible values:
+
+
+- 0 — Read, Write, and Change settings queries are allowed.
+- 1 — Only Read data queries are allowed.
+- 2 — Read data and Change settings queries are allowed.
+
+
+Default value: 0
+
+
+NoteAfter setting `readonly = 1`, the user can't change `readonly` and `allow_ddl` settings in the current session.When using the `GET` method in the [HTTP interface](/docs/interfaces/http), `readonly = 1` is set automatically. To modify data, use the `POST` method.Setting `readonly = 1` prohibits the user from changing settings. There is a way to prohibit the user from changing only specific settings. Also there is a way to allow changing only specific settings under `readonly = 1` restrictions. For details see [constraints on settings](/docs/operations/settings/constraints-on-settings).
+
+
+
+
+
+
+## allow\_ddl[​](#allow_ddl "Direct link to allow_ddl")
+
+
+Allows or denies [DDL](https://en.wikipedia.org/wiki/Data_definition_language) queries.
+
+
+Possible values:
+
+
+- 0 — DDL queries are not allowed.
+- 1 — DDL queries are allowed.
+
+
+Default value: 1
+
+
+NoteYou cannot run `SET allow_ddl = 1` if `allow_ddl = 0` for the current session.
+
+
+KILL QUERY`KILL QUERY` can be performed with any combination of readonly and allow\_ddl settings.
+
+[PreviousMemory overcommit](/docs/operations/settings/memory-overcommit)[NextRestrictions on query complexity](/docs/operations/settings/query-complexity)- [readonly](#readonly)- [allow\_ddl](#allow_ddl)
+Was this page helpful?

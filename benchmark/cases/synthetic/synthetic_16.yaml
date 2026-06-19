@@ -1,0 +1,20 @@
+case_id: synthetic_16
+source: synthetic
+sql: |
+  SELECT COUNT(*) FROM (
+      SELECT * FROM events ORDER BY created_at
+  )
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: nested_orderby_without_limit_removal
+  detected_by_rule: R-016
+  severity: medium
+  description: ORDER BY внутри подзапроса без LIMIT не влияет на внешний COUNT(*).
+expected_rules_to_fire:
+- R-016
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-016.
+expected_findings_count: 1
+status: validated

@@ -1,0 +1,31 @@
+id: D-005
+name: leading_wildcard_like
+tier: detector
+category: string_inefficiency
+status: proposed
+statement: LIKE с литералом, начинающимся на '%'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: medium
+detection_method:
+  ast_pattern: LIKE с литералом, начинающимся на '%'
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"LIKE с leading wildcard не использует индексы. Рассмотрите
+  ngrambf_v1 / tokenbf_v1 skip-index."'
+false_positives: []

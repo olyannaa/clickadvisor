@@ -1,0 +1,962 @@
+<h1>JSON Data Type | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/data-types" itemprop="item"><span itemprop="name">Data types</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">JSON</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/data-types/newjson.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>JSON Data Type</h1></header><a href="/docs/best-practices/use-json-where-appropriate" style="display:flex;text-decoration:none;width:fit-content"></a><div aria-disabled="false" class="sc-1drx130-8 hwmYxr" tabindex="0"><a href="/docs/best-practices/use-json-where-appropriate" style="display:flex;text-decoration:none;width:fit-content"><div class="sc-1drx130-0 jMIYCx"><div class="sc-1drx130-1 hVGaMm"><div class="sc-29ieut-0 fWYpyG"><svg aria-hidden="true" aria-label="book" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M12 16.37a6.368 6.368 0 0 0-7.495-1.12c-.684.364-1.509-.085-1.509-.86V5.295c0-.637.294-1.249.812-1.618A6.367 6.367 0 0 1 12 4.364a6.367 6.367 0 0 1 8.191-.687c.518.37.813.981.813 1.618v9.095c0 .775-.826 1.225-1.509.86A6.368 6.368 0 0 0 12 16.37Z" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path d="M4.505 19.387A6.368 6.368 0 0 1 12 20.507a6.368 6.368 0 0 1 7.495-1.12M12 16.37V4.363" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div><h3 class="sc-1bq7thb-0 aVYBb">Looking for a guide?</h3></div></div><div class="sc-1drx130-2 epsnlI"><p class="sc-6r74pj-0 ftDFSf">Check out our JSON best practice guide for examples, advanced features and considerations for using the JSON type.</p></div></a><a class="sc-1drx130-4 fKmGvx" href="/docs/best-practices/use-json-where-appropriate"><p class="sc-6r74pj-0 fZpIyM sc-1drx130-6 kyJcIb">Read more<div class="sc-29ieut-0 kQFWQO sc-1drx130-5 sc-1drx130-7 gJjNeE"><svg aria-label="chevron-right" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m10 16 4-4-4-4" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></p></a></div>
+<br/>
+<p>The <code>JSON</code> type stores JavaScript Object Notation (JSON) documents in a single column.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In ClickHouse Open-Source JSON data type is marked as production ready in version 25.3. It's not recommended to use this type in production in previous versions.</p></div></div>
+<p>To declare a column of <code>JSON</code> type, you can use the following syntax:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">&lt;column_name&gt; JSON
+(
+    max_dynamic_paths=N,
+    max_dynamic_types=M,
+    some.path TypeName,
+    SKIP path.to.skip,
+    SKIP REGEXP 'paths_regexp'
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Where the parameters in the syntax above are defined as:</p>
+<table><thead><tr><th>Parameter<th>Description<th>Default Value<tbody><tr><td><code>max_dynamic_paths</code><td>An optional parameter indicating how many paths can be stored separately as sub-columns across single block of data that is stored separately (for example across single data part for MergeTree table). <br/><br/>If this limit is exceeded, all other paths will be stored together in a single structure called <a href="#shared-data-structure">shared data</a>.<br/><br/>There are also <a href="#controlling-the-number-of-dynamic-paths">ways</a> how to change the limit on dynamic paths without changing this parameter.<td><code>1024</code><tr><td><code>max_dynamic_types</code><td>An optional parameter between <code>1</code> and <code>255</code> indicating how many different data types can be stored separately inside a single path column with type <code>Dynamic</code> across single block of data that is stored separately (for example across single data part for MergeTree table). <br/><br/>If this limit is exceeded, all new types will be stored together in a single structure called <code>shared variant</code>.<td><code>32</code><tr><td><code>some.path TypeName</code><td>An optional type hint for particular path in the JSON. Such paths will be always stored as sub-columns with specified type.<td><tr><td><code>SKIP path.to.skip</code><td>An optional hint for particular path that should be skipped during JSON parsing. Such paths will never be stored in the JSON column. If specified path is a nested JSON object, the whole nested object will be skipped.<td><tr><td><code>SKIP REGEXP 'path_regexp'</code><td>An optional hint with a regular expression that is used to skip paths during JSON parsing. All paths that match this regular expression will never be stored in the JSON column.<td></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></td></td></td></tr></tbody></th></th></th></tr></thead></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="when-to-use-json-type">When to use the <code>JSON</code> Type<a aria-label="Direct link to when-to-use-json-type" class="hash-link" href="#when-to-use-json-type" title="Direct link to when-to-use-json-type">​</a></h2>
+<p>The <code>JSON</code> type is designed for querying, filtering, and aggregating specific fields within JSON objects that have dynamic or unpredictable structures. It achieves this by splitting JSON objects into separate sub-columns, which dramatically reduces data read and speeds up queries on selected fields compared to alternatives like <code>Map</code> or parsing strings.</p>
+<p><strong>However, this comes with important trade-offs:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li">Slower <code>INSERT</code>s - Splitting JSON into sub-columns, performing type inference, and managing flexible storage structures makes inserts slower compared to storing JSON as a simple <code>String</code> column.</li>
+<li class="custom-li">Slower when reading entire objects - If you need to retrieve complete JSON documents (rather than specific fields), the <code>JSON</code> type is slower than reading from a <code>String</code> column. The overhead of reconstructing objects from separate sub-columns provides no benefit when you're not doing field-level queries.</li>
+<li class="custom-li">Storage overhead - Maintaining separate sub-columns adds structural overhead compared to storing JSON as a single string value.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="use-json-type">Use the <code>JSON</code> type when:<a aria-label="Direct link to use-json-type" class="hash-link" href="#use-json-type" title="Direct link to use-json-type">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">Your data has a dynamic or unpredictable structure with varying keys across documents</li>
+<li class="custom-li">Field types or schemas change over time or vary between records</li>
+<li class="custom-li">You need to query, filter, or aggregate on specific paths within JSON objects whose structure you can't predict upfront</li>
+<li class="custom-li">Your use case involves semi-structured data like logs, events, or user-generated content with inconsistent schemas</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="use-string-type">Use a <code>String</code> column (or structured types) when:<a aria-label="Direct link to use-string-type" class="hash-link" href="#use-string-type" title="Direct link to use-string-type">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">Your data structure is known and consistent - in this case, use normal columns, <code>Tuple</code>, <code>Array</code>, <code>Dynamic</code>, or <code>Variant</code> types instead</li>
+<li class="custom-li"><code>JSON</code> documents are treated as opaque blobs that are only stored and retrieved in their entirety without field-level analysis</li>
+<li class="custom-li">You don't need to query or filter on individual JSON fields within the database</li>
+<li class="custom-li">The <code>JSON</code> is simply a transport/storage format, not analyzed within ClickHouse</li>
+</ul>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>If <code>JSON</code> is an opaque document that isn't analyzed inside the database, and only stored and retrieved back, it should be stored as a <code>String</code> field. The <code>JSON</code> type's benefits only materialize when you need to efficiently query, filter, or aggregate on specific fields within dynamic <code>JSON</code> structures.<p>You can also mix approaches—use standard columns for predictable top-level fields and a <code>JSON</code> column for dynamic sections of the payload.</p></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="creating-json">Creating <code>JSON</code><a aria-label="Direct link to creating-json" class="hash-link" href="#creating-json" title="Direct link to creating-json">​</a></h2>
+<p>In this section we'll take a look at the various ways that you can create <code>JSON</code>.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="using-json-in-a-table-column-definition">Using <code>JSON</code> in a table column definition<a aria-label="Direct link to using-json-in-a-table-column-definition" class="hash-link" href="#using-json-in-a-table-column-definition" title="Direct link to using-json-in-a-table-column-definition">​</a></h3>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON) ENGINE = Memory;
+INSERT INTO test VALUES ('{"a" : {"b" : 42}, "c" : [1, 2, 3]}'), ('{"f" : "Hello, World!"}'), ('{"a" : {"b" : 43, "e" : 10}, "c" : [4, 5, 6]}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json────────────────────────────────────────┐
+│ {"a":{"b":"42"},"c":["1","2","3"]}          │
+│ {"f":"Hello, World!"}                       │
+│ {"a":{"b":"43","e":"10"},"c":["4","5","6"]} │
+└─────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(a.b UInt32, SKIP a.e)) ENGINE = Memory;
+INSERT INTO test VALUES ('{"a" : {"b" : 42}, "c" : [1, 2, 3]}'), ('{"f" : "Hello, World!"}'), ('{"a" : {"b" : 43, "e" : 10}, "c" : [4, 5, 6]}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────┐
+│ {"a":{"b":42},"c":["1","2","3"]}  │
+│ {"a":{"b":0},"f":"Hello, World!"} │
+│ {"a":{"b":43},"c":["4","5","6"]}  │
+└───────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="using-cast-with-json">Using CAST with <code>::JSON</code><a aria-label="Direct link to using-cast-with-json" class="hash-link" href="#using-cast-with-json" title="Direct link to using-cast-with-json">​</a></h3>
+<p>It is possible to cast various types using the special syntax <code>::JSON</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="cast-from-string-to-json">CAST from <code>String</code> to <code>JSON</code><a aria-label="Direct link to cast-from-string-to-json" class="hash-link" href="#cast-from-string-to-json" title="Direct link to cast-from-string-to-json">​</a></h4>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT '{"a" : {"b" : 42},"c" : [1, 2, 3], "d" : "Hello, World!"}'::JSON AS json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json───────────────────────────────────────────────────┐
+│ {"a":{"b":"42"},"c":["1","2","3"],"d":"Hello, World!"} │
+└────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="cast-from-tuple-to-json">CAST from <code>Tuple</code> to <code>JSON</code><a aria-label="Direct link to cast-from-tuple-to-json" class="hash-link" href="#cast-from-tuple-to-json" title="Direct link to cast-from-tuple-to-json">​</a></h4>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_named_columns_in_function_tuple = 1;
+SELECT (tuple(42 AS b) AS a, [1, 2, 3] AS c, 'Hello, World!' AS d)::JSON AS json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json───────────────────────────────────────────────────┐
+│ {"a":{"b":"42"},"c":["1","2","3"],"d":"Hello, World!"} │
+└────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="cast-from-map-to-json">CAST from <code>Map</code> to <code>JSON</code><a aria-label="Direct link to cast-from-map-to-json" class="hash-link" href="#cast-from-map-to-json" title="Direct link to cast-from-map-to-json">​</a></h4>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET use_variant_as_common_type=1;
+SELECT map('a', map('b', 42), 'c', [1,2,3], 'd', 'Hello, World!')::JSON AS json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json───────────────────────────────────────────────────┐
+│ {"a":{"b":"42"},"c":["1","2","3"],"d":"Hello, World!"} │
+└────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>JSON paths are stored flattened. This means that when a JSON object is formatted from a path like <code>a.b.c</code>
+it is not possible to know whether the object should be constructed as <code>{ "a.b.c" : ... }</code> or <code>{ "a": { "b": { "c": ... } } }</code>.
+Our implementation will always assume the latter.<p>For example:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT CAST('{"a.b.c" : 42}', 'JSON') AS json
+</code></pre></div><div class="activity_PoTP"></div></div><p>will return:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">   ┌─json───────────────────┐
+1. │ {"a":{"b":{"c":"42"}}} │
+   └────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div><p>and <strong>not</strong>:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">   ┌─json───────────┐
+1. │ {"a.b.c":"42"} │
+   └────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div></p></p></p></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reading-json-paths-as-sub-columns">Reading JSON paths as sub-columns<a aria-label="Direct link to Reading JSON paths as sub-columns" class="hash-link" href="#reading-json-paths-as-sub-columns" title="Direct link to Reading JSON paths as sub-columns">​</a></h2>
+<p>The <code>JSON</code> type supports reading every path as a separate sub-column.
+If the type of the requested path is not specified in the JSON type declaration,
+then the sub column of the path will always have type <a href="/docs/sql-reference/data-types/dynamic">Dynamic</a>.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON(a.b UInt32, SKIP a.e)) ENGINE = Memory;
+INSERT INTO test VALUES ('{"a" : {"b" : 42, "g" : 42.42}, "c" : [1, 2, 3], "d" : "2020-01-01"}'), ('{"f" : "Hello, World!", "d" : "2020-01-02"}'), ('{"a" : {"b" : 43, "e" : 10, "g" : 43.43}, "c" : [4, 5, 6]}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json────────────────────────────────────────────────────────┐
+│ {"a":{"b":42,"g":42.42},"c":["1","2","3"],"d":"2020-01-01"} │
+│ {"a":{"b":0},"d":"2020-01-02","f":"Hello, World!"}          │
+│ {"a":{"b":43,"g":43.43},"c":["4","5","6"]}                  │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b, json.a.g, json.c, json.d FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b─┬─json.a.g─┬─json.c──┬─json.d─────┐
+│       42 │ 42.42    │ [1,2,3] │ 2020-01-01 │
+│        0 │ ᴺᵁᴸᴸ     │ ᴺᵁᴸᴸ    │ 2020-01-02 │
+│       43 │ 43.43    │ [4,5,6] │ ᴺᵁᴸᴸ       │
+└──────────┴──────────┴─────────┴────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can also use <code>getSubcolumn</code> function to read subcolumns from JSON type:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT getSubcolumn(json, 'a.b'), getSubcolumn(json, 'a.g'), getSubcolumn(json, 'c'), getSubcolumn(json, 'd') FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─getSubcolumn(json, 'a.b')─┬─getSubcolumn(json, 'a.g')─┬─getSubcolumn(json, 'c')─┬─getSubcolumn(json, 'd')─┐
+│                        42 │ 42.42                     │ [1,2,3]                 │ 2020-01-01              │
+│                         0 │ ᴺᵁᴸᴸ                      │ ᴺᵁᴸᴸ                    │ 2020-01-02              │
+│                        43 │ 43.43                     │ [4,5,6]                 │ ᴺᵁᴸᴸ                    │
+└───────────────────────────┴───────────────────────────┴─────────────────────────┴─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If the requested path wasn't found in the data, it will be filled with <code>NULL</code> values:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.non.existing.path FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.non.existing.path─┐
+│ ᴺᵁᴸᴸ                   │
+│ ᴺᵁᴸᴸ                   │
+│ ᴺᵁᴸᴸ                   │
+└────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's check the data types of the returned sub-columns:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT toTypeName(json.a.b), toTypeName(json.a.g), toTypeName(json.c), toTypeName(json.d) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─toTypeName(json.a.b)─┬─toTypeName(json.a.g)─┬─toTypeName(json.c)─┬─toTypeName(json.d)─┐
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+└──────────────────────┴──────────────────────┴────────────────────┴────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As we can see, for <code>a.b</code>, the type is <code>UInt32</code> as we specified it to be in the JSON type declaration,
+and for all other sub-columns the type is <code>Dynamic</code>.</p>
+<p>It is also possible to read sub-columns of a <code>Dynamic</code> type using the special syntax <code>json.some.path.:TypeName</code>:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    json.a.g.:Float64,
+    dynamicType(json.a.g),
+    json.d.:Date,
+    dynamicType(json.d)
+FROM test
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.g.:`Float64`─┬─dynamicType(json.a.g)─┬─json.d.:`Date`─┬─dynamicType(json.d)─┐
+│               42.42 │ Float64               │     2020-01-01 │ Date                │
+│                ᴺᵁᴸᴸ │ None                  │     2020-01-02 │ Date                │
+│               43.43 │ Float64               │           ᴺᵁᴸᴸ │ None                │
+└─────────────────────┴───────────────────────┴────────────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>Dynamic</code> sub-columns can be cast to any data type. In this case an exception will be thrown if the internal type inside <code>Dynamic</code> cannot be cast to the requested type:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.g::UInt64 AS uint
+FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─uint─┐
+│   42 │
+│    0 │
+│   43 │
+└──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.g::UUID AS float
+FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Received exception from server:
+Code: 48. DB::Exception: Received from localhost:9000. DB::Exception:
+Conversion between numeric types and UUID is not supported.
+Probably the passed UUID is unquoted:
+while executing 'FUNCTION CAST(__table1.json.a.g :: 2, 'UUID'_String :: 1) -&gt; CAST(__table1.json.a.g, 'UUID'_String) UUID : 0'.
+(NOT_IMPLEMENTED)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>To read subcolumns efficiently from Compact MergeTree parts make sure MergeTree setting <a href="/docs/operations/settings/merge-tree-settings#write_marks_for_substreams_in_compact_parts">write_marks_for_substreams_in_compact_parts</a> is enabled.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reading-json-sub-objects-as-sub-columns">Reading JSON sub-objects as sub-columns<a aria-label="Direct link to Reading JSON sub-objects as sub-columns" class="hash-link" href="#reading-json-sub-objects-as-sub-columns" title="Direct link to Reading JSON sub-objects as sub-columns">​</a></h2>
+<p>The <code>JSON</code> type supports reading nested objects as sub-columns with type <code>JSON</code> using the special syntax <code>json.^some.path</code>:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON) ENGINE = Memory;
+INSERT INTO test VALUES ('{"a" : {"b" : {"c" : 42, "g" : 42.42}}, "c" : [1, 2, 3], "d" : {"e" : {"f" : {"g" : "Hello, World", "h" : [1, 2, 3]}}}}'), ('{"f" : "Hello, World!", "d" : {"e" : {"f" : {"h" : [4, 5, 6]}}}}'), ('{"a" : {"b" : {"c" : 43, "e" : 10, "g" : 43.43}}, "c" : [4, 5, 6]}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ {"a":{"b":{"c":"42","g":42.42}},"c":["1","2","3"],"d":{"e":{"f":{"g":"Hello, World","h":["1","2","3"]}}}} │
+│ {"d":{"e":{"f":{"h":["4","5","6"]}}},"f":"Hello, World!"}                                                 │
+│ {"a":{"b":{"c":"43","e":"10","g":43.43}},"c":["4","5","6"]}                                               │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.^a.b, json.^d.e.f FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.^`a`.b───────────────────┬─json.^`d`.e.f──────────────────────────┐
+│ {"c":"42","g":42.42}          │ {"g":"Hello, World","h":["1","2","3"]} │
+│ {}                            │ {"h":["4","5","6"]}                    │
+│ {"c":"43","e":"10","g":43.43} │ {}                                     │
+└───────────────────────────────┴────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>When paths are stored in basic (<code>map</code>) <a href="#shared-data-structure">shared data</a>, reading sub-object sub-columns may be inefficient as it requires scanning the entire shared data structure. With <code>map_with_buckets</code> or <code>advanced</code> shared data serialization, reading sub-columns from shared data is highly optimized.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reading-json-combined-sub-columns">Reading JSON combined sub-columns<a aria-label="Direct link to Reading JSON combined sub-columns" class="hash-link" href="#reading-json-combined-sub-columns" title="Direct link to Reading JSON combined sub-columns">​</a></h2>
+<p>The <code>JSON</code> type supports reading a path as a <strong>combined sub-column</strong> using the special syntax <code><a class="__cf_email__" data-cfemail="fd978e9293d3bd8e929098d38d9c8995" href="/cdn-cgi/l/email-protection">[email protected]</a></code>.
+A combined sub-column for a given path returns:</p>
+<ul class="custom-ul">
+<li class="custom-li">The literal value stored at that path as <code>Dynamic</code>, if the path has a literal value.</li>
+<li class="custom-li">A JSON sub-object at that path as <code>Dynamic</code>, if the path has no literal value but has nested sub-paths.</li>
+<li class="custom-li"><code>NULL</code>, if neither a literal value nor any sub-paths exist for that path.</li>
+</ul>
+<p>This is useful when a path may hold either a scalar value or a nested object across different rows, and is more convenient than separately querying the literal sub-column (<code>json.a</code>) and the sub-object sub-column (<code>json.^a</code>).</p>
+<p>The following example compares all three sub-column types for path <code>a</code>:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON) ENGINE = Memory;
+INSERT INTO test VALUES ('{"a" : 42, "b" : {"c" : 1, "d" : "Hello"}}'), ('{"a" : {"x": 1, "y": 2}, "b" : {"c" : 1}}'), ('{"c" : "World"}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json────────────────────────────┐
+│ {"a":42,"b":{"c":1,"d":"Hello"}}│
+│ {"a":{"x":1,"y":2},"b":{"c":1}}│
+│ {"c":"World"}                   │
+└─────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    json.a,
+    dynamicType(json.a),
+    json.^a,
+    toTypeName(json.^a),
+    json.@a,
+    dynamicType(json.@a)
+FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a─┬─dynamicType(json.a)─┬─json.^a───────┬─toTypeName(json.^a)─┬─json.@a───────┬─dynamicType(json.@a)─┐
+│ 42     │ Int64               │ {}            │ JSON                │ 42            │ Int64                │
+│ NULL   │ None                │ {"x":1,"y":2} │ JSON                │ {"x":1,"y":2} │ JSON                 │
+│ NULL   │ None                │ {}            │ JSON                │ NULL          │ None                 │
+└────────┴─────────────────────┴───────────────┴─────────────────────┴───────────────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<ul class="custom-ul">
+<li class="custom-li">Row 1: <code>a</code> holds a literal <code>42</code>. <code>json.a</code> returns it as <code>Dynamic(Int64)</code>, <code>json.^a</code> returns an empty sub-object <code>{}</code> (no nested keys under <code>a</code>), and <code>json.@a</code> returns the literal <code>42</code>.</li>
+<li class="custom-li">Row 2: <code>a</code> holds a nested object. <code>json.a</code> returns <code>NULL</code> (no literal at that path), <code>json.^a</code> returns the sub-object as <code>JSON</code>, and <code>json.@a</code> also returns the sub-object as <code>Dynamic(JSON)</code>.</li>
+<li class="custom-li">Row 3: <code>a</code> is absent entirely. Both <code>json.a</code> and <code>json.@a</code> return <code>NULL</code>, while <code>json.^a</code> returns an empty <code>{}</code>.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>When paths are stored in basic (<code>map</code>) <a href="#shared-data-structure">shared data</a>, reading combined sub-columns may be inefficient as it requires scanning the entire shared data structure. With <code>map_with_buckets</code> or <code>advanced</code> shared data serialization, reading sub-columns from shared data is highly optimized.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="type-inference-for-paths">Type inference for paths<a aria-label="Direct link to Type inference for paths" class="hash-link" href="#type-inference-for-paths" title="Direct link to Type inference for paths">​</a></h2>
+<p>During parsing of <code>JSON</code>, ClickHouse tries to detect the most appropriate data type for each JSON path.
+It works similarly to <a href="/docs/interfaces/schema-inference">automatic schema inference from input data</a>,
+and is controlled by the same settings:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_try_infer_dates">input_format_try_infer_dates</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_try_infer_datetimes">input_format_try_infer_datetimes</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#schema_inference_make_columns_nullable">schema_inference_make_columns_nullable</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_try_infer_numbers_from_strings">input_format_json_try_infer_numbers_from_strings</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_infer_incomplete_types_as_strings">input_format_json_infer_incomplete_types_as_strings</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_read_numbers_as_strings">input_format_json_read_numbers_as_strings</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_read_bools_as_strings">input_format_json_read_bools_as_strings</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_read_bools_as_numbers">input_format_json_read_bools_as_numbers</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_read_arrays_as_strings">input_format_json_read_arrays_as_strings</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/formats#input_format_json_infer_array_of_dynamic_from_array_of_different_types">input_format_json_infer_array_of_dynamic_from_array_of_different_types</a></li>
+</ul>
+<p>Let's take a look at some examples:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONAllPathsWithTypes('{"a" : "2020-01-01", "b" : "2020-01-01 10:00:00"}'::JSON) AS paths_with_types settings input_format_try_infer_dates=1, input_format_try_infer_datetimes=1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─paths_with_types─────────────────┐
+│ {'a':'Date','b':'DateTime64(9)'} │
+└──────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONAllPathsWithTypes('{"a" : "2020-01-01", "b" : "2020-01-01 10:00:00"}'::JSON) AS paths_with_types settings input_format_try_infer_dates=0, input_format_try_infer_datetimes=0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─paths_with_types────────────┐
+│ {'a':'String','b':'String'} │
+└─────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONAllPathsWithTypes('{"a" : [1, 2, 3]}'::JSON) AS paths_with_types settings schema_inference_make_columns_nullable=1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─paths_with_types───────────────┐
+│ {'a':'Array(Nullable(Int64))'} │
+└────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT JSONAllPathsWithTypes('{"a" : [1, 2, 3]}'::JSON) AS paths_with_types settings schema_inference_make_columns_nullable=0;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─paths_with_types─────┐
+│ {'a':'Array(Int64)'} │
+└──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="handling-arrays-of-json-objects">Handling arrays of JSON objects<a aria-label="Direct link to Handling arrays of JSON objects" class="hash-link" href="#handling-arrays-of-json-objects" title="Direct link to Handling arrays of JSON objects">​</a></h2>
+<p>JSON paths that contain an array of objects are parsed as type <code>Array(JSON)</code> and inserted into a <code>Dynamic</code> column for the path.
+To read an array of objects, you can extract it from the <code>Dynamic</code> column as a sub-column:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json JSON) ENGINE = Memory;
+INSERT INTO test VALUES
+('{"a" : {"b" : [{"c" : 42, "d" : "Hello", "f" : [[{"g" : 42.42}]], "k" : {"j" : 1000}}, {"c" : 43}, {"e" : [1, 2, 3], "d" : "My", "f" : [[{"g" : 43.43, "h" : "2020-01-01"}]],  "k" : {"j" : 2000}}]}}'),
+('{"a" : {"b" : [1, 2, 3]}}'),
+('{"a" : {"b" : [{"c" : 44, "f" : [[{"h" : "2020-01-02"}]]}, {"e" : [4, 5, 6], "d" : "World", "f" : [[{"g" : 44.44}]],  "k" : {"j" : 3000}}]}}');
+SELECT json FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ {"a":{"b":[{"c":"42","d":"Hello","f":[[{"g":42.42}]],"k":{"j":"1000"}},{"c":"43"},{"d":"My","e":["1","2","3"],"f":[[{"g":43.43,"h":"2020-01-01"}]],"k":{"j":"2000"}}]}} │
+│ {"a":{"b":["1","2","3"]}}                                                                                                                                               │
+│ {"a":{"b":[{"c":"44","f":[[{"h":"2020-01-02"}]]},{"d":"World","e":["4","5","6"],"f":[[{"g":44.44}]],"k":{"j":"3000"}}]}}                                                │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b, dynamicType(json.a.b) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─dynamicType(json.a.b)────────────────────────────────────┐
+│ ['{"c":"42","d":"Hello","f":[[{"g":42.42}]],"k":{"j":"1000"}}','{"c":"43"}','{"d":"My","e":["1","2","3"],"f":[[{"g":43.43,"h":"2020-01-01"}]],"k":{"j":"2000"}}'] │ Array(JSON(max_dynamic_types=16, max_dynamic_paths=256)) │
+│ [1,2,3]                                                                                                                                                           │ Array(Nullable(Int64))                                   │
+│ ['{"c":"44","f":[[{"h":"2020-01-02"}]]}','{"d":"World","e":["4","5","6"],"f":[[{"g":44.44}]],"k":{"j":"3000"}}']                                                  │ Array(JSON(max_dynamic_types=16, max_dynamic_paths=256)) │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As you may have noticed, the <code>max_dynamic_types</code>/<code>max_dynamic_paths</code> parameters of the nested <code>JSON</code> type got reduced compared to the default values.
+This is needed to avoid the number of sub-columns growing uncontrollably on nested arrays of JSON objects.</p>
+<p>Let's try to read sub-columns from a nested <code>JSON</code> column:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b.:`Array(JSON)`.c, json.a.b.:`Array(JSON)`.f, json.a.b.:`Array(JSON)`.d FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b.:`Array(JSON)`.c─┬─json.a.b.:`Array(JSON)`.f───────────────────────────────────┬─json.a.b.:`Array(JSON)`.d─┐
+│ [42,43,NULL]              │ [[['{"g":42.42}']],NULL,[['{"g":43.43,"h":"2020-01-01"}']]] │ ['Hello',NULL,'My']       │
+│ []                        │ []                                                          │ []                        │
+│ [44,NULL]                 │ [[['{"h":"2020-01-02"}']],[['{"g":44.44}']]]                │ [NULL,'World']            │
+└───────────────────────────┴─────────────────────────────────────────────────────────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can avoid writing <code>Array(JSON)</code> sub-column names using a special syntax:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b[].c, json.a.b[].f, json.a.b[].d FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b.:`Array(JSON)`.c─┬─json.a.b.:`Array(JSON)`.f───────────────────────────────────┬─json.a.b.:`Array(JSON)`.d─┐
+│ [42,43,NULL]              │ [[['{"g":42.42}']],NULL,[['{"g":43.43,"h":"2020-01-01"}']]] │ ['Hello',NULL,'My']       │
+│ []                        │ []                                                          │ []                        │
+│ [44,NULL]                 │ [[['{"h":"2020-01-02"}']],[['{"g":44.44}']]]                │ [NULL,'World']            │
+└───────────────────────────┴─────────────────────────────────────────────────────────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The number of <code>[]</code> after the path indicates the array level. For example, <code>json.path[][]</code> will be transformed to <code>json.path.:Array(Array(JSON))</code></p>
+<p>Let's check the paths and types inside our <code>Array(JSON)</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT DISTINCT arrayJoin(JSONAllPathsWithTypes(arrayJoin(json.a.b[]))) FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─arrayJoin(JSONAllPathsWithTypes(arrayJoin(json.a.b.:`Array(JSON)`)))──┐
+│ ('c','Int64')                                                         │
+│ ('d','String')                                                        │
+│ ('f','Array(Array(JSON(max_dynamic_types=8, max_dynamic_paths=64)))') │
+│ ('k.j','Int64')                                                       │
+│ ('e','Array(Nullable(Int64))')                                        │
+└───────────────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Let's read sub-columns from an <code>Array(JSON)</code> column:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b[].c.:Int64, json.a.b[].f[][].g.:Float64, json.a.b[].f[][].h.:Date FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b.:`Array(JSON)`.c.:`Int64`─┬─json.a.b.:`Array(JSON)`.f.:`Array(Array(JSON))`.g.:`Float64`─┬─json.a.b.:`Array(JSON)`.f.:`Array(Array(JSON))`.h.:`Date`─┐
+│ [42,43,NULL]                       │ [[[42.42]],[],[[43.43]]]                                     │ [[[NULL]],[],[['2020-01-01']]]                            │
+│ []                                 │ []                                                           │ []                                                        │
+│ [44,NULL]                          │ [[[NULL]],[[44.44]]]                                         │ [[['2020-01-02']],[[NULL]]]                               │
+└────────────────────────────────────┴──────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>We can also read sub-object sub-columns from a nested <code>JSON</code> column:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json.a.b[].^k FROM test
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.a.b.:`Array(JSON)`.^`k`─────────┐
+│ ['{"j":"1000"}','{}','{"j":"2000"}'] │
+│ []                                   │
+│ ['{}','{"j":"3000"}']                │
+└──────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="handling-json-keys-with-nulls">Handling JSON keys with NULL<a aria-label="Direct link to Handling JSON keys with NULL" class="hash-link" href="#handling-json-keys-with-nulls" title="Direct link to Handling JSON keys with NULL">​</a></h2>
+<p>In our JSON implementation <code>null</code> and absence of the value are considered equivalent:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT '{}'::JSON AS json1, '{"a" : null}'::JSON AS json2, json1 = json2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json1─┬─json2─┬─equals(json1, json2)─┐
+│ {}    │ {}    │                    1 │
+└───────┴───────┴──────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>It means that it's impossible to determine whether the original JSON data contained some path with the NULL value or didn't contain it at all.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="handling-json-keys-with-dots">Handling JSON keys with dots<a aria-label="Direct link to Handling JSON keys with dots" class="hash-link" href="#handling-json-keys-with-dots" title="Direct link to Handling JSON keys with dots">​</a></h2>
+<p>Internally JSON column stores all paths and values in a flattened form. It means that by default these 2 objects are considered as the same:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-json"><code class="language-json">{"a" : {"b" : 42}}
+{"a.b" : 42}
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>They both will be stored internally as a pair of path <code>a.b</code> and value <code>42</code>. During formatting of JSON we always form nested objects based on the path parts separated by dot:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT '{"a" : {"b" : 42}}'::JSON AS json1, '{"a.b" : 42}'::JSON AS json2, JSONAllPaths(json1), JSONAllPaths(json2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json1────────────┬─json2────────────┬─JSONAllPaths(json1)─┬─JSONAllPaths(json2)─┐
+│ {"a":{"b":"42"}} │ {"a":{"b":"42"}} │ ['a.b']             │ ['a.b']             │
+└──────────────────┴──────────────────┴─────────────────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As you can see, initial JSON <code>{"a.b" : 42}</code> is now formatted as <code>{"a" : {"b" : 42}}</code>.</p>
+<p>This limitation also leads to the failure of parsing valid JSON objects like this:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON AS json;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">Code: 117. DB::Exception: Cannot insert data into JSON column: Duplicate path found during parsing JSON object: a.b. You can enable setting type_json_skip_duplicated_paths to skip duplicated paths during insert: In scope SELECT CAST('{"a.b" : 42, "a" : {"b" : "Hello, World"}}', 'JSON') AS json. (INCORRECT_DATA)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If you want to keep keys with dots and avoid formatting them as nested objects, you can enable
+setting <a href="/docs/operations/settings/formats#json_type_escape_dots_in_keys">json_type_escape_dots_in_keys</a> (available starting from version <code>25.8</code>). In this case during parsing all dots in JSON keys will be
+escaped into <code>%2E</code> and unescaped back during formatting.</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a" : {"b" : 42}}'::JSON AS json1, '{"a.b" : 42}'::JSON AS json2, JSONAllPaths(json1), JSONAllPaths(json2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json1────────────┬─json2────────┬─JSONAllPaths(json1)─┬─JSONAllPaths(json2)─┐
+│ {"a":{"b":"42"}} │ {"a.b":"42"} │ ['a.b']             │ ['a%2Eb']           │
+└──────────────────┴──────────────┴─────────────────────┴─────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON AS json, JSONAllPaths(json);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────┬─JSONAllPaths(json)─┐
+│ {"a.b":"42","a":{"b":"Hello World!"}} │ ['a%2Eb','a.b']    │
+└───────────────────────────────────────┴────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>To read key with escaped dot as a subcolumn you have to use escaped dot in the subcolumn name:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON AS json, json.`a%2Eb`, json.a.b;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────┬─json.a%2Eb─┬─json.a.b─────┐
+│ {"a.b":"42","a":{"b":"Hello World!"}} │ 42         │ Hello World! │
+└───────────────────────────────────────┴────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: due to identifiers parser and analyzer limitations subcolumn <code>json.`a.b`</code> is equivalent to subcolumn <code>json.a.b</code> and won't read path with escaped dot:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON AS json, json.`a%2Eb`, json.`a.b`, json.a.b;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────┬─json.a%2Eb─┬─json.a.b─────┬─json.a.b─────┐
+│ {"a.b":"42","a":{"b":"Hello World!"}} │ 42         │ Hello World! │ Hello World! │
+└───────────────────────────────────────┴────────────┴──────────────┴──────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Also, if you want to specify a hint for a JSON path that contains keys with dots (or use it in the <code>SKIP</code>/<code>SKIP REGEX</code> sections), you have to use escaped dots in the hint:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON(`a%2Eb` UInt8) as json, json.`a%2Eb`, toTypeName(json.`a%2Eb`);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json────────────────────────────────┬─json.a%2Eb─┬─toTypeName(json.a%2Eb)─┐
+│ {"a.b":42,"a":{"b":"Hello World!"}} │         42 │ UInt8                  │
+└─────────────────────────────────────┴────────────┴────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET json_type_escape_dots_in_keys=1;
+SELECT '{"a.b" : 42, "a" : {"b" : "Hello World!"}}'::JSON(SKIP `a%2Eb`) as json, json.`a%2Eb`;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json───────────────────────┬─json.a%2Eb─┐
+│ {"a":{"b":"Hello World!"}} │ ᴺᵁᴸᴸ       │
+└────────────────────────────┴────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reading-json-type-from-data">Reading JSON type from data<a aria-label="Direct link to Reading JSON type from data" class="hash-link" href="#reading-json-type-from-data" title="Direct link to Reading JSON type from data">​</a></h2>
+<p>All text formats
+(<a href="/docs/interfaces/formats/JSONEachRow"><code>JSONEachRow</code></a>,
+<a href="/docs/interfaces/formats/TabSeparated"><code>TSV</code></a>,
+<a href="/docs/interfaces/formats/CSV"><code>CSV</code></a>,
+<a href="/docs/interfaces/formats/CustomSeparated"><code>CustomSeparated</code></a>,
+<a href="/docs/interfaces/formats/Values"><code>Values</code></a>, etc.) support reading the <code>JSON</code> type.</p>
+<p>Examples:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json FROM format(JSONEachRow, 'json JSON(a.b.c UInt32, SKIP a.b.d, SKIP d.e, SKIP REGEXP \'b.*\')', '
+{"json" : {"a" : {"b" : {"c" : 1, "d" : [0, 1]}}, "b" : "2020-01-01", "c" : 42, "d" : {"e" : {"f" : ["s1", "s2"]}, "i" : [1, 2, 3]}}}
+{"json" : {"a" : {"b" : {"c" : 2, "d" : [2, 3]}}, "b" : [1, 2, 3], "c" : null, "d" : {"e" : {"g" : 43}, "i" : [4, 5, 6]}}}
+{"json" : {"a" : {"b" : {"c" : 3, "d" : [4, 5]}}, "b" : {"c" : 10}, "e" : "Hello, World!"}}
+{"json" : {"a" : {"b" : {"c" : 4, "d" : [6, 7]}}, "c" : 43}}
+{"json" : {"a" : {"b" : {"c" : 5, "d" : [8, 9]}}, "b" : {"c" : 11, "j" : [1, 2, 3]}, "d" : {"e" : {"f" : ["s3", "s4"], "g" : 44}, "h" : "2020-02-02 10:00:00"}}}
+')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────────────────────────────┐
+│ {"a":{"b":{"c":1}},"c":"42","d":{"i":["1","2","3"]}}          │
+│ {"a":{"b":{"c":2}},"d":{"i":["4","5","6"]}}                   │
+│ {"a":{"b":{"c":3}},"e":"Hello, World!"}                       │
+│ {"a":{"b":{"c":4}},"c":"43"}                                  │
+│ {"a":{"b":{"c":5}},"d":{"h":"2020-02-02 10:00:00.000000000"}} │
+└───────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For text formats like <code>CSV</code>/<code>TSV</code>/etc, <code>JSON</code> is parsed from a string containing the JSON object:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json FROM format(TSV, 'json JSON(a.b.c UInt32, SKIP a.b.d, SKIP REGEXP \'b.*\')',
+'{"a" : {"b" : {"c" : 1, "d" : [0, 1]}}, "b" : "2020-01-01", "c" : 42, "d" : {"e" : {"f" : ["s1", "s2"]}, "i" : [1, 2, 3]}}
+{"a" : {"b" : {"c" : 2, "d" : [2, 3]}}, "b" : [1, 2, 3], "c" : null, "d" : {"e" : {"g" : 43}, "i" : [4, 5, 6]}}
+{"a" : {"b" : {"c" : 3, "d" : [4, 5]}}, "b" : {"c" : 10}, "e" : "Hello, World!"}
+{"a" : {"b" : {"c" : 4, "d" : [6, 7]}}, "c" : 43}
+{"a" : {"b" : {"c" : 5, "d" : [8, 9]}}, "b" : {"c" : 11, "j" : [1, 2, 3]}, "d" : {"e" : {"f" : ["s3", "s4"], "g" : 44}, "h" : "2020-02-02 10:00:00"}}')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json──────────────────────────────────────────────────────────┐
+│ {"a":{"b":{"c":1}},"c":"42","d":{"i":["1","2","3"]}}          │
+│ {"a":{"b":{"c":2}},"d":{"i":["4","5","6"]}}                   │
+│ {"a":{"b":{"c":3}},"e":"Hello, World!"}                       │
+│ {"a":{"b":{"c":4}},"c":"43"}                                  │
+│ {"a":{"b":{"c":5}},"d":{"h":"2020-02-02 10:00:00.000000000"}} │
+└───────────────────────────────────────────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="reaching-the-limit-of-dynamic-paths-inside-json">Reaching the limit of dynamic paths inside JSON<a aria-label="Direct link to Reaching the limit of dynamic paths inside JSON" class="hash-link" href="#reaching-the-limit-of-dynamic-paths-inside-json" title="Direct link to Reaching the limit of dynamic paths inside JSON">​</a></h2>
+<p>The <code>JSON</code> data type can store only a limited number of paths as separate sub-columns internally.
+By default, this limit is <code>1024</code>, but you can change it in the type declaration using parameter <code>max_dynamic_paths</code>.</p>
+<p>When the limit is reached, all new paths inserted to a <code>JSON</code> column will be stored in a single shared data structure.
+It's still possible to read such paths as sub-columns,
+but it might be less efficient (<a href="#shared-data-structure">see section about shared data</a>).
+This limit is needed to avoid having an enormous number of different sub-columns that can make the table unusable.</p>
+<p>Let's see what happens when the limit is reached in a few different scenarios.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="reaching-the-limit-during-data-parsing">Reaching the limit during data parsing<a aria-label="Direct link to Reaching the limit during data parsing" class="hash-link" href="#reaching-the-limit-during-data-parsing" title="Direct link to Reaching the limit during data parsing">​</a></h3>
+<p>During parsing of <code>JSON</code> objects from data, when the limit is reached for the current block of data,
+all new paths will be stored in a shared data structure. We can use the following two introspection functions <code>JSONDynamicPaths</code>, <code>JSONSharedDataPaths</code>:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT json, JSONDynamicPaths(json), JSONSharedDataPaths(json) FROM format(JSONEachRow, 'json JSON(max_dynamic_paths=3)', '
+{"json" : {"a" : {"b" : 42}, "c" : [1, 2, 3]}}
+{"json" : {"a" : {"b" : 43}, "d" : "2020-01-01"}}
+{"json" : {"a" : {"b" : 44}, "c" : [4, 5, 6]}}
+{"json" : {"a" : {"b" : 43}, "d" : "2020-01-02", "e" : "Hello", "f" : {"g" : 42.42}}}
+{"json" : {"a" : {"b" : 43}, "c" : [7, 8, 9], "f" : {"g" : 43.43}, "h" : "World"}}
+')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json───────────────────────────────────────────────────────────┬─JSONDynamicPaths(json)─┬─JSONSharedDataPaths(json)─┐
+│ {"a":{"b":"42"},"c":["1","2","3"]}                             │ ['a.b','c','d']        │ []                        │
+│ {"a":{"b":"43"},"d":"2020-01-01"}                              │ ['a.b','c','d']        │ []                        │
+│ {"a":{"b":"44"},"c":["4","5","6"]}                             │ ['a.b','c','d']        │ []                        │
+│ {"a":{"b":"43"},"d":"2020-01-02","e":"Hello","f":{"g":42.42}}  │ ['a.b','c','d']        │ ['e','f.g']               │
+│ {"a":{"b":"43"},"c":["7","8","9"],"f":{"g":43.43},"h":"World"} │ ['a.b','c','d']        │ ['f.g','h']               │
+└────────────────────────────────────────────────────────────────┴────────────────────────┴───────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As we can see, after inserting paths <code>e</code> and <code>f.g</code> the limit was reached,
+and they got inserted into a shared data structure.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="during-merges-of-data-parts-in-mergetree-table-engines">During merges of data parts in MergeTree table engines<a aria-label="Direct link to During merges of data parts in MergeTree table engines" class="hash-link" href="#during-merges-of-data-parts-in-mergetree-table-engines" title="Direct link to During merges of data parts in MergeTree table engines">​</a></h3>
+<p>During a merge of several data parts in a <code>MergeTree</code> table the <code>JSON</code> column in the resulting data part can reach the limit of dynamic paths
+and won't be able to store all paths from source parts as sub-columns.
+In this case, ClickHouse chooses what paths will remain as sub-columns after merge and what paths will be stored in the shared data structure.
+In most cases, ClickHouse tries to keep paths that contain
+the largest number of non-null values and move the rarest paths to the shared data structure. This does, however, depend on the implementation.</p>
+<p>Let's see an example of such a merge.
+First, let's create a table with a <code>JSON</code> column, set the limit of dynamic paths to <code>3</code> and then insert values with <code>5</code> different paths:</p>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (id UInt64, json JSON(max_dynamic_paths=3)) ENGINE=MergeTree ORDER BY id;
+SYSTEM STOP MERGES test;
+INSERT INTO test SELECT number, formatRow('JSONEachRow', number as a) FROM numbers(5);
+INSERT INTO test SELECT number, formatRow('JSONEachRow', number as b) FROM numbers(4);
+INSERT INTO test SELECT number, formatRow('JSONEachRow', number as c) FROM numbers(3);
+INSERT INTO test SELECT number, formatRow('JSONEachRow', number as d) FROM numbers(2);
+INSERT INTO test SELECT number, formatRow('JSONEachRow', number as e) FROM numbers(1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Each insert will create a separate data part with the <code>JSON</code> column containing a single path:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    count(),
+    groupArrayArrayDistinct(JSONDynamicPaths(json)) AS dynamic_paths,
+    groupArrayArrayDistinct(JSONSharedDataPaths(json)) AS shared_data_paths,
+    _part
+FROM test
+GROUP BY _part
+ORDER BY _part ASC
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┬─dynamic_paths─┬─shared_data_paths─┬─_part─────┐
+│       5 │ ['a']         │ []                │ all_1_1_0 │
+│       4 │ ['b']         │ []                │ all_2_2_0 │
+│       3 │ ['c']         │ []                │ all_3_3_0 │
+│       2 │ ['d']         │ []                │ all_4_4_0 │
+│       1 │ ['e']         │ []                │ all_5_5_0 │
+└─────────┴───────────────┴───────────────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Now, let's merge all parts into one and see what will happen:</p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT
+    count(),
+    groupArrayArrayDistinct(JSONDynamicPaths(json)) AS dynamic_paths,
+    groupArrayArrayDistinct(JSONSharedDataPaths(json)) AS shared_data_paths,
+    _part
+FROM test
+GROUP BY _part
+ORDER BY _part ASC
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─count()─┬─dynamic_paths─┬─shared_data_paths─┬─_part─────┐
+│      15 │ ['a','b','c'] │ ['d','e']         │ all_1_5_2 │
+└─────────┴───────────────┴───────────────────┴───────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>As we can see, ClickHouse kept the most frequent paths <code>a</code>, <code>b</code> and <code>c</code> and moved paths <code>d</code> and <code>e</code> to a shared data structure.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-structure">Shared data structure<a aria-label="Direct link to Shared data structure" class="hash-link" href="#shared-data-structure" title="Direct link to Shared data structure">​</a></h2>
+<p>As was described in the previous section, when the <code>max_dynamic_paths</code> limit is reached all new paths are stored in a single shared data structure.
+In this section we will look into the details of the shared data structure and how we read paths sub-columns from it.</p>
+<p>See section <a href="/docs/sql-reference/data-types/newjson#introspection-functions">"introspection functions"</a> for details of functions used for inspecting the contents of a JSON column.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-structure-in-memory">Shared data structure in memory<a aria-label="Direct link to Shared data structure in memory" class="hash-link" href="#shared-data-structure-in-memory" title="Direct link to Shared data structure in memory">​</a></h3>
+<p>In memory, shared data structure is just a sub-column with type <code>Map(String, String)</code> that stores mapping from a flattened JSON path to a binary encoded value.
+To extract a path subcolumn from it, we just iterate over all rows in this <code>Map</code> column and try to find the requested path and its values.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-structure-in-merge-tree-parts">Shared data structure in MergeTree parts<a aria-label="Direct link to Shared data structure in MergeTree parts" class="hash-link" href="#shared-data-structure-in-merge-tree-parts" title="Direct link to Shared data structure in MergeTree parts">​</a></h3>
+<p>In <a href="/docs/engines/table-engines/mergetree-family/mergetree">MergeTree</a> tables we store data in data parts that stores everything on disk (local or remote). And data on disk can be stored in a different way compared to memory.
+Currently, there are 3 different shared data structure serializations in MergeTree data parts: <code>map</code>, <code>map_with_buckets</code>
+and <code>advanced</code>.</p>
+<p>The serialization version is controlled by MergeTree
+settings <a href="/docs/operations/settings/merge-tree-settings#object_shared_data_serialization_version">object_shared_data_serialization_version</a>
+and <a href="/docs/operations/settings/merge-tree-settings#object_shared_data_serialization_version_for_zero_level_parts">object_shared_data_serialization_version_for_zero_level_parts</a>
+(zero level part is the part created during inserting data into the table, during merges parts have higher level).</p>
+<p>Note: changing shared data structure serialization is supported only
+for <code>v3</code> <a href="/docs/operations/settings/merge-tree-settings#object_serialization_version">object serialization version</a></p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-map">Map<a aria-label="Direct link to Map" class="hash-link" href="#shared-data-map" title="Direct link to Map">​</a></h4>
+<p>In <code>map</code> serialization version shared data is serialized as a single column with type <code>Map(String, String)</code> the same as it's stored in
+memory. To read path sub-column from this type of serialization ClickHouse reads the whole <code>Map</code> column and
+extracts the requested path in memory.</p>
+<p>This serialization is efficient for writing data and reading the whole <code>JSON</code> column, but it's not efficient for reading paths sub-columns.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-map-with-buckets">Map with buckets<a aria-label="Direct link to Map with buckets" class="hash-link" href="#shared-data-map-with-buckets" title="Direct link to Map with buckets">​</a></h4>
+<p>In <code>map_with_buckets</code> serialization version shared data is serialized as <code>N</code> columns ("buckets") with type <code>Map(String, String)</code>.
+Each such bucket contains only subset of paths. To read path sub-column from this type of serialization ClickHouse
+reads the whole <code>Map</code> column from a single bucket and extracts the requested path in memory.</p>
+<p>This serialization is less efficient for writing data and reading the whole <code>JSON</code> column, but it's more efficient for reading paths sub-columns
+because it reads data only from required buckets.</p>
+<p>Number of buckets <code>N</code> is controlled by MergeTree settings <a href="/docs/operations/settings/merge-tree-settings#object_shared_data_buckets_for_compact_part">object_shared_data_buckets_for_compact_part</a> (8 by default)
+and <a href="/docs/operations/settings/merge-tree-settings#object_shared_data_buckets_for_wide_part">object_shared_data_buckets_for_wide_part</a> (32 by default).
+The maximum allowed value for both settings is 256.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="shared-data-advanced">Advanced<a aria-label="Direct link to Advanced" class="hash-link" href="#shared-data-advanced" title="Direct link to Advanced">​</a></h4>
+<p>In <code>advanced</code> serialization version shared data is serialized in a special data structure that maximizes the performance
+of paths sub-columns reading by storing some additional information that allows to read only the data of requested paths.
+This serialization also supports buckets, so each bucket contains only sub-set of paths.</p>
+<p>This serialization is quite inefficient for writing data (so it's not recommended to use this serialization for zero-level parts), reading the whole <code>JSON</code> column is slightly less efficient compared to <code>map</code> serialization, but it's very efficient for reading paths sub-columns.</p>
+<p>Note: because of storing some additional information inside the data structure, the disk storage size is higher with this serialization compared to
+<code>map</code> and <code>map_with_buckets</code> serializations.</p>
+<p>For more detailed overview of the new shared data serializations and implementation details read the <a href="https://clickhouse.com/blog/json-data-type-gets-even-better" rel="noopener noreferrer" target="_blank">blog post</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="controlling-the-number-of-dynamic-paths">Controlling the number of dynamic paths inside JSON in MergeTree parts<a aria-label="Direct link to Controlling the number of dynamic paths inside JSON in MergeTree parts" class="hash-link" href="#controlling-the-number-of-dynamic-paths" title="Direct link to Controlling the number of dynamic paths inside JSON in MergeTree parts">​</a></h2>
+<p>The main way to set a limit on dynamic paths in JSON is to use <code>max_dynamic_paths</code> parameter inside the JSON type declaration.
+But changing <code>max_dynamic_paths</code> for existing columns requires running <code>ALTER TABLE &lt;table&gt; MODIFY COLUMN &lt;column&gt; JSON(max_dynamic_paths=K)</code> that will start a background mutation that will rewrite all existing parts.
+Such mutation can be really heavy and can affect the server performance until the mutation is finished. To avoid this, you can use these 3 settings that can help you to change the limit on dynamic paths in MergeTree tables for new data parts:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>merge_max_dynamic_subcolumns_in_wide_part</code> - a MergeTree setting that limits the number of dynamic subcolumns for each JSON column during merge into a Wide data part.</li>
+<li class="custom-li"><code>merge_max_dynamic_subcolumns_in_compact_part</code> - a MergeTree setting that limits the number of dynamic subcolumns for each JSON column during merge into a Compact data part.</li>
+<li class="custom-li"><code>max_dynamic_subcolumns_in_json_type_parsing</code> - a session setting that limits the number of dynamic subcolumns for each JSON column during parsing of JSON data into a JSON column.</li>
+</ul>
+<p>Note: limit on dynamic paths cannot exceed the value specified in <code>max_dynamic_paths</code> parameter, even if values of described settings are higher.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="introspection-functions">Introspection functions<a aria-label="Direct link to Introspection functions" class="hash-link" href="#introspection-functions" title="Direct link to Introspection functions">​</a></h2>
+<p>There are several functions that can help to inspect the content of the JSON column:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONAllPaths"><code>JSONAllPaths</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONAllPathsWithTypes"><code>JSONAllPathsWithTypes</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONAllValues"><code>JSONAllValues</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONDynamicPaths"><code>JSONDynamicPaths</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONDynamicPathsWithTypes"><code>JSONDynamicPathsWithTypes</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONSharedDataPaths"><code>JSONSharedDataPaths</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/functions/json-functions#JSONSharedDataPathsWithTypes"><code>JSONSharedDataPathsWithTypes</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/aggregate-functions/reference/distinctdynamictypes"><code>distinctDynamicTypes</code></a></li>
+<li class="custom-li"><a href="/docs/sql-reference/aggregate-functions/reference/distinctjsonpaths"><code>distinctJSONPaths and distinctJSONPathsAndTypes</code></a></li>
+</ul>
+<p><strong>Examples</strong></p>
+<p>Let's investigate the content of the <a href="https://www.gharchive.org/" rel="noopener noreferrer" target="_blank">GH Archive</a> dataset for the date <code>2020-01-01</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT arrayJoin(distinctJSONPaths(json))
+FROM s3('s3://clickhouse-public-datasets/gharchive/original/2020-01-01-*.json.gz', JSONAsObject)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:980.2px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─arrayJoin(distinctJSONPaths(json))─────────────────────────┐
+│ actor.avatar_url                                           │
+│ actor.display_login                                        │
+│ actor.gravatar_id                                          │
+│ actor.id                                                   │
+│ actor.login                                                │
+│ actor.url                                                  │
+│ created_at                                                 │
+│ id                                                         │
+│ org.avatar_url                                             │
+│ org.gravatar_id                                            │
+│ org.id                                                     │
+│ org.login                                                  │
+│ org.url                                                    │
+│ payload.action                                             │
+│ payload.before                                             │
+│ payload.comment._links.html.href                           │
+│ payload.comment._links.pull_request.href                   │
+│ payload.comment._links.self.href                           │
+│ payload.comment.author_association                         │
+│ payload.comment.body                                       │
+│ payload.comment.commit_id                                  │
+│ payload.comment.created_at                                 │
+│ payload.comment.diff_hunk                                  │
+│ payload.comment.html_url                                   │
+│ payload.comment.id                                         │
+│ payload.comment.in_reply_to_id                             │
+│ payload.comment.issue_url                                  │
+│ payload.comment.line                                       │
+│ payload.comment.node_id                                    │
+│ payload.comment.original_commit_id                         │
+│ payload.comment.original_position                          │
+│ payload.comment.path                                       │
+│ payload.comment.position                                   │
+│ payload.comment.pull_request_review_id                     │
+...
+│ payload.release.node_id                                    │
+│ payload.release.prerelease                                 │
+│ payload.release.published_at                               │
+│ payload.release.tag_name                                   │
+│ payload.release.tarball_url                                │
+│ payload.release.target_commitish                           │
+│ payload.release.upload_url                                 │
+│ payload.release.url                                        │
+│ payload.release.zipball_url                                │
+│ payload.size                                               │
+│ public                                                     │
+│ repo.id                                                    │
+│ repo.name                                                  │
+│ repo.url                                                   │
+│ type                                                       │
+└─arrayJoin(distinctJSONPaths(json))─────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT arrayJoin(distinctJSONPathsAndTypes(json))
+FROM s3('s3://clickhouse-public-datasets/gharchive/original/2020-01-01-*.json.gz', JSONAsObject)
+SETTINGS date_time_input_format = 'best_effort'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:980.2px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─arrayJoin(distinctJSONPathsAndTypes(json))──────────────────┐
+│ ('actor.avatar_url',['String'])                             │
+│ ('actor.display_login',['String'])                          │
+│ ('actor.gravatar_id',['String'])                            │
+│ ('actor.id',['Int64'])                                      │
+│ ('actor.login',['String'])                                  │
+│ ('actor.url',['String'])                                    │
+│ ('created_at',['DateTime'])                                 │
+│ ('id',['String'])                                           │
+│ ('org.avatar_url',['String'])                               │
+│ ('org.gravatar_id',['String'])                              │
+│ ('org.id',['Int64'])                                        │
+│ ('org.login',['String'])                                    │
+│ ('org.url',['String'])                                      │
+│ ('payload.action',['String'])                               │
+│ ('payload.before',['String'])                               │
+│ ('payload.comment._links.html.href',['String'])             │
+│ ('payload.comment._links.pull_request.href',['String'])     │
+│ ('payload.comment._links.self.href',['String'])             │
+│ ('payload.comment.author_association',['String'])           │
+│ ('payload.comment.body',['String'])                         │
+│ ('payload.comment.commit_id',['String'])                    │
+│ ('payload.comment.created_at',['DateTime'])                 │
+│ ('payload.comment.diff_hunk',['String'])                    │
+│ ('payload.comment.html_url',['String'])                     │
+│ ('payload.comment.id',['Int64'])                            │
+│ ('payload.comment.in_reply_to_id',['Int64'])                │
+│ ('payload.comment.issue_url',['String'])                    │
+│ ('payload.comment.line',['Int64'])                          │
+│ ('payload.comment.node_id',['String'])                      │
+│ ('payload.comment.original_commit_id',['String'])           │
+│ ('payload.comment.original_position',['Int64'])             │
+│ ('payload.comment.path',['String'])                         │
+│ ('payload.comment.position',['Int64'])                      │
+│ ('payload.comment.pull_request_review_id',['Int64'])        │
+...
+│ ('payload.release.node_id',['String'])                      │
+│ ('payload.release.prerelease',['Bool'])                     │
+│ ('payload.release.published_at',['DateTime'])               │
+│ ('payload.release.tag_name',['String'])                     │
+│ ('payload.release.tarball_url',['String'])                  │
+│ ('payload.release.target_commitish',['String'])             │
+│ ('payload.release.upload_url',['String'])                   │
+│ ('payload.release.url',['String'])                          │
+│ ('payload.release.zipball_url',['String'])                  │
+│ ('payload.size',['Int64'])                                  │
+│ ('public',['Bool'])                                         │
+│ ('repo.id',['Int64'])                                       │
+│ ('repo.name',['String'])                                    │
+│ ('repo.url',['String'])                                     │
+│ ('type',['String'])                                         │
+└─arrayJoin(distinctJSONPathsAndTypes(json))──────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="alter-modify-column-to-json-type">ALTER MODIFY COLUMN to JSON type<a aria-label="Direct link to ALTER MODIFY COLUMN to JSON type" class="hash-link" href="#alter-modify-column-to-json-type" title="Direct link to ALTER MODIFY COLUMN to JSON type">​</a></h2>
+<p>It's possible to alter an existing table and change the type of the column to the new <code>JSON</code> type. Right now only <code>ALTER</code> from a <code>String</code> type is supported.</p>
+<p><strong>Example</strong></p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json String) ENGINE=MergeTree ORDER BY tuple();
+INSERT INTO test VALUES ('{"a" : 42}'), ('{"a" : 43, "b" : "Hello"}'), ('{"a" : 44, "b" : [1, 2, 3]}'), ('{"c" : "2020-01-01"}');
+ALTER TABLE test MODIFY COLUMN json JSON;
+SELECT json, json.a, json.b, json.c FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json─────────────────────────┬─json.a─┬─json.b──┬─json.c─────┐
+│ {"a":"42"}                   │ 42     │ ᴺᵁᴸᴸ    │ ᴺᵁᴸᴸ       │
+│ {"a":"43","b":"Hello"}       │ 43     │ Hello   │ ᴺᵁᴸᴸ       │
+│ {"a":"44","b":["1","2","3"]} │ 44     │ [1,2,3] │ ᴺᵁᴸᴸ       │
+│ {"c":"2020-01-01"}           │ ᴺᵁᴸᴸ   │ ᴺᵁᴸᴸ    │ 2020-01-01 │
+└──────────────────────────────┴────────┴─────────┴────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="lazy-type-hints">Lazy Type Hints (Experimental)<a aria-label="Direct link to Lazy Type Hints (Experimental)" class="hash-link" href="#lazy-type-hints" title="Direct link to Lazy Type Hints (Experimental)">​</a></h2>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>This feature is experimental and requires the setting <code>allow_experimental_json_lazy_type_hints</code> to be enabled.</p></div></div>
+<p>When you add or modify type hints on a JSON column using <code>ALTER TABLE ... MODIFY COLUMN</code>, ClickHouse normally rewrites all data parts to materialize the new type hints. For tables with large amounts of historical data (hundreds of terabytes), this can be extremely expensive.</p>
+<p><strong>Lazy type hints</strong> allow adding type hints as a metadata-only operation without rewriting existing data:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Old parts</strong>: Type hints are applied at query time by casting from <code>Dynamic</code> to the hinted type</li>
+<li class="custom-li"><strong>New parts</strong>: Type hints are materialized during <code>INSERT</code> operations</li>
+<li class="custom-li"><strong>Merges</strong>: Type hints are materialized when parts are merged</li>
+</ul>
+<p>This means you can add type hints instantly, and the data will be gradually converted as normal background merges occur.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="enabling-lazy-type-hints">Enabling Lazy Type Hints<a aria-label="Direct link to Enabling Lazy Type Hints" class="hash-link" href="#enabling-lazy-type-hints" title="Direct link to Enabling Lazy Type Hints">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_experimental_json_lazy_type_hints = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="lazy-type-hints-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#lazy-type-hints-example" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a table and insert data
+CREATE TABLE test_lazy (json JSON) ENGINE = MergeTree ORDER BY tuple();
+INSERT INTO test_lazy VALUES ('{"user_id": "123", "score": "95.5"}');
+
+-- Enable experimental setting
+SET allow_experimental_json_lazy_type_hints = 1;
+
+-- Add type hints - this completes instantly without mutation
+ALTER TABLE test_lazy MODIFY COLUMN json JSON(user_id UInt64, score Float64);
+
+-- Query the data - type hints are applied at read time
+SELECT json.user_id, toTypeName(json.user_id), json.score, toTypeName(json.score) FROM test_lazy;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json.user_id─┬─toTypeName(json.user_id)─┬─json.score─┬─toTypeName(json.score)─┐
+│          123 │ UInt64                   │       95.5 │ Float64                │
+└──────────────┴──────────────────────────┴────────────┴────────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="verifying-no-mutation-occurred">Verifying No Mutation Occurred<a aria-label="Direct link to Verifying No Mutation Occurred" class="hash-link" href="#verifying-no-mutation-occurred" title="Direct link to Verifying No Mutation Occurred">​</a></h3>
+<p>You can verify that the <code>ALTER</code> completed without a mutation by checking the <code>system.mutations</code> table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM system.mutations WHERE table = 'test_lazy' AND NOT is_done;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>With lazy type hints enabled, this query returns no rows, confirming the operation was metadata-only.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="materializing-type-hints">Materializing Type Hints<a aria-label="Direct link to Materializing Type Hints" class="hash-link" href="#materializing-type-hints" title="Direct link to Materializing Type Hints">​</a></h3>
+<p>To materialize type hints in existing data, you can either:</p>
+<ol class="custom-ol">
+<li class="custom-li"><strong>Wait for background merges</strong>: ClickHouse will automatically materialize type hints when parts are merged</li>
+<li class="custom-li"><strong>Force merge</strong>: Use <code>OPTIMIZE TABLE test_lazy FINAL</code> to merge all parts immediately</li>
+<li class="custom-li"><strong>Rewrite parts</strong>: Use <code>ALTER TABLE test_lazy REWRITE PARTS</code> to rewrite parts with the new metadata</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="lazy-type-hints-limitations">Limitations<a aria-label="Direct link to Limitations" class="hash-link" href="#lazy-type-hints-limitations" title="Direct link to Limitations">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">This feature is experimental and may change in future versions</li>
+<li class="custom-li">Query-time type conversion can have significant performance overhead compared to pre-materialized types, especially for large JSON objects</li>
+<li class="custom-li">The feature only applies when modifying <code>typed_paths</code> (type hints); other JSON parameters like <code>max_dynamic_paths</code>, <code>SKIP</code>, or <code>SKIP REGEXP</code> still require mutations</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="comparison-between-values-of-the-json-type">Comparison between values of the JSON type<a aria-label="Direct link to Comparison between values of the JSON type" class="hash-link" href="#comparison-between-values-of-the-json-type" title="Direct link to Comparison between values of the JSON type">​</a></h2>
+<p>JSON objects are compared similarly to Maps.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:245.05px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE test (json1 JSON, json2 JSON) ENGINE=Memory;
+INSERT INTO test FORMAT JSONEachRow
+{"json1" : {}, "json2" : {}}
+{"json1" : {"a" : 42}, "json2" : {}}
+{"json1" : {"a" : 42}, "json2" : {"a" : 41}}
+{"json1" : {"a" : 42}, "json2" : {"a" : 42}}
+{"json1" : {"a" : 42}, "json2" : {"a" : [1, 2, 3]}}
+{"json1" : {"a" : 42}, "json2" : {"a" : "Hello"}}
+{"json1" : {"a" : 42}, "json2" : {"b" : 42}}
+{"json1" : {"a" : 42}, "json2" : {"a" : 42, "b" : 42}}
+{"json1" : {"a" : 42}, "json2" : {"a" : 41, "b" : 42}}
+
+SELECT json1, json2, json1 &lt; json2, json1 = json2, json1 &gt; json2 FROM test;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─json1──────┬─json2───────────────┬─less(json1, json2)─┬─equals(json1, json2)─┬─greater(json1, json2)─┐
+│ {}         │ {}                  │                  0 │                    1 │                     0 │
+│ {"a":"42"} │ {}                  │                  0 │                    0 │                     1 │
+│ {"a":"42"} │ {"a":"41"}          │                  0 │                    0 │                     1 │
+│ {"a":"42"} │ {"a":"42"}          │                  0 │                    1 │                     0 │
+│ {"a":"42"} │ {"a":["1","2","3"]} │                  0 │                    0 │                     1 │
+│ {"a":"42"} │ {"a":"Hello"}       │                  1 │                    0 │                     0 │
+│ {"a":"42"} │ {"b":"42"}          │                  1 │                    0 │                     0 │
+│ {"a":"42"} │ {"a":"42","b":"42"} │                  1 │                    0 │                     0 │
+│ {"a":"42"} │ {"a":"41","b":"42"} │                  0 │                    0 │                     1 │
+└────────────┴─────────────────────┴────────────────────┴──────────────────────┴───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Note:</strong> when 2 paths contain values of different data types, they are compared according to <a href="/docs/sql-reference/data-types/variant#comparing-values-of-variant-data">comparison rule</a> of <code>Variant</code> data type.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="data-skipping-indexes-for-json">Data skipping indexes for JSON<a aria-label="Direct link to Data skipping indexes for JSON" class="hash-link" href="#data-skipping-indexes-for-json" title="Direct link to Data skipping indexes for JSON">​</a></h2>
+<p><a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-data_skipping-indexes">Data skipping indexes</a> can be used with <code>JSON</code> columns in three ways:</p>
+<ol class="custom-ol">
+<li class="custom-li"><strong>Indexes on specific subcolumns</strong> — create a standard skip index on a known JSON path, just like on a regular column. This indexes the <em>values</em> at that path.</li>
+<li class="custom-li"><strong>Path-based indexes with <code>JSONAllPaths</code></strong> — index the <em>set of paths</em> present in each granule to skip granules that cannot contain the queried path.</li>
+<li class="custom-li"><strong>Value-based indexes with <code>JSONAllValues</code></strong> — index <em>all values</em> across all JSON paths using a <a href="/docs/engines/table-engines/mergetree-family/textindexes">text index</a> to accelerate full-text search on any JSON subcolumn with a single index.</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-on-subcolumns">Indexes on specific subcolumns<a aria-label="Direct link to Indexes on specific subcolumns" class="hash-link" href="#json-indexes-on-subcolumns" title="Direct link to Indexes on specific subcolumns">​</a></h3>
+<p>You can create a skip index on any JSON subcolumn using the same syntax as for regular columns.
+Any <a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-data_skipping-indexes">supported index type</a> works (<code>minmax</code>, <code>set</code>, <code>bloom_filter</code>, <code>tokenbf_v1</code>, <code>ngrambf_v1</code>, etc.).</p>
+<p>There are two ways to reference a JSON subcolumn in an index expression:</p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>Typed path</strong> declared in the JSON type hint — access by name directly: <code>json.a</code>.</li>
+<li class="custom-li"><strong>Dynamic path</strong> with explicit cast — use the <code>::</code> cast syntax: <code>json.b::String</code>.</li>
+</ul>
+<p>You can also use expressions that combine multiple subcolumns, for example <code>json.a || json.b::String</code>.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-on-subcolumns-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#json-indexes-on-subcolumns-example" title="Direct link to Example">​</a></h4>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE sensor_data
+(
+    data JSON(sensor_id UInt32),
+    INDEX idx_sensor data.sensor_id TYPE minmax GRANULARITY 1,
+    INDEX idx_location data.location::String TYPE bloom_filter GRANULARITY 1
+)
+ENGINE = MergeTree
+ORDER BY tuple()
+SETTINGS index_granularity = 1;
+
+INSERT INTO sensor_data SELECT toJSONString(map('sensor_id', number, 'location', 'room_' || toString(number))) FROM numbers(4);
+INSERT INTO sensor_data SELECT toJSONString(map('sensor_id', number, 'location', 'room_' || toString(number))) FROM numbers(4, 4);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>minmax</code> index on the typed subcolumn <code>data.sensor_id</code> narrows the scan to matching granules:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1 SELECT * FROM sensor_data WHERE data.sensor_id &lt; 2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">...
+    Indexes:
+      Skip
+        Name: idx_sensor
+        Description: minmax GRANULARITY 1
+        Parts: 1/2
+        Granules: 2/8
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>bloom_filter</code> index on the cast subcolumn <code>data.location::String</code> also works:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1 SELECT * FROM sensor_data WHERE data.location::String = 'room_5';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">...
+    Indexes:
+      Skip
+        Name: idx_location
+        Description: bloom_filter GRANULARITY 1
+        Parts: 1/2
+        Granules: 1/8
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallpaths">Path-based indexes with JSONAllPaths<a aria-label="Direct link to Path-based indexes with JSONAllPaths" class="hash-link" href="#json-indexes-jsonallpaths" title="Direct link to Path-based indexes with JSONAllPaths">​</a></h3>
+<p><a href="/docs/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-data_skipping-indexes">Data skipping indexes</a> can also be created on <code>JSON</code> columns using the <a href="/docs/sql-reference/functions/json-functions#JSONAllPaths"><code>JSONAllPaths</code></a> function.
+This works similarly to creating skip indexes on <a href="/docs/sql-reference/data-types/map"><code>Map</code></a> columns via <code>mapKeys</code> — the index stores the set of JSON paths present in each granule and uses it to skip granules that cannot contain the queried path.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallpaths-supported-types">Supported index types<a aria-label="Direct link to Supported index types" class="hash-link" href="#json-indexes-jsonallpaths-supported-types" title="Direct link to Supported index types">​</a></h4>
+<p><code>JSONAllPaths</code> can be used with the following skip index types:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/mergetree#bloom-filter"><code>bloom_filter</code></a> — supports <code>equals</code>, <code>in</code>, and <code>IS NOT NULL</code>.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/mergetree#token-bloom-filter"><code>tokenbf_v1</code></a> — supports <code>equals</code> and <code>IS NOT NULL</code>.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/mergetree#n-gram-bloom-filter"><code>ngrambf_v1</code></a> — supports <code>equals</code> and <code>IS NOT NULL</code>.</li>
+<li class="custom-li"><a href="/docs/engines/table-engines/mergetree-family/textindexes"><code>text</code></a> (inverted index) — supports <code>equals</code>, <code>in</code> and <code>IS NOT NULL</code>.</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallpaths-example">Example<a aria-label="Direct link to Example" class="hash-link" href="#json-indexes-jsonallpaths-example" title="Direct link to Example">​</a></h4>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE events
+(
+    data JSON,
+    INDEX idx JSONAllPaths(data) TYPE bloom_filter GRANULARITY 1
+)
+ENGINE = MergeTree
+ORDER BY tuple();
+
+INSERT INTO events VALUES ('{"user": {"name": "Alice"}, "action": "login"}');
+INSERT INTO events VALUES ('{"metric": {"cpu": 0.95}, "host": "srv1"}');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can use <code>EXPLAIN indexes = 1</code> to verify that the skip index is being used. When a path exists only in one part, the index skips the other part:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1 SELECT * FROM events WHERE data.user.name = 'Alice';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">...
+    Indexes:
+      Skip
+        Name: idx
+        Description: bloom_filter GRANULARITY 1
+        Parts: 1/2
+        Granules: 1/2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>When a path does not exist in any part, all parts and granules are skipped:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1 SELECT * FROM events WHERE data.nonexistent = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">...
+    Indexes:
+      Skip
+        Name: idx
+        Description: bloom_filter GRANULARITY 1
+        Parts: 0/2
+        Granules: 0/2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>IS NOT NULL</code> also uses the index — it skips granules where the path is absent (since the value would be <code>NULL</code>):</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">EXPLAIN indexes = 1 SELECT * FROM events WHERE data.user.name IS NOT NULL;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:131.95000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">...
+    Indexes:
+      Skip
+        Name: idx
+        Description: bloom_filter GRANULARITY 1
+        Parts: 1/2
+        Granules: 1/2
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallpaths-how-it-works">How it works<a aria-label="Direct link to How it works" class="hash-link" href="#json-indexes-jsonallpaths-how-it-works" title="Direct link to How it works">​</a></h4>
+<p>The <code>JSONAllPaths(json_column)</code> expression produces an <code>Array(String)</code> containing all paths present in a JSON value.
+The skip index stores these path strings in its data structure (bloom filter or inverted index).
+When a query filters on <code>json.some.path</code>, the index checks whether the string <code>"some.path"</code> is present in the index for each granule and skips granules where it is absent.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallpaths-safety-with-missing-paths">Safety with missing paths<a aria-label="Direct link to Safety with missing paths" class="hash-link" href="#json-indexes-jsonallpaths-safety-with-missing-paths" title="Direct link to Safety with missing paths">​</a></h4>
+<p>When a JSON path is absent from a granule, the subcolumn evaluates to:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>NULL</code> for <code>Dynamic</code> type (e.g., <code>json.path</code>) and <code>Nullable</code> typed subcolumns (e.g., <code>json.path.:Int64</code>) — comparisons with <code>NULL</code> always return false, so skipping is safe.</li>
+<li class="custom-li">The type's default value for non-<code>Nullable</code> CAST expressions (e.g., <code>json.path::Int64</code> produces <code>0</code> when the path is missing) — skipping is safe only when the compared value differs from the default. The index automatically handles this distinction.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="json-indexes-jsonallvalues">Full-text search with JSONAllValues<a aria-label="Direct link to Full-text search with JSONAllValues" class="hash-link" href="#json-indexes-jsonallvalues" title="Direct link to Full-text search with JSONAllValues">​</a></h3>
+<p><a href="/docs/engines/table-engines/mergetree-family/textindexes">Text indexes</a> can be used to accelerate full-text search on JSON columns via the <a href="/docs/sql-reference/functions/json-functions#JSONAllValues"><code>JSONAllValues</code></a> function.
+<code>JSONAllValues</code> returns all values from a JSON column as <code>Array(String)</code>, which can be indexed by a text index.
+A single index on <code>JSONAllValues(json_column)</code> covers all JSON paths, enabling full-text search on any subcolumn without creating separate indexes for each path.</p>
+<p>See <a href="/docs/engines/table-engines/mergetree-family/textindexes#json-indexes-jsonallvalues">Value-based indexes with JSONAllValues</a> in the text indexes documentation for details and examples.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tips-for-better-usage-of-the-json-type">Tips for better usage of the JSON type<a aria-label="Direct link to Tips for better usage of the JSON type" class="hash-link" href="#tips-for-better-usage-of-the-json-type" title="Direct link to Tips for better usage of the JSON type">​</a></h2>
+<p>Before creating <code>JSON</code> column and loading data into it, consider the following tips:</p>
+<ul class="custom-ul">
+<li class="custom-li">Investigate your data and specify as many path hints with types as you can. It will make storage and reading much more efficient.</li>
+<li class="custom-li">Think about what paths you will need and what paths you will never need. Specify paths that you won't need in the <code>SKIP</code> section, and <code>SKIP REGEXP</code> section if needed. This will improve the storage.</li>
+<li class="custom-li">Don't set the <code>max_dynamic_paths</code> parameter to very high values, as it can make storage and reading less efficient.
+While highly dependent on system parameters such as memory, CPU, etc., a general rule of thumb would be to not set <code>max_dynamic_paths</code> greater than 10 000 for the local filesystem storage and 1024 for the remote filesystem storage.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="further-reading">Further Reading<a aria-label="Direct link to Further Reading" class="hash-link" href="#further-reading" title="Direct link to Further Reading">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse" rel="noopener noreferrer" target="_blank">How we built a new powerful JSON data type for ClickHouse</a></li>
+<li class="custom-li"><a href="https://clickhouse.com/blog/json-bench-clickhouse-vs-mongodb-elasticsearch-duckdb-postgresql" rel="noopener noreferrer" target="_blank">The billion docs JSON Challenge: ClickHouse vs. MongoDB, Elasticsearch, and more</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/data-types/dynamic"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">Dynamic</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/data-types/qbit"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">QBit</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#when-to-use-json-type">When to use the <code>JSON</code> Type</a><ul><li><a class="table-of-contents__link toc-highlight" href="#use-json-type">Use the <code>JSON</code> type when:</a><li><a class="table-of-contents__link toc-highlight" href="#use-string-type">Use a <code>String</code> column (or structured types) when:</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#creating-json">Creating <code>JSON</code></a><ul><li><a class="table-of-contents__link toc-highlight" href="#using-json-in-a-table-column-definition">Using <code>JSON</code> in a table column definition</a><li><a class="table-of-contents__link toc-highlight" href="#using-cast-with-json">Using CAST with <code>::JSON</code></a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#reading-json-paths-as-sub-columns">Reading JSON paths as sub-columns</a><li><a class="table-of-contents__link toc-highlight" href="#reading-json-sub-objects-as-sub-columns">Reading JSON sub-objects as sub-columns</a><li><a class="table-of-contents__link toc-highlight" href="#reading-json-combined-sub-columns">Reading JSON combined sub-columns</a><li><a class="table-of-contents__link toc-highlight" href="#type-inference-for-paths">Type inference for paths</a><li><a class="table-of-contents__link toc-highlight" href="#handling-arrays-of-json-objects">Handling arrays of JSON objects</a><li><a class="table-of-contents__link toc-highlight" href="#handling-json-keys-with-nulls">Handling JSON keys with NULL</a><li><a class="table-of-contents__link toc-highlight" href="#handling-json-keys-with-dots">Handling JSON keys with dots</a><li><a class="table-of-contents__link toc-highlight" href="#reading-json-type-from-data">Reading JSON type from data</a><li><a class="table-of-contents__link toc-highlight" href="#reaching-the-limit-of-dynamic-paths-inside-json">Reaching the limit of dynamic paths inside JSON</a><ul><li><a class="table-of-contents__link toc-highlight" href="#reaching-the-limit-during-data-parsing">Reaching the limit during data parsing</a><li><a class="table-of-contents__link toc-highlight" href="#during-merges-of-data-parts-in-mergetree-table-engines">During merges of data parts in MergeTree table engines</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#shared-data-structure">Shared data structure</a><ul><li><a class="table-of-contents__link toc-highlight" href="#shared-data-structure-in-memory">Shared data structure in memory</a><li><a class="table-of-contents__link toc-highlight" href="#shared-data-structure-in-merge-tree-parts">Shared data structure in MergeTree parts</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#controlling-the-number-of-dynamic-paths">Controlling the number of dynamic paths inside JSON in MergeTree parts</a><li><a class="table-of-contents__link toc-highlight" href="#introspection-functions">Introspection functions</a><li><a class="table-of-contents__link toc-highlight" href="#alter-modify-column-to-json-type">ALTER MODIFY COLUMN to JSON type</a><li><a class="table-of-contents__link toc-highlight" href="#lazy-type-hints">Lazy Type Hints (Experimental)</a><ul><li><a class="table-of-contents__link toc-highlight" href="#enabling-lazy-type-hints">Enabling Lazy Type Hints</a><li><a class="table-of-contents__link toc-highlight" href="#lazy-type-hints-example">Example</a><li><a class="table-of-contents__link toc-highlight" href="#verifying-no-mutation-occurred">Verifying No Mutation Occurred</a><li><a class="table-of-contents__link toc-highlight" href="#materializing-type-hints">Materializing Type Hints</a><li><a class="table-of-contents__link toc-highlight" href="#lazy-type-hints-limitations">Limitations</a></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#comparison-between-values-of-the-json-type">Comparison between values of the JSON type</a><li><a class="table-of-contents__link toc-highlight" href="#data-skipping-indexes-for-json">Data skipping indexes for JSON</a><ul><li><a class="table-of-contents__link toc-highlight" href="#json-indexes-on-subcolumns">Indexes on specific subcolumns</a><li><a class="table-of-contents__link toc-highlight" href="#json-indexes-jsonallpaths">Path-based indexes with JSONAllPaths</a><li><a class="table-of-contents__link toc-highlight" href="#json-indexes-jsonallvalues">Full-text search with JSONAllValues</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#tips-for-better-usage-of-the-json-type">Tips for better usage of the JSON type</a><li><a class="table-of-contents__link toc-highlight" href="#further-reading">Further Reading</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

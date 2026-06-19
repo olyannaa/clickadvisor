@@ -1,0 +1,143 @@
+# url \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Table functions](/docs/sql-reference/table-functions)- url
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/url.md)# url Table Function
+
+
+`url` function creates a table from the `URL` with given `format` and `structure`.
+
+
+`url` function may be used in `SELECT` and `INSERT` queries on data in [URL](/docs/engines/table-engines/special/url) tables.
+
+
+## Syntax[​](#syntax "Direct link to Syntax")
+
+
+
+```
+url(URL [,format] [,structure] [,headers])
+
+```
+
+## Parameters[​](#parameters "Direct link to Parameters")
+
+
+
+
+| Parameter Description| `URL` Single quoted HTTP or HTTPS server address, which can accept `GET` or `POST` requests (for `SELECT` or `INSERT` queries correspondingly). Type: [String](/docs/sql-reference/data-types/string).| `format` [Format](/docs/sql-reference/formats) of the data. Type: [String](/docs/sql-reference/data-types/string).| `structure` Table structure in `'UserID UInt64, Name String'` format. Determines column names and types. Type: [String](/docs/sql-reference/data-types/string).| `headers` Headers in `'headers('key1'='value1', 'key2'='value2')'` format. You can set headers for HTTP call. | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+
+## Returned value[​](#returned_value "Direct link to Returned value")
+
+
+A table with the specified format and structure and with data from the defined `URL`.
+
+
+## Examples[​](#examples "Direct link to Examples")
+
+
+Getting the first 3 lines of a table that contains columns of `String` and [UInt32](/docs/sql-reference/data-types/int-uint) type from HTTP\-server which answers in [CSV](/docs/interfaces/formats/CSV) format.
+
+
+
+```
+SELECT * FROM url('http://127.0.0.1:12345/', CSV, 'column1 String, column2 UInt32', headers('Accept'='text/csv; charset=utf-8')) LIMIT 3;
+
+```
+
+Inserting data from a `URL` into a table:
+
+
+
+```
+CREATE TABLE test_table (column1 String, column2 UInt32) ENGINE=Memory;
+INSERT INTO FUNCTION url('http://127.0.0.1:8123/?query=INSERT+INTO+test_table+FORMAT+CSV', 'CSV', 'column1 String, column2 UInt32') VALUES ('http interface', 42);
+SELECT * FROM test_table;
+
+```
+
+## Globs in URL[​](#globs-in-url "Direct link to Globs in URL")
+
+
+Patterns in `{ }` are used to generate a set of shards or to specify failover addresses. Supported pattern types and examples see in the description of the [remote](/docs/sql-reference/table-functions/remote#globs-in-addresses) function.
+Character `|` inside patterns is used to specify failover addresses. They are iterated in the same order as listed in the pattern. The number of generated addresses is limited by [glob\_expansion\_max\_elements](/docs/operations/settings/settings#glob_expansion_max_elements) setting.
+
+
+## Virtual Columns[​](#virtual-columns "Direct link to Virtual Columns")
+
+
+- `_path` — Path to the `URL`. Type: `LowCardinality(String)`.
+- `_file` — Resource name of the `URL`. Type: `LowCardinality(String)`.
+- `_size` — Size of the resource in bytes. Type: `Nullable(UInt64)`. If the size is unknown, the value is `NULL`.
+- `_time` — Last modified time of the file. Type: `Nullable(DateTime)`. If the time is unknown, the value is `NULL`.
+- `_headers` \- HTTP response headers. Type: `Map(LowCardinality(String), LowCardinality(String))`.
+
+
+## use\_hive\_partitioning setting[​](#hive-style-partitioning "Direct link to use_hive_partitioning setting")
+
+
+When setting `use_hive_partitioning` is set to 1, ClickHouse will detect Hive\-style partitioning in the path (`/name=value/`) and will allow to use partition columns as virtual columns in the query. These virtual columns will have the same names as in the partitioned path.
+
+
+**Example**
+
+
+Use virtual column, created with Hive\-style partitioning
+
+
+
+```
+SELECT * FROM url('http://data/path/date=*/country=*/code=*/*.parquet') WHERE date > '2020-01-01' AND country = 'Netherlands' AND code = 42;
+
+```
+
+## Resolving relative URLs[​](#resolving-relative-urls "Direct link to Resolving relative URLs")
+
+
+The [url\_base](/docs/operations/settings/settings#url_base) setting allows passing a relative URL to the `url` function. When `url_base` is set and the function argument is a relative reference, it is resolved against the base URL per [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986).
+
+
+The resolution rules are:
+
+
+- **Path\-relative** (e.g. `data.csv`): merged with the base URL path — everything after the last `/` of the base path is replaced. The trailing slash matters: `https://example.com/dir/` \+ `data.csv` gives `https://example.com/dir/data.csv`, but `https://example.com/dir` \+ `data.csv` gives `https://example.com/data.csv`. Dot segments (`./` and `../`) are normalized.
+- **Host\-relative** (e.g. `/test/data.csv`): resolved using the scheme and host of the base URL.
+- **Scheme\-relative** (e.g. `//other.com/test/data.csv`): resolved using the scheme of the base URL.
+- **Query\-only** (e.g. `?x=1`): appended to the full base path, replacing any existing query or fragment.
+- **Fragment\-only** (e.g. `#frag`): appended to the base URL, preserving the query, replacing any existing fragment.
+- **Empty**: returns the base URL without fragment.
+- **Absolute URL**: passed through unchanged; `url_base` is ignored.
+
+
+**Example**
+
+
+
+```
+SET url_base = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/';
+SELECT * FROM url('tests/queries/0_stateless/data_csv/data.csv', CSV) LIMIT 3;
+
+```
+
+## Storage Settings[​](#storage-settings "Direct link to Storage Settings")
+
+
+- [engine\_url\_skip\_empty\_files](/docs/operations/settings/settings#engine_url_skip_empty_files) \- allows to skip empty files while reading. Disabled by default.
+- [enable\_url\_encoding](/docs/operations/settings/settings#enable_url_encoding) \- allows to enable/disable decoding/encoding path in uri. Enabled by default.
+- [url\_base](/docs/operations/settings/settings#url_base) \- base URL for resolving relative URLs passed to the `url` function.
+
+
+## Permissions[​](#permissions "Direct link to Permissions")
+
+
+`url` function requires `CREATE TEMPORARY TABLE` permission. As such \- it'll not work for users with [readonly](/docs/operations/settings/permissions-for-queries#readonly) \= 1 setting. At least readonly \= 2 is required.
+
+
+## Related[​](#related "Direct link to Related")
+
+
+- [Virtual columns](/docs/engines/table-engines#table_engines-virtual_columns)
+[PreviousarrowFlight](/docs/sql-reference/table-functions/arrowflight)[NexturlCluster](/docs/sql-reference/table-functions/urlCluster)- [Syntax](#syntax)- [Parameters](#parameters)- [Returned value](#returned_value)- [Examples](#examples)- [Globs in URL](#globs-in-url)- [Virtual Columns](#virtual-columns)- [use\_hive\_partitioning setting](#hive-style-partitioning)- [Resolving relative URLs](#resolving-relative-urls)- [Storage Settings](#storage-settings)- [Permissions](#permissions)- [Related](#related)
+Was this page helpful?

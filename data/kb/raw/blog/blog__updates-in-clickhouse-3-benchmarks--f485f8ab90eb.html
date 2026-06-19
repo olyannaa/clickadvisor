@@ -1,0 +1,595 @@
+<h1>How we made ClickHouse UPDATEs 1,000× faster (Part 3: Benchmarks)</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=engineering">Engineering</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">How we made ClickHouse UPDATEs 1,000× faster (Part 3: Benchmarks)</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=96&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fuploads%2Ftom_schreiber_headshot_a0cb0ce627.jpeg&amp;w=96&amp;q=75 2x" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base"><a class="hover:underline" data-state="closed" href="/authors/tom-schreiber">Tom Schreiber</a></div><div class="text-sm text-neutral-300">Aug 7, 2025 · 27 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><style>
+/* Expandable metric boxes */
+details.metric-box {
+  background: #2B2B2B;
+  border-radius: 12px;
+  margin: 28px 0;
+  padding: 0;
+  color: #E2E8F0;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.2);
+  border-left: 5px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Summary bar */
+details.metric-box summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #E2E8F0;
+  position: relative;
+  transition: background 0.2s;
+}
+
+details.metric-box summary:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Rotating arrow */
+details.metric-box summary::after {
+  content: &quot;▶&quot;;
+  position: absolute;
+  right: 20px;
+  transition: transform 0.2s;
+  font-size: 12px;
+  color: #A0AEC0;
+}
+
+details.metric-box[open] summary::after {
+  transform: rotate(90deg);
+}
+
+/* Inner content */
+details.metric-box p {
+  padding: 0 24px 12px 24px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+details.metric-box .notes {
+  margin: 12px 24px 16px 24px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+details.metric-box a { color: inherit; text-decoration: none; }
+details.metric-box code {
+  background: rgba(255,255,255,0.06);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Metrics table inside expandable boxes */
+details.metric-box.metrics .metric-row {
+  display: flex;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+  margin: 0 24px;
+}
+details.metric-box.metrics .metric-row:last-child { border-bottom: none; }
+
+details.metric-box.metrics .metric-label {
+  width: 180px;
+  text-align: right;
+  padding-right: 16px;
+  color: #A0AEC0;
+  flex-shrink: 0;
+}
+details.metric-box.metrics .metric-value { flex: 1; }
+</style>
+<blockquote>
+<p><strong>TL;DR</strong><br/><br/>
+Standard SQL UPDATEs come to ClickHouse: up to <strong>1,000× faster</strong> than mutations thanks to lightweight patch‑part updates.</p>
+</blockquote>
+<div style="margin-bottom:0.5em">
+<strong>This post is part of our series on fast UPDATEs in ClickHouse:</strong>
+</div>
+<ul style="margin-top:0.2em">
+<li>
+<strong><a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines">Part 1: Purpose-built engines</a></strong><br/>
+    Learn how ClickHouse sidesteps slow row-level updates using insert-based engines like ReplacingMergeTree, CollapsingMergeTree, and CoalescingMergeTree.
+  </li>
+<li>
+<strong><a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">Part 2: Declarative SQL-style UPDATEs</a></strong><br/>
+    Explore how we brought standard UPDATE syntax to ClickHouse with minimal overhead using patch parts.
+  </li>
+<li>
+<strong>This part: Benchmarks and results</strong><br/>
+    See how fast it really is. We benchmarked every approach, including declarative UPDATEs, and got up to <strong>1,000× speedups</strong>.
+  </li>
+<li>
+<strong><a href="https://clickhouse.com/blog/update-performance-clickhouse-vs-postgresql">Bonus: ClickHouse vs PostgreSQL</a></strong><br/>
+    We put ClickHouse’s new SQL UPDATEs head-to-head with PostgreSQL on identical hardware and data—parity on point updates, up to <strong>4,000× faster</strong> on bulk changes.
+  </li>
+</ul>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="fast-sql-updates-in-clickhouse-benchmarks-and-squirrels-on-espresso" level="2">Fast SQL UPDATEs in ClickHouse: benchmarks and squirrels on espresso<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#fast-sql-updates-in-clickhouse-benchmarks-and-squirrels-on-espresso">#</a></span></h2>
+<p>Imagine a squirrel. Small, quick, darting between stashes, dropping in new nuts.</p>
+<p>Now picture that squirrel <strong>on espresso</strong>, <em>ridiculously fast</em>, zipping between stashes before you can blink.</p>
+<p>That’s what <strong>lightweight updates in ClickHouse</strong> feel like: zipping between data parts, stashing tiny patches that apply instantly and <strong>keep queries fast</strong>.</p>
+<blockquote>
+<p><strong>Spoiler</strong>: These are full standard SQL UPDATEs, implemented with a lightweight patch‑part mechanism. In our benchmark, a bulk standard SQL UPDATE finished in <strong>60 ms instead of 100 s, 1,600× faster than classic mutations</strong>, while worst‑case queries run almost like on fully rewritten data.</p>
+</blockquote>
+<p>This post is <strong>Part 3</strong> of our deep‑dive on fast UPDATEs in ClickHouse, and <strong>it’s all about benchmarks</strong>.<br/>(If you want to see <em>how</em> we achieved this speedup, check out <strong><a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">Part 2: SQL‑style UPDATEs</a></strong>.)</p>
+<p>Here, we benchmark <strong>every UPDATE method side by side</strong>:</p>
+<ul>
+<li><strong>Classic mutations &amp; on‑the‑fly mutations</strong></li>
+<li><strong>Lightweight updates (patch parts)</strong></li>
+<li><strong>ReplacingMergeTree inserts</strong></li>
+</ul>
+<p>We focus on:</p>
+<ol>
+<li>
+<p><strong>Update speed and visibility</strong> – how quickly each method applies changes</p>
+</li>
+<li>
+<p><strong>Query impact before merges</strong> – how updates affect latency before materialization</p>
+</li>
+</ol>
+<p>Everything is <strong>fully reproducible</strong>, with open‑sourced scripts and queries.</p>
+<p>To start, we’ll <strong>introduce the dataset and benchmark setup</strong>, then go through the results.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="dataset-and-benchmark-setup" level="2">Dataset and benchmark setup<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#dataset-and-benchmark-setup">#</a></span></h2>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="dataset" level="3">Dataset<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#dataset">#</a></span></h3>
+<p>In <a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines">Part 1</a> and <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">Part 2</a>, we used a small orders table to illustrate basic update scenarios.</p>
+<p>For this benchmark, we continue the same “orders” theme but scale it up using the <strong><a href="https://clickhouse.com/docs/getting-started/example-datasets/tpch">TPC-H</a> lineitem table</strong>, which models the items from customer orders. This is a prototypical scenario for updates, where quantities, prices, or discounts might change after the initial insert:</p>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-sql" style="white-space:pre-wrap"><span><span style="color:#88aece">CREATE</span><span><span> </span><span style="color:#88aece">TABLE</span><span> lineitem (
+</span></span></span><span>    l_orderkey       Int32,
+<span></span></span><span>    l_partkey        Int32,
+<span></span></span><span>    l_suppkey        Int32,
+<span></span></span><span>    l_linenumber     Int32,
+<span></span></span><span><span>    l_quantity       </span><span><span style="color:#f08d49">Decimal</span><span>(</span><span style="color:#f08d49">15</span><span>,</span><span style="color:#f08d49">2</span><span>),
+</span></span></span><span><span>    l_extendedprice  </span><span><span style="color:#f08d49">Decimal</span><span>(</span><span style="color:#f08d49">15</span><span>,</span><span style="color:#f08d49">2</span><span>),
+</span></span></span><span><span>    l_discount       </span><span><span style="color:#f08d49">Decimal</span><span>(</span><span style="color:#f08d49">15</span><span>,</span><span style="color:#f08d49">2</span><span>),
+</span></span></span><span><span>    l_tax            </span><span><span style="color:#f08d49">Decimal</span><span>(</span><span style="color:#f08d49">15</span><span>,</span><span style="color:#f08d49">2</span><span>),
+</span></span></span><span>    l_returnflag     String,
+<span></span></span><span>    l_linestatus     String,
+<span></span></span><span><span>    l_shipdate       </span><span><span style="color:#f08d49">Date</span><span>,
+</span></span></span><span><span>    l_commitdate     </span><span><span style="color:#f08d49">Date</span><span>,
+</span></span></span><span><span>    l_receiptdate    </span><span><span style="color:#f08d49">Date</span><span>,
+</span></span></span><span>    l_shipinstruct   String,
+<span></span></span><span>    l_shipmode       String,
+<span></span></span><span>    l_comment        String)
+<span></span></span><span><span></span><span><span style="color:#88aece">ORDER</span><span> </span><span style="color:#88aece">BY</span><span> (l_orderkey, l_linenumber);</span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div>
+</pre>
+<p>We use the <strong>scale factor 100</strong> version of this table, which contains roughly <strong>600 million rows</strong> (~600 million items from ~150 million orders) and occupies <strong>~30 GiB compressed</strong> (~60 GiB uncompressed).</p>
+<p>For our benchmarks, the lineitem table is stored as a single <a href="https://clickhouse.com/docs/parts">data part</a>. Its ~30 GiB compressed size is well below ClickHouse’s 150 GiB compressed merge <a href="https://clickhouse.com/docs/operations/settings/merge-tree-settings#max_bytes_to_merge_at_max_space_in_pool">threshold</a>, the point up to which background merges will combine smaller parts into one. This ensures the table naturally exists as a single, fully‑merged part, making it a realistic update scenario.</p>
+<p>Here’s a quick look at the lineitem <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/init.sh#L68">base table</a> we used for all benchmark runs, confirming its single‑part size:</p>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-sql" style="white-space:pre-wrap"><span><span style="color:#88aece">SELECT</span><span><span>
+</span></span></span><span><span>    formatReadableQuantity(</span><span><span style="color:#f08d49">sum</span><span>(</span><span style="color:#88aece">rows</span><span>)) </span><span style="color:#88aece">AS</span><span> row_count,
+</span></span></span><span><span>    formatReadableQuantity(</span><span><span style="color:#f08d49">count</span><span>()) </span><span style="color:#88aece">AS</span><span> part_count,
+</span></span></span><span><span>    formatReadableSize(</span><span><span style="color:#f08d49">sum</span><span>(data_uncompressed_bytes)) </span><span style="color:#88aece">AS</span><span> size_uncomp,
+</span></span></span><span><span>    formatReadableSize(</span><span><span style="color:#f08d49">sum</span><span>(data_compressed_bytes)) </span><span style="color:#88aece">AS</span><span> size_comp
+</span></span></span><span><span></span><span><span style="color:#88aece">FROM</span><span> system.parts
+</span></span></span><span><span></span><span><span style="color:#88aece">WHERE</span><span> active </span><span style="color:#88aece">AND</span><span> database </span><span class="hljs-operator">=</span><span> </span><span style="color:#b5bd68">'default'</span><span> </span><span style="color:#88aece">AND</span><span> `</span><span style="color:#88aece">table</span><span>` </span><span class="hljs-operator">=</span><span> </span><span style="color:#b5bd68">'lineitem_base_tbl_1part'</span><span>;</span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div>
+</pre>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-text" style="white-space:pre-wrap"><span><span>┌─row_count──────┬─part_count─┬─size_uncomp─┬─size_comp─┐
+</span><span></span></span><span>│ 600.04 million │ 1.00       │ 57.85 GiB   │ 26.69 GiB │
+<span></span></span><span>└────────────────┴────────────┴─────────────┴───────────┘<span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="hardware-and-os" level="3">Hardware and OS<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#hardware-and-os">#</a></span></h3>
+<p>We used an <strong>AWS m6i.8xlarge</strong> EC2 instance (32 cores, 128 GB RAM) with a <strong>gp3 EBS volume</strong> (16k IOPS, 1000 MiB/s max throughput) running <strong>Ubuntu 24.04 LTS</strong>.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="clickhouse-version" level="3">ClickHouse version<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#clickhouse-version">#</a></span></h3>
+<p>All tests were performed with <strong>ClickHouse 25.7</strong>.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="running-it-yourself" level="3">Running it yourself<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#running-it-yourself">#</a></span></h3>
+<p>You can reproduce all results with our <a href="https://github.com/ClickHouse/examples/tree/main/blog-examples/clickhouse-fast-updates">benchmark scripts on GitHub</a>.</p>
+<p>The repository includes:</p>
+<ul>
+<li>Update statement sets (bulk and single-row)</li>
+<li>Scripts to run benchmarks and collect timings</li>
+<li>Helpers to inspect data part sizes and query impact</li>
+</ul>
+<p>With our environment and dataset ready, we can now explore how different update methods behave, starting with bulk updates, the backbone of most pipelines.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="bulk-updates" level="2">Bulk UPDATEs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#bulk-updates">#</a></span></h2>
+<p>We’ll start with bulk updates, since they’re the backbone of batch pipelines and the most common workload for classic mutations.</p>
+<p>We benchmarked <strong>10 typical bulk updates</strong> using three methods, each linked to its SQL scripts on GitHub:</p>
+<ol>
+<li>
+<p><strong><a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/SMALL/mutation_updates.sql">Mutations</a></strong> – trigger a <strong>full rewrite</strong> of affected data parts.</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/SMALL/lightweight_updates.sql">Lightweight updates</a></strong> – write only <strong>small patch parts</strong> to disk.<br/>(Uses <a href="https://www.w3schools.com/sql/sql_update.asp">standard SQL UPDATE statements</a>; the ‘lightweight’ name only refers to the efficient patch‑part implementation.)</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/SMALL/mutation_updates.sql">On-the-fly mutations</a></strong> – use the <strong>same syntax as mutations</strong>, but <strong>only store the update expressions in memory</strong> and apply them on read. Full column rewrites happen asynchronously.</p>
+</li>
+</ol>
+<p><strong>Note:</strong></p>
+<ul>
+<li>
+<p>We focus on declarative updates here. Purpose‑built engines like <strong>ReplacingMergeTree</strong> are excluded from multi‑row benchmarks, since bulk updates are impractical with row‑by‑row inserts. (Later, we’ll cover <strong>single‑row updates</strong> for these engines.)</p>
+</li>
+<li>
+<p>We didn’t benchmark <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">DELETE</code>s separately. A <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">DELETE</code> is either a classic mutation that <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-15-lightweight-deletes-still-mutations-but-faster">rewrites</a> <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_row_exists</code> or a <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#featherweight-deletes">lightweight patch</a> of that mask, and both mechanisms are already represented above.</p>
+</li>
+</ul>
+<p>(Charts ahead! Skip the “How we measured” boxes in each section if you just want the results.)</p>
+<details class="metric-box">
+<summary>How we measured – Bulk Updates Runtime (click to expand)</summary>
+<p><span class="step-num">1.</span> <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L84" target="_blank">Drop</a> the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">lineitem</code> table if it exists.</p>
+<p><span class="step-num">2.</span> <a href="https://clickhouse.com/blog/clickhouse-release-24-10#table-cloning" target="_blank">Clone</a> a fresh <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">lineitem</code> table from the base table.</p>
+<p><span class="step-num">3.</span> <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L96" target="_blank">Run the update and measure its runtime</a>.</p>
+<p><b>Repeat 3×</b> per method to compute average runtime.<br/>Procedure repeated <b>for all 10 bulk updates</b>.</p>
+</details>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="time-until-bulk-updates-are-visible-to-queries" level="3">Time until bulk updates are visible to queries<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#time-until-bulk-updates-are-visible-to-queries">#</a></span></h3>
+<p>For every one of the 10 bulk UPDATEs, the chart below measures the <strong>time from issuing the UPDATE to the moment its changes are visible to queries</strong>, comparing all three methods.</p>
+<p>We also show <strong>how much faster (in %) lightweight updates are</strong> relative to classic mutations, which must finish rewriting the affected data parts before queries see the changes.</p>
+<details class="metric-box metrics">
+<summary>Additional key metrics on the chart (click to expand)</summary>
+<div class="metric-row"><div class="metric-label">Rows upd / Cols upd</div><div class="metric-value">Number of rows and columns touched by the UPDATE</div></div>
+<div class="metric-row"><div class="metric-label">Full cols size</div><div class="metric-value">Bytes a classic mutation would rewrite</div></div>
+<div class="metric-row"><div class="metric-label">Upd data size</div><div class="metric-value">Bytes actually written by a lightweight update</div></div>
+</details>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.001.png" loading="lazy" src="/uploads/Blog_updates_Part_3_001_9bb4cf35e5.png"/></span>
+<ul>
+<li>
+<p><strong>On-the-fly mutations —</strong> <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-2-on-the-fly-updates-for-instant-visibility">update expressions are stored in memory</a> to be <em>immediately</em> applicable to queried data.</p>
+</li>
+<li>
+<p><strong>Classic mutations —</strong> slowest path; every change <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-1-classic-mutations-and-column-rewrites">rewrites full columns</a> on disk <strong>before</strong> queries can see the new data.</p>
+</li>
+<li>
+<p><strong>Lightweight updates —</strong> up to <strong>1,700× faster</strong> by <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-parts-work">writing tiny “patch parts”</a> that slot in instantly for queries.</p>
+</li>
+</ul>
+<p><em>See the <a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/results">raw benchmark results</a> for the JSON files behind these charts.</em></p>
+<p><em>We’ll break down exactly <strong>why</strong> the methods differ in speed in the deep dive later.</em></p>
+<p>Fast updates are great, but only if they don’t hurt queries. Let’s see how each method impacts query performance.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="worst-case-post-update-query-time--bulk-updates" level="3">Worst-case post-update query time — bulk updates<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#worst-case-post-update-query-time--bulk-updates">#</a></span></h3>
+<blockquote>
+<p><strong>After full materialization, query performance is identical, regardless of the used update method</strong>.</p>
+</blockquote>
+<p>Once background processing is complete, the table’s data parts are fully updated, and queries run at baseline speed regardless of the UPDATE method:</p>
+<ul>
+<li>
+<p><strong>Mutations</strong> – data parts are <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-1-classic-mutations-and-column-rewrites">rewritten</a> immediately.</p>
+</li>
+<li>
+<p><strong>On‑the‑fly mutations</strong> – background column rewrites <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-2-on-the-fly-updates-for-instant-visibility">eventually materialize</a> the in-memory update expressions.</p>
+</li>
+<li>
+<p><strong>Lightweight updates</strong> – patch parts are <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-parts-work">merged</a> into the main data parts by regular background merges.</p>
+</li>
+</ul>
+<p>Therefore, we report the <strong>worst-case post-update query time</strong>, which is our most conservative view of performance, defined as the <em>runtime of a query that hits the freshly updated rows before those changes have been fully materialized on disk</em>.</p>
+<p>We then show how much slower this is (expressed as a slowdown percentage) relative to the baseline time for the same query hitting the data once a classic mutation has finished writing all updates to disk.</p>
+<details class="metric-box">
+<summary>How we measured – Worst-case post-bulk-update query time (click to expand)</summary>
+<p>• We use <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/SMALL/analytical_queries.sql" target="_blank">10 analytical queries</a>, paired 1:1 with the 10 updates.</p>
+<p>• After each update, its paired query <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L141" target="_blank">runs</a> 3× to measure <b>average runtime and memory usage</b>.</p>
+<div class="notes">
+<b>Notes:</b><br/>
+    • <b>Each query touches at least the updated rows and columns</b>, but many scan broader data for realistic analytics.<br/>
+    • To capture the <b>worst-case latency</b>, the benchmark <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L92" target="_blank">disables background merges</a>:<br/>
+<div style="margin-left:20px;margin-top:4px">
+      • <b>On-the-fly mutations</b> stay purely in memory.<br/>
+      • <b>Lightweight updates</b> rely on Patch-on-read (implicit FINAL).
+    </div>
+</div>
+</details>
+<p>The next chart shows <strong>worst-case post-update query time</strong> for all <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/SMALL/analytical_queries.sql">10 queries</a> after each type of bulk UPDATE, compared to the baseline of fully materialized updates:</p>
+<details class="metric-box metrics">
+<summary>Additional key metrics on the chart (click to expand)</summary>
+<div class="metric-row"><div class="metric-label">Slowdown %</div><div class="metric-value">Extra runtime vs. a fully-materialised (mutation) baseline</div></div>
+<div class="metric-row"><div class="metric-label">Memory (MiB)</div><div class="metric-value">Peak memory used by the query</div></div>
+<div class="metric-row"><div class="metric-label">Memory Δ (%)</div><div class="metric-value">Memory change vs. the baseline</div></div>
+</details>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.002.png" loading="lazy" src="/uploads/Blog_updates_Part_3_002_dd391239df.png"/></span>
+<ul>
+<li>
+<p><strong>Classic mutations (baseline)</strong> → the query runtime once a synchronous mutation has fully rewritten the affected data parts on disk.</p>
+</li>
+<li>
+<p><strong>Lightweight updates</strong> → Minimal overhead by default (avg. 15%), only 8–21% slowdown in <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#fast-source-part-matching-via-index">fast-merge mode</a>.</p>
+</li>
+<li>
+<p><strong>Rare lightweight updates fallback</strong> → <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#patch-application-via-join-on-block-based-system-columns">Slower join-mode</a> can occur (39–121% overhead) if source parts merge concurrently to patch creation.</p>
+</li>
+<li>
+<p><strong>On-the-fly mutations</strong> → Visible instantly but cause the <strong>highest slowdown</strong> (12–427%, avg. 149%).</p>
+</li>
+</ul>
+<p><strong>Memory impact</strong> → On-the-fly can spike from ~0.7 MiB to ~302 MiB; lightweight stays very modest.</p>
+<p><em><a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/results">Raw benchmark results are here →</a></em></p>
+<p><em>The mechanics behind these slowdowns and memory changes will be explored in the deep dive section later.</em></p>
+<p>Bulk updates are the backbone of batch pipelines, but many real applications rely on frequent single-row updates. Let’s see how the methods compare there.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="single-row-updates" level="2">Single-row updates<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#single-row-updates">#</a></span></h2>
+<p>We also benchmark <strong>single‑row updates</strong> to represent workloads suited for <strong>ReplacingMergeTree</strong> or <strong>CoalescingMergeTree</strong>.</p>
+<ul>
+<li>
+<p>Each of the <strong>10 updates</strong> from before now targets <strong>1 row</strong> (instead of thousands).
+<a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/10x1">View SQL files →</a></p>
+</li>
+<li>
+<p>For <strong>ReplacingMergeTree</strong>, we insert a new row for each update; non‑updated columns repeat existing values.
+<a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/10x1">Replacing inserts →</a></p>
+<ul>
+<li>(<strong>CoalescingMergeTree</strong> could avoid this repetition of non-updated columns but requires all updated columns to be <a href="https://clickhouse.com/docs/sql-reference/data-types/nullable#storage-features">Nullable</a>.)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Note:</strong> We benchmarked only <strong>ReplacingMergeTree</strong> here as a representative of purpose‑built update engines from <a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines">Part 1</a>.  Performance would be similar for <strong>CoalescingMergeTree</strong> and <strong>CollapsingMergeTree</strong>.</p>
+<p>To compare the <strong>UPDATE performance</strong> of <strong>ReplacingMergeTree</strong> with the other methods, we also expressed the <strong>same 10 single‑row updates</strong> as <strong>mutations</strong>, <strong>on-the-fly mutations</strong>, and <strong>lightweight updates</strong> (<a href="https://www.w3schools.com/sql/sql_update.asp">standard SQL UPDATE syntax</a>, implemented with patch parts).
+<a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/10x1">View SQL files →</a></p>
+<details class="metric-box">
+<summary>How we measured – Single‑Row Updates Runtime (click to expand)</summary>
+<p>
+    For single‑row (point) updates we used the <b>same procedure</b>:
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L84" target="_blank">drop</a> &amp;
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L86" target="_blank">clone</a>
+    the table,
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L103" target="_blank">apply</a>
+    the update,
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L153" target="_blank">measure</a>
+    runtime three times, and average the results, repeated for
+    <b>10 updates per method</b>.
+  </p>
+</details>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="time-until-single-row-point-updates-are-visible-to-queries" level="3">Time until single-row (point) updates are visible to queries<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#time-until-single-row-point-updates-are-visible-to-queries">#</a></span></h3>
+<p>As with bulk updates, for each of the 10 single-row (point) UPDATEs the next chart shows the elapsed <strong>time from issuing the UPDATE to when its changes become visible to queries</strong>, across all four methods.</p>
+<p>We also show <strong>how much faster (in %) lightweight updates and replacing inserts are</strong> compared to the baseline of classic mutations, which only become visible once all affected data parts are rewritten.</p>
+<details class="metric-box metrics">
+<summary>Additional key metrics on the chart (click to expand)</summary>
+<div class="metric-row"><div class="metric-label">Rows upd / Cols upd</div><div class="metric-value">Number of rows and columns touched by the UPDATE</div></div>
+<div class="metric-row"><div class="metric-label">Full cols size</div><div class="metric-value">Bytes a classic mutation would rewrite</div></div>
+<div class="metric-row"><div class="metric-label">Upd data size</div><div class="metric-value">Bytes actually written by a lightweight update</div></div>
+</details>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.003.png" loading="lazy" src="/uploads/Blog_updates_Part_3_003_a1a6769c68.png"/></span>
+<ul>
+<li>
+<p><strong>On‑the‑fly mutations</strong> → Instantly visible (~0.03 s), since update expressions are just stored in memory; full rewrites happen later in the background.</p>
+</li>
+<li>
+<p><strong>ReplacingMergeTree inserts</strong> → Fastest raw speed (0.03–0.04 s) by writing new rows only; up to <strong>4,700× faster</strong> than full mutations; no row-lookup at all, but later queries must resolve multiple row versions until background merges complete.</p>
+</li>
+<li>
+<p><strong>Lightweight updates</strong> → Almost as fast (0.04–0.07 s), up to <strong>2,400× faster</strong> than full mutations, writes tiny patch parts; slightly slower due to row‑lookup, but far more efficient at query time.</p>
+</li>
+<li>
+<p><strong>Mutations</strong> → Slowest (90–170 s), as they rewrite all affected columns, even for a single row.</p>
+</li>
+</ul>
+<p><a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/results">Raw benchmark results are here →</a></p>
+<p><em>As with the bulk results, we’ll explain the reasons for these patterns later in the deep dive.</em></p>
+<p>Again, update speed is only half the picture, how do single‑row updates affect queries?</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="worst-case-post-update-query-time--single-row-updates" level="3">Worst-case post-update query time — single-row updates<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#worst-case-post-update-query-time--single-row-updates">#</a></span></h3>
+<p>For the single‑row benchmark, we <strong>reuse the same <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/10x1/analytical_queries.sql">10 analytical queries</a></strong> as in the multi‑row test.</p>
+<p>In this section, as with our bulk-update tests, we benchmark <strong>worst-case post-update query time</strong>, the time a query takes when it touches freshly updated rows before those changes are fully materialized on disk, and report the slowdown %, i.e. how much slower this is versus the same query’s runtime once a classic mutation has fully materialized the updates (the baseline).</p>
+<details class="metric-box">
+<summary>How we measured – Worst-case post-point-update query time (click to expand)</summary>
+<p>• Each query is paired 1:1 with its update; we <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L153" target="_blank">record</a> <b>average runtime and memory</b> over three runs.</p>
+<div class="notes">
+<b>Notes:</b><br/>
+    • <b>Each query touches at least the updated rows and columns</b>, but many scan broader data for realistic analytics.<br/>
+    • To capture the <b>worst‑case latency</b>, the benchmark
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L99" target="_blank">disables background merges</a>:<br/>
+<div style="margin-left:20px;margin-top:4px">
+      • <b>On‑the‑fly mutations</b> stay purely in memory.<br/>
+      • <b>Lightweight updates</b> rely on Patch‑on‑read (implicit FINAL).<br/>
+      • <b>ReplacingMergeTree</b> queries run with <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/run_updates_sequential.sh#L148" target="_blank">explicit FINAL</a>.
+    </div>
+</div>
+</details>
+<p>The following chart shows for all <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/10x1/analytical_queries.sql">10 analytical queries</a> the <strong>worst-case post-update query time</strong> after each type of bulk UPDATE, compared to the baseline of fully materialized updates:</p>
+<details class="metric-box metrics">
+<summary>Additional key metrics on the chart (click to expand)</summary>
+<div class="metric-row"><div class="metric-label">Slowdown %</div><div class="metric-value">Extra runtime vs. a fully‑materialised (mutation) baseline</div></div>
+<div class="metric-row"><div class="metric-label">Memory (MiB)</div><div class="metric-value">Peak memory used by the query</div></div>
+<div class="metric-row"><div class="metric-label">Memory Δ (%)</div><div class="metric-value">Memory change vs. the baseline</div></div>
+</details>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.004.png" loading="lazy" src="/uploads/Blog_updates_Part_3_004_b700981c01.png"/></span>
+<ul>
+<li>
+<p><strong>Classic mutations (baseline)</strong> → the query runtime once a synchronous mutation has fully rewritten the affected data parts on disk.</p>
+</li>
+<li>
+<p><strong>Lightweight updates</strong> → Most efficient for queries; slowdown 7 – 18 % (avg ~12 %), memory +20 % – 210 %. <em>Only <strong>fast‑merge mode</strong> is shown to keep the chart readable.</em></p>
+</li>
+<li>
+<p><strong>On‑the‑fly mutations</strong> → Visible instantly and often faster than ReplacingMergeTree + FINAL, but slow down sharply if many updates pile up in memory (not shown here).</p>
+</li>
+<li>
+<p><strong>ReplacingMergeTree + FINAL</strong> → Heaviest queries; slowdown 21 – 550 % (avg ~280 %), memory 20 × – 200 × baseline, as queries must read all row versions.</p>
+</li>
+</ul>
+<p><em><a href="https://github.com/ClickHouse/examples/tree/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/single-row-updates/results">Raw benchmark results are here →</a></em></p>
+<p>The results are striking. Now, let’s peek under the hood to understand why ClickHouse behaves this way.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="deep-dive-why-the-results-look-this-way" level="2">Deep dive: Why the results look this way<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#deep-dive-why-the-results-look-this-way">#</a></span></h2>
+<p>Parts <a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines">1</a> and <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">2</a> already explored how each update method works under the hood, classic mutations, lightweight updates, and purpose-built engines like ReplacingMergeTree.</p>
+<p>Here, we take an additional deep dive, comparing these methods side by side to reveal why the benchmark charts look the way they do, and what’s really happening inside ClickHouse.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="why-lightweight-updates-feel-like-inserts" level="3">Why lightweight updates feel like inserts<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#why-lightweight-updates-feel-like-inserts">#</a></span></h3>
+<blockquote>
+<p>Despite the name, these are ordinary <a href="https://www.w3schools.com/sql/sql_update.asp">SQL UPDATE statements</a>, ClickHouse just optimizes them by writing patch parts instead of rewriting full columns.</p>
+</blockquote>
+<p><a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-parts-work">Lightweight updates write tiny patch parts</a> instead of rewriting full columns.</p>
+<p><a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-on-read-work">Queries simply overlay these patches in memory (patch‑on‑read)</a>, so applying a small change feels almost as fast as inserting new rows.</p>
+<p>Specifically, a lightweight update writes a patch part that only contains:</p>
+<ul>
+<li>The <strong>updated values</strong></li>
+<li>A tiny bit of <strong><a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#patch-parts-at-scale-tracking-targeting-merging">targeting metadata</a></strong>: _part, _part_offset, _block_number, _block_offset, and _data_version</li>
+</ul>
+<p>This metadata points <strong>exactly</strong> to the rows that need updating, so ClickHouse avoids scanning or rewriting any unrelated data.</p>
+<p>Update performance is roughly comparable to an <a href="https://clickhouse.com/docs/sql-reference/statements/insert-into#inserting-the-results-of-select">INSERT INTO … SELECT</a> that writes only the changed values plus their row’s metadata:</p>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-sql" style="white-space:pre-wrap"><span><span style="color:#999999">-- Lightweight update statement:</span><span><span>
+</span></span></span><span>
+<span></span></span><span>UPDATE lineitem
+<span></span></span><span><span></span><span><span style="color:#88aece">SET</span><span> l_discount </span><span class="hljs-operator">=</span><span> </span><span style="color:#f08d49">0.045</span><span>, l_tax </span><span class="hljs-operator">=</span><span> </span><span style="color:#f08d49">0.11</span><span>, ...
+</span></span></span><span><span></span><span><span style="color:#88aece">WHERE</span><span> l_commitdate </span><span class="hljs-operator">=</span><span> </span><span style="color:#b5bd68">'1996-02-01'</span><span> </span><span style="color:#88aece">AND</span><span> l_quantity </span><span class="hljs-operator">=</span><span> </span><span style="color:#f08d49">1</span><span>;</span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div>
+</pre>
+<p>≈</p>
+<pre><div class="mb-9 bg-[#282828]"><div class="sc-18gnqgi-0 ewhjSD" style="word-break:break-word"><div class="sc-18gnqgi-4 iFjeJi"><button aria-label="copy" class="sc-4ff7ue-0 gkyJhN sc-1sddmxu-2 sc-18gnqgi-1 bhYite hiKtvz" role="button"><div class="sc-29ieut-0 kAJLcD"><svg aria-label="copy" fill="none" height="24" role="img" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14.006" rx="2" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14.006" x="6.998" y="6.998"></rect><path d="M6.998 17.002H4.997a2 2 0 0 1-2-2V4.997a2 2 0 0 1 2-2H15a2 2 0 0 1 2 2v2.001" stroke="#161517" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg></div></button></div><pre class="sc-18gnqgi-2 hTWtRq" style="display:block;overflow-x:auto;padding:1rem 1rem;color:#ffffff;background:#282828;border-radius:0.25rem;font:500 0.875rem/1.7 &quot;Inconsolata&quot;, Consolas, '&quot;SFMono Regular&quot;', monospace"><code class="sc-18gnqgi-3 cxwKSE language-sql" style="white-space:pre-wrap"><span><span style="color:#999999">-- Roughly equivalent:</span><span><span>
+</span></span></span><span>
+<span></span></span><span><span></span><span><span style="color:#88aece">INSERT</span><span> </span><span style="color:#88aece">INTO</span><span> patch
+</span></span></span><span><span></span><span><span style="color:#88aece">SELECT</span><span> </span><span style="color:#f08d49">0.045</span><span> </span><span style="color:#88aece">as</span><span> l_discount, </span><span style="color:#f08d49">0.11</span><span> </span><span style="color:#88aece">as</span><span> l_tax, ...,
+</span></span></span><span>       _part, _part_offset, _block_number, _block_offset 
+<span></span></span><span><span></span><span><span style="color:#88aece">FROM</span><span> lineitem
+</span></span></span><span><span></span><span><span style="color:#88aece">WHERE</span><span> l_commitdate </span><span class="hljs-operator">=</span><span> </span><span style="color:#b5bd68">'1996-02-01'</span><span> </span><span style="color:#88aece">AND</span><span> l_quantity </span><span class="hljs-operator">=</span><span> </span><span style="color:#f08d49">1</span><span>;</span></span></span></code></pre></div><div class="border-t-1 flex flex-col-reverse divide-y-4 divide-y-reverse divide-gray-200"></div></div>
+</pre>
+<p>This is why lightweight updates feel as fast as small inserts, they avoid scanning or rewriting unrelated data.</p>
+<blockquote>
+<p>Because their mechanics are intentionally based on ClickHouse’s fast and efficient insert mechanics, <strong>you can make lightweight updates as frequently as you can do inserts</strong>.</p>
+</blockquote>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="when-to-use-lightweight-updates-and-when-not-to" level="3">When to use lightweight updates (and when not to)<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#when-to-use-lightweight-updates-and-when-not-to">#</a></span></h3>
+<blockquote>
+<p><strong>Lightweight updates are designed for frequent, small changes (≈ ≤ 10% of a table)</strong>.<br/>Use them when you want updates to appear almost instantly with almost no <a href="/blog/updates-in-clickhouse-3-benchmarks#worst-case-post-update-query-time--bulk-updates">worst-case post-update</a> query slow-down.</p>
+</blockquote>
+<p>Lightweight updates shine for <strong>small, frequent corrections</strong>, like updating a few percent of a table at a time.</p>
+<p>Large updates, however, create <strong>big patch parts</strong> which:</p>
+<ul>
+<li>
+<p>Must be <strong>applied in memory on every query</strong> (<a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-on-read-works">patch‑on‑read</a>) until they merge,</p>
+</li>
+<li>
+<p>add <strong>CPU and RAM overhead</strong> before materialization, and</p>
+</li>
+<li>
+<p>will <strong>merge into the source part eventually</strong>.</p>
+</li>
+</ul>
+<p>For <strong>large changes</strong>, this means queries can become much slower until the patches are materialized with the next regular background merge.
+It is often <strong>better to run a <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#stage-1-classic-mutations-and-column-rewrites">classic mutation</a></strong>, wait longer <strong>once</strong> (for the update to rewrite the part),
+and then enjoy <strong>baseline query performance</strong>  afterward.</p>
+<blockquote>
+<p>Think of lightweight updates as <strong>sticky notes</strong>, perfect for quick, precise edits.
+<strong>But if you’re re-papering the whole wall, new wallpaper (a mutation) is faster and cleaner.</strong></p>
+</blockquote>
+<p>We use two schematic charts to visualize the trade-off.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="chart-1--update-latency" level="4">Chart 1 – update latency<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#chart-1--update-latency">#</a></span></h4>
+<p>Chart 1 shows how update latency changes as the percentage of modified rows grows.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.007.png" loading="lazy" src="/uploads/Blog_updates_Part_3_007_1697d78f3d.png"/></span>
+<ul>
+<li>
+<p><strong>Mutation (grey line)</strong> rewrites every affected column, so latency stays flat.</p>
+</li>
+<li>
+<p><strong>Lightweight update (yellow line)</strong> writes only a patch part, so it is fastest for tiny changes and gradually converges on mutation latency as the update touches more of the table.</p>
+</li>
+</ul>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="chart-2--query-runtime-after-a-bulk-update" level="4">Chart 2 – query runtime after a bulk update<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#chart-2--query-runtime-after-a-bulk-update">#</a></span></h4>
+<p>Chart 2 estimates how one representative query slows down after a bulk (multi-row) update before the update is fully materialized.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.008.png" loading="lazy" src="/uploads/Blog_updates_Part_3_008_a384ebe49b.png"/></span>
+<ul>
+<li>
+<p>With a <strong>synchronous mutation</strong>, the data parts are rewritten <strong>before</strong> the query runs, so runtime stays flat.</p>
+</li>
+<li>
+<p>With <strong>patch-on-read</strong>, ClickHouse overlays the patch part <strong>during</strong> execution; as the patch grows, the query slows proportionally.</p>
+</li>
+</ul>
+<p><strong>Therefore, use lightweight updates for small, frequent bulk changes (up to ~10% of the table):</strong> patch-on-read introduces a query slowdown as the patch part grows, but once the background merge completes, you’re back to baseline performance. For anything larger, stick with classic (synchronous) mutations.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="patch-on-read-modes-fast-vs-join-fallback" level="3">Patch-on-read modes: fast vs. join fallback<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#patch-on-read-modes-fast-vs-join-fallback">#</a></span></h3>
+<p>We saw <a href="/blog/updates-in-clickhouse-3-benchmarks#worst-case-post-update-query-time--bulk-updates">earlier</a> that with our dataset, when patch parts are applied via <strong>patch‑on‑read in <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#fast-source-part-matching-via-index">fast‑merge mode</a></strong>—that is, while the original source part still exists—the slowdown ranges from <strong>8% to 21%</strong>, with an <strong>average of 15.3%</strong>.</p>
+<p>As explained in <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">Part 2</a>, in most cases the <strong>source parts of a patch still exist</strong>, both when the patch is eventually materialized by the next background merge, and when it is applied <strong>in‑memory</strong> via patch‑on‑read if a query runs before that merge occurs.</p>
+<p>Rarely, a <strong>benign timing overlap</strong> occurs: a patch part is created for the <strong><a href="https://clickhouse.com/blog/clickhouse-release-25-06#single-snapshot-for-select">snapshot</a> of source parts at UPDATE start</strong>, but if those parts are <strong>merged concurrently to writing the patch</strong>, the patch is now targeting source parts that are no longer active (for patch-on-read in fast merge mode).</p>
+<p>Then ClickHouse <strong>automatically falls back</strong> to <strong>patch‑on‑read in <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#patch-application-via-join-on-block-based-system-columns">slower join‑mode</a></strong>, which, as we saw <a href="/blog/updates-in-clickhouse-3-benchmarks#worst-case-post-update-query-time--bulk-updates">earlier</a>, has higher overhead: <strong>39% to 121%</strong>, averaging <strong>68%</strong> in our benchmark. This mode performs an <strong>in‑memory join</strong> between the patch and the merged data.</p>
+<details class="metric-box">
+<summary>How we measured – slower join‑mode patch‑on‑read (click to expand)</summary>
+<p>
+    To measure this scenario explicitly, we
+    <a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L126" target="_blank">
+      forced a self‑merge of the table’s single data part
+    </a>
+    with
+    <a href="https://clickhouse.com/docs/operations/settings/merge-tree-settings#apply_patches_on_merge" target="_blank">
+      apply_patches_on_merge
+    </a>
+<a href="https://github.com/ClickHouse/examples/blob/71456ae42e3bd75d23b41f5636fa7e593b941b16/blog-examples/clickhouse-fast-updates/multi-row-updates/run_updates_sequential.sh#L121" target="_blank">
+      disabled
+    </a>.
+    The merge rewrote the part with a new name, invalidating the patch’s
+    <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#patch-part-indexes" target="_blank">
+      source index
+    </a>
+    and triggering slower join‑mode fallback at query time.
+  </p>
+</details>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="why-replacingmergetree-inserts-excel-at-raw-speed" level="3">Why ReplacingMergeTree inserts excel at raw speed<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#why-replacingmergetree-inserts-excel-at-raw-speed">#</a></span></h3>
+<p>ReplacingMergeTree <a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines#replacingmergetree-replace-rows-by-inserting-new-ones">models an update as inserting a new row</a>, writing only the new row to disk.</p>
+<ul>
+<li>
+<p><strong>No lookup is required</strong> to find the old row, which makes this the fastest update method in practice.</p>
+</li>
+<li>
+<p>In our benchmarks, updates typically completed in <strong>0.03 – 0.04 s</strong>, up to <strong>4,700× faster</strong> than classic mutations.</p>
+</li>
+</ul>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="lightweight-updates-are-nearly-as-fast" level="4">Lightweight updates are nearly as fast<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#lightweight-updates-are-nearly-as-fast">#</a></span></h4>
+<p>With single‑row (point) UPDATEs, lightweight updates write a <strong>tiny patch part</strong> to disk, often just a few dozen bytes.</p>
+<ul>
+<li>
+<p>First, ClickHouse <strong>locates the row being updated</strong> in the original part to generate its <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#precise-targeting-metadata-in-patch-parts">targeting metadata</a>: _part,  _part_offset, _block_number, _block_offset, and _data_version.</p>
+</li>
+<li>
+<p>Then it writes only the <strong>updated values</strong> plus that small metadata patch.</p>
+</li>
+</ul>
+<p>This extra lookup makes lightweight updates <strong>slightly slower</strong> than ReplacingMergeTree inserts, but <strong>much more efficient at query time</strong>, because patch‑on‑read knows exactly which rows to overlay.</p>
+<p>We’ll contrast this behavior with ReplacingMergeTree mechanics in the next section.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="why-final-is-slower-than-patch-on-read" level="3">Why FINAL is slower than patch-on-read<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#why-final-is-slower-than-patch-on-read">#</a></span></h3>
+<blockquote>
+<p><a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines#getting-up-to-date-results-with-final">FINAL</a> queries must <strong>discover</strong> the latest rows; <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-on-read-works">patch-on-read</a> queries <strong>already know</strong> where those rows live.</p>
+</blockquote>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="two-quick-visuals-show-the-difference" level="4">Two quick visuals show the difference.<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#two-quick-visuals-show-the-difference">#</a></span></h4>
+<p><strong>Diagram 1 – FINAL:</strong> ClickHouse <em>can’t</em> tell which part has the latest row, so it loads the parts, <a href="https://clickhouse.com/docs/merges#replacing-merges">merges</a> them on-the-fly in memory, and keeps only the newest rows per sorting key before the <a href="https://clickhouse.com/docs/optimize/query-parallelism">query engine</a> processes the data further.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.005.png" loading="lazy" src="/uploads/Blog_updates_Part_3_005_9f0a05cc39.png"/></span>
+<p>We won’t go into detail here, but the FINAL merge process has been heavily <a href="https://clickhouse.com/blog/clickhouse-release-23-12#optimizations-for-final">optimized</a> in recent years. There are also <a href="https://clickhouse.com/docs/guides/replacing-merge-tree#exploiting-partitions-with-replacingmergetree">best practices</a> to help minimize the amount of work required during FINAL processing.</p>
+<p><strong>Diagram 2 – patch-on-read:</strong> Patch parts tell ClickHouse <em>exactly</em> which rows changed, so it <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates#how-patch-on-read-works">overlays</a> only those rows on-the-fly in memory, no broad merge is needed.
+<span class="relative mb-9 flex w-full justify-center"><img alt="Blog-updates Part 3.006.png" loading="lazy" src="/uploads/Blog_updates_Part_3_006_b83131702c.png"/></span></p>
+<p>Patch parts reference their target rows precisely via _part, _part_offset, _block_number, and _block_offset, enabling a <strong>truly surgical, targeted overlay</strong>.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="quick-summary-table" level="4">Quick summary table<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#quick-summary-table">#</a></span></h4>
+<div class="w-full overflow-x-auto"><table><thead><tr><th>FINAL (ReplacingMergeTree)</th><th>Patch-on-read (Lightweight updates)</th></tr></thead><tbody><tr><td><strong>Doesn’t know</strong> which parts contain the latest row versions.</td><td><strong>Knows exactly</strong> which rows are updated and where they are stored (patch parts).</td></tr><tr><td><strong>Must merge all candidate ranges</strong> across all parts and resolve the latest version by sorting key and insertion time.</td><td>Patch parts <strong>directly reference the rows they update</strong> via _part, _part_offset, _block_number, and _block_offset.</td></tr><tr><td>Row-version resolution is <strong>broad and exploratory</strong>, requiring heavy processing.</td><td>Merging is <strong>surgical and targeted</strong>, overlaying only the known updated rows.</td></tr><tr><td>Historically much-slower than normal reads; it’s now heavily optimized, but still heavier than patch-on-read.</td><td>Highly efficient, lightweight, and predictable.</td></tr></tbody></table></div>
+<p>With the mechanics clear, here’s a quick side‑by‑side recap to tie it all together.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="update-methods-at-a-glance" level="2">UPDATE methods at a glance<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#update-methods-at-a-glance">#</a></span></h2>
+<p><em>Before we wrap up, here’s how the UPDATE methods compare at a glance:</em></p>
+<ul>
+<li>
+<p><strong>Classic mutations</strong> — slowest path; rewrite full columns on disk before queries can see the new data.</p>
+</li>
+<li>
+<p><strong>On-the-fly mutations</strong> — instant; store update expressions in memory, slower queries.</p>
+</li>
+<li>
+<p><strong>ReplacingMergeTree inserts</strong> — fast to write, but add query overhead with FINAL.</p>
+</li>
+<li>
+<p><strong>Lightweight updates</strong> — almost as fast as an INSERT, while keeping query impact low.</p>
+</li>
+</ul>
+<p><strong>Cheat‑sheet:</strong> Here’s where each update method shines, and what it costs.</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th>Method</th><th>Best for</th><th>Worst‑case query hit</th><th>Caveat</th></tr></thead><tbody><tr><td>Mutation</td><td>Large, infrequent bulk changes</td><td>baseline</td><td>Slow to apply</td></tr><tr><td>On‑the‑fly mutation</td><td>Ad‑hoc large changes requiring immediate visibility</td><td>↑ 12–427 %</td><td><strong>Still rewrites parts later;</strong> queries slow if many stack</td></tr><tr><td>ReplacingMT + FINAL</td><td>High‑frequency single‑row updates</td><td>↑ 21–550 %</td><td>Requires <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FINAL</code> clause</td></tr><tr><td>Lightweight update (patch parts)</td><td>High‑frequency small updates (≤ 10 % of table)</td><td>↑ 7–21 %</td><td>Slower join‑mode if sources merged away</td></tr></tbody></table></div>
+<p>With the mechanics clear and side-by-side results in hand, here’s what it all means for real workloads.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouse-updates-at-1000-speed-key-takeaways" level="2">ClickHouse updates at 1,000× speed: Key takeaways<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/updates-in-clickhouse-3-benchmarks#clickhouse-updates-at-1000-speed-key-takeaways">#</a></span></h2>
+<p>ClickHouse now supports <strong>standard SQL UPDATEs</strong>, implemented as <strong>lightweight updates with patch parts</strong>, an approach that finally closes a long‑standing gap in column‑store performance.</p>
+<p>In our benchmarks:</p>
+<ul>
+<li>
+<p><strong>Bulk SQL UPDATEs</strong> were up to <strong>1,700× faster</strong> than classic mutations</p>
+</li>
+<li>
+<p><strong>Single‑row SQL UPDATEs</strong> reached <strong>2,400× faster</strong></p>
+</li>
+<li>
+<p>All with only modest (worst-case) query overhead</p>
+</li>
+</ul>
+<p>This means:</p>
+<ul>
+<li>
+<p><strong>High‑frequency small updates</strong> using familiar SQL syntax, without slowing queries</p>
+</li>
+<li>
+<p><strong>Instantly visible changes</strong> for real‑time and streaming workloads</p>
+</li>
+<li>
+<p><strong>Scalable pipelines</strong> that mix batch and interactive updates seamlessly</p>
+</li>
+</ul>
+<p>ClickHouse can now handle update patterns that were previously reserved for row‑stores, while still excelling at analytical workloads.</p>
+<p><em><a href="https://github.com/ClickHouse/examples/tree/main/blog-examples/clickhouse-fast-updates">All benchmark scripts and queries are on GitHub</a>.</em></p>
+<p>This concludes our <strong>three‑part series</strong> on building fast UPDATEs for the ClickHouse column store.<br/>If you missed the earlier posts, check out <a href="https://clickhouse.com/blog/updates-in-clickhouse-1-purpose-built-engines">Part 1: Purpose-built engines</a> and <a href="https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates">Part 2: SQL‑style UPDATEs</a>.</p></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

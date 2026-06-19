@@ -1,0 +1,31 @@
+id: R-101
+name: order_by_key_redesign
+tier: '2'
+category: index_design
+status: proposed
+statement: Рекомендовать изменение ORDER BY ключа на основе паттерна запросов
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - анализ WHERE-колонок в query_log; корреляция с ORDER BY
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks:
+- перестройка таблицы — часы/сутки
+opt_in: true
+references: []
+cost_model:
+  metric: сокращение granules_to_read
+  formula: ''
+  baseline: ''
+  projected: ''

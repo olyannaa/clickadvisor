@@ -1,0 +1,12 @@
+case_id: tpch_q06
+source: tpch
+sql: "SELECT\n    sum(l_extendedprice * l_discount) AS revenue\nFROM\n    lineitem\nWHERE\n    l_shipdate >= toDate('1994-01-01')\n    AND l_shipdate < toDate('1994-01-01') + INTERVAL 1 YEAR\n    AND l_discount BETWEEN 0.06 - 0.01 AND 0.06 + 0.01\n    AND l_quantity < 24;"
+schema_files:
+- schemas/tpch.sql
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q6: Forecasting Revenue Change. Простой агрегат с range-фильтром. Правил не применяется — чистый запрос.'
+expected_findings_count: 0
+status: reviewed

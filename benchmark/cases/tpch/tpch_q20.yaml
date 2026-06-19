@@ -1,0 +1,24 @@
+case_id: tpch_q20
+source: tpch
+sql: "SELECT\n    s_name,\n    s_address\nFROM\n    supplier,\n    nation\nWHERE\n    s_suppkey IN (\n        SELECT\n            ps_suppkey\n        FROM\n            partsupp\n        WHERE\n            ps_partkey IN (\n                SELECT\n                    p_partkey\n                FROM\n                    part\n                WHERE\n                    p_name LIKE 'forest%'\n            )\n            AND ps_availqty > (\n                SELECT\n                    0.5 * sum(l_quantity)\n                FROM\n                    lineitem\n                WHERE\n                    l_partkey = ps_partkey\n                    AND l_suppkey = ps_suppkey\n                    AND l_shipdate >= toDate('1994-01-01')\n                    AND l_shipdate < toDate('1994-01-01') + INTERVAL 1 YEAR\n            )\n    )\n    AND s_nationkey = n_nationkey\n    AND n_name = 'CANADA'\nORDER BY\n    s_name;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM supplier, nation — implicit JOIN
+- issue_id: I-2
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: IN (SELECT ... WHERE ... IN (SELECT ...)) — двойная вложенность
+expected_rules_to_fire:
+- D-002
+- D-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q20: Potential Part Promotion. LIKE ''forest%'' — не leading wildcard, D-005 не применяется. Убрал из разметки.'
+expected_findings_count: 2
+status: reviewed

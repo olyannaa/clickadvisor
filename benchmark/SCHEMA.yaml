@@ -1,0 +1,67 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ClickAdvisor Benchmark Case
+type: object
+additionalProperties: false
+required:
+  - case_id
+  - source
+  - sql
+  - schema_files
+  - known_issues
+  - expected_rules_to_fire
+  - expected_findings_count
+  - expected_improvement
+  - synthetic_explain_path
+  - notes
+properties:
+  status:
+    type: string
+    enum: ["proposed", "reviewed", "validated"]
+  case_id:
+    type: string
+    minLength: 1
+  source:
+    type: string
+    minLength: 1
+  sql:
+    type: string
+  schema_files:
+    type: array
+    items:
+      type: string
+  known_issues:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+        - issue_id
+        - type
+        - detected_by_rule
+        - severity
+        - description
+      properties:
+        issue_id:
+          type: string
+        type:
+          type: string
+        detected_by_rule:
+          type: string
+        severity:
+          type: string
+          enum: ["low", "medium", "high"]
+        description:
+          type: string
+  expected_rules_to_fire:
+    type: array
+    items:
+      type: string
+  expected_findings_count:
+    type: integer
+    minimum: 0
+  expected_improvement:
+    type: ["string", "null"]
+  synthetic_explain_path:
+    type: ["string", "null"]
+  notes:
+    type: string

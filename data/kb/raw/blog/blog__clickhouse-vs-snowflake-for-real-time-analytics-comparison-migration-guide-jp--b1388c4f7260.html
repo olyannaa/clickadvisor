@@ -1,0 +1,236 @@
+<h1>ClickHouse vs Snowflakeによるリアルタイム分析 - 比較と移行</h1>
+<article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><p>title<br/>
+ClickHouse vs Snowflakeによるリアルタイム分析 - 比較と移行</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="clickhouse_vs_snowflake_simple.png" loading="lazy" src="/uploads/clickhouse_vs_snowflake_simple_165592b77b.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="要約" level="2">要約<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E8%A6%81%E7%B4%84">#</a></span></h2>
+<p>この「ClickHouse vs. Snowflake」ブログシリーズは2つのパートで構成されており、それぞれ独立して読むことができます。各パートは以下のとおりです。</p>
+<ul>
+<li>
+<p>比較と移行 - 本記事では、ClickHouseとSnowflakeのアーキテクチャ上の類似点と相違点を概説し、ClickHouse Cloudがリアルタイム分析に特に適した機能をレビューします。SnowflakeからClickHouseへのワークロード移行に興味がある方のために、データセットの違いやデータ移行方法についても解説します。</p>
+</li>
+<li>
+<p><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-benchmarks-cost-analysis">ベンチマークとコスト分析</a> - シリーズのもう一つの記事では、提案するアプリケーションを支える一連のリアルタイム分析用クエリを両システムでベンチマークし、さまざまな最適化を試した上でコストを直接比較しています。私たちの結果によると、ClickHouse Cloudはパフォーマンスとコストの両面でSnowflakeを上回りました。</p>
+<ul>
+<li>本番運用では、ClickHouse CloudはSnowflakeより3〜5倍コスト効率が高い</li>
+<li>クエリ速度はSnowflakeと比較して2倍以上高速</li>
+<li>データ圧縮率はSnowflakeより38%優れている</li>
+</ul>
+</li>
+</ul>
+<div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="目次" level="2" style="margin-bottom:20px">目次<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E7%9B%AE%E6%AC%A1">#</a></span></h2>
+<ul>
+<li><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#introduction">はじめに</a></li>
+<li><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#clickhouse-vs-snowflake">ClickHouse vs Snowflake</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#similarities">類似点</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#differences">相違点</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#real-time-analytics">リアルタイム分析</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#clustering-vs-ordering">クラスタリング vs ORDER BY</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#migrating-data">データ移行</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#unloading-from-snowflake">Snowflakeからのアンロード</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#importing-to-clickhouse">ClickHouseへのインポート</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#conclusion">結論</a></li>
+<li><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#appendix">付録</a>
+<ul style="margin-bottom:0px">
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#data-types">データ型</a>
+</li><li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#numerics">数値型</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#strings">文字列</a></li>
+<li style="margin-top:10px"><a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide#semi-structured">セミ構造化</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="はじめに" level="2">はじめに<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB">#</a></span></h2>
+<p>Snowflakeはオンプレミスのレガシーなデータウェアハウスのワークロードをクラウドに移行することを主目的としたクラウドデータウェアハウスです。大規模な長時間レポート処理に最適化されています。データをクラウドへ移行するにつれ、データオーナーはこのデータをどのように活用してさらに価値を引き出せるかを検討するようになります。たとえば、社内外で使うリアルタイムアプリケーションに活用するといったケースです。そこで、リアルタイム分析に最適化されたデータベースであるClickHouseの必要性に気づきます。</p>
+<p>私たちはこの比較を公正に行うよう努めており、Snowflakeがデータウェアハウス用途で素晴らしい機能をいくつも備えていることも認めています。私たちはClickHouseの専門家ではありますが、Snowflakeに関しては必ずしも専門家ではありません。Snowflakeに詳しいユーザーからのフィードバックや改善の提案を歓迎しています。Snowflakeが他のユースケースにも利用可能であることは承知していますが、本記事の範囲はリアルタイム分析に絞られています。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="clickhouse-vs-snowflake" level="2">ClickHouse vs Snowflake<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#clickhouse-vs-snowflake">#</a></span></h2>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="類似点" level="3">類似点<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E9%A1%9E%E4%BC%BC%E7%82%B9">#</a></span></h3>
+<p>Snowflakeはクラウドベースのデータウェアハウスプラットフォームで、大量データの格納・処理・分析をスケーラブルかつ効率的に行うためのソリューションを提供します。ClickHouse同様、Snowflakeは既存技術の上に構築されたものではなく、独自のSQLクエリエンジンとカスタムアーキテクチャを採用しています。</p>
+<p>Snowflakeのアーキテクチャは、<a href="https://en.wikipedia.org/wiki/Shared-disk_architecture">共有ディスク</a>（私たちは「共有ストレージ」という用語を好みます）と<a href="https://en.wikipedia.org/wiki/Shared-nothing_architecture">共有ナッシング</a>アーキテクチャをハイブリッドに組み合わせたものと説明されます。つまり、オブジェクトストア（S3など）を使ってすべての計算ノードからアクセスできる（共有ディスク）一方、クエリに応じて各計算ノードがデータの一部をローカルに保持する（共有ナッシング）仕組みです。これは理論上、<a href="https://www.geeksforgeeks.org/difference-between-shared-nothing-architecture-and-shared-disk-architecture/">両方の利点を兼ね備えている</a>とされます。共有ディスクアーキテクチャのシンプルさと、共有ナッシングアーキテクチャのスケーラビリティを兼ね備えているわけです。</p>
+<p>この設計は、オブジェクトストレージを主要なストレージとして利用することを前提としており、ほぼ無限の同時アクセス性と高い耐久性、スケーラブルなスループットを実現しています。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="snowflake_architecture.png" loading="lazy" src="/uploads/snowflake_architecture_e3c612c8e9.png"/></span>
+<em>クレジット: <a href="https://docs.snowflake.com/en/user-guide/intro-key-concepts">https://docs.snowflake.com/en/user-guide/intro-key-concepts</a></em>
+<p>一方、ClickHouseはオープンソースかつクラウドホスティングされた製品で、共有ディスクと共有ナッシングのどちらの構成にもデプロイすることができます。後者はセルフマネージド環境で一般的です。CPUやメモリのスケールアップは容易ですが、共有ナッシング構成ではクラスタ構成変更の際にデータのレプリケーションや管理にまつわる古典的な課題やオーバーヘッドが発生します。</p>
+<p>このため、ClickHouse CloudではSnowflakeと同様のコンセプトを持つ共有ストレージアーキテクチャを採用しています。S3やGCSなどのオブジェクトストアに単一コピーのデータを格納し、ほぼ無制限のストレージ容量と強力な冗長性が得られます。すべてのノードはこの単一コピーのデータと各ノード固有のローカルSSDキャッシュにアクセスできます。ノード数やスペックを調整することでCPUやメモリをスケールさせます。Snowflakeと同様、S3のスケーラビリティ特性によって、ノードを追加してもディスクI/Oやネットワークがボトルネックになりにくく、並行アクセスが増えても性能が落ちにくいのが特長です。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="clickhouse_architecture.png" loading="lazy" src="/uploads/clickhouse_architecture_53f247b7b1.png"/></span>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="相違点" level="3">相違点<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E7%9B%B8%E9%81%95%E7%82%B9">#</a></span></h3>
+<p>基盤となるストレージ形式やクエリエンジン以外にも、これらのアーキテクチャにはいくつか細かな違いがあります。</p>
+<ul>
+<li>Snowflakeの計算リソースは、<a href="https://docs.snowflake.com/en/user-guide/warehouses">ウェアハウス</a>という概念を通じて提供されます。これは一定サイズのノード数で構成されます。Snowflakeはウェアハウスの具体的な構成を公開していませんが、一般的には<a href="https://select.dev/posts/snowflake-warehouse-sizing">各ノードに8vCPU、16GiB、200GBのローカルストレージ（キャッシュ用）がある</a>と理解されています。ノード数はTシャツサイズ方式で決まり、たとえばX-Smallは1ノード、Smallは2ノード、Mediumは4ノード、Largeは8ノードといった具合です。これらのウェアハウスはオブジェクトストア上にあるデータをどれでもクエリすることが可能です。クエリ負荷がかかっていないアイドル時はウェアハウスが停止し、クエリが来ると再開します。ストレージコストは常に請求されますが、ウェアハウスの料金はアクティブな時間だけ発生します。</li>
+<li>ClickHouse Cloudも同様に、ノードとそのローカルキャッシュストレージを使った仕組みを利用します。ただしTシャツサイズではなく、ユーザーは合計CPUとメモリを指定してサービスをデプロイし、それに応じて（あらかじめ定義した上限内で）クエリ負荷に合わせて自動的に垂直・水平方向にスケールします。ClickHouse Cloudのノードは現在、Snowflakeの1:2とは異なり1<!-- -->。現時点では、Snowflakeのウェアハウスほど厳密にデータと疎結合ではありませんが、将来的には疎結合の構成も可能です。ノードはアイドルになると自動的に停止し、クエリが来ると再開します。必要に応じて手動でリサイズもできます。</li>
+<li>ClickHouse Cloudのクエリキャッシュは各ノード固有であり、Snowflakeのようにサービスレイヤーで共有していません。それでも、ベンチマークではSnowflakeより高いパフォーマンスを示しました。</li>
+<li>SnowflakeとClickHouse Cloudはクエリ同時実行数を増やすために異なるアプローチを取っています。Snowflakeは<a href="https://docs.snowflake.com/en/user-guide/warehouses-multicluster#benefits-of-multi-cluster-warehouses">マルチクラスタウェアハウス</a>という機能で並列化を図り、クエリ同時実行数を増やします（クエリレイテンシ自体は改善しません）。一方ClickHouseでは、垂直または水平スケールによってメモリやCPUを増やすことでこれを実現します。本記事では同時実行数よりもレイテンシに主眼を置いているため詳細は扱いませんが、Snowflakeが<a href="https://docs.snowflake.com/en/sql-reference/parameters#max-concurrency-level">ウェアハウスごとの同時実行数をデフォルトで8に制限</a>しているのに対し、ClickHouse Cloudは1ノードあたり1000クエリまで実行可能である点は注目に値します。</li>
+<li>Snowflakeはデータセットに対してコンピュートサイズを変更でき、ウェアハウスの再開も速い点があるため、アドホッククエリの体験は良好です。データウェアハウスやデータレイク用途では、これが他システムに対する優位性につながる場合があります。</li>
+</ul>
+<p>追加の機能やデータ型における類似点・相違点については後述します。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="リアルタイム分析" level="3">リアルタイム分析<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E5%88%86%E6%9E%90">#</a></span></h3>
+<p>ベンチマークの結果から、ClickHouseは以下の観点でリアルタイム分析アプリケーションにおいてSnowflakeを上回っています。</p>
+<ul>
+<li><strong>クエリレイテンシ</strong>: Snowflakeのクエリは、テーブルにクラスタリングを適用して最適化してもなお高めのレイテンシが生じます。テーブルをSnowflake側でクラスタリングキーに含め、ClickHouse側でPRIMARY KEYに含めた列でフィルタをかけた場合でも、Snowflakeでは同等のパフォーマンスを達成するのにClickHouseの2倍以上の計算リソースが必要でした。Snowflakeの<a href="https://docs.snowflake.com/en/user-guide/querying-persisted-results">永続的なクエリキャッシュ</a>は一部のレイテンシ問題を緩和しますが、フィルタ条件が多様化すると効果が薄れます。また、キャッシュはデータが変更されると無効化されるため、新しいデータが取り込まれるようなユースケースではキャッシュの恩恵を受けにくい可能性があります。今回のベンチマークではそのケースを想定していませんが、実際の運用ではもっと新しいデータが継続的に追加されるでしょう。<br/>
+ClickHouseのクエリキャッシュはノード固有であり、<a href="https://clickhouse.com/blog/introduction-to-the-clickhouse-query-cache-and-design">トランザクションレベルの一貫性</a>を保証しませんが、<a href="https://clickhouse.com/blog/introduction-to-the-clickhouse-query-cache-and-design">リアルタイム分析には向いている</a>設計です。ユーザーはクエリごとに<a href="https://clickhouse.com/docs/en/operations/settings/settings#use-query-cache">クエリキャッシュの使用</a>を制御でき、<a href="https://clickhouse.com/docs/en/operations/settings/settings#query-cache-max-size-in-bytes">サイズ</a>やクエリのキャッシュ対象となる<a href="https://clickhouse.com/docs/en/operations/settings/settings#enable-writes-to-query-cache">実行回数・時間</a>などの制限も設定できます。</li>
+<li><strong>コスト削減</strong>: Snowflakeではクエリが一定時間走らないとウェアハウスが自動で休止し、課金がストップする仕組みがあります。ただし、このアイドルチェックは<a href="https://docs.snowflake.com/en/sql-reference/sql/alter-warehouse">60秒までしか下げられません</a>。そして、クエリが届くと数秒以内にウェアハウスが再開します。リソースを使った分だけ課金されるので、アドホッククエリ主体のワークロードにはメリットがあります。<br/>
+しかし、多くのリアルタイム分析ワークロードでは継続的なデータ取り込みと頻繁なクエリ実行が必要となり、アイドルになるタイミングがほぼありません（例: 外部に公開されているダッシュボードなど）。結果としてウェアハウスは常にアクティブになり、Snowflakeのアイドル停止機能によるコストメリットが活かせません。一方、ClickHouse Cloudは1秒あたりのコスト単価がSnowflakeより低いため、常時稼働が求められるリアルタイム分析ワークロードでは最終的な料金が大幅に下がります。</li>
+<li><strong>機能に関する予測可能な価格設定</strong>: マテリアライズドビューやクラスタリング（ClickHouseのORDER BYに相当）などは、リアルタイム分析で高いパフォーマンスを得るうえで不可欠な機能です。Snowflakeではこれらの機能が追加課金や高い料金プランを必要とし、さらにバックグラウンドでどれだけ処理が走るかは予測しづらいです。一方、ClickHouse Cloudではこれらの機能を使っても基本コストに追加料金はかかりません（挿入時のCPU・メモリ使用量が増える程度）。私たちのベンチマークでは、これらの違いやクエリの高速化、圧縮率の高さが合わさって、トータルコストをSnowflakeより大きく下げられることが分かりました。</li>
+</ul>
+<p>さらにClickHouseには、リアルタイム分析機能を幅広くサポートする次のような特長があるという声もユーザーから寄せられています。</p>
+<ul>
+<li><a href="https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states">アグリゲートコンビネータ</a>や<a href="https://clickhouse.com/docs/en/sql-reference/functions/array-functions/">配列関数</a>などの特殊な分析関数が豊富で、複雑なクエリも短い構文で書け、パフォーマンスや可読性を向上できる</li>
+<li>Snowflakeほど厳しくないエイリアス制約など、分析向けに設計されたクエリ構文</li>
+<li>ENUMや精密指定可能な数値型など、より豊富なデータ型サポート。特にSnowflakeでは数値の精度指定があってもディスク消費には影響せず、ClickHouseでは型を厳密にすることで非圧縮時メモリを削減できる</li>
+<li><a href="https://clickhouse.com/blog/data-formats-clickhouse-csv-tsv-parquet-native">ファイルやデータ形式</a>の幅広いサポート（Snowflakeの<a href="https://docs.snowflake.com/en/sql-reference/sql/create-file-format">制限された形式</a>よりも多い）により、分析データのインポート・エクスポートが簡単</li>
+<li>S3やMySQL、PostgreSQL、MongoDB、Delta Lakeなど、さまざまなデータレイクやデータストアに対してアドホックでフェデレーテッドクエリを実行可能</li>
+<li>列ごとに<a href="https://clickhouse.com/blog/optimize-clickhouse-codecs-compression-schema">カスタムスキーマやコーデック</a>を指定することで高い圧縮率を実現可能。ベンチマークでもこの機能を活用して圧縮率を高めました</li>
+<li>セカンダリインデックスとプロジェクション機能をサポート。<a href="https://clickhouse.com/docs/en/optimize/skipping-indexes">セカンダリインデックス</a>には<a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/invertedindexes#usage">インバーテッドインデックス</a>も含まれ、テキスト検索にも対応。<a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree#projections">プロジェクション</a>はクエリごとに最適化を行うための仕組みです。プロジェクションはSnowflakeのマテリアライズドビューと似ていますが、<a href="https://docs.snowflake.com/en/user-guide/views-materialized#limitations-on-creating-materialized-views">制限</a>が少なく、すべてのアグリゲート関数をサポートしています。プロジェクション自体でコストが増加することはなく（Snowflakeでは機能使用によって1.5倍課金される場合がある）、ストレージ使用量増加分のみが影響します。ベンチマーク分析でこれらの機能が有効であることを示します。</li>
+<li>マテリアライズドビューもサポート。Snowflakeのマテリアライズドビュー（ClickHouseのプロジェクションに近い）とは異なり、ClickHouseのマテリアライズドビューはデータの挿入時にのみトリガーが実行されます。
+<ul>
+<li>結果は別のテーブルに格納可能で、もとのデータを保持する必要はありません。要約したデータだけでいいなら、ストレージ削減と高いパフォーマンスを両立できます。</li>
+<li>JOINやWHEREフィルタをサポートし、またマテリアライズドビューをチェーンさせることもできます。</li>
+</ul>
+</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="クラスタリング-vs-order-by" level="3">クラスタリング vs ORDER BY<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%82%AF%E3%83%A9%E3%82%B9%E3%82%BF%E3%83%AA%E3%83%B3%E3%82%B0-vs-order-by">#</a></span></h3>
+<p>ClickHouseもSnowflakeもカラム指向データベースです。行指向に比べてCPUキャッシュやSIMD命令を効率的に活用でき、特定のカラムをソートしておくと圧縮率が上がります。どちらも最適な読み取りパフォーマンスにはソートやインデックスが重要で、実装の違いはあるものの、概念としては類似しています。</p>
+<p>ClickHouseでは、スパースインデックスとソートされたデータを中心とした構造を採用しています。テーブル作成時に<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>でカラムのタプルを指定し、ディスク上のソート順を決定します。一般的には<a href="https://clickhouse.com/docs/en/optimize/sparse-primary-indexes">頻繁に使われるクエリのフィルタ列を、カーディナリティが低い順に並べる</a>とよいとされています。また、<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>を省略するとデフォルトでPRIMARY KEYが使われますが、<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">PRIMARY KEY</code>と<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>を両方指定することも可能です（<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">PRIMARY KEY</code>は<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>の先頭と一致している必要があります）。スパースインデックスはディスク上がソートされていることを前提として動くため、効率的にデータをスキップできます。</p>
+<p>Snowflakeは<a href="https://docs.snowflake.com/en/user-guide/tables-clustering-micropartitions">マイクロパーティション</a>と呼ばれる独自構造を使いつつ、<a href="https://docs.snowflake.com/en/user-guide/tables-clustering-keys">クラスタリング</a>という機能で似たコンセプトを提供しています。クラスタリングキーに指定されたカラムをもとにマイクロパーティションが割り振られ、同じ値を持つデータが近接配置されるようになります。これはClickHouseの<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>と同様、ディスク上のデータが並ぶ順序を制御し、クエリや圧縮において同様の利点を得ることができます。</p>
+<p>ただし、実装上はいくつかの違いがあります。</p>
+<ul>
+<li>ClickHouseは、データ挿入時に<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ORDER BY</code>に従って自動的にソートとインデックス構築を行います。これによる追加コストはほぼなく、高速に更新が必要なテーブルでも適切に最適化されます。</li>
+<li>Snowflakeはバックグラウンドでの<a href="https://docs.snowflake.com/en/user-guide/tables-auto-reclustering">自動クラスタリング</a>によってデータを再配置し、クレジットが消費されます。これにかかる料金を事前に予測するのは難しく、多数の行があるテーブルでこそ威力を発揮する一方で<a href="https://docs.snowflake.com/en/user-guide/tables-clustering-keys#benefits-of-defining-clustering-keys-for-very-large-tables">頻繁に更新されるテーブルには推奨していない</a>です。カラムのカーディナリティによってコストが大きく左右され、Snowflakeでは<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">to_date</code>などの式を使ってカーディナリティを下げることを推奨しています。さらに、クラスタリングによる恩恵が得られるまでには時間がかかり、すぐに最適化されるわけではありません。</li>
+<li>Snowflakeはマイクロパーティション方式なので、高コストではあるものの<a href="https://docs.snowflake.com/en/user-guide/tables-clustering-keys#credit-and-storage-impact-of-reclustering">再クラスタリング</a>が可能です。一方ClickHouseでは、テーブルを完全に再書き込みしなければ再ソートできません。</li>
+</ul>
+<p>両システムとも、分析処理では一般的に<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code>やソート、フィルタリングで特定のカラムをよく使用するため、こうしたソート/クラスタリングの設定は重要になります。クラスタリング/ORDER BYに指定するカラムはできるだけ多くのクエリで恩恵を受けられるよう選択し、カラムの並び順にも気を配る必要があります。</p>
+<p>カラム選択の推奨事項は両システムでほぼ共通しています。</p>
+<ul>
+<li>選択的なフィルタで頻繁に使うカラムを採用する。<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">GROUP BY</code>に使われるカラムもメモリ効率で役立つ</li>
+<li>カーディナリティが十分に高いカラムを使う（コイントスのように50%の行しか絞れないものは避ける）</li>
+<li>複数カラムが必要な場合は、カーディナリティが低いカラムから高いカラムの順に並べる。特にClickHouseでは<a href="https://clickhouse.com/docs/en/guides/improving-query-performance/sparse-primary-indexes/sparse-primary-indexes-cardinality/">この点が非常に重要</a>ですが、Snowflakeも考え方は同じと思われます。</li>
+</ul>
+<p><em>注: 上記の推奨事項は似ていますが、Snowflakeは<a href="https://docs.snowflake.com/en/user-guide/tables-clustering-keys#strategies-for-selecting-clustering-keys">高カーディナリティカラムをクラスタリングキーに指定するのを推奨していません</a>。これはClickHouseには当てはまりません。タイムスタンプなどカーディナリティが高い列はClickHouseでもORDER BYの候補になります。</em></p>
+<p>このガイドラインを踏まえた上で、私たちのベンチマークを行いました。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="データ移行" level="3">データ移行<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%83%87%E3%83%BC%E3%82%BF%E7%A7%BB%E8%A1%8C">#</a></span></h3>
+<p>SnowflakeからClickHouseにデータを移行する場合、S3などのオブジェクトストアを中継ストレージとして利用することができます。SnowflakeとClickHouseの<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">COPY INTO</code>や<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">INSERT INTO SELECT</code>コマンドを組み合わせ、次のような流れで転送します。</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="migrating_clickhouse_snowflake.png" loading="lazy" src="/uploads/migrating_clickhouse_snowflake_93a30b945c.png"/></span>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="snowflakeからのアンロード" level="4">Snowflakeからのアンロード<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#snowflake%E3%81%8B%E3%82%89%E3%81%AE%E3%82%A2%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89">#</a></span></h4>
+<p>Snowflakeからのエクスポートには、図のように<a href="https://docs.snowflake.com/en/sql-reference/sql/create-stage">External Stage</a>を使います。これは<a href="https://clickhouse.com/docs/en/engines/table-engines/integrations/s3">ClickHouseのS3テーブルエンジン</a>と似ており、外部にホストされたファイルのまとまりをSQLで参照できるようにします。</p>
+<p>SnowflakeとClickHouse間のデータ移行には、型情報を維持し、圧縮効率も良く、ネスト構造を扱えるParquet形式を推奨します。<a href="https://docs.snowflake.com/en/sql-reference/sql/create-file-format#required-parameters">JSONの<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ndjson</code>形式</a>を使う方法もありますが、こちらは可読性を除けばデータ量が増加する傾向があります。</p>
+<blockquote>
+<p>以下の例では65億行のPyPiデータセットをエクスポートしています。このスキーマとデータセットは、<a href="https://console.cloud.google.com/bigquery?p=bigquery-public-data&amp;d=pypi&amp;page=dataset">publicなBigQueryテーブル</a>から取得したもので、<a href="https://packaging.python.org/en/latest/guides/analyzing-pypi-package-downloads/">こちら</a>のとおりPiPなどのツールを使ったPythonパッケージのダウンロード履歴を記録しています。詳細は<a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-benchmarks-cost-analysis">ベンチマーク記事</a>で紹介していますが、550億行以上の大きなデータセットであり、リアルタイム分析における一般的なデータ構造に近いものとして選びました。</p>
+</blockquote>
+<p>下記の例では、SnowflakeでParquetの<a href="https://docs.snowflake.com/en/sql-reference/sql/create-file-format">名前付きファイル形式</a>を作成し、次にエクスポート先のS3を表すExternal Stageを宣言してから、<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">COPY INTO</code>コマンドでエクスポートします。このステージはS3バケットへの抽象化レイヤーで、権限付与も行いやすくなります。</p>
+<p>SnowflakeではS3への書き込み権限を付与する方法が<a href="https://docs.snowflake.com/en/user-guide/data-load-s3-config">複数</a>あります。サンプルを簡単にするため今回はキーとシークレットを直接使っていますが、本番環境では<a href="https://docs.snowflake.com/en/user-guide/data-load-s3-config-aws-iam-user">Snowflake Storage Integration</a>を使うことを推奨します。</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> FILE FORMAT my_parquet_format TYPE <span class="hljs-operator">=</span> parquet;
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">OR</span> REPLACE STAGE my_ext_unload_stage 
+URL<span class="hljs-operator">=</span><span class="hljs-string">'s3://datasets-documentation/pypi/sample/'</span>
+CREDENTIALS<span class="hljs-operator">=</span>(AWS_KEY_ID<span class="hljs-operator">=</span><span class="hljs-string">'&lt;key&gt;'</span> AWS_SECRET_KEY<span class="hljs-operator">=</span><span class="hljs-string">'&lt;secret&gt;'</span>)
+FILE_FORMAT <span class="hljs-operator">=</span> my_parquet_format;
+
+<span class="hljs-comment">-- 全ファイルに「pypi」プレフィックスを適用し、最大ファイルサイズを150MBに指定</span>
+<span class="hljs-keyword">COPY</span> <span class="hljs-keyword">INTO</span> <span class="hljs-variable">@my</span>_ext_unload_stage<span class="hljs-operator">/</span>pypi <span class="hljs-keyword">from</span> pypi max_file_size<span class="hljs-operator">=</span><span class="hljs-number">157286400</span> header<span class="hljs-operator">=</span><span class="hljs-literal">true</span>;
+</code></pre>
+<p>Snowflake側のスキーマは以下です。</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> PYPI (
+   <span class="hljs-type">timestamp</span> <span class="hljs-type">TIMESTAMP</span>,
+   country_code <span class="hljs-type">varchar</span>,
+   url <span class="hljs-type">varchar</span>,
+   project <span class="hljs-type">varchar</span>,
+   file OBJECT,
+   installer OBJECT,
+   python <span class="hljs-type">varchar</span>,
+   implementation OBJECT,
+   distro VARIANT,
+   <span class="hljs-keyword">system</span> OBJECT,
+   cpu <span class="hljs-type">varchar</span>,
+   openssl_version <span class="hljs-type">varchar</span>,
+   setuptools_version <span class="hljs-type">varchar</span>,
+   rustc_version <span class="hljs-type">varchar</span>,
+   tls_protocol <span class="hljs-type">varchar</span>,
+   tls_cipher <span class="hljs-type">varchar</span>
+) DATA_RETENTION_TIME_IN_DAYS <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+</code></pre>
+<p>Parquetにエクスポートするとサイズは約5.5TiB、1ファイル150MB上限で分割されます。AWS us-east-1にある2X-LARGEサイズのウェアハウスで処理時間は30分程度です。<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">header=true</code>を指定しているのはカラム名を出力するためです。VARIANTやOBJECTカラムは<a href="https://docs.snowflake.com/en/sql-reference/sql/copy-into-location#usage-notes">デフォルトでJSON文字列</a>として出力されるので、ClickHouseにインサートする際にキャストが必要になります。</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="clickhouseへのインポート" level="4">ClickHouseへのインポート<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#clickhouse%E3%81%B8%E3%81%AE%E3%82%A4%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%88">#</a></span></h4>
+<p>一度オブジェクトストアに書き出してしまえば、ClickHouseの<a href="https://clickhouse.com/docs/en/sql-reference/table-functions/s3">s3テーブル関数</a>などを使ってテーブルへ取り込めます。以下の例のように実行します。</p>
+<p>以下のようなターゲットスキーマを想定します。</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> default.pypi
+(
+	`<span class="hljs-type">timestamp</span>` DateTime64(<span class="hljs-number">6</span>),
+	`<span class="hljs-type">date</span>` <span class="hljs-type">Date</span> MATERIALIZED <span class="hljs-type">timestamp</span>,
+	`country_code` LowCardinality(String),
+	`url` String,
+	`project` String,
+	`file` Tuple(filename String, project String, version String, type Enum8(<span class="hljs-string">'bdist_wheel'</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>, <span class="hljs-string">'sdist'</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>, <span class="hljs-string">'bdist_egg'</span> <span class="hljs-operator">=</span> <span class="hljs-number">2</span>, <span class="hljs-string">'bdist_wininst'</span> <span class="hljs-operator">=</span> <span class="hljs-number">3</span>, <span class="hljs-string">'bdist_dumb'</span> <span class="hljs-operator">=</span> <span class="hljs-number">4</span>, <span class="hljs-string">'bdist_msi'</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>, <span class="hljs-string">'bdist_rpm'</span> <span class="hljs-operator">=</span> <span class="hljs-number">6</span>, <span class="hljs-string">'bdist_dmg'</span> <span class="hljs-operator">=</span> <span class="hljs-number">7</span>)),
+	`installer` Tuple(name LowCardinality(String), version LowCardinality(String)),
+	`python` LowCardinality(String),
+	`implementation` Tuple(name LowCardinality(String), version LowCardinality(String)),
+	`distro` Tuple(name LowCardinality(String), version LowCardinality(String), id LowCardinality(String), libc Tuple(lib Enum8(<span class="hljs-string">''</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>, <span class="hljs-string">'glibc'</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>, <span class="hljs-string">'libc'</span> <span class="hljs-operator">=</span> <span class="hljs-number">2</span>), version LowCardinality(String))),
+	`<span class="hljs-keyword">system</span>` Tuple(name LowCardinality(String), <span class="hljs-keyword">release</span> String),
+	`cpu` LowCardinality(String),
+	`openssl_version` LowCardinality(String),
+	`setuptools_version` LowCardinality(String),
+	`rustc_version` LowCardinality(String),
+	`tls_protocol` Enum8(<span class="hljs-string">'TLSv1.2'</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>, <span class="hljs-string">'TLSv1.3'</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>),
+	`tls_cipher` Enum8(<span class="hljs-string">'ECDHE-RSA-AES128-GCM-SHA256'</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>, <span class="hljs-string">'ECDHE-RSA-CHACHA20-POLY1305'</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>, <span class="hljs-string">'ECDHE-RSA-AES128-SHA256'</span> <span class="hljs-operator">=</span> <span class="hljs-number">2</span>, <span class="hljs-string">'TLS_AES_256_GCM_SHA384'</span> <span class="hljs-operator">=</span> <span class="hljs-number">3</span>, <span class="hljs-string">'AES128-GCM-SHA256'</span> <span class="hljs-operator">=</span> <span class="hljs-number">4</span>, <span class="hljs-string">'TLS_AES_128_GCM_SHA256'</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>, <span class="hljs-string">'ECDHE-RSA-AES256-GCM-SHA384'</span> <span class="hljs-operator">=</span> <span class="hljs-number">6</span>, <span class="hljs-string">'AES128-SHA'</span> <span class="hljs-operator">=</span> <span class="hljs-number">7</span>, <span class="hljs-string">'ECDHE-RSA-AES128-SHA'</span> <span class="hljs-operator">=</span> <span class="hljs-number">8</span>)
+)
+ENGINE <span class="hljs-operator">=</span> MergeTree
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> (<span class="hljs-type">date</span>, <span class="hljs-type">timestamp</span>)
+</code></pre>
+<p>Snowflake側でOBJECTやVARIANTだった構造化データはJSON文字列として出力されるため、<a href="https://clickhouse.com/docs/en/sql-reference/functions/json-functions#jsonextractjson-indices_or_keys-return_type">JSONExtract関数</a>を使ってインサート時にタプルへ変換します。</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> pypi
+<span class="hljs-keyword">SELECT</span>
+	<span class="hljs-type">TIMESTAMP</span>,
+	COUNTRY_CODE,
+	URL,
+	PROJECT,
+	JSONExtract(ifNull(FILE, <span class="hljs-string">'{}'</span>), <span class="hljs-string">'Tuple(filename String, project String, version String, type Enum8(\'</span>bdist_wheel\<span class="hljs-string">' = 0, \'</span>sdist\<span class="hljs-string">' = 1, \'</span>bdist_egg\<span class="hljs-string">' = 2, \'</span>bdist_wininst\<span class="hljs-string">' = 3, \'</span>bdist_dumb\<span class="hljs-string">' = 4, \'</span>bdist_msi\<span class="hljs-string">' = 5, \'</span>bdist_rpm\<span class="hljs-string">' = 6, \'</span>bdist_dmg\<span class="hljs-string">' = 7))'</span>) <span class="hljs-keyword">AS</span> file,
+	JSONExtract(ifNull(INSTALLER, <span class="hljs-string">'{}'</span>), <span class="hljs-string">'Tuple(name LowCardinality(String), version LowCardinality(String))'</span>) <span class="hljs-keyword">AS</span> installer,
+	PYTHON,
+	JSONExtract(ifNull(IMPLEMENTATION, <span class="hljs-string">'{}'</span>), <span class="hljs-string">'Tuple(name LowCardinality(String), version LowCardinality(String))'</span>) <span class="hljs-keyword">AS</span> implementation,
+	JSONExtract(ifNull(DISTRO, <span class="hljs-string">'{}'</span>), <span class="hljs-string">'Tuple(name LowCardinality(String), version LowCardinality(String), id LowCardinality(String), libc Tuple(lib Enum8(\'</span>\<span class="hljs-string">' = 0, \'</span>glibc\<span class="hljs-string">' = 1, \'</span>libc\<span class="hljs-string">' = 2), version LowCardinality(String)))'</span>) <span class="hljs-keyword">AS</span> distro,
+	JSONExtract(ifNull(<span class="hljs-keyword">SYSTEM</span>, <span class="hljs-string">'{}'</span>), <span class="hljs-string">'Tuple(name LowCardinality(String), release String)'</span>) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">system</span>,
+	CPU,
+	OPENSSL_VERSION,
+	SETUPTOOLS_VERSION,
+	RUSTC_VERSION,
+	TLS_PROTOCOL,
+	TLS_CIPHER
+<span class="hljs-keyword">FROM</span> s3(<span class="hljs-string">'https://datasets-documentation.s3.eu-west-3.amazonaws.com/pypi/2023/pypi*.parquet'</span>)
+SETTINGS input_format_null_as_default <span class="hljs-operator">=</span> <span class="hljs-number">1</span>, input_format_parquet_case_insensitive_column_matching <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+</code></pre>
+<p>ここでは、<a href="https://clickhouse.com/docs/en/operations/settings/formats#input_format_null_as_default"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">input_format_null_as_default=1</code></a>と<a href="https://clickhouse.com/docs/en/operations/settings/formats#input_format_parquet_case_insensitive_column_matching"><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">input_format_parquet_case_insensitive_column_matching=1</code></a>を有効にし、null値をデフォルトに変換し、列名の大小文字を区別しないようにしています。</p>
+<p><a href="https://docs.snowflake.com/en/user-guide/data-unload-azure">Azure</a>や<a href="https://docs.snowflake.com/en/user-guide/data-unload-gcs">Google Cloud</a>を使う場合も同様に処理できます。ClickHouseにはそれぞれの<a href="https://clickhouse.com/docs/en/sql-reference/table-functions/azureBlobStorage">専用テーブル関数</a>などが用意されています。</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="結論" level="2">結論<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E7%B5%90%E8%AB%96">#</a></span></h2>
+<p>本記事では、リアルタイム分析をユースケースとした場合にSnowflakeとClickHouseがどのように比較されるかを、両システムの類似点や相違点とともに見てきました。リアルタイム分析で有用なClickHouseの機能を挙げ、Snowflakeからワークロードを移行する際の考慮点も解説しました。<a href="/blog/clickhouse-vs-snowflake-for-real-time-analytics-benchmarks-cost-analysis">次の記事</a>では、サンプルのリアルタイム分析アプリケーションを構築し、圧縮や挿入パフォーマンスの違い、代表的なクエリのベンチマークを行います。その結果をコスト分析とともに紹介し、ClickHouse Cloud導入時のコスト削減可能性を示します。</p>
+<hr/>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="付録" level="2">付録<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E4%BB%98%E9%8C%B2">#</a></span></h2>
+<p>SnowflakeからClickHouseへリアルタイム分析ワークロードを移行する際に知っておくべき主要な概念を、以下にまとめます。データ型の違いやクラスタリングとORDER BYの相違を補足的に解説します。</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="データ型" level="3">データ型<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%83%87%E3%83%BC%E3%82%BF%E5%9E%8B">#</a></span></h3>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="数値型" level="4">数値型<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E6%95%B0%E5%80%A4%E5%9E%8B">#</a></span></h4>
+<p>SnowflakeとClickHouseを比較すると、SnowflakeよりClickHouseのほうが数値型の精度指定が細かいことに気づくでしょう。Snowflakeは数値型に<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Number</code>を使っており、精度（桁数）とスケール（小数点以下の桁数）を指定します（最大38桁）。整数は<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Number</code>の精度とスケールを0にしたものと同じです。Snowflakeではマイクロパーティションレベルで最小限のバイトで格納するため、ユーザーが指定する精度やスケールは実際のディスク使用量に大きく影響しません。圧縮で相殺される部分もあります。一方、<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float64</code>型を使用すると、精度を一部失う代わりにさらに広い範囲の値を扱えます。</p>
+<p>ClickHouseは、符号付き・符号なしの複数のビット幅を持つ整数型と浮動小数点型を提供し、明示的に精度を指定してメモリ消費を抑えることができます。<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Decimal</code>型はSnowflakeの<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Number</code>と同等ですが、最大76桁までサポートするためSnowflakeの倍の精度があります。浮動小数点は<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float32</code>と<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float64</code>の2種類があり、精度が必要ない場合は<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Float32</code>で圧縮とメモリを節約できます。</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="文字列" level="4">文字列<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E6%96%87%E5%AD%97%E5%88%97">#</a></span></h4>
+<p>ClickHouseとSnowflakeでは文字列型の扱い方に違いがあります。SnowflakeのVARCHARはUTF-8でエンコードされたUnicode文字列を保持し、最大長を指定しても実際の使用バイト数だけが格納されます。その他のTEXTやNCharなどの型はVARCHARのエイリアスです。<br/>
+ClickHouseは<a href="https://clickhouse.com/docs/en/sql-reference/data-types/string">生バイト列</a>として文字列を保持し、エンコーディングはユーザー側が管理します。クエリ時にエンコーディングを扱うための<a href="https://clickhouse.com/docs/en/sql-reference/functions/string-functions#lengthutf8">関数</a>が用意されています（<a href="https://utf8everywhere.org/#cookie">こちら</a>の考え方も参照）。実装的には、ClickHouseのString型はSnowflakeのBinary型に近いと言えます。<br/>
+また、<a href="https://docs.snowflake.com/en/sql-reference/collation">照合順序（コレーション）</a>はSnowflakeと<a href="https://clickhouse.com/docs/en/sql-reference/statements/select/order-by#collation-support">ClickHouse</a>の双方がサポートしています。</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="セミ構造化" level="4">セミ構造化<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/jp/blog/clickhouse-vs-snowflake-for-real-time-analytics-comparison-migration-guide-jp#%E3%82%BB%E3%83%9F%E6%A7%8B%E9%80%A0%E5%8C%96">#</a></span></h4>
+<p>SnowflakeとClickHouseはどちらもセミ構造化データのために豊富な型サポートを提供しています。Snowflakeは<a href="https://docs.snowflake.com/en/sql-reference/data-types-semistructured">VARIANT</a>を中心に<a href="https://docs.snowflake.com/en/sql-reference/data-types-semistructured">ARRAYやOBJECT</a>を定義し、ClickHouseは<a href="https://clickhouse.com/docs/en/sql-reference/data-types/json">JSON型</a>や<a href="https://clickhouse.com/docs/en/sql-reference/data-types/nested-data-structures/nested">Tuple、Nested型</a>で実現します。SnowflakeのARRAYやOBJECTもVARIANTの制約付きにすぎず、内部型を厳密に指定できないのが特徴です。</p>
+<p>一方、ClickHouseはNamed TupleやNested型によって、階層化された構造を明示的に定義できます。サブカラムごとに型を厳密に指定し、そこに圧縮やコーデックを適用できます。Snowflakeでは内部まで型を細かく指定できないため、<a href="https://docs.snowflake.com/en/user-guide/semistructured-considerations#storing-semi-structured-data-in-a-variant-column-vs-flattening-the-nested-structure">最適な圧縮を得るために構造をフラット化する</a>ことを推奨しています。また、Snowflakeにはセミ構造化データに<a href="https://docs.snowflake.com/en/user-guide/semistructured-considerations#data-size-limitations">サイズ制限</a>があります。</p>
+<p>以下の表は、SnowflakeとClickHouseの型対応をまとめたものです。</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th style="text-align:center"><strong>Snowflake</strong></th><th style="text-align:center"><strong>ClickHouse</strong></th><th><strong>備考</strong></th></tr></thead><tbody><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-numeric" target="_blank">NUMBER</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/decimal" target="_blank">Decimal</a></td><td>ClickHouseではSnowflakeの倍となる76桁までの精度とスケールをサポート</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-numeric#data-types-for-floating-point-numbers" target="_blank">FLOAT, FLOAT4, FLOAT8</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/float" target="_blank">Float32, Float64</a></td><td>Snowflakeでは浮動小数点は常に64ビット</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-text#varchar" target="_blank">VARCHAR</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/string" target="_blank">String</a></td><td></td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-text#binary" target="_blank">BINARY</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/string" target="_blank">String</a></td><td></td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-logical" target="_blank">BOOLEAN</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/boolean" target="_blank">Bool</a></td><td></td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#date" target="_blank">DATE</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/date" target="_blank">Date</a>, <a href="https://clickhouse.com/docs/en/sql-reference/data-types/date32" target="_blank">Date32</a></td><td>SnowflakeのDATEはClickHouseのDateより広い範囲をカバー。ClickHouseのDateは2バイトでコンパクト</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#time" target="_blank">TIME(N)</a></td><td style="text-align:center">直接の対応はないが、<a href="https://clickhouse.com/docs/en/sql-reference/data-types/datetime" target="_blank">DateTime</a>や<a href="https://clickhouse.com/docs/en/sql-reference/data-types/datetime64" target="_blank">DateTime64(N)</a>で表現可能</td><td>DateTime64は同様に小数点以下の精度を扱える</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#timestamp" target="_blank">TIMESTAMP</a> - <a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#timestamp-ltz-timestamp-ntz-timestamp-tz" target="_blank">TIMESTAMP_LTZ</a>, <a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#timestamp-ltz-timestamp-ntz-timestamp-tz" target="_blank">TIMESTAMP_NTZ</a>, <a href="https://docs.snowflake.com/en/sql-reference/data-types-datetime#timestamp-ltz-timestamp-ntz-timestamp-tz" target="_blank">TIMESTAMP_TZ</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/datetime" target="_blank">DateTime</a> と <a href="https://clickhouse.com/docs/en/sql-reference/data-types/datetime64" target="_blank">DateTime64</a></td><td>DateTimeおよびDateTime64では列ごとにTZパラメータを設定可能。設定がない場合はサーバーのタイムゾーンが使われる。クライアント側で<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">--use_client_time_zone</code>を使うこともできる</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-semistructured#variant" target="_blank">VARIANT</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/integrations/data-formats/json" target="_blank">JSON, Tuple, Nested</a></td><td>ClickHouseのJSON型はまだ実験的機能。挿入時に型を推論する。Tuple, Nested, Arrayを使って明示的に型を定義する方法もある</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-semistructured#object" target="_blank">OBJECT</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/integrations/data-formats/json" target="_blank">Tuple, Map, JSON</a></td><td>OBJECTとMapはどちらもキーがStringの構造。Snowflakeでは値もVARIANTで、キーごとに型が異なる可能性がある。ClickHouseでは値の型を厳密にする必要があるため、混在型を扱うにはJSON型やTupleで明示的に定義する</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-semistructured#array" target="_blank">ARRAY</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/array" target="_blank">Array</a>, <a href="https://clickhouse.com/docs/en/sql-reference/data-types/nested-data-structures/nested" target="_blank">Nested</a></td><td>SnowflakeのARRAYはVARIANTのサブタイプ。一方ClickHouseのArrayは要素が強く型付けされる</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-geospatial#geography-data-type" target="_blank">GEOGRAPHY</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/geo" target="_blank">Point, Ring, Polygon, MultiPolygon</a></td><td>Snowflakeは座標系(WGS 84)を固定的に適用。ClickHouseはクエリ時に指定する</td></tr><tr><td style="text-align:center"><a href="https://docs.snowflake.com/en/sql-reference/data-types-geospatial#geometry-data-type" target="_blank">GEOMETRY</a></td><td style="text-align:center"><a href="https://clickhouse.com/docs/en/sql-reference/data-types/geo" target="_blank">Point, Ring, Polygon, MultiPolygon</a></td><td></td></tr></tbody></table></div>
+<p>このほかClickHouseには以下のような型もあります。</p>
+<ul>
+<li><a href="https://clickhouse.com/docs/en/sql-reference/data-types/ipv4">ipv4</a>と<a href="https://clickhouse.com/docs/en/sql-reference/data-types/ipv6">ipv6</a>などのIP専用型（Snowflakeより効率的に格納できる場合がある）</li>
+<li><a href="https://clickhouse.com/docs/en/sql-reference/data-types/fixedstring">FixedString</a> - ハッシュなど固定長のバイト列を扱うのに便利</li>
+<li><a href="https://clickhouse.com/docs/en/sql-reference/data-types/lowcardinality">LowCardinality</a> - どんな型でも辞書エンコードをかけられる。カーディナリティが10万未満のときに有効</li>
+<li><a href="https://clickhouse.com/docs/en/sql-reference/data-types/enum">Enum</a> - 小さな整数値で名前付き定数を格納できる</li>
+<li><a href="https://clickhouse.com/docs/en/sql-reference/data-types/uuid">UUID</a> - UUIDを効率的に格納</li>
+<li><a href="https://clickhouse.com/blog/vector-search-clickhouse-p2">ベクトル</a>は<code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Array(Float32)</code>などで表現可能で、距離関数にも対応</li>
+</ul>
+<p>さらに、ClickHouseでは<a href="https://clickhouse.com/docs/en/sql-reference/data-types/aggregatefunction">アグリゲート関数の中間状態</a>を格納できるというユニークな機能があります。これは実装依存の形式ですが、マテリアライズドビューなどと組み合わせることで、挿入時の集計結果の状態を保持し、後から<a href="https://clickhouse.com/docs/en/sql-reference/aggregate-functions/combinators#-state">マージ関数</a>を適用して素早く集計結果を取得できます（詳しくは<a href="https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states#working-with-aggregation-states">こちら</a>）。</p>
+<p><a href="https://clickhouse.com/company/contact?loc=snowflake-blog-comparing-and-migrating&amp;utm_source=clickhouse&amp;utm_medium=blog&amp;utm_campaign=snowflake">お問い合わせ</a>いただければ、ClickHouse Cloudを用いたリアルタイム分析の詳細をご案内します。あるいは<a href="https://clickhouse.cloud/signUp?loc=snowflake-blog-comparing-and-migrating-footer&amp;utm_source=clickhouse&amp;utm_medium=blog&amp;utm_campaign=snowflake">こちら</a>からClickHouse Cloudを始めると、300ドル分のクレジットが付与されます。</p></div></div></article>

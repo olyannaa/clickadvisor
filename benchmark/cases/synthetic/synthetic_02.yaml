@@ -1,0 +1,18 @@
+case_id: synthetic_02
+source: synthetic
+sql: |
+  SELECT COUNT(DISTINCT session_id) FROM logs
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: count_distinct_to_uniq_approx
+  detected_by_rule: R-002
+  severity: medium
+  description: COUNT(DISTINCT session_id) допускает advisory-замену на approx distinct.
+expected_rules_to_fire:
+- R-002
+expected_improvement: null
+synthetic_explain_path: null
+notes: Validated synthetic case for R-002.
+expected_findings_count: 1
+status: validated

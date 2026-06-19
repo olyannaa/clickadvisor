@@ -1,0 +1,48 @@
+<h1>Custom Settings | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">Custom Settings</li></ol></nav><div class="td-content"><h1>Custom Settings</h1><div class="lead">Using custom settings</div><h2 id="using-custom-settings-in-config">Using custom settings in config</h2><p>You can not use the custom settings in config file ‘as is’, because ClickHouse® don’t know which datatype should be used to parse it.</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span>cat /etc/clickhouse-server/users.d/default_profile.xml 
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">&lt;?xml version="1.0"?&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;yandex&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;profiles&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;default&gt;</span>
+</span></span><span style="display:flex"><span>     	     <span style="color:#204a87;font-weight:700">&lt;custom_data_version&gt;</span>1<span style="color:#204a87;font-weight:700">&lt;/custom_data_version&gt;</span> <span style="color:#8f5902;font-style:italic">&lt;!-- will not work! see below --&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;/default&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;/profiles&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;/yandex&gt;</span>
+</span></span></code></pre></div><p>That will end up with the following error:</p><pre tabindex="0"><code>2021.09.24 12:50:37.369259 [ 264905 ] {} &lt;Error&gt; ConfigReloader: Error updating configuration from '/etc/clickhouse-server/users.xml' config.: Code: 536. DB::Exception: Couldn't restore Field from dump: 1: while parsing value '1' for setting 'custom_data_version'. (CANNOT_RESTORE_FROM_FIELD_DUMP), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, int, bool) @ 0x9440eba in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+1. DB::Field::restoreFromDump(std::__1::basic_string_view&lt;char, std::__1::char_traits&lt;char&gt; &gt; const&amp;)::$_4::operator()() const @ 0x10449da0 in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+2. DB::Field::restoreFromDump(std::__1::basic_string_view&lt;char, std::__1::char_traits&lt;char&gt; &gt; const&amp;) @ 0x10449bf1 in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+3. DB::BaseSettings&lt;DB::SettingsTraits&gt;::stringToValueUtil(std::__1::basic_string_view&lt;char, std::__1::char_traits&lt;char&gt; &gt; const&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;) @ 0x1042e2bf in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+4. DB::UsersConfigAccessStorage::parseFromConfig(Poco::Util::AbstractConfiguration const&amp;) @ 0x1041a097 in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+5. void std::__1::__function::__policy_invoker&lt;void (Poco::AutoPtr&lt;Poco::Util::AbstractConfiguration&gt;, bool)&gt;::__call_impl&lt;std::__1::__function::__default_alloc_func&lt;DB::UsersConfigAccessStorage::load(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, std::__1::function&lt;std::__1::shared_ptr&lt;zkutil::ZooKeeper&gt; ()&gt; const&amp;)::$_0, void (Poco::AutoPtr&lt;Poco::Util::AbstractConfiguration&gt;, bool)&gt; &gt;(std::__1::__function::__policy_storage const*, Poco::AutoPtr&lt;Poco::Util::AbstractConfiguration&gt;&amp;&amp;, bool) @ 0x1042e7ff in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+6. DB::ConfigReloader::reloadIfNewer(bool, bool, bool, bool) @ 0x11caf54e in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+7. DB::ConfigReloader::run() @ 0x11cb0f8f in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+8. ThreadFromGlobalPool::ThreadFromGlobalPool&lt;void (DB::ConfigReloader::*)(), DB::ConfigReloader*&gt;(void (DB::ConfigReloader::*&amp;&amp;)(), DB::ConfigReloader*&amp;&amp;)::'lambda'()::operator()() @ 0x11cb19f1 in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+9. ThreadPoolImpl&lt;std::__1::thread&gt;::worker(std::__1::__list_iterator&lt;std::__1::thread, void*&gt;) @ 0x9481f5f in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+10. void* std::__1::__thread_proxy&lt;std::__1::tuple&lt;std::__1::unique_ptr&lt;std::__1::__thread_struct, std::__1::default_delete&lt;std::__1::__thread_struct&gt; &gt;, void ThreadPoolImpl&lt;std::__1::thread&gt;::scheduleImpl&lt;void&gt;(std::__1::function&lt;void ()&gt;, int, std::__1::optional&lt;unsigned long&gt;)::'lambda0'()&gt; &gt;(void*) @ 0x9485843 in /usr/lib/debug/.build-id/ba/25f6646c3be7aa95f452ec85461e96178aa365.debug
+11. start_thread @ 0x9609 in /usr/lib/x86_64-linux-gnu/libpthread-2.31.so
+12. __clone @ 0x122293 in /usr/lib/x86_64-linux-gnu/libc-2.31.so
+ (version 21.10.1.8002 (official build))
+
+
+2021.09.29 11:36:07.722213 [ 2090 ] {} &lt;Error&gt; Application: DB::Exception: Couldn't restore Field from dump: 1: while parsing value '1' for setting 'custom_data_version'
+</code></pre><p>To make it work you need to change it an the following way:</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span>cat /etc/clickhouse-server/users.d/default_profile.xml 
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">&lt;?xml version="1.0"?&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;yandex&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;profiles&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;default&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;custom_data_version&gt;</span>UInt64_1<span style="color:#204a87;font-weight:700">&lt;/custom_data_version&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;/default&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;/profiles&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;/yandex&gt;</span>
+</span></span></code></pre></div><p>or</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span>cat /etc/clickhouse-server/users.d/default_profile.xml 
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">&lt;?xml version="1.0"?&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;yandex&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;profiles&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;default&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;custom_data_version&gt;</span>'1'<span style="color:#204a87;font-weight:700">&lt;/custom_data_version&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;/default&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;/profiles&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;/yandex&gt;</span>
+</span></span></code></pre></div><p>The list of recognized prefixes is in the sources: <a href="https://github.com/ClickHouse/ClickHouse/blob/ea13a8b562edbc422c07b5b4ecce353f79b6cb63/src/Core/Field.cpp#L253-L270" target="_blank">https://github.com/ClickHouse/ClickHouse/blob/ea13a8b562edbc422c07b5b4ecce353f79b6cb63/src/Core/Field.cpp#L253-L270</a></p><div class="td-page-meta__lastmod">Last modified 2024.07.30: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4a96398d6e97ac2935110b426947487e2e202d9">Site cleanup, mostly minor changes (a4a9639)</a></div></div></main>

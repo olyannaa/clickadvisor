@@ -1,0 +1,31 @@
+id: R-108
+name: prewhere_injection
+tier: '2'
+category: query_plan
+status: proposed
+statement: Явно переместить условия WHERE → PREWHERE если оптимизатор не сделал это
+  сам
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - selectivity < 0.1; compressed_size колонки мал
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks: []
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: rows_to_read после PREWHERE vs без
+  baseline: ''
+  projected: ''

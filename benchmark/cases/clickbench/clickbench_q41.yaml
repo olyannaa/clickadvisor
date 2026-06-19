@@ -1,0 +1,16 @@
+case_id: clickbench_q41
+source: clickbench
+sql: 'SELECT URLHash, EventDate, COUNT(*) AS PageViews FROM hits WHERE CounterID =
+  62 AND EventDate >= ''2013-07-01'' AND EventDate <= ''2013-07-31'' AND IsRefresh
+  = 0 AND TraficSourceID IN (-1, 6) AND RefererHash = 3594120000172545465 GROUP BY
+  URLHash, EventDate ORDER BY PageViews DESC LIMIT 10 OFFSET 100;
+
+  '
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: no confident rules apply under the current catalog.'
+expected_findings_count: 0
+status: reviewed

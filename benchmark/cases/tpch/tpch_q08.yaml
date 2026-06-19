@@ -1,0 +1,25 @@
+case_id: tpch_q08
+source: tpch
+sql: "SELECT\n    o_year,\n    sum(CASE\n        WHEN nation = 'BRAZIL' THEN volume\n        ELSE 0\n    END) / sum(volume) AS mkt_share\nFROM\n    (\n        SELECT\n            toYear(o_orderdate) AS o_year,\n            l_extendedprice * (1 - l_discount) AS volume,\n            n2.n_name AS nation\n        FROM\n            part,\n            supplier,\n            lineitem,\n            orders,\n            customer,\n            nation AS n1,\n            nation AS n2,\n            region\n        WHERE\n            p_partkey = l_partkey\n            AND s_suppkey = l_suppkey\n            AND l_orderkey = o_orderkey\n            AND o_custkey = c_custkey\n            AND c_nationkey = n1.n_nationkey\n            AND n1.n_regionkey = r_regionkey\n            AND r_name = 'AMERICA'\n            AND s_nationkey = n2.n_nationkey\n            AND o_orderdate BETWEEN toDate('1995-01-01') AND toDate('1996-12-31')\n            AND p_type = 'ECONOMY ANODIZED STEEL'\n    ) AS all_nations\nGROUP\
+  \ BY\n    o_year\nORDER BY\n    o_year;"
+schema_files:
+- schemas/tpch.sql
+known_issues:
+- issue_id: I-1
+  type: implicit_cross_join_syntax
+  detected_by_rule: D-002
+  severity: high
+  description: FROM part, supplier, lineitem, orders, customer, nation, region — 7 таблиц implicit JOIN
+- issue_id: I-2
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Подзапрос в FROM
+expected_rules_to_fire:
+- D-002
+- D-013
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'TPC-H Q8: National Market Share.'
+expected_findings_count: 2
+status: reviewed

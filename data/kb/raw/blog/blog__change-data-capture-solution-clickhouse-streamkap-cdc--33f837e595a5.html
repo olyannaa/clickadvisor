@@ -1,0 +1,491 @@
+<h1>Streamkap: An out-of-the-box CDC solution for ClickHouse</h1>
+<main class="readable-content"><div class="pointer-events-none fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-4 transition duration-500 translate-y-full opacity-0"><span class="absolute -inset-x-20 -inset-y-10 rounded-full bg-black/40 blur-3xl"></span><button class="flex gap-2 rounded-full border border-neutral-700/90 bg-neutral-950/90 px-3 py-1 text-sm text-neutral-200 shadow-lg backdrop-blur transition-colors hover:bg-neutral-900/90 pointer-events-none"><span class="-rotate-90">-&gt;</span>Scroll to top</button></div><div class="relative"><div class="sc-16gr3cg-0 hUuIbH top-100 fixed z-40 h-1" dir="start"></div><div class="section-container flex flex-col items-start gap-8 py-12 lg:flex-row lg:py-20"><button class="group/backButton -mx-3 -my-1.5 mr-8 inline-flex items-center whitespace-nowrap rounded px-3 py-1.5 text-base font-semibold transition-colors hover:bg-white/5" type="button"><svg aria-hidden="true" class="mr-2 w-4 transition-transform group-hover/backButton:-translate-x-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" fill-rule="evenodd"></path></svg>Back</button><div class="flex w-full flex-col gap-y-8 lg:grid lg:grid-cols-12 lg:gap-x-6"><div class="order-1 lg:order-none lg:col-span-11 lg:mb-12 xl:col-span-9"><div class="flex flex-col gap-6 sm:-mt-0.5 sm:flex-row sm:items-center"><ul class="flex items-center gap-2 text-base font-semibold text-primary-300"><li><a class="hover:underline" href="/blog">Blog</a></li><li aria-hidden="true"><span>/</span></li><li><a class="hover:underline" href="/blog?category=user-stories">User stories</a></li></ul><div><div class="relative w-max text-sm"><span class="flex"><button class="inline-flex items-center gap-3 rounded-l border border-neutral-700 bg-neutral-900 px-3 py-1 text-left text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none" title="Copy page as Markdown" type="button"><svg class="lucide lucide-copy size-3 text-white" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="14" rx="2" ry="2" width="14" x="8" y="8"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="grid grid-cols-1 grid-rows-1"><span class="col-start-1 row-start-1">Copy page</span><span class="col-start-1 row-start-1 opacity-0">Copied!</span></span></button><button aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center rounded-r border border-l-0 border-neutral-700 bg-neutral-900 px-2 py-1 transition-colors hover:bg-white/10" type="button"><span class="sr-only">More actions</span><svg class="lucide lucide-chevron-down size-4 transition-transform" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg></button></span><ul class="absolute left-0 top-full z-10 w-max translate-y-2 space-y-1 rounded-lg border border-neutral-700 bg-neutral-750 p-1 shadow-xl transition-opacity pointer-events-none opacity-0" role="menu"><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="View as Markdown" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-markdown.c048adbf.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">View as Markdown<!-- --> </strong><small class="text-neutral-200">Open this page in Markdown</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in ChatGPT" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-chatgpt.f6a7ebb4.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in ChatGPT<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in Claude" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-claude.18912ab9.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in Claude<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li><li role="none"><button class="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-700/25" role="menuitem" type="button"><span><img alt="Open in v0" class="aspect-square size-6 object-scale-down object-center" data-nimg="1" decoding="async" height="24" loading="lazy" src="/_next/static/media/icon-v0.2caf962b.svg" style="color:transparent" width="24"/></span><span class="flex flex-col text-left"><strong class="inline-flex items-center gap-2">Open in v0<!-- --> <svg class="lucide lucide-external-link size-3 text-neutral-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></strong><small class="text-neutral-200">Ask questions about this page</small></span></button></li></ul></div></div></div><h1 class="mb-8 mt-6 font-basier text-4xl font-bold text-neutral-100"><span class="leading-snug">Streamkap: An out-of-the-box CDC solution for ClickHouse</span></h1><div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2"><div class="flex-shrink-0 text-neutral-900"><div class="flex -space-x-3"><span class="relative" style="z-index:1"><img alt="" class="aspect-square !size-14 rounded-full border-4 bg-neutral object-cover" data-nimg="1" decoding="async" height="44" loading="lazy" src="/uploads/icon_a657dc06cb.svg" style="border-color:currentColor" width="44"/></span></div></div><div><div class="text-base">Streamkap</div><div class="text-sm text-neutral-300">Feb 22, 2024 · 18 minutes read</div></div></div></div><article class="order-3 lg:order-none lg:col-span-11 xl:col-span-9"><div class="w-full space-y-6"><div class="rich_content rich-text-content leading-6"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="introduction" level="2">Introduction<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#introduction">#</a></span></h2>
+<blockquote>
+<p>Today, we welcome a guest post from our technology partner Streamkap, an out-of-the-box change data capture (CDC) solution for ClickHouse. This blog dives into the details and challenges of building such a product. For those of you who just want a working out-of-the-box CDC solution for ClickHouse, we are pleased to recommend Streamkap as a hosted service.</p>
+</blockquote>
+<p>We’re excited to announce our new ClickHouse connector for streaming CDC data into <a href="https://clickhouse.com/">ClickHouse</a> from databases such as PostgreSQL, MySQL, SQL Server, Oracle &amp; MongoDB.</p>
+<p>Streamkap recently switched to ClickHouse to process all of our logs and metrics in real-time after we found that other solutions failed to achieve the query performance we required. Upon adopting ClickHouse ourselves, we wished to start offering a ClickHouse CDC integration but found issues with the existing connectors available, so we set out to build a new connector that addresses these issues.</p>
+<p>In this post, we assume you’re familiar with the ClickHouse database and the concept of Change Data Capture (CDC), but if not, you can learn more by reading about <a href="https://streamkap.com/blog/change-data-capture-for-streaming-etl">Change Data Capture in Streaming</a>.</p>
+<p>We will dive into the challenges of building a CDC solution for ClickHouse and how we have addressed these, discussing how we handle schema evolution, data consistency, and snapshotting. Finally, we show this can all be achieved while maintaining a performant streaming pipeline.</p>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="technologies" level="2">Technologies<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#technologies">#</a></span></h2>
+<p><a href="https://clickhouse.com/">ClickHouse</a> is an open-source column-oriented database. A column-oriented structure means data is stored and retrieved by columns rather than by rows. ClickHouse has become the de-facto choice for building real-time applications due to its ability to ingest large volumes as well as materialize the data at write instead of at read time. This results in significantly faster queries, making ClickHouse suitable for serving real-time applications.</p>
+<p><a href="https://streamkap.com/">Streamkap</a> is a serverless streaming platform enabling real-time Change Data Capture (CDC) ingestion into ClickHouse. Under the hood, technologies such as <a href="https://kafka.apache.org/">Kafka</a>, <a href="https://debezium.io/">Debezium</a>, <a href="https://flink.apache.org/">Flink</a> are combined with production-grade connectors/pipelines.</p>
+<p>Here is an overview of how Streamkap streams from a database to ClickHouse.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="streamkap_architecture.png" loading="lazy" src="/uploads/streamkap_architecture_19cc03bc3b.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="challenges" level="2">Challenges<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#challenges">#</a></span></h2>
+<p>When we first looked to stream CDC data to ClickHouse, we went looking for existing connectors we could use. After reviewing the official ClickHouse Kafka Connect connector, as well as others on the market, we soon realized that we would need to modify them extensively to support varying use cases. Realizing these connectors would need extensive modifications, we set about building our own solution. Below are some key requirements we needed to ensure were addressed before we could bring our solution to production.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="data-typing" level="3">Data typing<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#data-typing">#</a></span></h3>
+<p>Data types were not well supported by existing solutions:</p>
+<ul>
+<li>Nested Struct</li>
+<li>Nested Array, arrays containing nested Struct</li>
+<li>Timestamp with microsecond precision</li>
+<li>Time with microsecond precision</li>
+<li>Date without time information (days since epoch)</li>
+<li>JSON transported as plain string fields</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metadata" level="3">Metadata<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#metadata">#</a></span></h3>
+<p>When dealing with CDC data, it’s helpful to add additional metadata columns such as timestamps and type of CDC record. This allows for simpler and more powerful post-ingestion transformations as well as diagnosing any issues in latency.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="insertupserts" level="3">Insert/upserts<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#insertupserts">#</a></span></h3>
+<p>At Streamkap we see an equal split of customers wishing to use inserts or upserts. Inserts being append-only mode and therefore maintaining a history of all changes, while upserts result in only the final data being visible (inserts + updates). While most companies are used to this ability with batch ETL, it is a new concept when combined with streaming ETL. Learn more at <a href="https://streamkap.com/blog/batch-processing-vs-real-time-stream-processing">Batch vs Real-Time Processing</a></p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="schema-evolution" level="3">Schema evolution<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#schema-evolution">#</a></span></h3>
+<p>When a source table is changed, we need the destination table to be updated to handle this schema drift and not result in a broken pipeline.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="semi-structured-data" level="3">Semi-structured data<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#semi-structured-data">#</a></span></h3>
+<p>Sources like MongoDB/Elasticsearch allow inconsistencies within complex nested record structures which need to be reconciled by the ingest pipeline prior to insertion into ClickHouse. For example:</p>
+<ul>
+<li>Date/Time represented as a number (sec/ms since epoch) in some records and as a string (ISO format) in other records</li>
+<li>Nested fields that are strings in some records and a more complex nested struct in other records</li>
+<li>Deeply nested complex semi-structured data usually needs preprocessing before insertion into ClickHouse, with mapping to the appropriate types e.g. Tuples, Nested.</li>
+</ul>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="our-approach" level="2">Our approach<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#our-approach">#</a></span></h2>
+<p>Now let’s dig into our connector and how we addressed each of these challenges.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="data-types" level="3">Data types<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#data-types">#</a></span></h3>
+<p>We found the default approach was often to just insert data into ClickHouse as JSON and then transform the data post-loading.</p>
+<p>We’ve built-in support for the following data types:</p>
+<div class="w-full overflow-x-auto"><table><thead><tr><th style="text-align:center">Kafka Connect Data Type</th><th style="text-align:center">ClickHouse Data type</th></tr></thead><tbody><tr><td style="text-align:center">INT8</td><td style="text-align:center">Int8</td></tr><tr><td style="text-align:center">INT16</td><td style="text-align:center">Int16</td></tr><tr><td style="text-align:center">INT32</td><td style="text-align:center">Int32</td></tr><tr><td style="text-align:center">INT64</td><td style="text-align:center">Int64</td></tr><tr><td style="text-align:center">FLOAT32</td><td style="text-align:center">Float32</td></tr><tr><td style="text-align:center">FLOAT64</td><td style="text-align:center">Float64</td></tr><tr><td style="text-align:center">BOOLEAN</td><td style="text-align:center">Bool</td></tr><tr><td style="text-align:center">BYTES</td><td style="text-align:center">BLOB (String)</td></tr><tr><td style="text-align:center">STRING</td><td style="text-align:center">String</td></tr><tr><td style="text-align:center">org.apache.kafka.connect.data.Decimal</td><td style="text-align:center">DECIMAL(38, 0)</td></tr><tr><td style="text-align:center">org.apache.kafka.connect.data.Timestampio.debezium.time.ZonedTimestamp</td><td style="text-align:center">DateTime64</td></tr><tr><td style="text-align:center">org.apache.kafka.connect.data.Date</td><td style="text-align:center">Date</td></tr><tr><td style="text-align:center">io.debezium.data.Json</td><td style="text-align:center">String</td></tr><tr><td style="text-align:center">STRUCT</td><td style="text-align:center">Tuple</td></tr><tr><td style="text-align:center">ARRAY</td><td style="text-align:center">Array</td></tr></tbody></table></div>
+<p>JSON fields are currently ingested as strings, the use of <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">allow_experimental_object_type=1</code> is currently under testing.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="metadata-1" level="3">Metadata<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#metadata-1">#</a></span></h3>
+<p>The connector adds additional key columns to each insert to the ClickHouse table for better analysis and modeling post-loading, as well as to support upserts.</p>
+<p>The following metadata columns are added to each ClickHouse table:</p>
+<ul>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_ts_ms</code>: CDC event timestamp</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_deleted</code>: if the current CDC event is a delete event</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_partition</code>: smallint representing the internal Streamkap partition number obtained by applying consistent hashing on the source records key fields</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_source_ts_ms</code>: timestamp when the change event happened in the source database</li>
+<li><code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_op</code>: CDC event operation type (c insert, u update, d delete, r snapshot, t truncate)</li>
+</ul>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="insertsupserts" level="3">Inserts/Upserts<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#insertsupserts">#</a></span></h3>
+<p>The Streamkap connector supports two modes of data ingestion into ClickHouse: <strong>Inserts</strong> (append) and <strong>Upserts</strong>.</p>
+<p>Upsert mode is our connector's default mode and is used when ClickHouse tables are required to contain the latest version of the source data.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="insert-append-mode" level="4">Insert (Append) mode<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#insert-append-mode">#</a></span></h4>
+<p>Insert mode results in every change being tracked and inserted as a new row in ClickHouse while delete events will be marked in ClickHouse as deleted using the meta value <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">_streamkap_deleted</code>.</p>
+<p>This is useful with larger volumes to keep latency low as well as maintain a history of changes.</p>
+<p>For example, Streamkap uses insert mode when collecting our metrics, as only immutable data is inserted.</p>
+<p>We then use <a href="https://clickhouse.com/docs/en/guides/developer/cascading-materialized-views">Materialized Views</a> on top of the metrics table to create a number of aggregates for time series analysis upon ingestion. A suitable <a href="https://clickhouse.com/docs/en/guides/developer/ttl">TTL</a> on this table is set so that ClickHouse handles the delete operations for us while providing enough historical data to investigate any issues or if we have to rebuild the Materialized Views for some reason.</p>
+<p>To use Insert (Append) mode, the ClickHouse engine <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree">MergeTree</a> is used.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="appends_streamkap.png" loading="lazy" src="/uploads/appends_streamkap_6c1b60b712.png"/></span>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="upsert-mode" level="4">Upsert mode<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#upsert-mode">#</a></span></h4>
+<p>Upserts are both inserts and updates combined. If there is a match on the primary key of the row, the value will be overwritten. Conversely, if there is no match, the event will be inserted.</p>
+<p>Upsert mode is implemented using ClickHouse's <a href="https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replacingmergetree">ReplacingMergeTree</a> engine.</p>
+<p>The ReplacingMergeTree engine de-duplicates data during periodic background merges based on the ordering key, allowing old records to be cleaned up. The asynchronous nature of this process means there could be a small window where you are left with older records in the view. Queries must, therefore, use the <a href="https://clickhouse.com/docs/en/sql-reference/statements/select/from#final-modifier">FINAL</a> modifier to ensure that the latest version of the data is returned, and this will then perform a deduplication of any remaining identical records at query time.</p>
+<p><strong>Upsert Example with basic types</strong></p>
+<p>An input record for an upsert is shown here in JSON format. The key has only one field, <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">id</code>, which is the primary key on which rows will be de-duplicated:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"123456hYCcEM62894000000000"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"str_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"some-str-values-000000000"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"IntColumn"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123000</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"Int8"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"InT16"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bool_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"double_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.7976931348623157E308</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"json_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"{\"a\": 0}"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"__deleted"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1707379532748</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"date_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">19761</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"ts_tz"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2023-10-24T15:19:51Z"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"_streamkap_ts_ms"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1707379532748</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"binary_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"byte_buf"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bigint_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"E4f/////0tCeAA=="</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>The resulting table:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> streamkap_test_nominal_upsert
+FORMAT Vertical
+
+Query id: <span class="hljs-number">1</span>abf2898<span class="hljs-number">-69</span>b3<span class="hljs-number">-4785</span><span class="hljs-operator">-</span>a849<span class="hljs-number">-65</span>c3879493bb
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+statement: <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> streamkap.streamkap_test_nominal_upsert
+(
+    `id` String COMMENT <span class="hljs-string">'id'</span>,
+    `str_col` String COMMENT <span class="hljs-string">'str_col'</span>,
+    `IntColumn` Int32 COMMENT <span class="hljs-string">'IntColumn'</span>,
+    `Int8` Int8 COMMENT <span class="hljs-string">'Int8'</span>,
+    `InT16` Int16 COMMENT <span class="hljs-string">'InT16'</span>,
+    `bool_col` Bool COMMENT <span class="hljs-string">'bool_col'</span>,
+    `double_col` Float64 COMMENT <span class="hljs-string">'double_col'</span>,
+    `json_col` String COMMENT <span class="hljs-string">'json_col'</span>,
+    `__deleted` Bool COMMENT <span class="hljs-string">'__deleted'</span>,
+    `created_at` DateTime64(<span class="hljs-number">3</span>) COMMENT <span class="hljs-string">'created_at'</span>,
+    `date_col` <span class="hljs-type">Date</span> COMMENT <span class="hljs-string">'date_col'</span>,
+    `ts_tz` DateTime64(<span class="hljs-number">3</span>) COMMENT <span class="hljs-string">'ts_tz'</span>,
+    `_streamkap_ts_ms` Int64 COMMENT <span class="hljs-string">'_streamkap_ts_ms'</span>,
+    `binary_col` String COMMENT <span class="hljs-string">'binary_col'</span>,
+    `byte_buf` String COMMENT <span class="hljs-string">'byte_buf'</span>,
+    `bigint_col` <span class="hljs-type">Decimal</span>(<span class="hljs-number">38</span>, <span class="hljs-number">0</span>) COMMENT <span class="hljs-string">'bigint_col'</span>,
+    `_streamkap_partition` Int32 COMMENT <span class="hljs-string">'_streamkap_partition'</span>,
+    `_streamkap_deleted` UInt8 MATERIALIZED if(__deleted <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+)
+ENGINE <span class="hljs-operator">=</span> ReplicatedReplacingMergeTree(<span class="hljs-string">'/clickhouse/tables/{uuid}/{shard}'</span>, <span class="hljs-string">'{replica}'</span>, _streamkap_ts_ms, _streamkap_deleted)
+<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> _streamkap_partition
+<span class="hljs-keyword">PRIMARY</span> KEY id
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> id
+SETTINGS index_granularity <span class="hljs-operator">=</span> <span class="hljs-number">8192</span>
+</code></pre>
+<p>Example data:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> streamkap_test_nominal_upsert
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+id:                   <span class="hljs-number">123456</span>hYCcEM62894000000000
+str_col:              <span class="hljs-keyword">some</span><span class="hljs-operator">-</span>str<span class="hljs-operator">-</span><span class="hljs-keyword">values</span><span class="hljs-number">-000000000</span>
+IntColumn:            <span class="hljs-number">123000</span>
+Int8:                 <span class="hljs-number">0</span>
+InT16:                <span class="hljs-number">10</span>
+bool_col:             <span class="hljs-literal">true</span>
+double_col:           <span class="hljs-number">1.7976931348623157e308</span>
+json_col:             {"a": <span class="hljs-number">0</span>}
+__deleted:            <span class="hljs-literal">false</span>
+created_at:           <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span> <span class="hljs-number">08</span>:<span class="hljs-number">03</span>:<span class="hljs-number">37.368</span>
+date_col:             <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span>
+ts_tz:                <span class="hljs-number">2023</span><span class="hljs-number">-10</span><span class="hljs-number">-24</span> <span class="hljs-number">15</span>:<span class="hljs-number">19</span>:<span class="hljs-number">51.000</span>
+_streamkap_ts_ms:     <span class="hljs-number">1707379417368</span>
+binary_col:
+byte_buf:
+bigint_col:           <span class="hljs-number">92233720368547000000000</span>
+_streamkap_partition: <span class="hljs-number">0</span>
+
+<span class="hljs-type">Row</span> <span class="hljs-number">2</span>:
+──────
+id:                   <span class="hljs-number">123456</span>hYCcEM62894000000000
+str_col:              <span class="hljs-keyword">some</span><span class="hljs-operator">-</span>str<span class="hljs-operator">-</span><span class="hljs-keyword">values</span><span class="hljs-number">-000000000</span>
+IntColumn:            <span class="hljs-number">123000</span>
+Int8:                 <span class="hljs-number">0</span>
+InT16:                <span class="hljs-number">10</span>
+bool_col:             <span class="hljs-literal">true</span>
+double_col:           <span class="hljs-number">1.7976931348623157e308</span>
+json_col:             {"a": <span class="hljs-number">0</span>}
+__deleted:            <span class="hljs-literal">false</span>
+created_at:           <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span> <span class="hljs-number">08</span>:<span class="hljs-number">03</span>:<span class="hljs-number">41.608</span>
+date_col:             <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span>
+ts_tz:                <span class="hljs-number">2023</span><span class="hljs-number">-10</span><span class="hljs-number">-24</span> <span class="hljs-number">15</span>:<span class="hljs-number">19</span>:<span class="hljs-number">51.000</span>
+_streamkap_ts_ms:     <span class="hljs-number">1707379421608</span>
+binary_col:           java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+byte_buf:             java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+bigint_col:           <span class="hljs-number">92233720368547000000000</span>
+_streamkap_partition: <span class="hljs-number">0</span>
+</code></pre>
+<p>De-duplicated data, using <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">FINAL</code>:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> streamkap_test_nominal_upsert
+<span class="hljs-keyword">FINAL</span>
+FORMAT Vertical
+
+<span class="hljs-type">Row</span> <span class="hljs-number">1</span>:
+──────
+id:                   <span class="hljs-number">123456</span>hYCcEM62894000000000
+str_col:              <span class="hljs-keyword">some</span><span class="hljs-operator">-</span>str<span class="hljs-operator">-</span><span class="hljs-keyword">values</span><span class="hljs-number">-000000000</span>
+IntColumn:            <span class="hljs-number">123000</span>
+Int8:                 <span class="hljs-number">0</span>
+InT16:                <span class="hljs-number">10</span>
+bool_col:             <span class="hljs-literal">true</span>
+double_col:           <span class="hljs-number">1.7976931348623157e308</span>
+json_col:             {"a": <span class="hljs-number">0</span>}
+__deleted:            <span class="hljs-literal">false</span>
+created_at:           <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span> <span class="hljs-number">08</span>:<span class="hljs-number">03</span>:<span class="hljs-number">41.608</span>
+date_col:             <span class="hljs-number">2024</span><span class="hljs-number">-02</span><span class="hljs-number">-08</span>
+ts_tz:                <span class="hljs-number">2023</span><span class="hljs-number">-10</span><span class="hljs-number">-24</span> <span class="hljs-number">15</span>:<span class="hljs-number">19</span>:<span class="hljs-number">51.000</span>
+_streamkap_ts_ms:     <span class="hljs-number">1707379421608</span>
+binary_col:           java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+byte_buf:             java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+bigint_col:           <span class="hljs-number">92233720368547000000000</span>
+_streamkap_partition: <span class="hljs-number">0</span>
+</code></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="handling-semi-structured-data" level="3">Handling semi-structured data<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#handling-semi-structured-data">#</a></span></h3>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="nested-arrays--structs" level="4">Nested arrays &amp; structs<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#nested-arrays--structs">#</a></span></h4>
+<p>Below, we provide some examples of how complex structures are mapped to ClickHouse types automatically.</p>
+<p>For supporting Arrays containing structs, we need to alter Streamkap’s role in ClickHouse to set <a href="https://clickhouse.com/docs/en/operations/settings/settings#flatten-nested">flatten_nested</a> to 0:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">ALTER</span> ROLE STREAMKAP_ROLE SETTINGS flatten_nested <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+</code></pre>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="nested-struct-field-containing-sub-array" level="4">Nested struct field containing sub array<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#nested-struct-field-containing-sub-array">#</a></span></h4>
+<p>An input record is shown here in JSON format, where the key has only one field <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">id</code>:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">"obj"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">"nb"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">"str"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc"</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">"sub_arr"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+			<span class="hljs-punctuation">{</span>
+				<span class="hljs-attr">"sub_nb"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">789</span><span class="hljs-punctuation">,</span>
+				<span class="hljs-attr">"sub_str"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"mnp"</span>
+			<span class="hljs-punctuation">}</span>
+		<span class="hljs-punctuation">]</span>	
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>The resulting table. Not how the <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">obj</code> column has been mapped to an <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">Tuple(nb Int32, str String, sub_arr Array(Tuple(n Int32, s String)), sub_arr_str Array(String))</code> to handle the complex structure:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> chdb.streamkap_nested_struct_with_array
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> chdb.streamkap_nested_struct_with_array
+(
+    `obj` Tuple(nb Int32, str String, sub_arr <span class="hljs-keyword">Array</span>(Tuple(n Int32, s String)), sub_arr_str <span class="hljs-keyword">Array</span>(String)) COMMENT <span class="hljs-string">'obj'</span>,
+    `__deleted` Bool COMMENT <span class="hljs-string">'__deleted'</span>,
+    `_streamkap_ts_ms` Int64 COMMENT <span class="hljs-string">'_streamkap_ts_ms'</span>,
+    `_streamkap_partition` Int32 COMMENT <span class="hljs-string">'_streamkap_partition'</span>,
+    `id` Int32 COMMENT <span class="hljs-string">'id'</span>,
+    `_streamkap_deleted` UInt8 MATERIALIZED if(__deleted <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+)
+ENGINE <span class="hljs-operator">=</span> ReplacingMergeTree(_streamkap_ts_ms, _streamkap_deleted)
+<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> _streamkap_partition
+<span class="hljs-keyword">PRIMARY</span> KEY id
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> id
+SETTINGS index_granularity <span class="hljs-operator">=</span> <span class="hljs-number">8192</span> 
+</code></pre>
+<p>Example data:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> chdb.streamkap_nested_struct_with_array
+LIMIT <span class="hljs-number">1</span> format Vertical
+
+obj:                               (<span class="hljs-number">123</span>,<span class="hljs-string">'abc'</span>,[(<span class="hljs-number">789</span>,<span class="hljs-string">'mnp'</span>)],[<span class="hljs-string">'efg'</span>]) 
+__deleted:                         <span class="hljs-literal">false</span>     
+_streamkap_ts_ms:                  <span class="hljs-number">1702519029407</span> 
+_streamkap_partition:              <span class="hljs-number">0</span> 
+id:                                <span class="hljs-number">1</span> 
+</code></pre>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="nested-array-field-containing-sub-struct" level="4">Nested array field containing sub struct<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#nested-array-field-containing-sub-struct">#</a></span></h4>
+<p>An input record is shown here as JSON format, where key has only one field <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">id</code>:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"arr"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">"nb"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">"str"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc"</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> streamkap_nested_array_of_struct
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> streamkap.streamkap_nested_array_of_struct
+(
+    `arr` <span class="hljs-keyword">Array</span>(Tuple(nb Int32, str String)) COMMENT <span class="hljs-string">'arr'</span>,
+    `__deleted` Bool COMMENT <span class="hljs-string">'__deleted'</span>,
+    `_streamkap_ts_ms` Int64 COMMENT <span class="hljs-string">'_streamkap_ts_ms'</span>,
+    `_streamkap_partition` Int32 COMMENT <span class="hljs-string">'_streamkap_partition'</span>,
+    `id` Int32 COMMENT <span class="hljs-string">'id'</span>,
+    `_streamkap_deleted` UInt8 MATERIALIZED if(__deleted <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+)
+ENGINE <span class="hljs-operator">=</span> ReplacingMergeTree( _streamkap_ts_ms, _streamkap_deleted)
+<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> _streamkap_partition
+<span class="hljs-keyword">PRIMARY</span> KEY id
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> id
+SETTINGS index_granularity <span class="hljs-operator">=</span> <span class="hljs-number">8192</span>
+</code></pre>
+<p>Example data:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+<span class="hljs-keyword">FROM</span> streamkap_nested_array_of_struct
+LIMIT <span class="hljs-number">1</span> format Vertical
+
+arr:                            [(<span class="hljs-number">123</span>,<span class="hljs-string">'abc'</span>)]
+__deleted:                      <span class="hljs-literal">false</span>
+_streamkap_ts_ms:               <span class="hljs-number">1702529856885</span>
+_streamkap_partition:           <span class="hljs-number">0</span>
+id:                             <span class="hljs-number">1</span>
+</code></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="snapshotting" level="3">Snapshotting<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#snapshotting">#</a></span></h3>
+<p>Snapshotting refers to the process of loading existing data from the database into ClickHouse.</p>
+<p>We have two methods in which we can load this historical data.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="blocking-snapshot" level="4">Blocking Snapshot<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#blocking-snapshot">#</a></span></h4>
+<p>A blocking snapshot serves the purpose of capturing the entire current state of the database tables and will use large select statements to do so. These can also be run concurrently and are very fast. Efficiency-wise, a blocking snapshot may have a higher impact on system resources, especially for large tables, and can take longer per query.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="incremental-snapshot" level="4">Incremental Snapshot<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#incremental-snapshot">#</a></span></h4>
+<p>Incremental snapshots aim for efficiency with a generally lower impact on system resources and are particularly well suited for very large tables or when wishing to snapshot and stream at the same time.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="data-consistency--delivery-guarantees" level="3">Data Consistency &amp; Delivery Guarantees<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#data-consistency--delivery-guarantees">#</a></span></h3>
+<p>Delivery guarantees mainly refer to failure scenarios where unconfirmed CDC events could be replayed, resulting in duplicated rows inserted into ClickHouse.</p>
+<p>Streamkap offers <strong>at-least-once</strong> delivery guarantee for ClickHouse.</p>
+<p>With insert ingestion mode, it’s possible that some duplicate rows can be inserted into ClickHouse. However, by adding in dedupe code into your materialized view, there will not be any impact.</p>
+<p>As mentioned earlier, for the upsert ingestion mode, we carry out deduplication with the source record key. Enforcing <strong>exactly-once</strong> delivery guarantees adds a performance penalty without any additional benefit since the same process handles duplicated CDC events, merging all CDC events for one record into the final record state.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="transforms" level="3">Transforms<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#transforms">#</a></span></h3>
+<p>Streamkap supports transformations in the pipeline so that data can be sent to ClickHouse pre-processed.</p>
+<p>This is especially useful for semi-structured data, pre-processing, and cleanup tasks. This can be significantly more efficient than working on the data post-ingestion.</p>
+<p>Real-time analytics on cleaned-up structured data is naturally done in ClickHouse, with the query performance benefiting from moving data transformation to insert time.</p>
+<p>Below, we present some common transformations performed by Streamkap.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="fix-inconsistencies-in-semi-structured-data" level="4">Fix inconsistencies in semi-structured data<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#fix-inconsistencies-in-semi-structured-data">#</a></span></h4>
+<p>Consider the fixing of an inconsistent semi-structured date field:</p>
+<pre><code class="hljs language-js mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-string">"someDateField"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"2023-08-04T09:12:20.29Z"</span>}
+<span class="hljs-string">"someDateField"</span>: <span class="hljs-string">"2023-08-07T08:14:57.817325+00:00"</span>
+<span class="hljs-string">"someDateField"</span>: {<span class="hljs-string">"$date"</span>: {<span class="hljs-string">"$numberLong"</span>: <span class="hljs-number">1702853448000</span>}}
+</code></pre>
+<p>Using Streamkap transforms, all records can be converted to a common format for ingestion into Clickhouse <a href="https://clickhouse.com/docs/en/sql-reference/data-types/datetime64">DateTime64</a> column:</p>
+<pre><code class="hljs language-js mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-string">"someDateField"</span>: <span class="hljs-string">"yyyy-MM-dd HH:mm:ss.SSS"</span>
+</code></pre>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="split-large-semi-structured-json-documents" level="4">Split large semi-structured JSON documents<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#split-large-semi-structured-json-documents">#</a></span></h4>
+<p>With document databases, child entities can be modelled as sub-arrays nested inside the parent entity document:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"key"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc1234"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"array"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"11111"</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">"someField"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"aa-11"</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"22222"</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">"someField"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"bb-22"</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>In ClickHouse it can make sense to represent these child entities as separate rows. Using Streamkap transforms, the child entity records can be split into individual records:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"11111"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"parentKey"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc1234"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"someField"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"aa-11"</span>
+<span class="hljs-punctuation">}</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"22222"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"parentKey"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc1234"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"someField"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"bb-22"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="schema-evolution-1" level="3">Schema evolution<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#schema-evolution-1">#</a></span></h3>
+<p>Schema evolution or drift handling is the process of making changes to the destination tables to reflect upstream changes.</p>
+<p>The Streamkap connector automatically handles schema drift in the following scenarios.</p>
+<ul>
+<li><strong>Additional Columns:</strong> An additional field will be detected, and a new column in the table will be created to receive the new data.</li>
+<li><strong>Removal of Columns:</strong> This column will now be ignored, and no further action will be taken.</li>
+<li><strong>Changing Column Type</strong>: An additional column is created in the table using a suffix to represent the new type. e.g. <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">ColumnName_type</code></li>
+</ul>
+<p>Additional tables can be added to the pipeline at any stage. We show some examples of this schema evolution below.</p>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="add-column" level="4">Add Column<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#add-column">#</a></span></h4>
+<p>Consider the following input record before schema evolution:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"123456hYCcEM62894000000000"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"str_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"some-str-values-000000000"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"IntColumn"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123000</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"Int8"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"InT16"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bool_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"double_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.7976931348623157E308</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"json_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"{\"a\": 0}"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"binary_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"byte_buf"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bigint_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"E4f/////0tCeAA=="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"__deleted"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1702894985613</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"ts_tz"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2023-10-24T15:19:51Z"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"_streamkap_ts_ms"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1702894985613</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>A new column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">new_double_col</code> is added to the upstream schema. This causes the ClickHouse schema to evolve:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"123456hYCcEM62894xxx"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"str_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"some-str-values-000000000"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"IntColumn"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123000</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"Int8"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"InT16"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bool_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"double_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.7976931348623157E308</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"json_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"{\"a\": 0}"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"binary_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"byte_buf"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"AQIDBAU="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"bigint_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"E4f/////0tCeAA=="</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"__deleted"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1702894985613</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"ts_tz"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2023-10-24T15:19:51Z"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"_streamkap_ts_ms"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1702894985613</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"new_double_col"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.7976931348623157E308</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>ClickHouse data:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+    id,
+    new_double_col
+<span class="hljs-keyword">FROM</span> streamkap_test_nominal_add_new_column
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> _streamkap_ts_ms <span class="hljs-keyword">ASC</span>
+
+┌─id─────────────────────────┬─new_double_col─┐
+│ <span class="hljs-number">123456</span>hYCcEM62894000000000 │              <span class="hljs-number">0</span> │
+└────────────────────────────┴────────────────┘
+┌─id───────────────────┬─────────new_double_col─┐
+│ <span class="hljs-number">123456</span>hYCcEM62894xxx │ <span class="hljs-number">1.7976931348623157e308</span> │
+└──────────────────────┴────────────────────────┘
+</code></pre>
+<h4 class="text-inherit undefined Typography_suiTitleh4__Tptil group/mdHeader" id="evolve-int-to-string" level="4">Evolve Int to String<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#evolve-int-to-string">#</a></span></h4>
+<p>An input record before schema evolution:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"123456hYCcEM62894000000000"</span><span class="hljs-punctuation">,</span>
+. . . 
+    <span class="hljs-attr">"IntColumn"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123000</span><span class="hljs-punctuation">,</span>
+. . . 
+    <span class="hljs-attr">"_streamkap_ts_ms"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1702894492041</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>A new record ingested after the schema has evolved upstream:</p>
+<pre><code class="hljs language-json mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"123456hYCcEM62894xxx"</span><span class="hljs-punctuation">,</span>
+. . .
+    <span class="hljs-attr">"IntColumn"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"new-str-value"</span><span class="hljs-punctuation">,</span>
+. . .
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>ClickHouse data, after the new column <code class="undefined mb-9 border border-solid border-neutral-750" style="word-break:break-word">IntColumn_str</code> has been added:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">SELECT</span>
+    id,
+    IntColumn,
+    IntColumn_str
+<span class="hljs-keyword">FROM</span> streamkap_test_nominal_evolve_int2string
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> _streamkap_ts_ms <span class="hljs-keyword">ASC</span>
+
+
+┌─id─────────────────────────┬─IntColumn─┬─IntColumn_str─┐
+│ <span class="hljs-number">123456</span>hYCcEM62894000000000 │    <span class="hljs-number">123000</span> │               │
+└────────────────────────────┴───────────┴───────────────┘
+┌─id───────────────────┬─IntColumn─┬─IntColumn_str─┐
+│ <span class="hljs-number">123456</span>hYCcEM62894xxx │         <span class="hljs-number">0</span> │ <span class="hljs-keyword">new</span><span class="hljs-operator">-</span>str<span class="hljs-operator">-</span><span class="hljs-keyword">value</span> │
+└──────────────────────┴───────────┴───────────────┘
+</code></pre>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="performance" level="2">Performance<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#performance">#</a></span></h2>
+<p>The following 15-minute load tests aim to show the performance characteristics of various bulk sizes in relation to latency. Also, we’ll evaluate the scalability of the Streamkap ClickHouse destination connector.</p>
+<p>ClickHouse Cloud instance details: 3 nodes each of 32GiB with 8 vCPUs</p>
+<p>Input record format contains basic types, a medium string ~100 characters and a large string of ~1000 characters:</p>
+<pre><code class="hljs language-sql mb-9 border border-solid border-neutral-750" style="word-break:break-word"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> streamkap_test_nominal_perf limit <span class="hljs-number">1</span> format Vertical;
+
+id:                   <span class="hljs-number">123456</span>hYCcEM62894000000001
+str_col:              <span class="hljs-keyword">some</span><span class="hljs-operator">-</span>str<span class="hljs-operator">-</span><span class="hljs-keyword">values</span><span class="hljs-number">-000000001</span>
+IntColumn:            <span class="hljs-number">123001</span>
+Int8:                 <span class="hljs-number">1</span>
+InT16:                <span class="hljs-number">10</span>
+bool_col:             <span class="hljs-literal">true</span>
+double_col:           <span class="hljs-number">1.7976931348623157e308</span>
+json_col:             {"a": <span class="hljs-number">1</span>}
+__deleted:            <span class="hljs-literal">false</span>
+created_at:           <span class="hljs-number">1970</span><span class="hljs-number">-01</span><span class="hljs-number">-01</span> <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">19.751</span>
+ts_tz:                <span class="hljs-number">2023</span><span class="hljs-number">-10</span><span class="hljs-number">-24</span> <span class="hljs-number">15</span>:<span class="hljs-number">19</span>:<span class="hljs-number">51.000</span>
+_streamkap_ts_ms:     <span class="hljs-number">1706539233685</span>
+binary_col:           java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+byte_buf:             java.nio.HeapByteBuffer[pos<span class="hljs-operator">=</span><span class="hljs-number">0</span> lim<span class="hljs-operator">=</span><span class="hljs-number">5</span> cap<span class="hljs-operator">=</span><span class="hljs-number">5</span>]
+bigint_col:           <span class="hljs-number">92233720368547000000001</span>
+medium_str:           str<span class="hljs-operator">-</span>medium<span class="hljs-number">-000000001</span>x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001
+large_str:            str<span class="hljs-operator">-</span><span class="hljs-keyword">large</span><span class="hljs-number">-000000001</span>x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001x000000001
+_streamkap_partition: <span class="hljs-number">0</span>
+</code></pre>
+<p>Ingestion mode is set to "upsert" for the current tests. When using "append" the throughput will be slightly better since some in-memory de-duplication logic is not needed.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="baseline-single-partition" level="3">Baseline single partition<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#baseline-single-partition">#</a></span></h3>
+<p>Baselining with a single Streamkap task and Clickhouse partition with multiple bulk sizes.</p>
+<p>Throughput:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="streamkap_throughput.png" loading="lazy" src="/uploads/streamkap_throughput_91dc8e3518.png"/></span>
+<p>Latency per bulk size:</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="latency_streamkap.png" loading="lazy" src="/uploads/latency_streamkap_1fb40c8f73.png"/></span>
+<p>Generally, raw throughput is required for backfill, and latency is not a concern. In this case, larger bulk sizes of over 100k rows will be more appropriate.</p>
+<p>Usually, throughput requirements are lower for streaming changes, and a smaller latency might be desired. In this case, smaller bulk sizes are more appropriate.</p>
+<p>These are artificial tests with fixed bulk sizes to exemplify the tradeoff between throughput and latency. In practice, the bulk size varies with the internal queue size. If many records are waiting in the queue, the bulk size will grow, and thus, throughput will grow.</p>
+<h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 group/mdHeader" id="scalability" level="3">Scalability<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#scalability">#</a></span></h3>
+<p>Testing with the same bulk size: 100,000 records per bulk size, and increasing gradually the number of tasks: 1, 2, 4, and 8. We can see that the throughput scales roughly linearly with the number of tasks.</p>
+<span class="relative mb-9 flex w-full justify-center"><img alt="streamkap_scalability.png" loading="lazy" src="/uploads/streamkap_scalability_48c507d9fe.png"/></span>
+<h2 class="text-inherit undefined Typography_suiTitleh2__deFQc group/mdHeader" id="summary" level="2">Summary<!-- --> <span class="transition-opacity group-hover/mdHeader:opacity-100 has-hover:opacity-0" data-state="closed"><a class="" href="/blog/change-data-capture-solution-clickhouse-streamkap-cdc#summary">#</a></span></h2>
+<p>This is just the start of our partnership with ClickHouse, and in the coming weeks, we will continue to build the very best integration possible for handling Change Data Capture events and beyond.</p>
+<p>Here are some areas we would like feedback on whether the community would vote for these</p>
+<ul>
+<li>The use of allow_experimental_object_type=1</li>
+<li>Auto-created Materialized views, template-based</li>
+<li>Streaming ACID transactions across multiple tables</li>
+<li>Single Record Transformations</li>
+<li>Multi Record Transformations (splits, joins, aggregations)</li>
+<li>Exactly-once</li>
+</ul>
+<p>Hopefully, this connector will enable you to enjoy the benefits of ClickHouse more easily, as we do.</p>
+<p>Streamkap &amp; ClickHouse both offer free trials; you can sign up at <a href="https://streamkap.com/">Streamkap.com</a> and <a href="https://clickhouse.com/cloud">ClickHouse.com</a>.</p></div></div></article><aside class="order-2 hidden lg:order-none xl:col-span-3 xl:block"><div class="sticky top-30 flex max-h-[calc(100vh_-_9rem)] flex-col gap-6"></div></aside><div class="order-4 lg:order-none lg:col-span-11 xl:col-span-9"><div class="mx-auto w-full max-w-screen-md border-t border-neutral-725 px-7 mb-8 !max-w-none"></div><div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row"><div class="text-neutral-0 text-sm font-medium">Share this post</div><div class="flex flex-wrap justify-center gap-4 text-neutral-0"><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="sr-only">Copy URL</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2004_30310)"><path d="M8.69336 17V11.5771L3.97363 4.11523H7.02344L10.0557 9.21289L13.0264 4.11523H16.0234L11.2861 11.5947V17H8.69336Z" fill="currentColor"></path></g><defs><clippath id="clip0_2004_30310"><rect fill="white" height="20" width="20"></rect></clippath></defs></svg><span class="sr-only">Share on Y Combinator</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg height="20" viewbox="0 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z" fill="currentColor"></path></svg><span class="sr-only">Share on Twitter</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4.58126 3.13368C6.77426 4.78006 9.1331 8.11825 9.99915 9.90967C10.8653 8.11836 13.224 4.78003 15.4171 3.13368C16.9994 1.94572 19.5633 1.02654 19.5633 3.95141C19.5633 4.53555 19.2284 8.85846 19.0319 9.56025C18.3492 12.0003 15.8612 12.6226 13.648 12.2459C17.5165 12.9043 18.5006 15.0852 16.3753 17.2661C12.3389 21.408 10.5739 16.2269 10.1214 14.8993C10.0385 14.6559 9.99968 14.542 9.9991 14.6388C9.99852 14.542 9.95973 14.6559 9.87684 14.8993C9.42452 16.2269 7.65952 21.4081 3.62289 17.2661C1.49754 15.0852 2.48162 12.9042 6.35021 12.2459C4.13701 12.6226 1.64895 12.0003 0.966271 9.56025C0.769839 8.85841 0.434937 4.53548 0.434937 3.95141C0.434937 1.02654 2.99896 1.94572 4.58126 3.13368Z" fill="currentColor"></path></svg><span class="sr-only">Share on BlueSky</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 10C20 4.47715 15.5229 0 10 0C4.47715 0 0 4.47715 0 10C0 14.9912 3.65684 19.1283 8.4375 19.8785V12.8906H5.89844V10H8.4375V7.79688C8.4375 5.29063 9.93047 3.90625 12.2146 3.90625C13.3084 3.90625 14.4531 4.10156 14.4531 4.10156V6.5625H13.1922C11.95 6.5625 11.5625 7.3334 11.5625 8.125V10H14.3359L13.8926 12.8906H11.5625V19.8785C16.3432 19.1283 20 14.9912 20 10Z" fill="currentColor"></path></svg><span class="sr-only">Share on Facebook</span></button><button class="inline-block rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-2.5 shadow transition-colors hover:bg-primary-300 hover:text-neutral-800" type="button"><svg fill="none" height="20" viewbox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.5195 0H1.47656C0.660156 0 0 0.644531 0 1.44141V18.5547C0 19.3516 0.660156 20 1.47656 20H18.5195C19.3359 20 20 19.3516 20 18.5586V1.44141C20 0.644531 19.3359 0 18.5195 0ZM5.93359 17.043H2.96484V7.49609H5.93359V17.043ZM4.44922 6.19531C3.49609 6.19531 2.72656 5.42578 2.72656 4.47656C2.72656 3.52734 3.49609 2.75781 4.44922 2.75781C5.39844 2.75781 6.16797 3.52734 6.16797 4.47656C6.16797 5.42188 5.39844 6.19531 4.44922 6.19531ZM17.043 17.043H14.0781V12.4023C14.0781 11.2969 14.0586 9.87109 12.5352 9.87109C10.9922 9.87109 10.7578 11.0781 10.7578 12.3242V17.043H7.79688V7.49609H10.6406V8.80078H10.6797C11.0742 8.05078 12.043 7.25781 13.4844 7.25781C16.4883 7.25781 17.043 9.23438 17.043 11.8047V17.043Z" fill="currentColor"></path></svg><span class="sr-only">Share on LinkedIn</span></button></div></div><div class="flex flex-col justify-between gap-6 rounded bg-white/5 p-4 md:flex-row md:items-center md:p-6"><div class="w-full md:w-1/2"><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 mb-2.5">Subscribe to our newsletter</h3><div class="text-neutral-200 text-sm font-medium">Stay informed on feature releases, product roadmap, support, and cloud offerings!</div></div><div class="flex-1"><div class="text-center">Loading form...</div></div></div></div></div></div></div><div class="section-container my-20 flex flex-col"><div class="flex justify-between pb-8"><h2 class="text-inherit undefined Typography_suiTitleh2__deFQc Typography_weight-semibold__3MnOk !text-3xl text-neutral-100">Recent posts</h2><a class="" href="/blog"><button class="styles_button__3smpn font-medium" data-type="secondary"><span class="flex items-center whitespace-nowrap">View all Blogs</span></button></a></div><div class="grid grid-cols-1 justify-center gap-8 md:grid-cols-2 lg:grid-cols-3"><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FFINAL_1_0d999c9df8.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/stripe-projects"><span class="absolute inset-0"></span>Agents can now provision ClickHouse and Postgres on ClickHouse Cloud</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Chloé Carasso dit Carson · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fdatadog_clickhouse_partnership_9b7ff1f4a5.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/datadog-and-clickhouse-partner"><span class="absolute inset-0"></span>Datadog and ClickHouse partner to bring full-fidelity data to modern observability</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 10, 2026</div></div></div></div><div class=""><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2Fclickhouse_agents_jun2026_image7_e65251f928.png&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">Product</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/clickhouse-agents-beta"><span class="absolute inset-0"></span>ClickHouse Agents: Claude-powered agentic analytics, now in public beta</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">Ryadh Dahimene · Jun 9, 2026</div></div></div></div><div class="hidden md:block lg:hidden"><div class="h-full"><div class="cui-card flex h-full flex-col items-center justify-between rounded-lg border border-neutral-700/80 bg-neutral-900/50 shadow-card hover:shadow-lg relative overflow-hidden transition-transform hover:-translate-y-1"><div class="cui-card-header w-full undefined"><img alt="" class="aspect-thumbnail w-full max-w-none object-cover object-center" data-nimg="1" decoding="async" height="600" loading="lazy" src="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75" srcset="/_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=640&amp;q=75 1x, /_next/image?url=%2Fuploads%2FQRT_Customer_Story_Cover_cdf374dbd5.jpg&amp;w=828&amp;q=75 2x" style="color:transparent" width="400"/></div><div class="cui-card-body w-full mb-auto p-6"><div class="mb-2 font-inconsolata text-base font-medium text-primary-300">User stories</div><h3 class="text-inherit undefined Typography_suiTitleh3__JlLe2 undefined"><a class="text-neutral-100" href="/blog/qrt"><span class="absolute inset-0"></span>How QRT powers real-time research and risk management at petabyte scale</a></h3></div><div class="cui-card-footer w-full mt-auto flex w-full items-center p-6 pt-0 text-sm text-neutral-300">ClickHouse · Jun 9, 2026</div></div></div></div></div></div><div class="mt-24 flex flex-col items-center justify-center bg-primary-300 text-neutral"><div class="mb-4 mt-8 font-bold">Follow us</div><div class="mb-12 flex flex-wrap justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://x.com/ClickhouseDB" target="_blank" title="X"><img alt="X" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/x.svg" style="color:transparent" width="32"/><span class="sr-only">X</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://bsky.app/profile/clickhouse.com" target="_blank" title="Bluesky"><img alt="Bluesky" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/bluesky.svg" style="color:transparent" width="32"/><span class="sr-only">Bluesky</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/slack" target="_blank" title="Slack"><img alt="Slack" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/slack.svg" style="color:transparent" width="32"/><span class="sr-only">Slack</span></a><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://github.com/ClickHouse/ClickHouse" target="_blank" title="GitHub"><img alt="GitHub" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/github.svg" style="color:transparent" width="32"/><span class="sr-only">GitHub</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://telegram.me/clickhouse_en" target="_blank" title="Telegram"><img alt="Telegram" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/telegram.svg" style="color:transparent" width="32"/><span class="sr-only">Telegram</span></a><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="https://www.meetup.com/pro/clickhouse" target="_blank" title="Meetup"><img alt="Meetup" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/meetup.svg" style="color:transparent" width="32"/><span class="sr-only">Meetup</span></a></div><div class="flex justify-center gap-2 md:gap-6"><a class="grid size-16 place-items-center rounded border border-neutral-700/80 bg-neutral-900 transition-colors hover:bg-neutral-800" href="/rss.xml" target="_blank" title="Rss"><img alt="Rss" class="size-8 max-w-none object-scale-down object-center" data-nimg="1" decoding="async" height="32" loading="lazy" src="/socials/rss.svg" style="color:transparent" width="32"/><span class="sr-only">Rss</span></a></div></div></div></main>

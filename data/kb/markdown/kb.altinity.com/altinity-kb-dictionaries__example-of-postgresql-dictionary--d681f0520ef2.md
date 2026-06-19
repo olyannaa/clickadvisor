@@ -1,0 +1,37 @@
+# Example of PostgreSQL dictionary \| Altinity® Knowledge Base for ClickHouse®
+
+
+1. [Dictionaries](/altinity-kb-dictionaries/)
+2. Example of PostgreSQL dictionary
+# Example of PostgreSQL dictionary
+
+
+```
+CREATE DICTIONARY postgres_dict
+(
+    id UInt32,
+    value String
+)
+PRIMARY KEY id
+SOURCE(
+    POSTGRESQL(
+        port 5432
+        host 'postgres1'
+        user  'postgres'
+        password 'mysecretpassword'
+        db 'clickhouse'
+        table 'test_schema.test_table'
+    )
+)
+LIFETIME(MIN 300 MAX 600)
+LAYOUT(HASHED());
+
+```
+and later do
+
+
+```
+SELECT dictGetString(postgres_dict, 'value', toUInt64(1))
+
+```
+Last modified 2021\.08\.18: [Removed odd characters. (5a8e9af)](https://github.com/Altinity/altinityknowledgebase/commit/5a8e9afba4f8d779a1136522b4e29003a13ae38c)

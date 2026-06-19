@@ -1,0 +1,71 @@
+# sum \| ClickHouse Docs
+
+
+- - [Functions](/docs/sql-reference/functions)- [Aggregate functions](/docs/sql-reference/aggregate-functions)- [Aggregate Functions](/docs/sql-reference/aggregate-functions/reference)- sum
+[Edit this page](https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/aggregate-functions/reference/sum.md)# sum
+
+## sum[​](#sum "Direct link to sum")
+
+
+Introduced in: v1\.1\.0
+
+
+Calculates the sum of numeric values.
+
+
+**Syntax**
+
+
+
+```
+sum(num)
+
+```
+
+**Arguments**
+
+
+- `num` — Column of numeric values. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Returned value**
+
+
+Returns the sum of the values. [`(U)Int*`](/docs/sql-reference/data-types/int-uint) or [`Float*`](/docs/sql-reference/data-types/float) or [`Decimal*`](/docs/sql-reference/data-types/decimal)
+
+
+**Examples**
+
+
+**Computing sum of employee salaries**
+
+
+
+```
+CREATE TABLE employees
+(
+    id UInt32,
+    name String,
+    salary UInt32
+)
+ENGINE = Memory;
+
+INSERT INTO employees VALUES
+    (87432, 'John Smith', 45680),
+    (59018, 'Jane Smith', 72350),
+    (20376, 'Ivan Ivanovich', 58900),
+    (71245, 'Anastasia Ivanovna', 89210);
+
+SELECT sum(salary) FROM employees;
+
+```
+
+
+```
+┌─sum(salary)─┐
+│      266140 │
+└─────────────┘
+
+```
+[PreviousstudentTTestOneSample](/docs/sql-reference/aggregate-functions/reference/studentttestonesample)[NextsumCount](/docs/sql-reference/aggregate-functions/reference/sumcount)- [sum](#sum)
+Was this page helpful?

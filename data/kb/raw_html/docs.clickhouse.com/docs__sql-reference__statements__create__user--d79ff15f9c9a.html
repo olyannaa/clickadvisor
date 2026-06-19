@@ -1,0 +1,179 @@
+<h1>CREATE USER | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements/create" itemprop="item"><span itemprop="name">CREATE</span></a><meta content="3" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">USER</span><meta content="4" itemprop="position"/></li></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/create/user.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>CREATE USER</h1></header><p>Creates <a href="/docs/operations/access-rights#user-account-management">user accounts</a>.</p>
+<p>Syntax:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER [IF NOT EXISTS | OR REPLACE] name1 [, name2 [,...]] [ON CLUSTER cluster_name]
+    [NOT IDENTIFIED | IDENTIFIED {[WITH {plaintext_password | sha256_password | sha256_hash | double_sha1_password | double_sha1_hash}] BY {'password' | 'hash'}} | WITH NO_PASSWORD | {WITH ldap SERVER 'server_name'} | {WITH kerberos [REALM 'realm']} | {WITH ssl_certificate CN 'common_name' | SAN 'TYPE:subject_alt_name'} | {WITH ssh_key BY KEY 'public_key' TYPE 'ssh-rsa|...'} | {WITH http SERVER 'server_name' [SCHEME 'Basic']} [VALID UNTIL datetime] 
+    [, {[{plaintext_password | sha256_password | sha256_hash | ...}] BY {'password' | 'hash'}} | {ldap SERVER 'server_name'} | {...} | ... [,...]]]
+    [HOST {LOCAL | NAME 'name' | REGEXP 'name_regexp' | IP 'address' | LIKE 'pattern'} [,...] | ANY | NONE]
+    [VALID UNTIL datetime]
+    [IN access_storage_type]
+    [ROLE role [,...]]
+    [DEFAULT ROLE role [,...]]
+    [DEFAULT DATABASE database | NONE]
+    [GRANTEES {user | role | ANY | NONE} [,...] [EXCEPT {user | role} [,...]]]
+    [SETTINGS variable [= value] [MIN [=] min_value] [MAX [=] max_value] [READONLY | WRITABLE] | PROFILE 'profile_name'] [,...]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>ON CLUSTER</code> clause allows creating users on a cluster, see <a href="/docs/sql-reference/distributed-ddl">Distributed DDL</a>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="identification">Identification<a aria-label="Direct link to Identification" class="hash-link" href="#identification" title="Direct link to Identification">​</a></h2>
+<p>There are multiple ways of user identification:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>IDENTIFIED WITH no_password</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH plaintext_password BY 'qwerty'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH sha256_password BY 'qwerty'</code> or <code>IDENTIFIED BY 'password'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH sha256_hash BY 'hash'</code> or <code>IDENTIFIED WITH sha256_hash BY 'hash' SALT 'salt'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH double_sha1_password BY 'qwerty'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH double_sha1_hash BY 'hash'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH bcrypt_password BY 'qwerty'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH bcrypt_hash BY 'hash'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH ldap SERVER 'server_name'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH kerberos</code> or <code>IDENTIFIED WITH kerberos REALM 'realm'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH ssl_certificate CN 'mysite.com:user'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH ssh_key BY KEY 'public_key' TYPE 'ssh-rsa', KEY 'another_public_key' TYPE 'ssh-ed25519'</code></li>
+<li class="custom-li"><code>IDENTIFIED WITH http SERVER 'http_server'</code> or <code>IDENTIFIED WITH http SERVER 'http_server' SCHEME 'basic'</code></li>
+<li class="custom-li"><code>IDENTIFIED BY 'qwerty'</code></li>
+</ul>
+<p>Password complexity requirements can be edited in <a href="/docs/operations/configuration-files">config.xml</a>. Below is an example configuration that requires passwords to be at least 12 characters long and contain 1 number. Each password complexity rule requires a regex to match against passwords and a description of the rule.</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;password_complexity&gt;
+        &lt;rule&gt;
+            &lt;pattern&gt;.{12}&lt;/pattern&gt;
+            &lt;message&gt;be at least 12 characters long&lt;/message&gt;
+        &lt;/rule&gt;
+        &lt;rule&gt;
+            &lt;pattern&gt;\p{N}&lt;/pattern&gt;
+            &lt;message&gt;contain at least 1 numeric character&lt;/message&gt;
+        &lt;/rule&gt;
+    &lt;/password_complexity&gt;
+&lt;/clickhouse&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>In ClickHouse Cloud, by default, passwords must meet the following complexity requirements:<ul class="custom-ul">
+<li class="custom-li">Be at least 12 characters long</li>
+<li class="custom-li">Contain at least 1 numeric character</li>
+<li class="custom-li">Contain at least 1 uppercase character</li>
+<li class="custom-li">Contain at least 1 lowercase character</li>
+<li class="custom-li">Contain at least 1 special character</li>
+</ul></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples" title="Direct link to Examples">​</a></h2>
+<ol class="custom-ol">
+<li class="custom-li">
+<p>The following username is <code>name1</code> and does not require a password - which obviously doesn't provide much security:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name1 NOT IDENTIFIED
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+<li class="custom-li">
+<p>To specify a plaintext password:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name2 IDENTIFIED WITH plaintext_password BY 'my_password'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>The password is stored in a SQL text file in <code>/var/lib/clickhouse/access</code>, so it's not a good idea to use <code>plaintext_password</code>. Try <code>sha256_password</code> instead, as demonstrated next...</p></div></div>
+</li>
+<li class="custom-li">
+<p>The most common option is to use a password that is hashed using SHA-256. ClickHouse will hash the password for you when you specify <code>IDENTIFIED WITH sha256_password</code>. For example:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name3 IDENTIFIED WITH sha256_password BY 'my_password'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The <code>name3</code> user can now login using <code>my_password</code>, but the password is stored as the hashed value above. The following SQL file was created in <code>/var/lib/clickhouse/access</code> and gets executed at server startup:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">/var/lib/clickhouse/access $ cat 3843f510-6ebd-a52d-72ac-e021686d8a93.sql
+ATTACH USER name3 IDENTIFIED WITH sha256_hash BY '0C268556C1680BEF0640AAC1E7187566704208398DA31F03D18C74F5C5BE5053' SALT '4FB16307F5E10048196966DD7E6876AE53DE6A1D1F625488482C75F14A5097C7';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>If you have already created a hash value and corresponding salt value for a username, then you can use <code>IDENTIFIED WITH sha256_hash BY 'hash'</code> or <code>IDENTIFIED WITH sha256_hash BY 'hash' SALT 'salt'</code>. For identification with <code>sha256_hash</code> using <code>SALT</code> - hash must be calculated from concatenation of 'password' and 'salt'.</p></div></div>
+</li>
+<li class="custom-li">
+<p>The <code>double_sha1_password</code> is not typically needed, but comes in handy when working with clients that require it (like the MySQL interface):</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name4 IDENTIFIED WITH double_sha1_password BY 'my_password'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse generates and runs the following query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-response"><code class="language-response">CREATE USER name4 IDENTIFIED WITH double_sha1_hash BY 'CCD3A959D6A004B9C3807B728BC2E55B67E10518'
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+<li class="custom-li">
+<p>The <code>bcrypt_password</code> is the most secure option for storing passwords. It uses the <a href="https://en.wikipedia.org/wiki/Bcrypt" rel="noopener noreferrer" target="_blank">bcrypt</a> algorithm, which is resilient against brute force attacks even if the password hash is compromised.</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name5 IDENTIFIED WITH bcrypt_password BY 'my_password'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The length of the password is limited to 72 characters with this method.
+The bcrypt work factor parameter, which defines the amount of computations and time needed to compute the hash and verify the password, can be modified in the server configuration:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;bcrypt_workfactor&gt;12&lt;/bcrypt_workfactor&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The work factor must be between 4 and 31, with a default value of 12.</p>
+<div class="theme-admonition theme-admonition-warning alert alert--warning admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 16 16"><path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>For applications with high-frequency authentication,
+consider alternative authentication methods due to
+bcrypt's computational overhead at higher work factors.</p></div></div>
+</li>
+<li class="custom-li">
+<p>The type of the password can also be omitted:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER name6 IDENTIFIED BY 'my_password'
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this case, ClickHouse will use the default password type specified in the server configuration:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;default_password_type&gt;sha256_password&lt;/default_password_type&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>The available password types are: <code>plaintext_password</code>, <code>sha256_password</code>, <code>double_sha1_password</code>.</p>
+</li>
+<li class="custom-li">
+<p>Multiple authentication methods can be specified:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER user1 IDENTIFIED WITH plaintext_password by '1', bcrypt_password by '2', plaintext_password by '3''
+</code></pre></div><div class="activity_PoTP"></div></div>
+</li>
+</ol>
+<p>Notes:</p>
+<ol class="custom-ol">
+<li class="custom-li">Older versions of ClickHouse might not support the syntax of multiple authentication methods. Therefore, if the ClickHouse server contains such users and is downgraded to a version that does not support it, such users will become unusable and some user related operations will be broken. In order to downgrade gracefully, one must set all users to contain a single authentication method prior to downgrading. Alternatively, if the server was downgraded without the proper procedure, the faulty users should be dropped.</li>
+<li class="custom-li"><code>no_password</code> can not co-exist with other authentication methods for security reasons. Therefore, you can only specify
+<code>no_password</code> if it is the only authentication method in the query.</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="user-host">User Host<a aria-label="Direct link to User Host" class="hash-link" href="#user-host" title="Direct link to User Host">​</a></h2>
+<p>User host is a host from which a connection to ClickHouse server could be established. The host can be specified in the <code>HOST</code> query section in the following ways:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>HOST IP 'ip_address_or_subnetwork'</code> — User can connect to ClickHouse server only from the specified IP address or a <a href="https://en.wikipedia.org/wiki/Subnetwork" rel="noopener noreferrer" target="_blank">subnetwork</a>. Examples: <code>HOST IP '192.168.0.0/16'</code>, <code>HOST IP '2001:DB8::/32'</code>. For use in production, only specify <code>HOST IP</code> elements (IP addresses and their masks), since using <code>host</code> and <code>host_regexp</code> might cause extra latency.</li>
+<li class="custom-li"><code>HOST ANY</code> — User can connect from any location. This is a default option.</li>
+<li class="custom-li"><code>HOST LOCAL</code> — User can connect only locally.</li>
+<li class="custom-li"><code>HOST NAME 'fqdn'</code> — User host can be specified as FQDN. For example, <code>HOST NAME 'mysite.com'</code>.</li>
+<li class="custom-li"><code>HOST REGEXP 'regexp'</code> — You can use <a href="http://www.pcre.org/" rel="noopener noreferrer" target="_blank">pcre</a> regular expressions when specifying user hosts. For example, <code>HOST REGEXP '.*\.mysite\.com'</code>.</li>
+<li class="custom-li"><code>HOST LIKE 'template'</code> — Allows you to use the <a href="/docs/sql-reference/functions/string-search-functions#like">LIKE</a> operator to filter the user hosts. For example, <code>HOST LIKE '%'</code> is equivalent to <code>HOST ANY</code>, <code>HOST LIKE '%.mysite.com'</code> filters all the hosts in the <code>mysite.com</code> domain.</li>
+</ul>
+<p>Another way of specifying host is to use <code>@</code> syntax following the username. Examples:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>CREATE USER mira@'127.0.0.1'</code> — Equivalent to the <code>HOST IP</code> syntax.</li>
+<li class="custom-li"><code>CREATE USER mira@'localhost'</code> — Equivalent to the <code>HOST LOCAL</code> syntax.</li>
+<li class="custom-li"><code>CREATE USER mira@'192.168.%.%'</code> — Equivalent to the <code>HOST LIKE</code> syntax.</li>
+</ul>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>ClickHouse treats <code>user_name@'address'</code> as a username as a whole. Thus, technically you can create multiple users with the same <code>user_name</code> and different constructions after <code>@</code>. However, we do not recommend to do so.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="valid-until-clause">VALID UNTIL Clause<a aria-label="Direct link to VALID UNTIL Clause" class="hash-link" href="#valid-until-clause" title="Direct link to VALID UNTIL Clause">​</a></h2>
+<p>Allows you to specify the expiration date and, optionally, the time for an authentication method. It accepts a string as a parameter. It is recommended to use the <code>YYYY-MM-DD [hh:mm:ss] [timezone]</code> format for datetime, where <code>[timezone]</code> must be a numeric offset such as <code>+09:00</code> or one of <code>UTC</code>, <code>GMT</code>, <code>Z</code>, <code>MSK</code>, <code>MSD</code>; named IANA zones like <code>Asia/Tokyo</code> are not recognized (see the note below). By default, this parameter equals <code>'infinity'</code>.
+The <code>VALID UNTIL</code> clause can only be specified along with an authentication method, except for the case where no authentication method has been specified in the query. In this scenario, the <code>VALID UNTIL</code> clause will be applied to all existing authentication methods.</p>
+<p>Examples:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>CREATE USER name1 VALID UNTIL '2025-01-01'</code></li>
+<li class="custom-li"><code>CREATE USER name1 VALID UNTIL '2025-01-01 12:00:00 UTC'</code></li>
+<li class="custom-li"><code>CREATE USER name1 VALID UNTIL '2025-01-01 12:00:00 +09:00'</code></li>
+<li class="custom-li"><code>CREATE USER name1 VALID UNTIL 'infinity'</code></li>
+<li class="custom-li"><code>CREATE USER name1 IDENTIFIED WITH plaintext_password BY 'no_expiration', bcrypt_password BY 'expiration_set' VALID UNTIL '2025-01-01'</code></li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>The datetime string is parsed by <code>parseDateTimeBestEffort</code>, which only recognizes the timezone tokens <code>UTC</code>, <code>GMT</code>, <code>Z</code>, <code>MSK</code>, <code>MSD</code>, and numeric offsets such as <code>+09:00</code> or <code>-05:00</code>. Named IANA timezones like <code>Asia/Tokyo</code> or <code>Europe/London</code> are not supported, and a fixed offset is not equivalent to an IANA zone for regions that observe daylight saving time, so you must compute the correct offset for the specific date you are encoding.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="grantees-clause">GRANTEES Clause<a aria-label="Direct link to GRANTEES Clause" class="hash-link" href="#grantees-clause" title="Direct link to GRANTEES Clause">​</a></h2>
+<p>Specifies users or roles which are allowed to receive <a href="/docs/sql-reference/statements/grant#privileges">privileges</a> from this user on the condition this user has also all required access granted with <a href="/docs/sql-reference/statements/grant#granting-privilege-syntax">GRANT OPTION</a>. Options of the <code>GRANTEES</code> clause:</p>
+<ul class="custom-ul">
+<li class="custom-li"><code>user</code> — Specifies a user this user can grant privileges to.</li>
+<li class="custom-li"><code>role</code> — Specifies a role this user can grant privileges to.</li>
+<li class="custom-li"><code>ANY</code> — This user can grant privileges to anyone. It's the default setting.</li>
+<li class="custom-li"><code>NONE</code> — This user can grant privileges to none.</li>
+</ul>
+<p>You can exclude any user or role by using the <code>EXCEPT</code> expression. For example, <code>CREATE USER user1 GRANTEES ANY EXCEPT user2</code>. It means if <code>user1</code> has some privileges granted with <code>GRANT OPTION</code> it will be able to grant those privileges to anyone except <code>user2</code>.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="examples-1">Examples<a aria-label="Direct link to Examples" class="hash-link" href="#examples-1" title="Direct link to Examples">​</a></h2>
+<p>Create the user account <code>mira</code> protected by the password <code>qwerty</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER mira HOST IP '127.0.0.1' IDENTIFIED WITH sha256_password BY 'qwerty';
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><code>mira</code> should start client app at the host where the ClickHouse server runs.</p>
+<p>Create the user account <code>john</code> and assign roles:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER john ROLE role1, role2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Create the user account <code>john</code>, assign roles and make some of them default:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER john ROLE role1, role2 DEFAULT ROLE role1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>or</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER john ROLE role1, role2 DEFAULT ROLE ALL EXCEPT role2;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Create the user account <code>john</code> and allow him to grant his privileges to the user with <code>jack</code> account:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE USER john GRANTEES jack;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Use a query parameter to create the user account <code>john</code>:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET param_user=john;
+CREATE USER {user:Identifier};
+</code></pre></div><div class="activity_PoTP"></div></div></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/function"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">FUNCTION</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/create/role"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">ROLE</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#identification">Identification</a><li><a class="table-of-contents__link toc-highlight" href="#examples">Examples</a><li><a class="table-of-contents__link toc-highlight" href="#user-host">User Host</a><li><a class="table-of-contents__link toc-highlight" href="#valid-until-clause">VALID UNTIL Clause</a><li><a class="table-of-contents__link toc-highlight" href="#grantees-clause">GRANTEES Clause</a><li><a class="table-of-contents__link toc-highlight" href="#examples-1">Examples</a></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

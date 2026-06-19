@@ -1,0 +1,28 @@
+id: R-007
+name: toStartOfInterval_eq_to_range
+tier: 1A
+category: sargable
+status: proposed
+statement: 'toStartOfHour(ts) = const → range; то же для toStartOfDay,
+
+  toStartOfFifteenMinutes, toStartOfInterval(ts, INTERVAL X UNIT).'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: 'toStartOfX — это floor по временной границе.
+
+  Equality с floor-значением ≡ range [floor, floor+granularity).'
+explain_template: 'toStartOfHour и похожие функции округляют время вниз до границы интервала. Для человека это удобно, но для планировщика такое выражение скрывает реальный диапазон значений исходной колонки. Явный range по ts даёт ClickHouse то, что нужно для индексного пропуска данных: нижнюю и верхнюю границы без вычисления функции на каждой строке.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE toStartOfHour(ts) = '2024-01-15 14:00:00'
+example_after: WHERE ts >= '2024-01-15 14:00:00' AND ts < '2024-01-15 15:00:00'
+expected_speedup:
+  estimate: null
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references: []

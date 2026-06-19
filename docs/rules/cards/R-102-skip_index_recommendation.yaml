@@ -1,0 +1,32 @@
+id: R-102
+name: skip_index_recommendation
+tier: '2'
+category: index_design
+status: proposed
+statement: Добавить skip index (minmax, set, ngrambf_v1, bloom_filter)
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+  stats_based:
+  - колонка коррелирует с ORDER BY; selectivity < 0.1
+proof: ''
+ch_version:
+  introduced: '20.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: Оценка через EXPLAIN ESTIMATE до и после применения DDL.
+risks:
+- без корреляции с ORDER BY даёт только overhead
+opt_in: true
+references: []
+cost_model:
+  metric: ''
+  formula: EXPLAIN ESTIMATE до и после ALTER TABLE ADD INDEX
+  baseline: ''
+  projected: ''
+ddl_template: '`ALTER TABLE t ADD INDEX idx_name expr TYPE type GRANULARITY N`'

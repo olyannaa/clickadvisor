@@ -1,0 +1,73 @@
+<h1>Settings to adjust | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">Settings to adjust</li></ol></nav><div class="td-content"><h1>Settings to adjust</h1><div class="lead"></div><ol><li><p><code>query_log</code> and other <code>_log</code> tables - set up TTL, or some other cleanup procedures.</p><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/config.d/query_log.xml
+&lt;clickhouse&gt;
+    &lt;query_log replace="1"&gt;
+        &lt;database&gt;system&lt;/database&gt;
+        &lt;table&gt;query_log&lt;/table&gt;
+        &lt;flush_interval_milliseconds&gt;7500&lt;/flush_interval_milliseconds&gt;
+        &lt;engine&gt;
+ENGINE = MergeTree
+PARTITION BY event_date
+ORDER BY (event_time)
+TTL event_date + interval 90 day
+SETTINGS ttl_only_drop_parts=1
+        &lt;/engine&gt;
+    &lt;/query_log&gt;
+&lt;/clickhouse&gt;
+</code></pre></li><li><p><code>query_thread_log</code> - typically is not too useful for end users, you can disable it (or set up TTL).
+We do not recommend removing this table completely as you might need it for debug one day and the threads’ logging can be easily disabled/enabled without a restart through user profiles:</p><pre tabindex="0"><code class="language-markup" data-lang="markup"> $ cat /etc/clickhouse-server/users.d/z_log_queries.xml
+ &lt;clickhouse&gt;
+     &lt;profiles&gt;
+         &lt;default&gt;
+             &lt;log_query_threads&gt;0&lt;/log_query_threads&gt;
+         &lt;/default&gt;
+     &lt;/profiles&gt;
+ &lt;/clickhouse&gt;
+</code></pre></li><li><p>If you have a good monitoring outside ClickHouse® you don’t need to store the history of metrics in ClickHouse</p><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/config.d/disable_metric_logs.xml
+&lt;clickhouse&gt;
+    &lt;metric_log remove="1" /&gt;
+    &lt;asynchronous_metric_log remove="1" /&gt;
+&lt;/clickhouse&gt;
+</code></pre></li><li><p><code>part_log</code> - may be nice, especially at the beginning / during system tuning/analyze.</p><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/config.d/part_log.xml
+&lt;clickhouse&gt;
+    &lt;part_log replace="1"&gt;
+        &lt;database&gt;system&lt;/database&gt;
+        &lt;table&gt;part_log&lt;/table&gt;
+        &lt;flush_interval_milliseconds&gt;7500&lt;/flush_interval_milliseconds&gt;
+        &lt;engine&gt;
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(event_date)
+ORDER BY (event_time)
+TTL toStartOfMonth(event_date) + INTERVAL 3 MONTH
+SETTINGS ttl_only_drop_parts=1
+        &lt;/engine&gt;
+    &lt;/part_log&gt;
+&lt;/clickhouse&gt;
+</code></pre></li><li><p>on older versions <code>log_queries</code> is disabled by default, it’s worth having it enabled always.</p><pre tabindex="0"><code class="language-markup" data-lang="markup">$ cat /etc/clickhouse-server/users.d/log_queries.xml
+&lt;clickhouse&gt;
+    &lt;profiles&gt;
+        &lt;default&gt;
+            &lt;log_queries&gt;1&lt;/log_queries&gt;
+        &lt;/default&gt;
+    &lt;/profiles&gt;
+&lt;/clickhouse&gt;
+</code></pre></li><li><p>quite often you want to have on-disk group by / order by enabled (both disabled by default).</p><pre tabindex="0"><code class="language-markup" data-lang="markup">cat /etc/clickhouse-server/users.d/enable_on_disk_operations.xml
+&lt;clickhouse&gt;
+    &lt;profiles&gt;
+        &lt;default&gt;
+           &lt;max_bytes_before_external_group_by&gt;2000000000&lt;/max_bytes_before_external_group_by&gt;
+           &lt;max_bytes_before_external_sort&gt;2000000000&lt;/max_bytes_before_external_sort&gt;
+        &lt;/default&gt;
+    &lt;/profiles&gt;
+&lt;/clickhouse&gt;
+</code></pre></li><li><p>quite often you want to create more users with different limitations.
+The most typical is <code>&lt;max_execution_time&gt;</code>
+It’s actually also not a way to plan/share existing resources better, but it at least disciplines users.</p><p>Also introducing some <a href="https://clickhouse.tech/docs/en/operations/settings/query-complexity/" rel="nofollow" target="_blank">restrictions on query complexity</a>
+can be a good option to discipline users.</p><p>You can find the preset example <a href="https://clickhouse.tech/docs/en/operations/settings/settings-profiles/" rel="nofollow" target="_blank">here</a>
+.
+Also, force_index_by_date + force_primary_key can be a nice idea to avoid queries that ‘accidentally’ do full scans, max_concurrent_queries_for_user</p></li><li><p>merge_tree settings: <code>max_bytes_to_merge_at_max_space_in_pool</code> (may be reduced in some scenarios), <code>inactive_parts_to_throw_insert</code> - can be enabled, <code>replicated_deduplication_window</code> - can be extended if single insert create lot of parts , <code>merge_with_ttl_timeout</code> - when you use ttl</p></li><li><p><code>insert_distributed_sync</code> - for small clusters you may sometimes want to enable it</p></li><li><p>when the durability is the main requirement (or server / storage is not stable) - you may want to enable <code>fsync_*</code> setting (impacts the write performance significantly!!), and <code>insert_quorum</code></p></li><li><p>If you use FINAL queries - usually you want to enable <code>do_not_merge_across_partitions_select_final</code></p></li><li><p>memory usage per server / query / user: <a href="/altinity-kb-setup-and-maintenance/altinity-kb-memory-configuration-settings/">memory configuration settings</a></p></li><li><p>if you use async_inserts - you often may want to increase max_concurrent_queries</p></li></ol><pre tabindex="0"><code>&lt;clickhouse&gt;
+    &lt;max_concurrent_queries&gt;500&lt;/max_concurrent_queries&gt;
+    &lt;max_concurrent_insert_queries&gt;400&lt;/max_concurrent_insert_queries&gt;
+    &lt;max_concurrent_select_queries&gt;100&lt;/max_concurrent_select_queries&gt;
+&lt;/clickhouse&gt;
+</code></pre><ol start="11"><li>materialize_ttl_after_modify=0</li><li>access_management=1</li><li>secret in &lt;remote_servers&gt;</li></ol><p>See also:</p><p><a href="https://docs.altinity.com/operationsguide/security/clickhouse-hardening-guide/" target="_blank">https://docs.altinity.com/operationsguide/security/clickhouse-hardening-guide/</a></p><div class="td-page-meta__lastmod">Last modified 2024.07.30: <a href="https://github.com/Altinity/altinityknowledgebase/commit/a4a96398d6e97ac2935110b426947487e2e202d9">Site cleanup, mostly minor changes (a4a9639)</a></div></div></main>

@@ -1,0 +1,148 @@
+<h1>ClickHouse® AggregatingMergeTree | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/engines/">Engines</a></li><li class="breadcrumb-item"><a href="/engines/mergetree-table-engine-family/">MergeTree table engine family</a></li><li aria-current="page" class="breadcrumb-item active">AggregatingMergeTree</li></ol></nav><div class="td-content"><h1>ClickHouse® AggregatingMergeTree</h1><div class="lead">FAQs for storing and merging pre-aggregated data</div><p>Q. What happens with columns which are not part of the <a href="/engines/mergetree-table-engine-family/pick-keys/">ORDER BY</a>
+key, nor have the AggregateFunction type?</p><p>A. it picks the first value met, (similar to <code>any</code>)</p><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-sql" data-lang="sql"><span style="display:flex"><span><span style="color:#204a87;font-weight:700">CREATE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TABLE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#000;font-weight:700">(</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">    </span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#000">a</span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">String</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">    </span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#000">b</span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">UInt8</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">    </span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#204a87;font-weight:700">c</span><span style="color:#ce5c00;font-weight:700">`</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">SimpleAggregateFunction</span><span style="color:#000;font-weight:700">(</span><span style="color:#204a87;font-weight:700">max</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">UInt8</span><span style="color:#000;font-weight:700">)</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#000;font-weight:700">)</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#000">ENGINE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">=</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">AggregatingMergeTree</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">ORDER</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">BY</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">a</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">INSERT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">INTO</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">VALUES</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'a'</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">1</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">1</span><span style="color:#000;font-weight:700">);</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">INSERT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">INTO</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">VALUES</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'a'</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">2</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">2</span><span style="color:#000;font-weight:700">);</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">*</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FROM</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FINAL</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">┌─</span><span style="color:#000">a</span><span style="color:#a40000">─┬─</span><span style="color:#000">b</span><span style="color:#a40000">─┬─</span><span style="color:#204a87;font-weight:700">c</span><span style="color:#a40000">─┐</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">a</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">1</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">2</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">└───┴───┴───┘</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">INSERT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">INTO</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">VALUES</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000;font-weight:700">(</span><span style="color:#4e9a06">'a'</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">3</span><span style="color:#000;font-weight:700">,</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">3</span><span style="color:#000;font-weight:700">);</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">*</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FROM</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">┌─</span><span style="color:#000">a</span><span style="color:#a40000">─┬─</span><span style="color:#000">b</span><span style="color:#a40000">─┬─</span><span style="color:#204a87;font-weight:700">c</span><span style="color:#a40000">─┐</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">a</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">1</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">2</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">└───┴───┴───┘</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">┌─</span><span style="color:#000">a</span><span style="color:#a40000">─┬─</span><span style="color:#000">b</span><span style="color:#a40000">─┬─</span><span style="color:#204a87;font-weight:700">c</span><span style="color:#a40000">─┐</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">a</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">3</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">3</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">└───┴───┴───┘</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#000">OPTIMIZE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">TABLE</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FINAL</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#204a87;font-weight:700">SELECT</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#ce5c00;font-weight:700">*</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#204a87;font-weight:700">FROM</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">agg_test</span><span style="color:#000;font-weight:700">;</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">┌─</span><span style="color:#000">a</span><span style="color:#a40000">─┬─</span><span style="color:#000">b</span><span style="color:#a40000">─┬─</span><span style="color:#204a87;font-weight:700">c</span><span style="color:#a40000">─┐</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#000">a</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">1</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#0000cf;font-weight:700">3</span><span style="color:#f8f8f8;text-decoration:underline"> </span><span style="color:#a40000">│</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span><span style="display:flex"><span><span style="color:#f8f8f8;text-decoration:underline"></span><span style="color:#a40000">└───┴───┴───┘</span><span style="color:#f8f8f8;text-decoration:underline">
+</span></span></span></code></pre></div><h2 id="last-non-null-value-for-each-column">Last non-null value for each column</h2><pre tabindex="0"><code>CREATE TABLE test_last
+(
+    `col1` Int32,
+    `col2` SimpleAggregateFunction(anyLast, Nullable(DateTime)),
+    `col3` SimpleAggregateFunction(anyLast, Nullable(DateTime))
+)
+ENGINE = AggregatingMergeTree
+ORDER BY col1
+
+Ok.
+
+0 rows in set. Elapsed: 0.003 sec.
+
+INSERT INTO test_last (col1, col2) VALUES (1, now());
+
+Ok.
+
+1 rows in set. Elapsed: 0.014 sec.
+
+INSERT INTO test_last (col1, col3) VALUES (1, now())
+
+Ok.
+
+1 rows in set. Elapsed: 0.006 sec.
+
+SELECT
+    col1,
+    anyLast(col2),
+    anyLast(col3)
+FROM test_last
+GROUP BY col1
+
+┌─col1─┬───────anyLast(col2)─┬───────anyLast(col3)─┐
+│    1 │ 2020-01-16 20:57:46 │ 2020-01-16 20:57:51 │
+└──────┴─────────────────────┴─────────────────────┘
+
+1 rows in set. Elapsed: 0.005 sec.
+
+SELECT *
+FROM test_last
+FINAL
+
+┌─col1─┬────────────────col2─┬────────────────col3─┐
+│    1 │ 2020-01-16 20:57:46 │ 2020-01-16 20:57:51 │
+└──────┴─────────────────────┴─────────────────────┘
+
+1 rows in set. Elapsed: 0.003 sec.
+</code></pre><h2 id="merge-two-data-streams">Merge two data streams</h2><p>Q. I have 2 Kafka topics from which I am storing events into 2 different tables (A and B) having the same unique ID. I want to create a single table that combines the data in tables A and B into one table C. The problem is that data is received asynchronously and not all the data is available when a row arrives in Table A or vice-versa.</p><p>A. You can use AggregatingMergeTree with Nullable columns and any aggregation function or Non-Nullable column and max aggregation function if it is acceptable for your data.</p><pre tabindex="0"><code>CREATE TABLE table_C (
+    id      Int64,
+    colA    SimpleAggregatingFunction(any,Nullable(UInt32)),
+    colB    SimpleAggregatingFunction(max, String)
+) ENGINE = AggregatingMergeTree()
+ORDER BY id;
+
+CREATE MATERIALIZED VIEW mv_A TO table_C AS
+SELECT id,colA FROM Kafka_A;
+
+CREATE MATERIALIZED VIEW mv_B TO table_C AS
+SELECT id,colB FROM Kafka_B;
+</code></pre><p>Here is a more complicated example (from here <a href="https://gist.github.com/den-crane/d03524eadbbce0bafa528101afa8f794" target="_blank">https://gist.github.com/den-crane/d03524eadbbce0bafa528101afa8f794</a>
+)</p><pre tabindex="0"><code>CREATE TABLE states_raw(
+    d date,
+    uid UInt64,
+    first_name String,
+    last_name String,
+    modification_timestamp_mcs DateTime64(3) default now64(3)
+) ENGINE = Null;
+
+CREATE TABLE final_states_by_month(
+    d date,
+    uid UInt64,
+    final_first_name      AggregateFunction(argMax, String, DateTime64(3)),
+    final_last_name      AggregateFunction(argMax, String, DateTime64(3)))
+ENGINE = AggregatingMergeTree
+PARTITION BY toYYYYMM(d)
+ORDER BY (uid, d);
+
+CREATE MATERIALIZED VIEW final_states_by_month_mv TO final_states_by_month AS
+SELECT
+    d, uid,
+    argMaxState(first_name, if(first_name&lt;&gt;'', modification_timestamp_mcs, toDateTime64(0,3))) AS final_first_name,
+    argMaxState(last_name, if(last_name&lt;&gt;'', modification_timestamp_mcs, toDateTime64(0,3)))   AS final_last_name
+FROM states_raw
+GROUP BY d, uid;
+
+
+insert into states_raw(d,uid,first_name) values (today(), 1, 'Tom');
+insert into states_raw(d,uid,last_name) values (today(),  1, 'Jones');
+insert into states_raw(d,uid,first_name,last_name) values (today(), 2, 'XXX', '');
+insert into states_raw(d,uid,first_name,last_name) values (today(), 2, 'YYY', 'YYY');
+
+
+select uid, argMaxMerge(final_first_name) first_name, argMaxMerge(final_last_name) last_name 
+from final_states_by_month group by uid
+
+┌─uid─┬─first_name─┬─last_name─┐
+│   2 │ YYY        │ YYY       │
+│   1 │ Tom        │ Jones     │
+└─────┴────────────┴───────────┘
+
+optimize table final_states_by_month final;
+
+select uid, finalizeAggregation(final_first_name) first_name, finalizeAggregation(final_last_name) last_name 
+from final_states_by_month 
+
+┌─uid─┬─first_name─┬─last_name─┐
+│   1 │ Tom        │ Jones     │
+│   2 │ YYY        │ YYY       │
+└─────┴────────────┴───────────┘
+</code></pre><div class="td-page-meta__lastmod">Last modified 2025.04.09: <a href="https://github.com/Altinity/altinityknowledgebase/commit/3b6158c2a22100a97198a07184f2bce18e189d37">SEO improvements to make content easier to find (3b6158c)</a></div></div></main>

@@ -1,0 +1,21 @@
+case_id: clickbench_q22
+source: clickbench
+sql: 'SELECT SearchPhrase, MIN(URL), COUNT(*) AS c FROM hits WHERE URL LIKE ''%google%''
+  AND SearchPhrase <> '''' GROUP BY SearchPhrase ORDER BY c DESC LIMIT 10;
+
+  '
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: leading_wildcard_like
+  detected_by_rule: D-005
+  severity: medium
+  description: Predicate `URL LIKE '%google%'` starts with a leading wildcard and
+    is expected to bypass index-friendly filtering.
+expected_rules_to_fire:
+- D-005
+expected_improvement: null
+synthetic_explain_path: null
+notes: 'Reviewed: 1 confirmed finding(s) after rule-card precondition check.'
+expected_findings_count: 1
+status: reviewed

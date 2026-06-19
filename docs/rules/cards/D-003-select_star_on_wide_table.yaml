@@ -1,0 +1,31 @@
+id: D-003
+name: select_star_on_wide_table
+tier: detector
+category: io_waste
+status: proposed
+statement: SELECT *; количество колонок в таблице > 20
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: N/A — detector не предлагает rewrite, только диагностику.
+risks: []
+opt_in: false
+references: []
+severity: medium
+detection_method:
+  ast_pattern: SELECT *; количество колонок в таблице > 20
+  explain_features: []
+  metadata_check: []
+recommendation_template: '"SELECT * на {table} с {N} колонками. Columnar — каждая
+  колонка читается с диска."'
+false_positives: []

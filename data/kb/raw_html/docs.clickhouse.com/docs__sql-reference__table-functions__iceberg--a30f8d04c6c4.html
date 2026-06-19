@@ -1,0 +1,567 @@
+<h1>iceberg | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/functions" itemprop="item"><span itemprop="name">Functions</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/table-functions" itemprop="item"><span itemprop="name">Table functions</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">iceberg</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/table-functions/iceberg.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>iceberg</h1></header><p>Provides a read-only table-like interface to Apache <a href="https://iceberg.apache.org/" rel="noopener noreferrer" target="_blank">Iceberg</a> tables in Amazon S3, Azure, HDFS or locally stored.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="syntax">Syntax<a aria-label="Direct link to Syntax" class="hash-link" href="#syntax" title="Direct link to Syntax">​</a></h2>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">icebergS3(url [, NOSIGN | access_key_id, secret_access_key, [session_token]] [,format] [,compression_method] [,extra_credentials])
+icebergS3(named_collection[, option=value [,..]])
+
+icebergAzure(connection_string|storage_account_url, container_name, blobpath, [,account_name], [,account_key] [,format] [,compression_method])
+icebergAzure(named_collection[, option=value [,..]])
+
+icebergHDFS(path_to_table, [,format] [,compression_method])
+icebergHDFS(named_collection[, option=value [,..]])
+
+icebergLocal(path_to_table, [,format] [,compression_method])
+icebergLocal(named_collection[, option=value [,..]])
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="arguments">Arguments<a aria-label="Direct link to Arguments" class="hash-link" href="#arguments" title="Direct link to Arguments">​</a></h2>
+<p>Description of the arguments coincides with description of arguments in table functions <code>s3</code>, <code>azureBlobStorage</code>, <code>HDFS</code> and <code>file</code> correspondingly.
+<code>format</code> stands for the format of data files in the Iceberg table.</p>
+<p>For <code>icebergS3</code>, an optional <code>extra_credentials</code> parameter can be used to pass a <code>role_arn</code> for role-based access in ClickHouse Cloud. See <a href="/docs/cloud/data-sources/secure-s3">Secure S3</a> for configuration steps.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="returned-value">Returned value<a aria-label="Direct link to Returned value" class="hash-link" href="#returned-value" title="Direct link to Returned value">​</a></h3>
+<p>A table with the specified structure for reading data in the specified Iceberg table.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example">Example<a aria-label="Direct link to Example" class="hash-link" href="#example" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM icebergS3('http://test.s3.amazonaws.com/clickhouse-bucket/test_table', 'test', 'test')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-important alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>ClickHouse currently supports reading v1 and v2 of the Iceberg format via the <code>icebergS3</code>, <code>icebergAzure</code>, <code>icebergHDFS</code> and <code>icebergLocal</code> table functions and <code>IcebergS3</code>, <code>icebergAzure</code>, <code>IcebergHDFS</code> and <code>IcebergLocal</code> table engines.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="defining-a-named-collection">Defining a named collection<a aria-label="Direct link to Defining a named collection" class="hash-link" href="#defining-a-named-collection" title="Direct link to Defining a named collection">​</a></h2>
+<p>Here is an example of configuring a named collection for storing the URL and credentials:</p>
+<div class="wrapper_EBtA" style="height:207.35000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-xml"><code class="language-xml">&lt;clickhouse&gt;
+    &lt;named_collections&gt;
+        &lt;iceberg_conf&gt;
+            &lt;url&gt;http://test.s3.amazonaws.com/clickhouse-bucket/&lt;/url&gt;
+            &lt;access_key_id&gt;test&lt;access_key_id&gt;
+            &lt;secret_access_key&gt;test&lt;/secret_access_key&gt;
+            &lt;format&gt;auto&lt;/format&gt;
+            &lt;structure&gt;auto&lt;/structure&gt;
+        &lt;/iceberg_conf&gt;
+    &lt;/named_collections&gt;
+&lt;/clickhouse&gt;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM icebergS3(iceberg_conf, filename = 'test_table')
+DESCRIBE icebergS3(iceberg_conf, filename = 'test_table')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-writes-catalogs">Using a data catalog<a aria-label="Direct link to Using a data catalog" class="hash-link" href="#iceberg-writes-catalogs" title="Direct link to Using a data catalog">​</a></h2>
+<p>Iceberg tables can also be used with various data catalogs, such as the <a href="https://iceberg.apache.org/rest-catalog-spec/" rel="noopener noreferrer" target="_blank">REST Catalog</a>, <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/serverless-etl-aws-glue/aws-glue-data-catalog.html" rel="noopener noreferrer" target="_blank">AWS Glue Data Catalog</a> and <a href="https://www.unitycatalog.io/" rel="noopener noreferrer" target="_blank">Unity Catalog</a>.</p>
+<div class="theme-admonition theme-admonition-important alert alert--info admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">References</div><p>When using a catalog, most users will want to use the <code>DataLakeCatalog</code> database engine, which connects ClickHouse to your catalog to discover your tables. You can use this database engine instead of manually creating individual tables with <code>IcebergS3</code> table engine.</p></div></div>
+<p>To use them, create a table with the <code>IcebergS3</code> engine and provide the necessary settings.</p>
+<p>For example, using REST Catalog with MinIO storage:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE `database_name.table_name`
+ENGINE = IcebergS3(
+  'http://minio:9000/warehouse-rest/table_name/',
+  'minio_access_key',
+  'minio_secret_key'
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Or, using AWS Glue Data Catalog with S3:</p>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE `my_database.my_table`  
+ENGINE = IcebergS3(
+  's3://my-data-bucket/warehouse/my_database/my_table/',
+  'aws_access_key',
+  'aws_secret_key'
+)
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="schema-evolution">Schema Evolution<a aria-label="Direct link to Schema Evolution" class="hash-link" href="#schema-evolution" title="Direct link to Schema Evolution">​</a></h2>
+<p>At the moment, with the help of CH, you can read iceberg tables, the schema of which has changed over time. We currently support reading tables where columns have been added and removed, and their order has changed. You can also change a column where a value is required to one where NULL is allowed. Additionally, we support permitted type casting for simple types, namely:  </p>
+<ul class="custom-ul">
+<li class="custom-li">int -&gt; long</li>
+<li class="custom-li">float -&gt; double</li>
+<li class="custom-li">decimal(P, S) -&gt; decimal(P', S) where P' &gt; P.</li>
+</ul>
+<p>Currently, it is not possible to change nested structures or the types of elements within arrays and maps.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="partition-pruning">Partition Pruning<a aria-label="Direct link to Partition Pruning" class="hash-link" href="#partition-pruning" title="Direct link to Partition Pruning">​</a></h2>
+<p>ClickHouse supports partition pruning during SELECT queries for Iceberg tables, which helps optimize query performance by skipping irrelevant data files. To enable partition pruning, set <code>use_iceberg_partition_pruning = 1</code>. For more information about iceberg partition pruning address <a href="https://iceberg.apache.org/spec/#partitioning" rel="noopener noreferrer" target="_blank">https://iceberg.apache.org/spec/#partitioning</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="time-travel">Time Travel<a aria-label="Direct link to Time Travel" class="hash-link" href="#time-travel" title="Direct link to Time Travel">​</a></h2>
+<p>ClickHouse supports time travel for Iceberg tables, allowing you to query historical data with a specific timestamp or snapshot ID.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="deleted-rows">Processing of tables with deleted rows<a aria-label="Direct link to Processing of tables with deleted rows" class="hash-link" href="#deleted-rows" title="Direct link to Processing of tables with deleted rows">​</a></h2>
+<p>Currently, only Iceberg tables with <a href="https://iceberg.apache.org/spec/#position-delete-files" rel="noopener noreferrer" target="_blank">position deletes</a> are supported.</p>
+<p>The following deletion methods are <strong>not supported</strong>:</p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="https://iceberg.apache.org/spec/#equality-delete-files" rel="noopener noreferrer" target="_blank">Equality deletes</a></li>
+<li class="custom-li"><a href="https://iceberg.apache.org/spec/#deletion-vectors" rel="noopener noreferrer" target="_blank">Deletion vectors</a> (introduced in v3)</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="basic-usage">Basic usage<a aria-label="Direct link to Basic usage" class="hash-link" href="#basic-usage" title="Direct link to Basic usage">​</a></h3>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM example_table ORDER BY 1 
+SETTINGS iceberg_timestamp_ms = 1714636800000
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM example_table ORDER BY 1 
+SETTINGS iceberg_snapshot_id = 3547395809148285433
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: You cannot specify both <code>iceberg_timestamp_ms</code> and <code>iceberg_snapshot_id</code> parameters in the same query.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="important-considerations">Important considerations<a aria-label="Direct link to Important considerations" class="hash-link" href="#important-considerations" title="Direct link to Important considerations">​</a></h3>
+<ul class="custom-ul">
+<li class="custom-li">
+<p><strong>Snapshots</strong> are typically created when:</p>
+</li>
+<li class="custom-li">
+<p>New data is written to the table</p>
+</li>
+<li class="custom-li">
+<p>Some kind of data compaction is performed</p>
+</li>
+<li class="custom-li">
+<p><strong>Schema changes typically don't create snapshots</strong> - This leads to important behaviors when using time travel with tables that have undergone schema evolution.</p>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-scenarios">Example scenarios<a aria-label="Direct link to Example scenarios" class="hash-link" href="#example-scenarios" title="Direct link to Example scenarios">​</a></h3>
+<p>All scenarios are written in Spark because CH doesn't support writing to Iceberg tables yet.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="scenario-1">Scenario 1: Schema Changes Without New Snapshots<a aria-label="Direct link to Scenario 1: Schema Changes Without New Snapshots" class="hash-link" href="#scenario-1" title="Direct link to Scenario 1: Schema Changes Without New Snapshots">​</a></h4>
+<p>Consider this sequence of operations:</p>
+<div class="wrapper_EBtA" style="height:904.8000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a table with two columns
+ CREATE TABLE IF NOT EXISTS spark_catalog.db.time_travel_example (
+ order_number bigint, 
+ product_code string
+ ) 
+ USING iceberg 
+ OPTIONS ('format-version'='2')
+
+- - Insert data into the table
+ INSERT INTO spark_catalog.db.time_travel_example VALUES 
+   (1, 'Mars')
+
+ ts1 = now() // A piece of pseudo code
+
+- - Alter table to add a new column
+ ALTER TABLE spark_catalog.db.time_travel_example ADD COLUMN (price double)
+
+ ts2 = now()
+
+- - Insert data into the table
+ INSERT INTO spark_catalog.db.time_travel_example VALUES (2, 'Venus', 100)
+
+  ts3 = now()
+
+- - Query the table at each timestamp
+ SELECT * FROM spark_catalog.db.time_travel_example TIMESTAMP AS OF ts1;
+
++------------+------------+
+|order_number|product_code|
++------------+------------+
+|           1|        Mars|
++------------+------------+
+ SELECT * FROM spark_catalog.db.time_travel_example TIMESTAMP AS OF ts2;
+
++------------+------------+
+|order_number|product_code|
++------------+------------+
+|           1|        Mars|
++------------+------------+
+
+ SELECT * FROM spark_catalog.db.time_travel_example TIMESTAMP AS OF ts3;
+
++------------+------------+-----+
+|order_number|product_code|price|
++------------+------------+-----+
+|           1|        Mars| NULL|
+|           2|       Venus|100.0|
++------------+------------+-----+
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Query results at different timestamps:</p>
+<ul class="custom-ul">
+<li class="custom-li">At ts1 &amp; ts2: Only the original two columns appear</li>
+<li class="custom-li">At ts3: All three columns appear, with NULL for the price of the first row</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="scenario-2">Scenario 2:  Historical vs. Current Schema Differences<a aria-label="Direct link to Scenario 2:  Historical vs. Current Schema Differences" class="hash-link" href="#scenario-2" title="Direct link to Scenario 2:  Historical vs. Current Schema Differences">​</a></h4>
+<p>A time travel query at a current moment might show a different schema than the current table:</p>
+<div class="wrapper_EBtA" style="height:622.0500000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a table
+  CREATE TABLE IF NOT EXISTS spark_catalog.db.time_travel_example_2 (
+  order_number bigint, 
+  product_code string
+  ) 
+  USING iceberg 
+  OPTIONS ('format-version'='2')
+
+-- Insert initial data into the table
+  INSERT INTO spark_catalog.db.time_travel_example_2 VALUES (2, 'Venus');
+
+-- Alter table to add a new column
+  ALTER TABLE spark_catalog.db.time_travel_example_2 ADD COLUMN (price double);
+
+  ts = now();
+
+-- Query the table at a current moment but using timestamp syntax
+
+  SELECT * FROM spark_catalog.db.time_travel_example_2 TIMESTAMP AS OF ts;
+
+    +------------+------------+
+    |order_number|product_code|
+    +------------+------------+
+    |           2|       Venus|
+    +------------+------------+
+
+-- Query the table at a current moment
+  SELECT * FROM spark_catalog.db.time_travel_example_2;
+    +------------+------------+-----+
+    |order_number|product_code|price|
+    +------------+------------+-----+
+    |           2|       Venus| NULL|
+    +------------+------------+-----+
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>This happens because <code>ALTER TABLE</code> doesn't create a new snapshot but for the current table Spark takes value of <code>schema_id</code> from the latest metadata file, not a snapshot.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="scenario-3">Scenario 3:  Historical vs. Current Schema Differences<a aria-label="Direct link to Scenario 3:  Historical vs. Current Schema Differences" class="hash-link" href="#scenario-3" title="Direct link to Scenario 3:  Historical vs. Current Schema Differences">​</a></h4>
+<p>The second one is that while doing time travel you can't get state of table before any data was written to it:</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Create a table
+  CREATE TABLE IF NOT EXISTS spark_catalog.db.time_travel_example_3 (
+  order_number bigint, 
+  product_code string
+  ) 
+  USING iceberg 
+  OPTIONS ('format-version'='2');
+
+  ts = now();
+
+-- Query the table at a specific timestamp
+  SELECT * FROM spark_catalog.db.time_travel_example_3 TIMESTAMP AS OF ts; -- Finises with error: Cannot find a snapshot older than ts.
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In Clickhouse the behavior is consistent with Spark. You can mentally replace Spark Select queries with Clickhouse Select queries and it will work the same way.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="metadata-file-resolution">Metadata File Resolution<a aria-label="Direct link to Metadata File Resolution" class="hash-link" href="#metadata-file-resolution" title="Direct link to Metadata File Resolution">​</a></h2>
+<p>When using the <code>iceberg</code> table function in ClickHouse, the system needs to locate the correct metadata.json file that describes the Iceberg table structure. Here's how this resolution process works:</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="candidate-search">Candidate Search (in Priority Order)<a aria-label="Direct link to Candidate Search (in Priority Order)" class="hash-link" href="#candidate-search" title="Direct link to Candidate Search (in Priority Order)">​</a></h3>
+<ol class="custom-ol">
+<li class="custom-li"><strong>Direct Path Specification</strong>:
+*If you set <code>iceberg_metadata_file_path</code>, the system will use this exact path by combining it with the Iceberg table directory path.</li>
+</ol>
+<ul class="custom-ul">
+<li class="custom-li">When this setting is provided, all other resolution settings are ignored.</li>
+</ul>
+<ol class="custom-ol" start="2">
+<li class="custom-li">
+<p><strong>Table UUID Matching</strong>:
+*If <code>iceberg_metadata_table_uuid</code> is specified, the system will:
+*Look only at <code>.metadata.json</code> files in the <code>metadata</code> directory
+*Filter for files containing a <code>table-uuid</code> field matching your specified UUID (case-insensitive)</p>
+</li>
+<li class="custom-li">
+<p><strong>Default Search</strong>:
+*If neither of the above settings are provided, all <code>.metadata.json</code> files in the <code>metadata</code> directory become candidates</p>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="most-recent-file">Selecting the Most Recent File<a aria-label="Direct link to Selecting the Most Recent File" class="hash-link" href="#most-recent-file" title="Direct link to Selecting the Most Recent File">​</a></h3>
+<p>After identifying candidate files using the above rules, the system determines which one is the most recent:</p>
+<ul class="custom-ul">
+<li class="custom-li">
+<p>If <code>iceberg_recent_metadata_file_by_last_updated_ms_field</code> is enabled:</p>
+</li>
+<li class="custom-li">
+<p>The file with the largest <code>last-updated-ms</code> value is selected</p>
+</li>
+<li class="custom-li">
+<p>Otherwise:</p>
+</li>
+<li class="custom-li">
+<p>The file with the highest version number is selected</p>
+</li>
+<li class="custom-li">
+<p>(Version appears as <code>V</code> in filenames formatted as <code>V.metadata.json</code> or <code>V-uuid.metadata.json</code>)</p>
+</li>
+</ul>
+<p><strong>Note</strong>: All mentioned settings are table function settings (not global or query-level settings) and must be specified as shown below:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM iceberg('s3://bucket/path/to/iceberg_table', 
+    SETTINGS iceberg_metadata_table_uuid = 'a90eed4c-f74b-4e5b-b630-096fb9d09021');
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Note</strong>: While Iceberg Catalogs typically handle metadata resolution, the <code>iceberg</code> table function in ClickHouse directly interprets files stored in S3 as Iceberg tables, which is why understanding these resolution rules is important.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="metadata-cache">Metadata cache<a aria-label="Direct link to Metadata cache" class="hash-link" href="#metadata-cache" title="Direct link to Metadata cache">​</a></h2>
+<p><code>Iceberg</code> table engine and table function support metadata cache storing the information of manifest files, manifest list and metadata json. The cache is stored in memory. This feature is controlled by setting <code>use_iceberg_metadata_files_cache</code>, which is enabled by default.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="aliases">Aliases<a aria-label="Direct link to Aliases" class="hash-link" href="#aliases" title="Direct link to Aliases">​</a></h2>
+<p>Table function <code>iceberg</code> is an alias to <code>icebergS3</code> now.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="virtual-columns">Virtual Columns<a aria-label="Direct link to Virtual Columns" class="hash-link" href="#virtual-columns" title="Direct link to Virtual Columns">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><code>_path</code> — Path to the file. Type: <code>LowCardinality(String)</code>.</li>
+<li class="custom-li"><code>_file</code> — Name of the file. Type: <code>LowCardinality(String)</code>.</li>
+<li class="custom-li"><code>_size</code> — Size of the file in bytes. Type: <code>Nullable(UInt64)</code>. If the file size is unknown, the value is <code>NULL</code>.</li>
+<li class="custom-li"><code>_time</code> — Last modified time of the file. Type: <code>Nullable(DateTime)</code>. If the time is unknown, the value is <code>NULL</code>.</li>
+<li class="custom-li"><code>_etag</code> — The etag of the file. Type: <code>LowCardinality(String)</code>. If the etag is unknown, the value is <code>NULL</code>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="writes-into-iceberg-table">Writes into iceberg table<a aria-label="Direct link to Writes into iceberg table" class="hash-link" href="#writes-into-iceberg-table" title="Direct link to Writes into iceberg table">​</a></h2>
+<p>Starting from version 25.7, ClickHouse supports modifications of user’s Iceberg tables.</p>
+<p>Currently, this is an experimental feature, so you first need to enable it:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_insert_into_iceberg = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="create-iceberg-table">Creating table<a aria-label="Direct link to Creating table" class="hash-link" href="#create-iceberg-table" title="Direct link to Creating table">​</a></h3>
+<p>To create your own empty Iceberg table, use the same commands as for reading, but specify the schema explicitly.
+Writes supports all data formats from iceberg specification, such as Parquet, Avro, ORC.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-iceberg-writes-create">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-iceberg-writes-create" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE iceberg_writes_example
+(
+    x Nullable(String),
+    y Nullable(Int32)
+)
+ENGINE = IcebergLocal('/home/scanhex12/iceberg_example/')
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note: To create a version hint file, enable the <code>iceberg_use_version_hint</code> setting.
+If you want to compress the metadata.json file, specify the codec name in the <code>iceberg_metadata_compression_method</code> setting.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="writes-inserts">INSERT<a aria-label="Direct link to INSERT" class="hash-link" href="#writes-inserts" title="Direct link to INSERT">​</a></h3>
+<p>After creating a new table, you can insert data using the usual ClickHouse syntax.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-iceberg-writes-insert">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-iceberg-writes-insert" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:282.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO iceberg_writes_example VALUES ('Pavel', 777), ('Ivanov', 993);
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Pavel
+y: 777
+
+Row 2:
+──────
+x: Ivanov
+y: 993
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-writes-delete">DELETE<a aria-label="Direct link to DELETE" class="hash-link" href="#iceberg-writes-delete" title="Direct link to DELETE">​</a></h3>
+<p>Deleting extra rows in the merge-on-read format is also supported in ClickHouse.
+This query will create a new snapshot with position delete files.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-iceberg-writes-delete">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-iceberg-writes-delete" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:188.5px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE iceberg_writes_example DELETE WHERE x != 'Ivanov';
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Ivanov
+y: 993
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-writes-schema-evolution">Schema evolution<a aria-label="Direct link to Schema evolution" class="hash-link" href="#iceberg-writes-schema-evolution" title="Direct link to Schema evolution">​</a></h3>
+<p>ClickHouse allows you to add, drop, modify, or rename columns with simple types (non-tuple, non-array, non-map).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="example-iceberg-writes-evolution">Example<a aria-label="Direct link to Example" class="hash-link" href="#example-iceberg-writes-evolution" title="Direct link to Example">​</a></h3>
+<div class="wrapper_EBtA" style="height:1413.75px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE iceberg_writes_example MODIFY COLUMN y Nullable(Int64);
+SHOW CREATE TABLE iceberg_writes_example;
+
+   ┌─statement─────────────────────────────────────────────────┐
+1. │ CREATE TABLE default.iceberg_writes_example              ↴│
+   │↳(                                                        ↴│
+   │↳    `x` Nullable(String),                                ↴│
+   │↳    `y` Nullable(Int64)                                  ↴│
+   │↳)                                                        ↴│
+   │↳ENGINE = IcebergLocal('/home/scanhex12/iceberg_example/') │
+   └───────────────────────────────────────────────────────────┘
+
+ALTER TABLE iceberg_writes_example ADD COLUMN z Nullable(Int32);
+SHOW CREATE TABLE iceberg_writes_example;
+
+   ┌─statement─────────────────────────────────────────────────┐
+1. │ CREATE TABLE default.iceberg_writes_example              ↴│
+   │↳(                                                        ↴│
+   │↳    `x` Nullable(String),                                ↴│
+   │↳    `y` Nullable(Int64),                                 ↴│
+   │↳    `z` Nullable(Int32)                                  ↴│
+   │↳)                                                        ↴│
+   │↳ENGINE = IcebergLocal('/home/scanhex12/iceberg_example/') │
+   └───────────────────────────────────────────────────────────┘
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Ivanov
+y: 993
+z: ᴺᵁᴸᴸ
+
+ALTER TABLE iceberg_writes_example DROP COLUMN z;
+SHOW CREATE TABLE iceberg_writes_example;
+   ┌─statement─────────────────────────────────────────────────┐
+1. │ CREATE TABLE default.iceberg_writes_example              ↴│
+   │↳(                                                        ↴│
+   │↳    `x` Nullable(String),                                ↴│
+   │↳    `y` Nullable(Int64)                                  ↴│
+   │↳)                                                        ↴│
+   │↳ENGINE = IcebergLocal('/home/scanhex12/iceberg_example/') │
+   └───────────────────────────────────────────────────────────┘
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Ivanov
+y: 993
+
+ALTER TABLE iceberg_writes_example RENAME COLUMN y TO value;
+SHOW CREATE TABLE iceberg_writes_example;
+
+   ┌─statement─────────────────────────────────────────────────┐
+1. │ CREATE TABLE default.iceberg_writes_example              ↴│
+   │↳(                                                        ↴│
+   │↳    `x` Nullable(String),                                ↴│
+   │↳    `value` Nullable(Int64)                              ↴│
+   │↳)                                                        ↴│
+   │↳ENGINE = IcebergLocal('/home/scanhex12/iceberg_example/') │
+   └───────────────────────────────────────────────────────────┘
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Ivanov
+value: 993
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-writes-compaction">Compaction<a aria-label="Direct link to Compaction" class="hash-link" href="#iceberg-writes-compaction" title="Direct link to Compaction">​</a></h3>
+<p>ClickHouse supports compaction iceberg table. Currently, it can merge position delete files into data files while updating metadata. Previous snapshot IDs and timestamps remain unchanged, so the time-travel feature can still be used with the same values.</p>
+<p>How to use it:</p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_experimental_iceberg_compaction = 1
+
+OPTIMIZE TABLE iceberg_writes_example;
+
+SELECT *
+FROM iceberg_writes_example
+FORMAT VERTICAL;
+
+Row 1:
+──────
+x: Ivanov
+y: 993
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-expire-snapshots">Expire Snapshots<a aria-label="Direct link to Expire Snapshots" class="hash-link" href="#iceberg-expire-snapshots" title="Direct link to Expire Snapshots">​</a></h3>
+<p>Iceberg tables accumulate snapshots with each INSERT, DELETE, or UPDATE operation. Over time, this can lead to a large number of snapshots and associated data files. The <code>expire_snapshots</code> command removes old snapshots and cleans up data files that are no longer referenced by any retained snapshot.</p>
+<p><strong>Syntax:</strong></p>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">ALTER TABLE iceberg_table EXECUTE expire_snapshots(
+    ['timestamp']
+    [, expire_before = 'timestamp']
+    [, retention_period = '3d']
+    [, retain_last = 100]
+    [, snapshot_ids = [1, 2, 3, 4]]
+    [, dry_run = 1]
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>By default, which snapshots to keep is determined by the <a href="#iceberg-snapshot-retention-policy">retention policy</a> (table properties <code>min-snapshots-to-keep</code>, <code>max-snapshot-age-ms</code>, and per-ref overrides). When <code>snapshot_ids</code> is specified, the retention policy is bypassed and only the listed snapshots are considered for expiration.</p>
+<p><strong>Arguments:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><code>'timestamp'</code> (positional) or <code>expire_before = 'timestamp'</code> — a datetime string (e.g., <code>'2024-06-01 00:00:00'</code>) interpreted in the <strong>server's timezone</strong>. Acts as a safety fuse: snapshots whose <code>timestamp-ms</code> is at or after this value are protected from expiration, even if the retention policy would otherwise expire them. Can be combined with <code>snapshot_ids</code>, in which case listed snapshots at or newer than the timestamp are not expired.</li>
+<li class="custom-li"><code>retention_period = '&lt;duration&gt;'</code> — overrides the table-level <code>history.expire.max-snapshot-age-ms</code> for this invocation only. Snapshots older than this duration (measured from now) become candidates for expiration. The value is a duration string consisting of one or more <code>{number}{unit}</code> pairs concatenated together. Supported units: <code>y</code> (365 days), <code>w</code> (7 days), <code>d</code> (24 hours), <code>h</code> (60 minutes), <code>m</code> (60 seconds), <code>s</code> (1 second), <code>ms</code> (1 millisecond). Units can be combined, e.g. <code>'3d'</code>, <code>'12h'</code>, <code>'1d12h30m'</code>, <code>'500ms'</code>.</li>
+<li class="custom-li"><code>retain_last = N</code> — overrides the table-level <code>history.expire.min-snapshots-to-keep</code> for this invocation only. At least <code>N</code> snapshots are always retained regardless of age.</li>
+<li class="custom-li"><code>snapshot_ids = [id1, id2, ...]</code> — expires exactly the listed snapshot IDs (except snapshots referenced by current snapshot, branches, or tags). This mode bypasses the retention policy entirely and cannot be combined with <code>retention_period</code> or <code>retain_last</code>.</li>
+<li class="custom-li"><code>dry_run = 1</code> — computes what would be expired and returns metrics without writing new metadata or deleting files.</li>
+</ul>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p><code>retention_period</code> and <code>retain_last</code> override only the <strong>table-level</strong> retention defaults. Per-ref (branch/tag) retention overrides configured in the Iceberg table properties (e.g., <code>refs.&lt;branch&gt;.min-snapshots-to-keep</code>) are never overridden — they always take effect as specified in the table metadata.</p></div></div>
+<p><strong>Example:</strong></p>
+<div class="wrapper_EBtA" style="height:452.40000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET allow_insert_into_iceberg = 1;
+
+-- Create some snapshots by inserting data
+INSERT INTO iceberg_table VALUES (1);
+INSERT INTO iceberg_table VALUES (2);
+INSERT INTO iceberg_table VALUES (3);
+
+-- Expire using retention policy only
+ALTER TABLE iceberg_table EXECUTE expire_snapshots();
+
+-- Expire with a safety fuse: protect snapshots newer than the timestamp (positional syntax)
+ALTER TABLE iceberg_table EXECUTE expire_snapshots('2025-01-01 00:00:00');
+
+-- Same using the named argument form
+ALTER TABLE iceberg_table EXECUTE expire_snapshots(expire_before = '2025-01-01 00:00:00');
+
+-- Override retention parameters for one execution
+ALTER TABLE iceberg_table EXECUTE expire_snapshots(retention_period = '3d', retain_last = 10);
+
+-- Expire explicit snapshots
+ALTER TABLE iceberg_table EXECUTE expire_snapshots(snapshot_ids = [101, 102, 103]);
+
+-- Dry-run preview (no metadata updates, no file deletes)
+ALTER TABLE iceberg_table EXECUTE expire_snapshots(retention_period = '1d', dry_run = 1);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Output:</strong></p>
+<p>The command returns a table with two columns (<code>metric_name String</code>, <code>metric_value Int64</code>) containing one row per metric. The metric names follow the <a href="https://iceberg.apache.org/docs/latest/spark-procedures/#output" rel="noopener noreferrer" target="_blank">Iceberg spec</a>:</p>
+<table><thead><tr><th>metric_name<th>Description<tbody><tr><td><code>deleted_data_files_count</code><td>Number of data files deleted<tr><td><code>deleted_position_delete_files_count</code><td>Number of position delete files deleted<tr><td><code>deleted_equality_delete_files_count</code><td>Number of equality delete files deleted<tr><td><code>deleted_manifest_files_count</code><td>Number of manifest files deleted<tr><td><code>deleted_manifest_lists_count</code><td>Number of manifest list files deleted<tr><td><code>deleted_statistics_files_count</code><td>Number of statistics files deleted (always 0 currently)<tr><td><code>dry_run</code><td><code>1</code> for dry-run mode, <code>0</code> for normal execution</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p>The command performs the following steps:</p>
+<ol class="custom-ol">
+<li class="custom-li">Evaluates the retention policy (see below) to determine which snapshots must be preserved</li>
+<li class="custom-li">If a timestamp argument was provided, additionally protects all snapshots at or newer than that timestamp</li>
+<li class="custom-li">Expires snapshots that are neither retained by the policy nor protected by the timestamp fuse</li>
+<li class="custom-li">Computes which files are exclusively associated with expired snapshots</li>
+<li class="custom-li">In normal mode: generates new metadata without the expired snapshots</li>
+<li class="custom-li">In normal mode: physically deletes unreachable manifest lists, manifest files, and data files</li>
+<li class="custom-li">In <code>dry_run = 1</code> mode: skips steps 5 and 6 and only returns the calculated metrics</li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-snapshot-retention-policy">Snapshot Retention Policy<a aria-label="Direct link to Snapshot Retention Policy" class="hash-link" href="#iceberg-snapshot-retention-policy" title="Direct link to Snapshot Retention Policy">​</a></h4>
+<p>The <code>expire_snapshots</code> command respects the <a href="https://iceberg.apache.org/spec/#snapshot-retention-policy" rel="noopener noreferrer" target="_blank">Iceberg snapshot retention policy</a>. Retention is configured via Iceberg table properties and per-reference overrides:</p>
+<table><thead><tr><th>Property<th>Scope<th>Default<th>Description<tbody><tr><td><code>history.expire.min-snapshots-to-keep</code><td>Table<td><code>iceberg_expire_default_min_snapshots_to_keep</code> (default <code>1</code>)<td>Minimum number of snapshots to keep in each branch's ancestor chain<tr><td><code>history.expire.max-snapshot-age-ms</code><td>Table<td><code>iceberg_expire_default_max_snapshot_age_ms</code> (default <code>432000000</code>, 5 days)<td>Maximum age (in ms) of snapshots to retain in a branch<tr><td><code>history.expire.max-ref-age-ms</code><td>Table<td><code>iceberg_expire_default_max_ref_age_ms</code> (default <code>∞</code>)<td>Maximum age (in ms) for a snapshot reference (branch or tag) before the reference itself is removed</td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<p>Each snapshot reference (<code>refs</code> in the Iceberg metadata) can override these with per-ref fields: <code>min-snapshots-to-keep</code>, <code>max-snapshot-age-ms</code>, and <code>max-ref-age-ms</code>.</p>
+<p><strong>Retention evaluation:</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><strong>For each branch</strong> (including <code>main</code>): the ancestor chain is walked starting from the branch head. Snapshots are retained while either of these conditions is true:<!-- -->
+<ul class="custom-ul">
+<li class="custom-li">The snapshot is one of the first <code>min-snapshots-to-keep</code> in the chain</li>
+<li class="custom-li">The snapshot's age is within <code>max-snapshot-age-ms</code> (i.e., <code>now - timestamp-ms &lt;= max-snapshot-age-ms</code>)</li>
+</ul>
+</li>
+<li class="custom-li"><strong>For tags</strong>: the tagged snapshot is retained unless the tag has exceeded its <code>max-ref-age-ms</code>, in which case the tag reference is removed</li>
+<li class="custom-li"><strong>Non-main references</strong> whose age exceeds <code>max-ref-age-ms</code> are removed entirely (the <code>main</code> branch is never removed)</li>
+<li class="custom-li"><strong>Dangling references</strong> that point to non-existent snapshots are removed with a warning</li>
+<li class="custom-li"><strong>The current snapshot is always preserved</strong>, regardless of retention settings</li>
+</ul>
+<p><strong>Required privileges:</strong></p>
+<p>The <code>ALTER TABLE EXECUTE</code> privilege is required, which is a child of <code>ALTER TABLE</code> in the ClickHouse access control hierarchy. You can grant it specifically or via the parent:</p>
+<div class="wrapper_EBtA" style="height:94.25px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Grant only EXECUTE permission
+GRANT ALTER TABLE EXECUTE ON my_iceberg_table TO my_user;
+
+-- Or grant all ALTER TABLE permissions (includes ALTER TABLE EXECUTE)
+GRANT ALTER TABLE ON my_iceberg_table TO my_user;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><ul class="custom-ul">
+<li class="custom-li">Only Iceberg format version 2 tables are supported (v1 snapshots do not guarantee <code>manifest-list</code>, which is required to safely identify files for cleanup)</li>
+<li class="custom-li">The current snapshot is always preserved, even if it is older than the specified timestamp</li>
+<li class="custom-li">Requires the <code>allow_insert_into_iceberg</code> setting to be enabled</li>
+<li class="custom-li">Requires the <code>allow_experimental_expire_snapshots</code> setting to be enabled</li>
+<li class="custom-li">The catalog's own authorization (REST catalog auth, AWS Glue IAM, etc.) is enforced independently when ClickHouse updates the metadata</li>
+</ul></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="iceberg-remove-orphan-files">Remove Orphan Files<a aria-label="Direct link to Remove Orphan Files" class="hash-link" href="#iceberg-remove-orphan-files" title="Direct link to Remove Orphan Files">​</a></h3>
+<p>Orphan files are files on storage that are not referenced by any snapshot in the Iceberg table metadata. They accumulate from failed writes, partial cleanup after compaction, and interrupted operations, causing unbounded storage growth. The <code>remove_orphan_files</code> command identifies and removes these orphan files.</p>
+<p><strong>Syntax:</strong></p>
+<div class="wrapper_EBtA" style="height:226.20000000000002px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Positional form: single unnamed older_than argument
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files('timestamp')
+
+-- Named form
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files(
+    older_than = 'timestamp',
+    location = 'path',
+    dry_run = 0|1
+)
+
+-- No arguments: use all defaults (older_than = 3 days ago)
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files()
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Parameters:</strong></p>
+<table><thead><tr><th>Parameter<th>Type<th>Default<th>Description<tbody><tr><td><code>older_than</code><td><code>String</code> (timestamp)<td>3 days ago (configurable via <code>iceberg_orphan_files_older_than_seconds</code>)<td>Only consider files with a last-modified time older than this timestamp as orphan candidates. Safety guard against deleting files from in-progress writes.<tr><td><code>location</code><td><code>String</code><td>Table location<td>Restrict the scan to a specific subdirectory under the table location (e.g., <code>'data/'</code> or <code>'metadata/'</code>).<tr><td><code>dry_run</code><td><code>UInt64</code><td><code>0</code><td>When <code>1</code>, identify orphan files and return the result summary without actually deleting anything.</td></td></td></td></tr></td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<p><strong>Examples:</strong></p>
+<div class="wrapper_EBtA" style="height:320.45000000000005px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">-- Remove orphan files older than a specific timestamp
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files('2026-03-01 00:00:00');
+
+-- Dry run: preview which files would be deleted
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files(dry_run = 1);
+
+-- Scan only the data directory
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files(
+    older_than = '2026-03-01 00:00:00',
+    location = 'data/'
+);
+
+-- Combine positional older_than with named arguments
+ALTER TABLE iceberg_table EXECUTE remove_orphan_files(
+    '2026-03-01 00:00:00',
+    dry_run = 1
+);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Output:</strong></p>
+<p>The command returns a table with <code>metric_name</code> and <code>metric_value</code> columns showing the count of deleted (or would-be-deleted in dry_run mode) files by category. File categories are classified using best-effort heuristics based on file naming conventions; files that do not match any specific pattern default to <code>deleted_data_files_count</code>:</p>
+<table><thead><tr><th>metric_name<th>metric_value<tbody><tr><td>deleted_data_files_count<td>5<tr><td>deleted_position_delete_files_count<td>2<tr><td>deleted_equality_delete_files_count<td>0<tr><td>deleted_manifest_files_count<td>3<tr><td>deleted_manifest_lists_count<td>1<tr><td>deleted_metadata_files_count<td>0<tr><td>deleted_statistics_files_count<td>0<tr><td>skipped_missing_metadata_count<td>0<tr><td>failed_deletions_count<td>0</td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></td></td></tr></tbody></th></th></tr></thead></table>
+<p><strong>Settings:</strong></p>
+<table><thead><tr><th>Setting<th>Type<th>Default<th>Description<tbody><tr><td><code>allow_iceberg_remove_orphan_files</code><td><code>Bool</code><td><code>false</code><td>Gate setting to enable the feature (experimental).<tr><td><code>iceberg_orphan_files_older_than_seconds</code><td><code>UInt64</code><td><code>259200</code> (3 days)<td>Default <code>older_than</code> threshold in seconds when the argument is omitted.</td></td></td></td></tr></td></td></td></td></tr></tbody></th></th></th></th></tr></thead></table>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><ul class="custom-ul">
+<li class="custom-li"><strong>Requires Iceberg format version 2 (or higher).</strong> Version 1 tables are rejected because they lack <code>manifest-list</code> pointers in snapshots, which are needed to safely determine the reachable file set. Running the command on a v1 table returns a <code>BAD_ARGUMENTS</code> error.</li>
+<li class="custom-li">Requires both <code>allow_insert_into_iceberg</code> and <code>allow_iceberg_remove_orphan_files</code> settings to be enabled</li>
+<li class="custom-li">It is recommended to run <code>expire_snapshots</code> before <code>remove_orphan_files</code> so that files uniquely referenced by expired snapshots are cleaned up first</li>
+<li class="custom-li">Use <code>dry_run = 1</code> to preview orphan files before deletion</li>
+<li class="custom-li">The <code>older_than</code> threshold protects against deleting files from in-progress writes — the default 3-day threshold provides a generous safety margin</li>
+</ul></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="see-also">See Also<a aria-label="Direct link to See Also" class="hash-link" href="#see-also" title="Direct link to See Also">​</a></h2>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/engines/table-engines/integrations/iceberg">Iceberg engine</a></li>
+<li class="custom-li"><a href="/docs/sql-reference/table-functions/icebergCluster">Iceberg cluster table function</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/hudiCluster"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">hudiCluster</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/table-functions/paimon"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">paimon</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#syntax">Syntax</a><li><a class="table-of-contents__link toc-highlight" href="#arguments">Arguments</a><ul><li><a class="table-of-contents__link toc-highlight" href="#returned-value">Returned value</a><li><a class="table-of-contents__link toc-highlight" href="#example">Example</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#defining-a-named-collection">Defining a named collection</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-writes-catalogs">Using a data catalog</a><li><a class="table-of-contents__link toc-highlight" href="#schema-evolution">Schema Evolution</a><li><a class="table-of-contents__link toc-highlight" href="#partition-pruning">Partition Pruning</a><li><a class="table-of-contents__link toc-highlight" href="#time-travel">Time Travel</a><li><a class="table-of-contents__link toc-highlight" href="#deleted-rows">Processing of tables with deleted rows</a><ul><li><a class="table-of-contents__link toc-highlight" href="#basic-usage">Basic usage</a><li><a class="table-of-contents__link toc-highlight" href="#important-considerations">Important considerations</a><li><a class="table-of-contents__link toc-highlight" href="#example-scenarios">Example scenarios</a></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#metadata-file-resolution">Metadata File Resolution</a><ul><li><a class="table-of-contents__link toc-highlight" href="#candidate-search">Candidate Search (in Priority Order)</a><li><a class="table-of-contents__link toc-highlight" href="#most-recent-file">Selecting the Most Recent File</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#metadata-cache">Metadata cache</a><li><a class="table-of-contents__link toc-highlight" href="#aliases">Aliases</a><li><a class="table-of-contents__link toc-highlight" href="#virtual-columns">Virtual Columns</a><li><a class="table-of-contents__link toc-highlight" href="#writes-into-iceberg-table">Writes into iceberg table</a><ul><li><a class="table-of-contents__link toc-highlight" href="#create-iceberg-table">Creating table</a><li><a class="table-of-contents__link toc-highlight" href="#example-iceberg-writes-create">Example</a><li><a class="table-of-contents__link toc-highlight" href="#writes-inserts">INSERT</a><li><a class="table-of-contents__link toc-highlight" href="#example-iceberg-writes-insert">Example</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-writes-delete">DELETE</a><li><a class="table-of-contents__link toc-highlight" href="#example-iceberg-writes-delete">Example</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-writes-schema-evolution">Schema evolution</a><li><a class="table-of-contents__link toc-highlight" href="#example-iceberg-writes-evolution">Example</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-writes-compaction">Compaction</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-expire-snapshots">Expire Snapshots</a><li><a class="table-of-contents__link toc-highlight" href="#iceberg-remove-orphan-files">Remove Orphan Files</a></li></li></li></li></li></li></li></li></li></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#see-also">See Also</a></li></li></li></li></li></li></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

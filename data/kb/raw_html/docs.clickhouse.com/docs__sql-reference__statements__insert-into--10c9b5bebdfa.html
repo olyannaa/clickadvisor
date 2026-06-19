@@ -1,0 +1,183 @@
+<h1>INSERT INTO Statement | ClickHouse Docs</h1>
+<main class="docMainContainer_Vlkt"><div class="container padding-bottom--lg main-content-wrapper docItemWrapper_GJ0o"><div class="row" style="flex-wrap:nowrap"><div class="col docItemCol_PW1h"><div class="docItemContainer_F8S3"><article><div class="docHeaderContainer_yf04"><nav aria-label="Breadcrumb navigation" class="theme-doc-breadcrumbs breadcrumbsContainer_Alpn"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg class="breadcrumbHomeIcon_xK9p" viewbox="0 0 24 24"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference" itemprop="item"><span itemprop="name">Introduction</span></a><meta content="1" itemprop="position"/><li class="breadcrumbs__item" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><a class="breadcrumbs__link" href="/docs/sql-reference/statements" itemprop="item"><span itemprop="name">Statements</span></a><meta content="2" itemprop="position"/><li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem"><span class="breadcrumbs__link" itemprop="name">INSERT INTO</span><meta content="3" itemprop="position"/></li></li></li></li></ul></nav><a class="theme-edit-this-page" href="https://github.com/ClickHouse/ClickHouse/tree/master/docs/en/sql-reference/statements/insert-into.md" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" class="iconEdit_Z9Sw" fill="currentColor" height="20" viewbox="0 0 40 40" width="20"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="theme-doc-markdown markdown"><header><h1>INSERT INTO Statement</h1></header><p>Inserts data into a table.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [TABLE] [db.]table [(c1, c2, c3)] [SETTINGS ...] VALUES (v11, v12, v13), (v21, v22, v23), ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can specify a list of columns to insert using  the <code>(c1, c2, c3)</code>. You can also use an expression with column <a href="/docs/sql-reference/statements/select#asterisk">matcher</a> such as <code>*</code> and/or <a href="/docs/sql-reference/statements/select#select-modifiers">modifiers</a> such as <a href="/docs/sql-reference/statements/select/apply-modifier">APPLY</a>, <a href="/docs/sql-reference/statements/select/except-modifier">EXCEPT</a>, <a href="/docs/sql-reference/statements/select/replace-modifier">REPLACE</a>.</p>
+<p>For example, consider the table:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SHOW CREATE insert_select_testtable;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:150.8px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">CREATE TABLE insert_select_testtable
+(
+    `a` Int8,
+    `b` String,
+    `c` Int8
+)
+ENGINE = MergeTree()
+ORDER BY a
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO insert_select_testtable (*) VALUES (1, 'a', 1) ;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If you want to insert data into all of the columns, except column <code>b</code>, you can do so using the <code>EXCEPT</code> keyword. With reference to the syntax above, you will need to ensure that you insert as many values (<code>VALUES (v11, v13)</code>) as you specify columns (<code>(c1, c3)</code>) :</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO insert_select_testtable (* EXCEPT(b)) Values (2, 2);
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT * FROM insert_select_testtable;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:113.10000000000001px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─a─┬─b─┬─c─┐
+│ 2 │   │ 2 │
+└───┴───┴───┘
+┌─a─┬─b─┬─c─┐
+│ 1 │ a │ 1 │
+└───┴───┴───┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>In this example, we see that the second inserted row has <code>a</code> and <code>c</code> columns filled by the passed values, and <code>b</code> filled with value by default. It is also possible to use the <code>DEFAULT</code> keyword to insert default values:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO insert_select_testtable VALUES (1, DEFAULT, 1) ;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>If a list of columns does not include all existing columns, the rest of the columns are filled with:</p>
+<ul class="custom-ul">
+<li class="custom-li">The values calculated from the <code>DEFAULT</code> expressions specified in the table definition.</li>
+<li class="custom-li">Zeros and empty strings, if <code>DEFAULT</code> expressions are not defined.</li>
+</ul>
+<p>Data can be passed to the INSERT in any <a href="/docs/sql-reference/formats">format</a> supported by ClickHouse. The format must be specified explicitly in the query:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [db.]table [(c1, c2, c3)] FORMAT format_name data_set
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>For example, the following query format is identical to the basic version of <code>INSERT ... VALUES</code>:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [db.]table [(c1, c2, c3)] FORMAT Values (v11, v12, v13), (v21, v22, v23), ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>ClickHouse removes all spaces and one line feed (if there is one) before the data. When forming a query, we recommend putting the data on a new line after the query operators which is important if the data begins with spaces.</p>
+<p>Example:</p>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO t FORMAT TabSeparated
+11  Hello, world!
+22  Qwerty
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>You can insert data separately from the query by using the <a href="/docs/operations/utilities/clickhouse-local">command-line client</a> or the <a href="/docs/interfaces/http">HTTP interface</a>.</p>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>If you want to specify <code>SETTINGS</code> for <code>INSERT</code> query then you have to do it <em>before</em> the <code>FORMAT</code> clause since everything after <code>FORMAT format_name</code> is treated as data. For example:<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO table SETTINGS ... FORMAT format_name data_set
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="constraints">Constraints<a aria-label="Direct link to Constraints" class="hash-link" href="#constraints" title="Direct link to Constraints">​</a></h2>
+<p>If a table has <a href="/docs/sql-reference/statements/create/table#constraints">constraints</a>, their expressions will be checked for each row of inserted data. If any of those constraints is not satisfied — the server will raise an exception containing the constraint name and expression, and the query will be stopped.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="data-type-validation">Data Type Validation<a aria-label="Direct link to Data Type Validation" class="hash-link" href="#data-type-validation" title="Direct link to Data Type Validation">​</a></h2>
+<p>ClickHouse validates allowed data types (controlled by settings like <code>enable_time_time64_type</code>, <code>allow_suspicious_low_cardinality_types</code>, <code>allow_suspicious_fixed_string_types</code>, etc.) only during table creation (<code>CREATE TABLE</code>) and schema modification (<code>ALTER TABLE</code>), not during <code>INSERT</code>.</p>
+<p>This means that if a table with a disallowed data type already exists, data can be inserted into it even when the corresponding setting is disabled on the server. This is by design — once a table is created, inserts should not be blocked by settings that control type creation.</p>
+<p>For example:</p>
+<div class="wrapper_EBtA" style="height:452.40000000000003px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SET enable_time_time64_type = 1;
+
+CREATE TABLE events
+(
+    `id` UInt64,
+    `event_time` Time
+)
+ENGINE = MergeTree()
+ORDER BY id;
+
+SET enable_time_time64_type = 0;
+
+-- This works even though the setting is now disabled.
+-- The table already exists, so inserts are not blocked.
+INSERT INTO events VALUES (1, '14:30:25');
+
+-- But creating a new table with the Time type will fail.
+CREATE TABLE events_new
+(
+    `id` UInt64,
+    `event_time` Time
+)
+ENGINE = MergeTree()
+ORDER BY id; -- ERR: TYPE_TIME_TIME64_IS_NOT_ENABLED
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-note alert alert--secondary admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 14 16"><path d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Note</div><p>As a consequence, a client with a newer version (where a setting is enabled by default) can insert data with disallowed data types into a server with an older version (where the setting is disabled), as long as the target table already has the corresponding column types. The validation is enforced at the DDL level, not at the DML level.</p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-the-results-of-select">Inserting the Results of SELECT<a aria-label="Direct link to Inserting the Results of SELECT" class="hash-link" href="#inserting-the-results-of-select" title="Direct link to Inserting the Results of SELECT">​</a></h2>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [TABLE] [db.]table [(c1, c2, c3)] SELECT ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Columns are mapped according to their position in the <code>SELECT</code> clause. However, their names in the <code>SELECT</code> expression and the table for <code>INSERT</code> may differ. If necessary, type casting is performed.</p>
+<p>None of the data formats except the Values format allow setting values to expressions such as <code>now()</code>, <code>1 + 2</code>, and so on. The Values format allows limited use of expressions, but this is not recommended, because in this case inefficient code is used for their execution.</p>
+<p>Other queries for modifying data parts are not supported: <code>UPDATE</code>, <code>DELETE</code>, <code>REPLACE</code>, <code>MERGE</code>, <code>UPSERT</code>, <code>INSERT UPDATE</code>.
+However, you can delete old data using <code>ALTER TABLE ... DROP PARTITION</code>.</p>
+<p>The <code>FORMAT</code> clause must be specified at the end of the query if the <code>SELECT</code> clause contains the table function <a href="/docs/sql-reference/table-functions/input">input()</a>.</p>
+<p>To insert a default value instead of <code>NULL</code> into a column with a non-nullable data type, enable the <a href="/docs/operations/settings/settings#insert_null_as_default">insert_null_as_default</a> setting.</p>
+<p><code>INSERT</code> also supports CTE (common table expression). For example, the following two statements are equivalent:</p>
+<div class="wrapper_EBtA" style="height:37.7px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO x WITH y AS (SELECT * FROM numbers(10)) SELECT * FROM y;
+WITH y AS (SELECT * FROM numbers(10)) INSERT INTO x SELECT * FROM y;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-data-from-a-file">Inserting Data from a File<a aria-label="Direct link to Inserting Data from a File" class="hash-link" href="#inserting-data-from-a-file" title="Direct link to Inserting Data from a File">​</a></h2>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [TABLE] [db.]table [(c1, c2, c3)] FROM INFILE file_name [COMPRESSION type] [SETTINGS ...] [FORMAT format_name]
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Use the syntax above to insert data from a file, or files, stored on the <strong>client</strong> side. <code>file_name</code> and <code>type</code> are string literals. Input file <a href="/docs/interfaces/formats">format</a> must be set in the <code>FORMAT</code> clause.</p>
+<p>Compressed files are supported. The compression type is detected by the extension of the file name. Or it can be explicitly specified in a <code>COMPRESSION</code> clause. Supported types are: <code>'none'</code>, <code>'gzip'</code>, <code>'deflate'</code>, <code>'br'</code>, <code>'xz'</code>, <code>'zstd'</code>, <code>'lz4'</code>, <code>'bz2'</code>.</p>
+<p>This functionality is available in the <a href="/docs/interfaces/client">command-line client</a> and <a href="/docs/operations/utilities/clickhouse-local">clickhouse-local</a>.</p>
+<p><strong>Examples</strong></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="single-file-with-from-infile">Single file with FROM INFILE<a aria-label="Direct link to Single file with FROM INFILE" class="hash-link" href="#single-file-with-from-infile" title="Direct link to Single file with FROM INFILE">​</a></h3>
+<p>Execute the following queries using <a href="/docs/interfaces/client">command-line client</a>:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">echo 1,A &gt; input.csv ; echo 2,B &gt;&gt; input.csv
+clickhouse-client --query="CREATE TABLE table_from_file (id UInt32, text String) ENGINE=MergeTree() ORDER BY id;"
+clickhouse-client --query="INSERT INTO table_from_file FROM INFILE 'input.csv' FORMAT CSV;"
+clickhouse-client --query="SELECT * FROM table_from_file FORMAT PrettyCompact;"
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌─id─┬─text─┐
+│  1 │ A    │
+│  2 │ B    │
+└────┴──────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="multiple-files-with-from-infile-using-globs">Multiple files with FROM INFILE using globs<a aria-label="Direct link to Multiple files with FROM INFILE using globs" class="hash-link" href="#multiple-files-with-from-infile-using-globs" title="Direct link to Multiple files with FROM INFILE using globs">​</a></h3>
+<p>This example is very similar to the previous one but inserts are performed from multiple files using <code>FROM INFILE 'input_*.csv</code>.</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-bash"><code class="language-bash">echo 1,A &gt; input_1.csv ; echo 2,B &gt; input_2.csv
+clickhouse-client --query="CREATE TABLE infile_globs (id UInt32, text String) ENGINE=MergeTree() ORDER BY id;"
+clickhouse-client --query="INSERT INTO infile_globs FROM INFILE 'input_*.csv' FORMAT CSV;"
+clickhouse-client --query="SELECT * FROM infile_globs FORMAT PrettyCompact;"
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="theme-admonition theme-admonition-tip alert alert--success admonition_WoCw"><div class="alert-icon admonitionIcon_Ibzs"><svg viewbox="0 0 12 16"><path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z" fill-rule="evenodd"></path></svg></div><div class="alert-content admonitionContent_vXIg"><div class="admonitionHeading_TMsN">Tip</div><p>In addition to selecting multiple files with <code>*</code>, you can use ranges (<code>{1,2}</code> or <code>{1..9}</code>) and other <a href="/docs/sql-reference/table-functions/file#globs-in-path">glob substitutions</a>. These three all would work with the example above:<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO infile_globs FROM INFILE 'input_*.csv' FORMAT CSV;
+INSERT INTO infile_globs FROM INFILE 'input_{1,2}.csv' FORMAT CSV;
+INSERT INTO infile_globs FROM INFILE 'input_?.csv' FORMAT CSV;
+</code></pre></div><div class="activity_PoTP"></div></div></p></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-using-a-table-function">Inserting using a Table Function<a aria-label="Direct link to Inserting using a Table Function" class="hash-link" href="#inserting-using-a-table-function" title="Direct link to Inserting using a Table Function">​</a></h2>
+<p>Data can be inserted into tables referenced by <a href="/docs/sql-reference/table-functions">table functions</a>.</p>
+<p><strong>Syntax</strong></p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">INSERT INTO [TABLE] FUNCTION table_func ...
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p><strong>Example</strong></p>
+<p>The <a href="/docs/sql-reference/table-functions/remote">remote</a> table function is used in the following queries:</p>
+<div class="wrapper_EBtA" style="height:75.4px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">CREATE TABLE simple_table (id UInt32, text String) ENGINE=MergeTree() ORDER BY id;
+INSERT INTO TABLE FUNCTION remote('localhost', default.simple_table)
+    VALUES (100, 'inserted via remote()');
+SELECT * FROM simple_table;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<div class="wrapper_EBtA" style="height:56.550000000000004px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-text"><code class="language-text">┌──id─┬─text──────────────────┐
+│ 100 │ inserted via remote() │
+└─────┴───────────────────────┘
+</code></pre></div><div class="activity_PoTP"></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-into-clickhouse-cloud">Inserting into ClickHouse Cloud<a aria-label="Direct link to Inserting into ClickHouse Cloud" class="hash-link" href="#inserting-into-clickhouse-cloud" title="Direct link to Inserting into ClickHouse Cloud">​</a></h2>
+<p>By default, services on ClickHouse Cloud provide multiple replicas for high availability. When you connect to a service, a connection is established to one of these replicas.</p>
+<p>After an <code>INSERT</code> succeeds, data is written to the underlying storage. However, it may take some time for replicas to receive these updates. Therefore, if you use a different connection that executes a <code>SELECT</code> query on one of these other replicas, the updated data may not yet be reflected.</p>
+<p>It is possible to use the <code>select_sequential_consistency</code> to force the replica to receive the latest updates. Here is an example of a <code>SELECT</code> query using this setting:</p>
+<div class="wrapper_EBtA" style="height:18.85px"><div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden"><pre class="language-sql"><code class="language-sql">SELECT .... SETTINGS select_sequential_consistency = 1;
+</code></pre></div><div class="activity_PoTP"></div></div>
+<p>Note that using <code>select_sequential_consistency</code> will increase the load on ClickHouse Keeper (used by ClickHouse Cloud internally) and may result in slower performance depending on the load on the service. We recommend against enabling this setting unless necessary. The recommended approach is to execute read/writes in the same session or to use a client driver that uses the native protocol (and thus supports sticky connections).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="inserting-into-a-replicated-setup">Inserting into a replicated setup<a aria-label="Direct link to Inserting into a replicated setup" class="hash-link" href="#inserting-into-a-replicated-setup" title="Direct link to Inserting into a replicated setup">​</a></h2>
+<p>In a replicated setup, data will be visible on other replicas after it has been replicated. Data begins being replicated (downloaded on other replicas) immediately after an <code>INSERT</code>. This differs from ClickHouse Cloud, where data is immediately written to shared storage and replicas subscribe to metadata changes.</p>
+<p>Note that for replicated setups, <code>INSERTs</code> can sometimes take a considerable amount of time (in the order of one second) as it requires committing to ClickHouse Keeper for distributed consensus. Using S3 for storage also adds additional latency.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="performance-considerations">Performance Considerations<a aria-label="Direct link to Performance Considerations" class="hash-link" href="#performance-considerations" title="Direct link to Performance Considerations">​</a></h2>
+<p><code>INSERT</code> sorts the input data by primary key and splits them into partitions by a partition key. If you insert data into several partitions at once, it can significantly reduce the performance of the <code>INSERT</code> query. To avoid this:</p>
+<ul class="custom-ul">
+<li class="custom-li">Add data in fairly large batches, such as 100,000 rows at a time.</li>
+<li class="custom-li">Group data by a partition key before uploading it to ClickHouse.</li>
+</ul>
+<p>Performance will not decrease if:</p>
+<ul class="custom-ul">
+<li class="custom-li">Data is added in real time.</li>
+<li class="custom-li">You upload data that is usually sorted by time.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="asynchronous-inserts">Asynchronous inserts<a aria-label="Direct link to Asynchronous inserts" class="hash-link" href="#asynchronous-inserts" title="Direct link to Asynchronous inserts">​</a></h3>
+<p>It is possible to asynchronously insert data in small but frequent inserts. The data from such insertions is combined into batches and then safely inserted into a table. To use asynchronous inserts, enable the <a href="/docs/operations/settings/settings#async_insert"><code>async_insert</code></a> setting.</p>
+<p>Using <code>async_insert</code> or the <a href="/docs/engines/table-engines/special/buffer"><code>Buffer</code> table engine</a> results in additional buffering.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="large-or-long-running-inserts">Large or long-running inserts<a aria-label="Direct link to Large or long-running inserts" class="hash-link" href="#large-or-long-running-inserts" title="Direct link to Large or long-running inserts">​</a></h3>
+<p>When you are inserting large amounts of data, ClickHouse will optimize write performance through a process called "squashing". Small blocks of inserted data in memory are merged and squashed into larger blocks before being written to disk. Squashing reduces the overhead associated with each write operation. In this process, inserted data will be available to query after ClickHouse completes writing each <a href="/docs/operations/settings/settings#max_insert_block_size"><code>max_insert_block_size</code></a> rows.</p>
+<p><strong>See Also</strong></p>
+<ul class="custom-ul">
+<li class="custom-li"><a href="/docs/operations/settings/settings#async_insert">async_insert</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#wait_for_async_insert">wait_for_async_insert</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#wait_for_async_insert_timeout">wait_for_async_insert_timeout</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#async_insert_max_data_size">async_insert_max_data_size</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#async_insert_busy_timeout_max_ms">async_insert_busy_timeout_ms</a></li>
+<li class="custom-li"><a href="/docs/operations/settings/settings#async_insert_max_data_size">async_insert_stale_timeout_ms</a></li>
+</ul></div></article><nav aria-label="Docs pages" class="pagination-nav docusaurus-mt-lg"><a class="pagination-nav__link pagination-nav__link--prev paginationNavLink_UdUv" href="/docs/sql-reference/statements/select/with"><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.2751 19.175L10.3251 18.125L5.4501 13.25H21.6001V11.75H5.4501L10.3251 6.87501L9.2751 5.82501L2.5751 12.5L9.2751 19.175Z" fill="currentColor"></path></svg><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Previous</div><div class="paginationNavLabel_YPzM pagination-nav__label">WITH</div></div></a><a class="pagination-nav__link pagination-nav__link--next paginationNavLink_UdUv" href="/docs/sql-reference/statements/create"><div class="paginationNavContent__3xr"><div class="pagination-nav__sublabel">Next</div><div class="paginationNavLabel_YPzM pagination-nav__label">CREATE</div></div><svg fill="none" height="25" viewbox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M14.7249 19.175L13.6749 18.125L18.5499 13.25H2.3999V11.75H18.5499L13.6749 6.87501L14.7249 5.82501L21.4249 12.5L14.7249 19.175Z" fill="currentColor"></path></svg></a></nav></div></div><div class="tocSidebar_cg0C col col--3"><div class="docTOCContainer_yhWY theme-doc-toc-desktop-container"><div class="tableOfContents_bqdL thin-scrollbar docTOC_QrVz theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a class="table-of-contents__link toc-highlight" href="#constraints">Constraints</a><li><a class="table-of-contents__link toc-highlight" href="#data-type-validation">Data Type Validation</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-the-results-of-select">Inserting the Results of SELECT</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-data-from-a-file">Inserting Data from a File</a><ul><li><a class="table-of-contents__link toc-highlight" href="#single-file-with-from-infile">Single file with FROM INFILE</a><li><a class="table-of-contents__link toc-highlight" href="#multiple-files-with-from-infile-using-globs">Multiple files with FROM INFILE using globs</a></li></li></ul><li><a class="table-of-contents__link toc-highlight" href="#inserting-using-a-table-function">Inserting using a Table Function</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-into-clickhouse-cloud">Inserting into ClickHouse Cloud</a><li><a class="table-of-contents__link toc-highlight" href="#inserting-into-a-replicated-setup">Inserting into a replicated setup</a><li><a class="table-of-contents__link toc-highlight" href="#performance-considerations">Performance Considerations</a><ul><li><a class="table-of-contents__link toc-highlight" href="#asynchronous-inserts">Asynchronous inserts</a><li><a class="table-of-contents__link toc-highlight" href="#large-or-long-running-inserts">Large or long-running inserts</a></li></li></ul></li></li></li></li></li></li></li></li></ul></div><div><div class="displayFeedback_Qo8B"><div class="sc-1q78udp-0 gXLeMB"><div aria-controls="radix-:Rlalj5lb6h:" aria-expanded="false" aria-haspopup="dialog" class="sc-1dii14g-0 buBXLQ" data-state="closed" type="button"><div><p class="sc-6r74pj-0 iPDoKp">Was this page helpful?</p></div><div class="mt-[6px] flex"><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-up" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3987)"><path d="M2 6.5H5V13H2C1.86739 13 1.74021 12.9473 1.64645 12.8536C1.55268 12.7598 1.5 12.6326 1.5 12.5V7C1.5 6.86739 1.55268 6.74021 1.64645 6.64645C1.74021 6.55268 1.86739 6.5 2 6.5Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6.5L7.5 1.5C8.03043 1.5 8.53914 1.71071 8.91421 2.08579C9.28929 2.46086 9.5 2.96957 9.5 3.5V5H13.5C13.6419 5.00004 13.7821 5.03026 13.9113 5.08865C14.0406 5.14704 14.156 5.23227 14.2498 5.33867C14.3436 5.44507 14.4137 5.57021 14.4555 5.70579C14.4972 5.84136 14.5096 5.98426 14.4919 6.125L13.7419 12.125C13.7114 12.3666 13.5939 12.5888 13.4113 12.7499C13.2286 12.911 12.9935 12.9999 12.75 13H5" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3987"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div><div class="Button_OQ45 dark_oAth"><svg aria-label="thumbs-down" fill="none" height="12" role="img" style="display:block;margin:auto" viewbox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_110_3992)"><path d="M2 3H5V9.5H2C1.86739 9.5 1.74021 9.44732 1.64645 9.35355C1.55268 9.25979 1.5 9.13261 1.5 9L1.5 3.5C1.5 3.36739 1.55268 3.24021 1.64645 3.14645C1.74021 3.05268 1.86739 3 2 3Z" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 9.5L7.5 14.5C8.03043 14.5 8.53914 14.2893 8.91421 13.9142C9.28929 13.5391 9.5 13.0304 9.5 12.5V11H13.5C13.6419 11 13.7821 10.9697 13.9113 10.9114C14.0406 10.853 14.156 10.7677 14.2498 10.6613C14.3436 10.5549 14.4137 10.4298 14.4555 10.2942C14.4972 10.1586 14.5096 10.0157 14.4919 9.875L13.7419 3.875C13.7114 3.63339 13.5939 3.41119 13.4113 3.25009C13.2286 3.08899 12.9935 3.00007 12.75 3L5 3" stroke="#B3B6BD" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clippath id="clip0_110_3992"><rect fill="white" height="16" width="16"></rect></clippath></defs></svg></div></div></div></div></div></div></div></div></div></div></main>

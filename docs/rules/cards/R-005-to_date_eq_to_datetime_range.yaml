@@ -1,0 +1,31 @@
+id: R-005
+name: to_date_eq_to_datetime_range
+tier: 1A
+category: sargable
+status: proposed
+statement: 'Заменить toDate(datetime_col) = ''YYYY-MM-DD'' на range-предикат
+
+  datetime_col >= ''...'' AND datetime_col < ''...''.'
+preconditions:
+  syntactic:
+  - WHERE содержит toDate(col) = const
+  semantic:
+  - Тип колонки — DateTime или DateTime64 (проверяется по схеме)
+  data: []
+proof: 'toDate(dt) = D ≡ dt ∈ [D 00:00:00, D+1 00:00:00).
+
+  Это арифметическое тождество на временной оси по определению toDate.'
+explain_template: 'ClickHouse primary key index работает как sparse index: он хранит значения колонки ORDER BY через каждые 8192 строк (granule). Когда ты оборачиваешь колонку в функцию toDate(), планировщик не может использовать этот индекс — он не знает как функция изменяет значения. Range-предикат напрямую по колонке позволяет пропускать целые granules.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: WHERE toDate(event_time) = '2024-01-15'
+example_after: WHERE event_time >= '2024-01-15 00:00:00' AND event_time < '2024-01-16 00:00:00'
+expected_speedup:
+  estimate: 10-1000× (зависит от позиции event_time в ORDER BY)
+  measurement_method: Прогон на TPC-H lineitem (6M rows). Сравнение query_duration_ms из system.query_log до и после применения правила.
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

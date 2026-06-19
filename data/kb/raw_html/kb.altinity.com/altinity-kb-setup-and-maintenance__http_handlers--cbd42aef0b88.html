@@ -1,0 +1,19 @@
+<h1>http handler example | Altinity® Knowledge Base for ClickHouse®</h1>
+<main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main"><nav aria-label="breadcrumb" class="td-breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/altinity-kb-setup-and-maintenance/">Setup &amp; maintenance</a></li><li aria-current="page" class="breadcrumb-item active">http_handlers</li></ol></nav><div class="td-content"><h1>http handler example</h1><div class="lead"></div><h2 id="http-handler-example-how-to-disable-play">http handler example (how to disable /play)</h2><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4" tabindex="0"><code class="language-xml" data-lang="xml"><span style="display:flex"><span># cat /etc/clickhouse-server/config.d/play_disable.xml
+</span></span><span style="display:flex"><span><span style="color:#8f5902;font-style:italic">&lt;?xml version="1.0" ?&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;yandex&gt;</span>
+</span></span><span style="display:flex"><span>     <span style="color:#204a87;font-weight:700">&lt;http_handlers&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;rule&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;url&gt;</span>/play<span style="color:#204a87;font-weight:700">&lt;/url&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;methods&gt;</span>GET<span style="color:#204a87;font-weight:700">&lt;/methods&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;handler&gt;</span>
+</span></span><span style="display:flex"><span>                <span style="color:#204a87;font-weight:700">&lt;type&gt;</span>static<span style="color:#204a87;font-weight:700">&lt;/type&gt;</span>
+</span></span><span style="display:flex"><span>                <span style="color:#204a87;font-weight:700">&lt;status&gt;</span>403<span style="color:#204a87;font-weight:700">&lt;/status&gt;</span>
+</span></span><span style="display:flex"><span>                <span style="color:#204a87;font-weight:700">&lt;content_type&gt;</span>text/plain; charset=UTF-8<span style="color:#204a87;font-weight:700">&lt;/content_type&gt;</span>
+</span></span><span style="display:flex"><span>                <span style="color:#204a87;font-weight:700">&lt;response_content&gt;&lt;/response_content&gt;</span>
+</span></span><span style="display:flex"><span>            <span style="color:#204a87;font-weight:700">&lt;/handler&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;/rule&gt;</span>
+</span></span><span style="display:flex"><span>        <span style="color:#204a87;font-weight:700">&lt;defaults/&gt;</span>         <span style="color:#8f5902;font-style:italic">&lt;!-- handler to save default handlers ?query / ping --&gt;</span>
+</span></span><span style="display:flex"><span>    <span style="color:#204a87;font-weight:700">&lt;/http_handlers&gt;</span>
+</span></span><span style="display:flex"><span><span style="color:#204a87;font-weight:700">&lt;/yandex&gt;</span>
+</span></span></code></pre></div><div class="td-page-meta__lastmod">Last modified 2021.12.22: <a href="https://github.com/Altinity/altinityknowledgebase/commit/62aa7bfe832d23e9ca418f011a0c6ec155f687c5">Create http_handlers.md (62aa7bf)</a></div></div></main>
