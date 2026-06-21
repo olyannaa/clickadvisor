@@ -54,6 +54,9 @@ jobs:
     services:
       clickhouse:
         image: clickhouse/clickhouse-server:latest
+        env:
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: clickadvisor
         ports:
           - "8123:8123"
     steps:
