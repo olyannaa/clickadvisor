@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
+from urllib.parse import urlparse
 
 from rich.console import Console, Group
 from rich.panel import Panel
@@ -12,6 +14,16 @@ from clickadvisor.core.models import Finding, Report
 from clickadvisor.rules.registry import get_registered_rule
 
 SEVERITY_STYLES = {"high": "bold red", "medium": "bold yellow", "low": "bold blue"}
+
+
+def _is_rag_finding(finding: Finding) -> bool:
+    return finding.tier == "rag" or finding.rule_id.startswith("RAG-")
+
+
+def _split_findings(findings: list[Finding]) -> tuple[list[Finding], list[Finding]]:
+    rule_findings = [finding for finding in findings if not _is_rag_finding(finding)]
+    rag_findings = [finding for finding in findings if _is_rag_finding(finding)]
+    return rule_findings, rag_findings
 
 
 def _summary_counts(report: Report) -> tuple[int, int, int]:
@@ -63,6 +75,52 @@ def _render_skipped_rules(skipped_rules: list[str]) -> str:
     return ", ".join(rendered)
 
 
+def _extract_rag_score(finding: Finding) -> str:
+    match = re.search(r"score:\s*([0-9.]+)", finding.description)
+    return match.group(1) if match else "n/a"
+
+
+def _extract_rag_url(finding: Finding) -> str:
+    marker = "Источник:"
+    if marker not in finding.suggestion:
+        return ""
+    return finding.suggestion.rsplit(marker, 1)[1].strip()
+
+
+def _extract_rag_text(finding: Finding) -> str:
+    marker = "Источник:"
+    text = finding.suggestion.split(marker, 1)[0].strip()
+    return text.replace("\n", " ")
+
+
+def _source_label(url: str) -> str:
+    if not url:
+        return "knowledge base"
+    host = urlparse(url).netloc
+    return host or url
+
+
+def _render_rag_findings(findings: list[Finding]) -> Panel:
+    body: list[object] = []
+    for index, finding in enumerate(findings, start=1):
+        score = _extract_rag_score(finding)
+        url = _extract_rag_url(finding)
+        text = _extract_rag_text(finding)
+        preview = text[:220] + ("..." if len(text) > 220 else "")
+
+        body.append(Text(f"[{index}] (score: {score}) {_source_label(url)}", style="bold blue"))
+        body.append(Text(f'    "{preview}"', style="white"))
+        if url:
+            body.append(Text(f"    → {url}", style="cyan"))
+
+    return Panel(
+        Group(*body),
+        title="📚 Релевантная документация",
+        border_style="blue",
+        padding=(0, 1),
+    )
+
+
 def _finding_to_dict(finding: Finding) -> dict[str, object]:
     payload: dict[str, object] = {
         "rule_id": finding.rule_id,
@@ -109,13 +167,22 @@ def print_report_console(
     header.add_row(Text(header_stats, style="white"))
     active_console.print(Panel(header, border_style="magenta", padding=(0, 2)))
 
-    if report.findings:
-        for finding in report.findings:
+    rule_findings, rag_findings = _split_findings(report.findings)
+
+    if rule_findings:
+        for finding in rule_findings:
             active_console.print(_render_finding(finding, mode))
+    elif rag_findings:
+        active_console.print(
+            Panel(Text("Основных rule-находок не обнаружено.", style="green"), border_style="green")
+        )
     else:
         active_console.print(
             Panel(Text("Находок не обнаружено.", style="green"), border_style="green")
         )
+
+    if rag_findings:
+        active_console.print(_render_rag_findings(rag_findings))
 
     high, medium, low = _summary_counts(report)
     summary = Text()
@@ -143,6 +210,7 @@ def print_report_json(report: Report, console: Console | None = None) -> None:
 
 def render_markdown(report: Report, mode: str = "diagnose") -> str:
     version = report.query_context.ch_version or "unknown"
+    rule_findings, rag_findings = _split_findings(report.findings)
     lines = [
         "# ClickAdvisor Report",
         "",
@@ -152,10 +220,10 @@ def render_markdown(report: Report, mode: str = "diagnose") -> str:
         "",
     ]
 
-    if not report.findings:
+    if not rule_findings and not rag_findings:
         lines.append("Находок не обнаружено.")
     else:
-        for finding in report.findings:
+        for finding in rule_findings:
             lines.extend(
                 [
                     f"## {finding.rule_id} — {finding.rule_name}",
@@ -172,6 +240,18 @@ def render_markdown(report: Report, mode: str = "diagnose") -> str:
             if mode == "explain" and finding.explain_why:
                 lines.append(f"- Почему: {finding.explain_why}")
             lines.append("")
+
+        if rag_findings:
+            lines.extend(["## 📚 Релевантная документация", ""])
+            for index, finding in enumerate(rag_findings, start=1):
+                score = _extract_rag_score(finding)
+                url = _extract_rag_url(finding)
+                text = _extract_rag_text(finding)
+                lines.append(f"{index}. **(score: {score}) {_source_label(url)}**")
+                lines.append(f"   > {text[:500]}")
+                if url:
+                    lines.append(f"   → {url}")
+                lines.append("")
 
     lines.extend(
         [

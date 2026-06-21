@@ -5,6 +5,7 @@ from typing import Annotated
 
 import typer
 from rich.console import Console
+from rich.progress import Progress
 
 from clickadvisor import __version__
 from clickadvisor.cli.output import (
@@ -50,6 +51,13 @@ def analyze(
         str,
         typer.Option(help="console|json|markdown"),
     ] = "console",
+    retrieval: Annotated[
+        bool | None,
+        typer.Option(
+            "--retrieval/--no-retrieval",
+            help="Включить retrieval advisory, если Qdrant KB доступна",
+        ),
+    ] = None,
 ) -> None:
     if mode not in {"diagnose", "explain"}:
         raise typer.BadParameter("mode must be one of: diagnose, explain")
@@ -72,7 +80,20 @@ def analyze(
     )
 
     rules = get_all_rules()
-    pipeline = AnalysisPipeline(rules, mode=mode)
+    retrieval_advisor = None
+    qdrant_db_path = Path(".qdrant_db")
+    should_use_retrieval = qdrant_db_path.exists() if retrieval is None else retrieval
+    if should_use_retrieval and qdrant_db_path.exists():
+        from clickadvisor.retrieval.advisory import RetrievalAdvisor
+
+        retrieval_advisor = RetrievalAdvisor(db_path=str(qdrant_db_path))
+    elif retrieval:
+        console.print(
+            "[yellow]Retrieval advisory отключён: .qdrant_db не найден. "
+            "Запустите `chadvisor index-kb`.[/yellow]"
+        )
+
+    pipeline = AnalysisPipeline(rules, mode=mode, retrieval_advisor=retrieval_advisor)
     report = pipeline.run(context)
 
     if output_format == "console":
@@ -84,3 +105,26 @@ def analyze(
     if output_format == "markdown":
         print_report_markdown(report, mode=mode, console=console)
         return
+
+
+@app.command()
+def index_kb(
+    chunks_dir: Annotated[
+        str,
+        typer.Option(help="Директория с Markdown-чанками knowledge base"),
+    ] = "data/kb/chunks",
+    db_path: Annotated[
+        str,
+        typer.Option(help="Путь к embedded Qdrant базе"),
+    ] = ".qdrant_db",
+) -> None:
+    """Индексировать knowledge base для retrieval advisory."""
+    from clickadvisor.retrieval.indexer import KBIndexer
+
+    indexer = KBIndexer(db_path=db_path)
+    with Progress() as progress:
+        task = progress.add_task("Индексация KB...", total=None)
+        count = indexer.index_kb(chunks_dir)
+        progress.update(task, completed=1)
+
+    typer.echo(f"Проиндексировано {count} чанков")
