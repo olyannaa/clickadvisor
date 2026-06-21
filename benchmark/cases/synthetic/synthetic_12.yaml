@@ -11,8 +11,10 @@ known_issues:
   description: Константный предикат TRUE в WHERE избыточен и должен быть устранён.
 expected_rules_to_fire:
 - R-012
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-012.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

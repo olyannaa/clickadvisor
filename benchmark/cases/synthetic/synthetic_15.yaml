@@ -13,8 +13,9 @@ known_issues:
   description: DISTINCT поверх результата GROUP BY по тем же ключам избыточен.
 expected_rules_to_fire:
 - R-015
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-015.
-expected_findings_count: 1
+expected_findings_count: 2
 status: validated

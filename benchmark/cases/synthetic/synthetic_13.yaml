@@ -11,8 +11,10 @@ known_issues:
   description: Проверку length(body) > 0 можно заменить на notEmpty(body).
 expected_rules_to_fire:
 - R-013
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-013.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

@@ -48,3 +48,22 @@ jobs:
         run: poetry install --no-interaction --no-ansi
       - name: Run pytest
         run: poetry run pytest
+
+  integration-test:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server:latest
+        ports:
+          - "8123:8123"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+      - name: Run integration tests
+        run: poetry run pytest tests/integration/ -v

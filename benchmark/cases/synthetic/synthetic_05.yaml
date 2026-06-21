@@ -11,8 +11,10 @@ known_issues:
   description: Функция toDate над колонкой в фильтре мешает sargable range-предикату.
 expected_rules_to_fire:
 - R-005
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-005.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

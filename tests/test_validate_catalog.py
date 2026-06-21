@@ -15,7 +15,7 @@ def write_card(path: Path, **overrides: object) -> None:
         "statement": "TODO",
         "preconditions": {"syntactic": [], "semantic": [], "data": []},
         "proof": {"status": "TODO", "notes": "TODO"},
-        "ch_version": {"introduced": None, "deprecated": None, "last_validated": None},
+        "ch_version": {"introduced": "1.0", "deprecated": None, "last_validated": "25.3"},
         "example_before": "",
         "example_after": "",
         "expected_speedup": {"estimate": None, "measurement_method": None},

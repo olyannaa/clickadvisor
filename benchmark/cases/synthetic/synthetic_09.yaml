@@ -11,8 +11,10 @@ known_issues:
   description: Singleton IN по country можно заменить на простое равенство.
 expected_rules_to_fire:
 - R-009
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-009.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

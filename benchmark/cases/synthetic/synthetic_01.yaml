@@ -11,8 +11,9 @@ known_issues:
   description: COUNT(DISTINCT user_id) можно заменить на uniqExact(user_id).
 expected_rules_to_fire:
 - R-001
+- R-002
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-001.
-expected_findings_count: 1
+expected_findings_count: 2
 status: validated

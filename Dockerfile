@@ -1,28 +1,25 @@
-FROM python:3.11-slim AS builder
-
-ENV POETRY_VERSION=1.8.3 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    PYTHONUNBUFFERED=1
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir "poetry==$POETRY_VERSION"
+RUN pip install poetry==2.4.1
 
-COPY pyproject.toml README.md ./
-COPY clickadvisor ./clickadvisor
+COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --only main --no-interaction --no-ansi
+RUN poetry config virtualenvs.in-project true \
+    && poetry install --no-root --without dev
 
-FROM python:3.11-slim AS runtime
+COPY . .
 
-ENV PYTHONUNBUFFERED=1
+RUN poetry install --without dev
+
+FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY clickadvisor ./clickadvisor
-COPY README.md pyproject.toml ./
+COPY --from=builder /app /app
 
-ENTRYPOINT ["python", "-m", "clickadvisor"]
+ENV PATH="/app/.venv/bin:$PATH"
+
+ENTRYPOINT ["chadvisor"]
 CMD ["--help"]

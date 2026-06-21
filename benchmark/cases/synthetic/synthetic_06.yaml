@@ -11,8 +11,10 @@ known_issues:
   description: toYYYYMM(event_date) в WHERE можно переписать в диапазон по дате.
 expected_rules_to_fire:
 - R-006
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-006.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

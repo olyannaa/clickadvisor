@@ -10,9 +10,10 @@ known_issues:
   severity: medium
   description: COUNT(DISTINCT session_id) допускает advisory-замену на approx distinct.
 expected_rules_to_fire:
+- R-001
 - R-002
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-002.
-expected_findings_count: 1
+expected_findings_count: 2
 status: validated

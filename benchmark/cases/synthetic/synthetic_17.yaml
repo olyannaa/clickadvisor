@@ -13,8 +13,10 @@ known_issues:
   description: Внешний фильтр user_id = 42 можно протолкнуть внутрь подзапроса.
 expected_rules_to_fire:
 - R-017
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-017.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

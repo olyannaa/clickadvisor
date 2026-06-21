@@ -11,8 +11,10 @@ known_issues:
   description: Цепочку OR по одной колонке country можно свернуть в IN.
 expected_rules_to_fire:
 - R-010
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-010.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

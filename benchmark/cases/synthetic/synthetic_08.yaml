@@ -12,8 +12,10 @@ known_issues:
   description: Избыточный CAST над user_id в фильтре не меняет тип и мешает упрощению предиката.
 expected_rules_to_fire:
 - R-008
+- D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for R-008.
-expected_findings_count: 1
+expected_findings_count: 3
 status: validated

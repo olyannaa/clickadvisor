@@ -12,8 +12,9 @@ known_issues:
   description: Top-level SELECT * читает все 25 колонок широкой таблицы events.
 expected_rules_to_fire:
 - D-003
+- D-004
 expected_improvement: null
 synthetic_explain_path: null
 notes: Validated synthetic case for D-003.
-expected_findings_count: 1
+expected_findings_count: 2
 status: validated
