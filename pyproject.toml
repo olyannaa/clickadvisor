@@ -47,11 +47,16 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "UP007"]
 
 [tool.mypy]
 python_version = "3.11"
 packages = ["clickadvisor"]
 strict = true
+
+[[tool.mypy.overrides]]
+module = ["yaml"]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.9.0"]

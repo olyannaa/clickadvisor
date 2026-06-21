@@ -17,7 +17,6 @@ site/
 # Poetry and virtualenvs
 .venv/
 venv/
-poetry.lock
 
 # IDEs and editors
 .idea/
@@ -38,3 +37,4 @@ docker-compose.override.yml
 .env
 .env.*
 tmp/
+.qdrant_db/

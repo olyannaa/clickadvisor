@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any, Protocol, cast
 
 from qdrant_client import QdrantClient
+from qdrant_client.models import Filter
 
 from clickadvisor.retrieval.embedder import Embedder
 
@@ -16,6 +19,11 @@ class RetrievedChunk:
     url: str
     score: float
     ch_version: str
+
+
+class SearchResult(Protocol):
+    payload: dict[str, Any] | None
+    score: float
 
 
 class KBRetriever:
@@ -59,7 +67,7 @@ class KBRetriever:
             )
         return chunks
 
-    def build_query_from_context(self, sql: str, findings: list[object]) -> str:
+    def build_query_from_context(self, sql: str, findings: Sequence[object]) -> str:
         found_types = [
             str(getattr(finding, "description", ""))[:100]
             for finding in findings
@@ -82,15 +90,18 @@ class KBRetriever:
         query_vector: list[float],
         top_k: int,
         score_threshold: float,
-        query_filter: object | None,
-    ) -> list[object]:
+        query_filter: Filter | None,
+    ) -> list[SearchResult]:
         if hasattr(self.client, "search"):
-            return self.client.search(
-                collection_name=COLLECTION_NAME,
-                query_vector=query_vector,
-                limit=top_k,
-                score_threshold=score_threshold,
-                query_filter=query_filter,
+            return cast(
+                list[SearchResult],
+                self.client.search(
+                    collection_name=COLLECTION_NAME,
+                    query_vector=query_vector,
+                    limit=top_k,
+                    score_threshold=score_threshold,
+                    query_filter=query_filter,
+                ),
             )
 
         response = self.client.query_points(
@@ -100,4 +111,4 @@ class KBRetriever:
             score_threshold=score_threshold,
             query_filter=query_filter,
         )
-        return list(response.points)
+        return cast(list[SearchResult], list(response.points))

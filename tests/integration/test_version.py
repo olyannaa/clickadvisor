@@ -8,7 +8,7 @@ from clickadvisor.core.version import detect_version, parse_version
 def test_detect_version() -> None:
     version = None
     for _ in range(30):
-        version = detect_version("http://localhost:8123", user="default", password="clickadvisor")
+        version = detect_version("http://localhost:8123", user="default", password="")
         if version is not None:
             break
         time.sleep(1)

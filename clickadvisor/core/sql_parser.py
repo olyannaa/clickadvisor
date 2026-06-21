@@ -109,8 +109,8 @@ class SQLParser:
         for count in ast.find_all(exp.Count):
             if isinstance(count.this, exp.Distinct):
                 if count.this.expressions:
-                    return count.this.expressions[0].sql(dialect="clickhouse")
-                return count.this.sql(dialect="clickhouse")
+                    return str(count.this.expressions[0].sql(dialect="clickhouse"))
+                return str(count.this.sql(dialect="clickhouse"))
         return None
 
     def get_quantile_exact(self, ast: sqlglot.Expression) -> tuple[str, str] | None:

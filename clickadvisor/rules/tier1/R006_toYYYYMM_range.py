@@ -21,6 +21,7 @@ class R006ToYYYYMMRange(Rule):
             return None
         function_name, column, literal = match
         date_range = self.parser.monthly_range_from_literal(function_name, literal)
+        example_after: str | None = None
         if date_range is None:
             suggestion = (
                 f"Замените {function_name}({column}) = {literal!r} на range-предикат "
@@ -36,8 +37,6 @@ class R006ToYYYYMMRange(Rule):
                 f"SELECT * FROM events WHERE {column} >= '{start}' AND {column} < '{end}'"
             )
         example_before = f"SELECT * FROM events WHERE {function_name}({column}) = {literal!r}"
-        if date_range is None:
-            example_after = None
         return Finding(
             rule_id=self.rule_id,
             rule_name=self.name,

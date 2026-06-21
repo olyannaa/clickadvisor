@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 from qdrant_client import QdrantClient
@@ -68,7 +68,10 @@ class KBIndexer:
 
     def get_stats(self) -> dict[str, int | None]:
         info = self.client.get_collection(COLLECTION_NAME)
-        return {"vectors_count": info.vectors_count}
+        vectors_count = getattr(info, "vectors_count", None)
+        if vectors_count is None:
+            vectors_count = getattr(info, "points_count", None)
+        return {"vectors_count": cast(int | None, vectors_count)}
 
 
 def parse_frontmatter(content: str) -> dict[str, Any]:
@@ -80,7 +83,7 @@ def parse_frontmatter(content: str) -> dict[str, Any]:
             except yaml.YAMLError:
                 return {}
             if isinstance(metadata, dict):
-                return metadata
+                return cast(dict[str, Any], metadata)
     return {}
 
 

@@ -20,7 +20,10 @@ class R007ToStartOfIntervalRange(Rule):
         if match is None:
             return None
         function_name, column, literal = match
-        start, end = self.parser.interval_range_from_literal(function_name, literal)
+        interval_range = self.parser.interval_range_from_literal(function_name, literal)
+        if interval_range is None:
+            return None
+        start, end = interval_range
         return Finding(
             rule_id=self.rule_id,
             rule_name=self.name,

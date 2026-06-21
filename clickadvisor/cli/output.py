@@ -4,7 +4,7 @@ import json
 import re
 from urllib.parse import urlparse
 
-from rich.console import Console, Group
+from rich.console import Console, Group, RenderableType
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
@@ -34,7 +34,7 @@ def _summary_counts(report: Report) -> tuple[int, int, int]:
 
 
 def _render_finding(finding: Finding, mode: str) -> Panel:
-    body: list[object] = []
+    body: list[RenderableType] = []
     severity_style = SEVERITY_STYLES.get(finding.severity, "bold white")
 
     header = Text()
@@ -101,7 +101,7 @@ def _source_label(url: str) -> str:
 
 
 def _render_rag_findings(findings: list[Finding]) -> Panel:
-    body: list[object] = []
+    body: list[RenderableType] = []
     for index, finding in enumerate(findings, start=1):
         score = _extract_rag_score(finding)
         url = _extract_rag_url(finding)
