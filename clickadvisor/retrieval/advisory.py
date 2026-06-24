@@ -18,7 +18,7 @@ class RetrievalAdvisor:
             query=query,
             top_k=3,
             ch_version=context.ch_version,
-            score_threshold=0.55,
+            score_threshold=0.65,
         )
 
         findings = []

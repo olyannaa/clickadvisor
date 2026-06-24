@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, cast
 
@@ -11,12 +12,17 @@ from clickadvisor.retrieval.embedder import Embedder
 
 COLLECTION_NAME = "clickadvisor_kb"
 VECTOR_SIZE = 384
+CH_VERSION_PATTERN = re.compile(r"^\d{1,2}\.\d{1,2}$")
 
 
 class KBIndexer:
-    def __init__(self, db_path: str = ".qdrant_db") -> None:
+    def __init__(
+        self,
+        db_path: str = ".qdrant_db",
+        embedding_model: str = Embedder.DEFAULT_MODEL,
+    ) -> None:
         self.client = QdrantClient(path=db_path)
-        self.embedder = Embedder()
+        self.embedder = Embedder(model_key=embedding_model)
 
     def is_indexed(self) -> bool:
         collections = self.client.get_collections().collections
@@ -49,7 +55,9 @@ class KBIndexer:
                     "text": text_body[:1000],
                     "source": metadata.get("source", "unknown"),
                     "url": metadata.get("url", ""),
-                    "ch_version": metadata.get("ch_version_introduced", ""),
+                    "ch_version": validate_ch_version(
+                        str(metadata.get("ch_version_introduced", ""))
+                    ),
                     "topic": metadata.get("topic", ""),
                     "file_path": str(md_file),
                 },
@@ -65,6 +73,14 @@ class KBIndexer:
             self.client.upsert(COLLECTION_NAME, points)
 
         return indexed_count
+
+    def reindex(self, chunks_dir: str = "data/kb/chunks") -> int:
+        """Удаляет старый индекс и создаёт новый."""
+        try:
+            self.client.delete_collection(COLLECTION_NAME)
+        except Exception:
+            pass
+        return self.index_kb(chunks_dir)
 
     def get_stats(self) -> dict[str, int | None]:
         info = self.client.get_collection(COLLECTION_NAME)
@@ -83,7 +99,12 @@ def parse_frontmatter(content: str) -> dict[str, Any]:
             except yaml.YAMLError:
                 return {}
             if isinstance(metadata, dict):
-                return cast(dict[str, Any], metadata)
+                parsed = cast(dict[str, Any], metadata)
+                if "ch_version_introduced" in parsed:
+                    parsed["ch_version_introduced"] = validate_ch_version(
+                        str(parsed["ch_version_introduced"])
+                    )
+                return parsed
     return {}
 
 
@@ -93,3 +114,9 @@ def strip_frontmatter(content: str) -> str:
         if len(parts) >= 3:
             return parts[2].strip()
     return content.strip()
+
+
+def validate_ch_version(v: str) -> str:
+    if v and CH_VERSION_PATTERN.match(str(v)):
+        return str(v)
+    return ""

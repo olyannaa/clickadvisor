@@ -2,16 +2,17 @@
 
 `benchmark/cases/` stores source query cases grouped by origin.
 
-The case directories created in this stage are seed corpora and templates. Many
-of them intentionally keep `known_issues` and `expected_rules_to_fire` empty
-until expert review is completed.
+The current v1.0 scored subset is `synthetic/`, which contains 20 validated
+rule-focused cases. Other folders are seed corpora and templates; many of them
+intentionally keep `known_issues` and `expected_rules_to_fire` empty until expert
+review is completed.
 
 ## Subdirectories
 
 - `tpch/`: 22 seed cases based on TPC-H query texts
 - `clickbench/`: seed cases from the ClickBench ClickHouse query set
 - `job/`: selected JOIN-heavy cases from JOB Benchmark
-- `synthetic/`: targeted rule scaffolds
+- `synthetic/`: 20 validated targeted rule cases
 - `github-issues/`: placeholder for manually curated issue-derived cases
 
 ## Validation contract
@@ -21,7 +22,21 @@ Every YAML file under these folders should conform to `benchmark/SCHEMA.yaml`.
 Validate with:
 
 ```bash
-python scripts/benchmark/validate_cases.py
+poetry run python scripts/benchmark/validate_cases.py
+```
+
+## Evaluation
+
+Run the synthetic rule benchmark with:
+
+```bash
+poetry run python scripts/eval/run_benchmark.py
+```
+
+Run retrieval embedding ablation with:
+
+```bash
+poetry run python scripts/eval/ablation_embeddings.py
 ```
 
 ## Labeling policy

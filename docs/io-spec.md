@@ -549,183 +549,158 @@ Reason:
 - mixed versions of metadata fields should be normalized at ingest
 - numeric strings should be coerced only through explicit normalization
 
-## 7. Report Output JSON Schema
+## 7. Report Output JSON Shape
 
 ### Purpose
 
-The final report is the canonical structured output of ClickAdvisor. Console and
-Markdown renderings are derived from this report.
+The final report is the canonical structured output of ClickAdvisor. Console,
+Markdown, JSON, and MCP renderings are derived from the same `Report` object.
 
-### Top-level schema
+The current runtime JSON is intentionally compact and optimized for local CLI
+and automation use.
 
-```yaml
-type: object
-required:
-  - report_version
-  - generated_at
-  - analyzer_version
-  - llm_mode
-  - input_summary
-  - findings
-  - summary
-properties:
-  report_version:
-    type: string
-  generated_at:
-    type: string
-    format: date-time
-  analyzer_version:
-    type: string
-  llm_mode:
-    type: string
-    enum: [none, local, remote]
-  input_summary:
-    type: object
-  findings:
-    type: array
-  summary:
-    type: object
-```
-
-### Finding variants
-
-#### `rule_match`
-
-Use for rule-backed findings from tiers `1A`, `1B`, `1C`, or `2`.
-
-Required fields:
-
-- `finding_id`
-- `finding_type: rule_match`
-- `rule_id`
-- `tier`
-- `title`
-- `severity`
-- `confidence`
-- `statement_ref`
-- `evidence`
-- `recommendation`
-
-#### `env_suggestion`
-
-Use for environment-sensitive recommendations not expressed as SQL rewrites.
-
-Required fields:
-
-- `finding_id`
-- `finding_type: env_suggestion`
-- `title`
-- `severity`
-- `environment_scope`
-- `evidence`
-- `recommendation`
-
-#### `advisory`
-
-Use for LLM-backed or otherwise advisory outputs.
-
-Required fields:
-
-- `finding_id`
-- `finding_type: advisory`
-- `tier`
-- `title`
-- `confidence`
-- `verification_required`
-- `evidence`
-- `recommendation`
-
-### Canonical output example
+### Top-level JSON
 
 ```json
 {
-  "report_version": "1.0.0",
-  "generated_at": "2026-05-25T10:41:00Z",
-  "analyzer_version": "0.1.0",
-  "llm_mode": "none",
-  "input_summary": {
-    "statements_total": 1,
-    "target_statements": 1,
-    "schema_tables_seen": 1,
-    "explain_kinds": ["ESTIMATE"]
-  },
-  "findings": [
-    {
-      "finding_id": "F-001",
-      "finding_type": "rule_match",
-      "rule_id": "R-001",
-      "tier": "1A",
-      "title": "Use a specialized distinct aggregate",
-      "severity": "medium",
-      "confidence": 0.98,
-      "statement_ref": "main",
-      "evidence": {
-        "matched_pattern": "count(DISTINCT user_id)",
-        "plan_signals": ["ReadFromMergeTree"],
-        "metadata_signals": []
-      },
-      "recommendation": {
-        "before_sql": "SELECT count(DISTINCT user_id) FROM analytics.events",
-        "after_sql": "SELECT uniqExact(user_id) FROM analytics.events",
-        "notes": ["Equivalent under the rule catalog contract."]
-      }
-    }
-  ],
-  "summary": {
-    "findings_total": 1,
-    "by_tier": {
-      "1A": 1
-    },
-    "estimated_cost_reduction": "low_to_medium"
-  }
+  "ch_version": "25.3",
+  "findings_count": 2,
+  "findings": [],
+  "rules_skipped_version": []
 }
 ```
 
-### Invalid output example
+Fields:
+
+- `ch_version`: ClickHouse version if known, otherwise `null` or `unknown`
+  depending on interface
+- `findings_count`: total number of findings in the report
+- `findings`: ordered list of rule and advisory findings
+- `rules_skipped_version`: rule IDs skipped by version filtering
+
+### Finding fields
+
+Each finding may contain:
 
 ```json
 {
-  "report_version": "1.0.0",
-  "findings": [
-    {
-      "title": "Maybe faster"
-    }
-  ]
+  "rule_id": "R-001",
+  "tier": "1A",
+  "severity": "high",
+  "description": "...",
+  "suggestion": "...",
+  "confidence": "provable",
+  "example_before": "SELECT ...",
+  "example_after": "SELECT ...",
+  "explain_why": "...",
+  "ch_version_introduced": "1.0",
+  "impact_estimate": "Строк до: 1,000 | после: 10 | сокращение: 100× (оценка планировщика CH)",
+  "rewritten_sql": "SELECT ..."
 }
 ```
 
-Reason:
+Optional fields are omitted when unavailable.
 
-- missing required envelope fields
-- finding type is not specified
-- no tier or evidence contract
+### RAG findings
 
-### Edge cases
+Retrieval advisory findings use:
 
-#### No findings
+- `tier: "rag"`
+- `rule_id: "RAG-001"`, `RAG-002`, ...
+- `confidence: "retrieved"`
 
-Valid output must still include:
+Console and Markdown render these in a separate `📚 Релевантная документация`
+section after primary rule findings. MCP `analyze_query_json` excludes RAG
+findings to keep programmatic output deterministic.
 
-- full envelope
-- empty `findings`
-- summary with `findings_total: 0`
+### Impact estimates
 
-#### Partial context
+When `--explain-estimate` is enabled together with `--connect`, findings with a
+rewrite may include `impact_estimate`. This value comes from comparing
+`EXPLAIN ESTIMATE` before and after the suggested rewrite. It is planner-visible
+work reduction, not measured runtime speedup.
 
-If some inputs are missing, the report should carry degraded-context notes in
-`input_summary` or finding evidence rather than fail silently.
+## 8. CLI Commands
 
-#### Multiple statements
+### `analyze`
 
-`statement_ref` must identify which SQL statement a finding belongs to.
+Required:
 
-## 8. Error handling conventions
+- `--sql PATH`
 
-Across all input formats:
+Optional:
 
-- parse errors should include file, section, and location when available
-- unsupported but well-formed input should produce a typed compatibility error
-- partial context should degrade analysis rather than fail if the remaining
-  inputs are still useful
-- fatal errors are reserved for malformed primary inputs, not for optional
-  enrichments
+- `--explain PATH`
+- `--schema PATH`
+- `--connect URL`
+- `--ch-version VERSION`
+- `--ch-user USER`
+- `--ch-password PASSWORD`
+- `--mode diagnose|explain`
+- `--output-format console|json|markdown`
+- `--retrieval / --no-retrieval`
+- `--explain-estimate / --no-explain-estimate`
+
+### `index-kb`
+
+Indexes `data/kb/chunks/` into embedded Qdrant.
+
+Options:
+
+- `--chunks-dir PATH`
+- `--db-path PATH`
+- `--reindex`
+- `--embedding-model multilingual-e5-small|minilm-l6`
+
+### `mcp-server`
+
+Starts the stdio MCP server for AI-agent integrations.
+
+## 9. MCP Protocol Surface
+
+The MCP server exposes four tools:
+
+- `analyze_query`
+- `analyze_query_json`
+- `list_rules`
+- `detect_ch_version`
+
+It also exposes prompts:
+
+- `analyze`
+- `explain`
+
+MCP transport is stdio. The protocol adapter returns `TextContent` messages and
+does not send SQL or metadata to external services.
+
+## 10. Retrieval Index Contract
+
+The retrieval index is an embedded Qdrant collection named `clickadvisor_kb`.
+Payload fields include:
+
+- `text`
+- `source`
+- `url`
+- `ch_version`
+- `topic`
+- `file_path`
+
+`ch_version` is validated as `^\d{1,2}\.\d{1,2}$`; invalid values such as URLs,
+IPs, and patch versions are stored as an empty string.
+
+## 11. EXPLAIN ESTIMATE Output
+
+The parser accepts:
+
+- default tabular output with tab or box separators
+- `FORMAT JSON` with a `data` array or a direct object/list
+
+Parsed fields:
+
+- `database`
+- `table`
+- `parts`
+- `rows`
+- `marks`
+
+Multiple table rows are aggregated by summing `parts`, `rows`, and `marks`.

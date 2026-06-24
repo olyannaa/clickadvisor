@@ -49,6 +49,13 @@ selective at the SQL level.
 
 ## M
 
+
+### MCP (Model Context Protocol)
+
+A protocol for exposing local tools to AI-agent clients. ClickAdvisor provides a
+stdio MCP server with tools for SQL analysis, JSON analysis, rule listing, and
+ClickHouse version detection.
+
 ### Mark
 
 A storage pointer associated with a granule in MergeTree-family tables. Marks
@@ -118,6 +125,13 @@ must be labeled by trust tier:
 - Tier 3 for LLM-originated advisory suggestions with verification
 
 ## R
+
+
+### Retrieval advisory
+
+A documentation-backed advisory layer that retrieves relevant KB chunks from an
+embedded Qdrant index. Retrieval findings use `tier="rag"` and provide context,
+not proof of rule correctness.
 
 ### Read amplification
 

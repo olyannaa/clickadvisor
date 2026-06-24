@@ -25,6 +25,8 @@ class Finding:
     explain_why: Optional[str] = None
     confidence: str = "provable"
     ch_version_introduced: Optional[str] = None
+    impact_estimate: Optional[str] = None
+    rewritten_sql: Optional[str] = None
 
 
 @dataclass(slots=True)

@@ -38,6 +38,14 @@ def version() -> None:
 
 
 @app.command()
+def mcp_server() -> None:
+    """Запустить MCP сервер для интеграции с Claude Desktop и другими LLM."""
+    from clickadvisor.mcp_server.server import run
+
+    run()
+
+
+@app.command()
 def analyze(
     sql: Annotated[Path, typer.Option(help="SQL файл")],
     explain: Annotated[Path | None, typer.Option()] = None,
@@ -58,6 +66,13 @@ def analyze(
             help="Включить retrieval advisory, если Qdrant KB доступна",
         ),
     ] = None,
+    explain_estimate: Annotated[
+        bool,
+        typer.Option(
+            "--explain-estimate/--no-explain-estimate",
+            help="Запускать EXPLAIN ESTIMATE через ClickHouse HTTP API",
+        ),
+    ] = False,
 ) -> None:
     if mode not in {"diagnose", "explain"}:
         raise typer.BadParameter("mode must be one of: diagnose, explain")
@@ -93,7 +108,24 @@ def analyze(
             "Запустите `chadvisor index-kb`.[/yellow]"
         )
 
-    pipeline = AnalysisPipeline(rules, mode=mode, retrieval_advisor=retrieval_advisor)
+    explain_comparator = None
+    if explain_estimate and connect:
+        from clickadvisor.explain.comparator import ExplainComparator
+        from clickadvisor.explain.estimator import ExplainEstimator
+
+        estimator = ExplainEstimator(connect, user=ch_user, password=ch_password)
+        explain_comparator = ExplainComparator(estimator)
+    elif explain_estimate:
+        console.print(
+            "[yellow]EXPLAIN ESTIMATE отключён: требуется параметр --connect.[/yellow]"
+        )
+
+    pipeline = AnalysisPipeline(
+        rules,
+        mode=mode,
+        retrieval_advisor=retrieval_advisor,
+        explain_comparator=explain_comparator,
+    )
     report = pipeline.run(context)
 
     if output_format == "console":
@@ -117,14 +149,31 @@ def index_kb(
         str,
         typer.Option(help="Путь к embedded Qdrant базе"),
     ] = ".qdrant_db",
+    reindex: Annotated[
+        bool,
+        typer.Option("--reindex", help="Пересоздать индекс"),
+    ] = False,
+    embedding_model: Annotated[
+        str,
+        typer.Option(
+            help=(
+                "Embedding model: multilingual-e5-small (default, multilingual) "
+                "or minilm-l6 (english-only, faster, better MRR@3 on English KB)"
+            )
+        ),
+    ] = "multilingual-e5-small",
 ) -> None:
     """Индексировать knowledge base для retrieval advisory."""
     from clickadvisor.retrieval.indexer import KBIndexer
 
-    indexer = KBIndexer(db_path=db_path)
+    indexer = KBIndexer(db_path=db_path, embedding_model=embedding_model)
+    if not reindex and indexer.is_indexed():
+        typer.echo("KB уже проиндексирован. Используйте --reindex для обновления.")
+        return
+
     with Progress() as progress:
         task = progress.add_task("Индексация KB...", total=None)
-        count = indexer.index_kb(chunks_dir)
+        count = indexer.reindex(chunks_dir) if reindex else indexer.index_kb(chunks_dir)
         progress.update(task, completed=1)
 
     typer.echo(f"Проиндексировано {count} чанков")

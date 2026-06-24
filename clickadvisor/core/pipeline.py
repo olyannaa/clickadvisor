@@ -19,16 +19,30 @@ class RetrievalAdvisorProtocol(Protocol):
     ) -> list[Finding]: ...
 
 
+class ImpactEstimateProtocol(Protocol):
+    def format_summary(self) -> str: ...
+
+
+class ExplainComparatorProtocol(Protocol):
+    def compare(
+        self,
+        original_sql: str,
+        rewritten_sql: str,
+    ) -> ImpactEstimateProtocol | None: ...
+
+
 class AnalysisPipeline:
     def __init__(
         self,
         rules: list[Rule],
         mode: str = "diagnose",
         retrieval_advisor: RetrievalAdvisorProtocol | None = None,
+        explain_comparator: ExplainComparatorProtocol | None = None,
     ) -> None:
         self.rules = rules
         self.mode = mode
         self.retrieval_advisor = retrieval_advisor
+        self.explain_comparator = explain_comparator
 
     def run(self, context: QueryContext) -> Report:
         findings = []
@@ -42,6 +56,22 @@ class AnalysisPipeline:
             rule.mode = self.mode
             finding = rule.check(context)
             if finding:
+                if finding.example_after:
+                    finding.rewritten_sql = finding.example_after
+                if (
+                    self.explain_comparator
+                    and finding.example_after
+                    and finding.tier in ("1A", "1B", "1C")
+                ):
+                    try:
+                        impact = self.explain_comparator.compare(
+                            context.sql,
+                            finding.example_after,
+                        )
+                        if impact:
+                            finding.impact_estimate = impact.format_summary()
+                    except Exception as error:
+                        logger.warning("EXPLAIN ESTIMATE comparison failed: %s", error)
                 findings.append(finding)
 
         findings.sort(key=lambda finding: SEVERITY_ORDER.get(finding.severity, 99))

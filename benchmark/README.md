@@ -1,22 +1,40 @@
 # ClickAdvisor Benchmark
 
-`/benchmark/` contains the curated evaluation corpus and the metadata contracts
-used to score ClickAdvisor over time.
+`/benchmark/` contains the curated evaluation corpus and metadata contracts used
+to score ClickAdvisor over time.
 
 ## Purpose
 
-The benchmark exists to answer a narrow question:
+The benchmark answers a narrow question:
 
 - given a query and limited context, does ClickAdvisor detect the right problem,
   fire the right rule family, and communicate the right trust tier?
 
-It is not primarily a query replay harness and it is not a measured-speedup
-leaderboard.
+It is not a query replay harness and it is not a measured-speedup leaderboard.
+Runtime impact is reported separately through planner estimates such as
+`EXPLAIN ESTIMATE`.
+
+## Current state
+
+The repository includes 20 validated synthetic cases under
+`benchmark/cases/synthetic/`. They target the implemented rule and detector
+families and are used by:
+
+```bash
+poetry run python scripts/eval/run_benchmark.py
+```
+
+Retrieval experiments reuse these synthetic cases as query prompts and expected
+rule labels:
+
+```bash
+poetry run python scripts/eval/ablation_embeddings.py
+```
 
 ## Planned scope
 
-The benchmark is expected to converge toward roughly 100-150 tracked cases made
-up of:
+The benchmark is expected to grow toward roughly 100-150 tracked cases made up
+of:
 
 - TPC-H query seeds
 - ClickBench query seeds
@@ -26,7 +44,7 @@ up of:
   discussions
 
 The raw count of YAML files may exceed the final scored set because some cases
-will remain unlabelled or exploratory until reviewed with DBA experts.
+remain unlabelled or exploratory until reviewed with DBA experts.
 
 ## Sources
 
@@ -41,10 +59,11 @@ will remain unlabelled or exploratory until reviewed with DBA experts.
 Important constraint:
 
 - final `known_issues` and `expected_rules_to_fire` labels are expert work and
-  must be reviewed manually with DBA input
+  should be reviewed manually with DBA input before being treated as ground
+  truth
 
-This repository step provides source queries and structural templates only. It
-does not claim benchmark truth for the unresolved labels.
+Synthetic cases in v1.0 are validated for implemented rules. Broader source
+corpora remain seed material until labelled.
 
 ## Case structure
 
@@ -67,15 +86,15 @@ Core fields:
 - `cases/tpch/`: TPC-H query seeds
 - `cases/clickbench/`: ClickBench query seeds
 - `cases/job/`: selected JOIN-heavy JOB seeds
-- `cases/synthetic/`: empty targeted scaffolds for rule-focused testing
-- `cases/github-issues/`: future manually curated real-world issue cases
+- `cases/synthetic/`: 20 validated targeted rule cases
+- `cases/github-issues/`: placeholder for manually curated issue-derived cases
 
 ## Validation
 
 Run:
 
 ```bash
-python scripts/benchmark/validate_cases.py
+poetry run python scripts/benchmark/validate_cases.py
 ```
 
 This checks schema compliance across all YAML cases before they are consumed by

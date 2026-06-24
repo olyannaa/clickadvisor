@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clickadvisor"
-version = "0.1.0"
+version = "1.0.0"
 description = "Local-first CLI for ClickHouse query optimization with formally grounded rewrite rules."
 authors = ["OpenAI Codex <codex@openai.com>"]
 readme = "README.md"
@@ -25,12 +25,14 @@ testcontainers = "^4.10.0"
 typer = "^0.16.0"
 httpx = "^0.27.0"
 xmltodict = "^0.14.2"
+mcp = ">=1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.135.0"
 mypy = "^1.16.0"
 pytest = "^8.3.5"
 ruff = "^0.11.13"
+pytest-asyncio = "^1.4.0"
 
 [tool.poetry.scripts]
 clickadvisor = "clickadvisor.cli.main:app"
@@ -40,6 +42,7 @@ chadvisor = "clickadvisor.cli.main:app"
 testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["."]
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 100

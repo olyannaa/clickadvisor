@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
@@ -10,6 +11,31 @@ from qdrant_client.models import Filter
 from clickadvisor.retrieval.embedder import Embedder
 
 COLLECTION_NAME = "clickadvisor_kb"
+logger = logging.getLogger(__name__)
+
+RULE_QUERIES = {
+    "R-001": "ClickHouse COUNT DISTINCT optimization uniqExact aggregation performance",
+    "R-002": "ClickHouse uniq HyperLogLog approximate distinct count",
+    "R-003": "ClickHouse quantileExact quantileTDigest approximate quantile",
+    "R-004": "ClickHouse COUNT DISTINCT subquery collapse optimization",
+    "R-005": "ClickHouse toDate datetime range predicate sargable primary key index",
+    "R-006": "ClickHouse toYYYYMM date range filter index pruning",
+    "R-007": "ClickHouse toStartOfHour toStartOfDay range predicate optimization",
+    "R-008": "ClickHouse CAST redundant type conversion primary key",
+    "R-009": "ClickHouse IN singleton equality optimization",
+    "R-010": "ClickHouse OR disjunction IN clause optimization",
+    "R-011": "ClickHouse HAVING WHERE predicate pushdown aggregation",
+    "R-012": "ClickHouse constant predicate elimination WHERE TRUE",
+    "R-013": "ClickHouse length empty string function optimization",
+    "R-014": "ClickHouse GROUP BY string cityHash64 hash optimization",
+    "R-015": "ClickHouse DISTINCT after GROUP BY redundant",
+    "R-016": "ClickHouse ORDER BY subquery without LIMIT remove",
+    "R-017": "ClickHouse subquery filter pushdown WHERE",
+    "R-018": "ClickHouse UNION UNION ALL distinct performance",
+    "D-003": "ClickHouse SELECT star columnar storage IO all columns",
+    "D-004": "ClickHouse SELECT without LIMIT unbounded result",
+    "D-007": "ClickHouse FINAL modifier performance MergeTree",
+}
 
 
 @dataclass(slots=True)
@@ -36,7 +62,7 @@ class KBRetriever:
         query: str,
         top_k: int = 3,
         ch_version: str | None = None,
-        score_threshold: float = 0.5,
+        score_threshold: float = 0.65,
     ) -> list[RetrievedChunk]:
         if not self._collection_exists():
             return []
@@ -52,6 +78,7 @@ class KBRetriever:
             score_threshold=score_threshold,
             query_filter=query_filter,
         )
+        results = self._apply_score_diversity_guard(results)
 
         chunks = []
         for result in results:
@@ -68,18 +95,41 @@ class KBRetriever:
         return chunks
 
     def build_query_from_context(self, sql: str, findings: Sequence[object]) -> str:
-        found_types = [
-            str(getattr(finding, "description", ""))[:100]
-            for finding in findings
-            if getattr(finding, "description", "")
-        ]
-        sql_preview = sql[:200].replace("\n", " ")
+        rule_queries = []
+        for finding in findings:
+            rule_id = str(getattr(finding, "rule_id", ""))
+            tier = str(getattr(finding, "tier", ""))
+            if rule_id in RULE_QUERIES and tier != "rag":
+                rule_queries.append(RULE_QUERIES[rule_id])
 
-        query_parts = [f"ClickHouse query optimization: {sql_preview}"]
-        if found_types:
-            query_parts.append("Issues found: " + "; ".join(found_types[:3]))
+        if rule_queries:
+            high_findings = [
+                finding
+                for finding in findings
+                if getattr(finding, "severity", "") == "high"
+                and str(getattr(finding, "rule_id", "")) in RULE_QUERIES
+                and str(getattr(finding, "tier", "")) != "rag"
+            ]
+            primary_queries = [
+                RULE_QUERIES[str(getattr(finding, "rule_id", ""))]
+                for finding in high_findings[:2]
+            ]
+            return " | ".join(primary_queries) if primary_queries else rule_queries[0]
 
-        return " ".join(query_parts)
+        return "ClickHouse query optimization performance"
+
+    def _apply_score_diversity_guard(self, results: list[SearchResult]) -> list[SearchResult]:
+        if len(results) < 3:
+            return results
+
+        top_scores = [float(result.score) for result in results[:3]]
+        if max(top_scores) - min(top_scores) < 0.001:
+            logger.warning(
+                "Retrieval top-3 scores are nearly identical (%s); returning only first result",
+                ", ".join(f"{score:.4f}" for score in top_scores),
+            )
+            return results[:1]
+        return results
 
     def _collection_exists(self) -> bool:
         collections = self.client.get_collections().collections

@@ -44,6 +44,8 @@ def _render_finding(finding: Finding, mode: str) -> Panel:
     body.append(header)
     body.append(Text(f"Найдено: {finding.description}", style="white"))
     body.append(Text(f"Решение: {finding.suggestion}", style="green"))
+    if finding.impact_estimate:
+        body.append(Text(f"📊 Влияние: {finding.impact_estimate}", style="cyan"))
 
     if finding.example_before:
         body.append(Text("До:", style="bold"))
@@ -138,6 +140,10 @@ def _finding_to_dict(finding: Finding) -> dict[str, object]:
         payload["explain_why"] = finding.explain_why
     if finding.ch_version_introduced is not None:
         payload["ch_version_introduced"] = finding.ch_version_introduced
+    if finding.impact_estimate is not None:
+        payload["impact_estimate"] = finding.impact_estimate
+    if finding.rewritten_sql is not None:
+        payload["rewritten_sql"] = finding.rewritten_sql
     return payload
 
 
@@ -233,6 +239,8 @@ def render_markdown(report: Report, mode: str = "diagnose") -> str:
                     f"- Решение: {finding.suggestion}",
                 ]
             )
+            if finding.impact_estimate:
+                lines.append(f"- 📊 Влияние: {finding.impact_estimate}")
             if finding.example_before:
                 lines.extend(["- До:", "```sql", finding.example_before, "```"])
             if finding.example_after:
@@ -260,6 +268,10 @@ def render_markdown(report: Report, mode: str = "diagnose") -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def format_report_markdown(report: Report, mode: str = "diagnose") -> str:
+    return render_markdown(report, mode=mode)
 
 
 def print_report_markdown(
