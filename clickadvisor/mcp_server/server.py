@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
@@ -13,12 +13,13 @@ from clickadvisor.cli.output import format_report_markdown
 from clickadvisor.core.models import QueryContext
 from clickadvisor.core.pipeline import AnalysisPipeline
 from clickadvisor.core.version import detect_version
+from clickadvisor.rules.base import Rule
 from clickadvisor.rules.registry import get_applicable_rules
 
 server = Server("clickadvisor")
 
 
-@server.list_tools()
+@server.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]
 async def list_tools() -> list[Tool]:
     return [
         Tool(
@@ -121,7 +122,7 @@ async def list_tools() -> list[Tool]:
     ]
 
 
-@server.list_prompts()
+@server.list_prompts()  # type: ignore[no-untyped-call, untyped-decorator]
 async def list_prompts() -> list[Prompt]:
     return [
         Prompt(
@@ -156,7 +157,7 @@ async def list_prompts() -> list[Prompt]:
     ]
 
 
-@server.get_prompt()
+@server.get_prompt()  # type: ignore[no-untyped-call, untyped-decorator]
 async def get_prompt(name: str, arguments: dict[str, Any]) -> GetPromptResult:
     sql = str(arguments.get("sql", ""))
     ch_version = str(arguments.get("ch_version", ""))
@@ -193,7 +194,7 @@ async def get_prompt(name: str, arguments: dict[str, Any]) -> GetPromptResult:
     )
 
 
-@server.call_tool()
+@server.call_tool()  # type: ignore[untyped-decorator]
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     if name == "analyze_query":
         return await _analyze_query(arguments)
@@ -220,7 +221,7 @@ async def _analyze_query(arguments: dict[str, Any]) -> list[TextContent]:
         ch_version=str(ch_version) if ch_version is not None else None,
     )
 
-    rules = get_applicable_rules(context.ch_version)
+    rules = _get_applicable_rules(context.ch_version)
     retrieval_advisor = _build_retrieval_advisor()
     pipeline = AnalysisPipeline(
         rules=rules,
@@ -242,7 +243,7 @@ async def _analyze_query_json(arguments: dict[str, Any]) -> list[TextContent]:
         schema_ddl=str(schema_ddl) if schema_ddl is not None else None,
         ch_version=str(ch_version) if ch_version is not None else None,
     )
-    rules = get_applicable_rules(context.ch_version)
+    rules = _get_applicable_rules(context.ch_version)
     pipeline = AnalysisPipeline(rules=rules)
     report = pipeline.run(context)
 
@@ -271,7 +272,7 @@ async def _analyze_query_json(arguments: dict[str, Any]) -> list[TextContent]:
 
 async def _list_rules(arguments: dict[str, Any]) -> list[TextContent]:
     tier_filter = str(arguments.get("tier", "all"))
-    rules = get_applicable_rules(None)
+    rules = _get_applicable_rules(None)
 
     lines = ["# Правила оптимизации ClickAdvisor\n"]
     tier_order = {"1A": 0, "1B": 1, "1C": 2, "detector": 3, "rag": 4}
@@ -336,6 +337,10 @@ def _build_retrieval_advisor() -> Any | None:
     except Exception:
         return None
     return None
+
+
+def _get_applicable_rules(ch_version: str | None) -> list[Rule]:
+    return cast(list[Rule], get_applicable_rules(ch_version))
 
 
 async def main() -> None:
