@@ -3,7 +3,7 @@
 > Local-first CLI and MCP advisor for ClickHouse query optimization.
 > Находит SQL-антипаттерны, показывает формально обоснованные rewrite-рекомендации, дополняет их retrieval-контекстом из KB и при необходимости оценивает влияние через `EXPLAIN ESTIMATE`.
 
-## Почему не просто ChatGPT?
+## Advantages
 
 LLM легко даёт устаревшие или неподходящие советы, особенно если не знает вашу версию ClickHouse и конкретные инварианты движка. ClickAdvisor строится вокруг детерминированного rule engine:
 
