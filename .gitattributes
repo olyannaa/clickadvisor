@@ -1,0 +1,6 @@
+# Keep GitHub language statistics focused on source code, not bundled KB corpora.
+data/kb/** linguist-vendored
+benchmark/cases/** linguist-vendored
+benchmark/*.yaml linguist-vendored
+docs/** linguist-documentation
+*.md linguist-documentation

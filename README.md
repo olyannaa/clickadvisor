@@ -1,7 +1,14 @@
 # ClickAdvisor
 
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Tests](https://img.shields.io/badge/tests-91%20passed-green)
+![F1](https://img.shields.io/badge/F1%20Score-1.0-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 > Local-first CLI and MCP advisor for ClickHouse query optimization.
 > Находит SQL-антипаттерны, показывает формально обоснованные rewrite-рекомендации, дополняет их retrieval-контекстом из KB и при необходимости оценивает влияние через `EXPLAIN ESTIMATE`.
+
+![ClickAdvisor Demo](docs/demo.png)
 
 ## Advantages
 
@@ -33,14 +40,14 @@ LLM легко даёт устаревшие или неподходящие с�
 git clone https://github.com/olyannaa/clickadvisor.git
 cd clickadvisor
 poetry install
-poetry run chadvisor analyze --sql query.sql
+poetry run chadvisor analyze --sql examples/bad_query.sql
 ```
 
 ### pip
 
 ```bash
 pip install clickadvisor  # когда пакет будет опубликован
-chadvisor analyze --sql query.sql
+chadvisor analyze --sql examples/bad_query.sql
 ```
 
 ### Docker
