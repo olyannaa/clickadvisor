@@ -1,5 +1,4 @@
-# ClickAdvisor
-# https://clickadvisor.lovable.app/#
+# ![ClickAdvisor] (https://clickadvisor.lovable.app)
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Tests](https://img.shields.io/badge/tests-91%20passed-green)
