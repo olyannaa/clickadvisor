@@ -10,10 +10,6 @@
 
 ![ClickAdvisor Demo](docs/demo.png)
 
-## Advantages
-
-LLM легко даёт устаревшие или неподходящие советы, особенно если не знает вашу версию ClickHouse и конкретные инварианты движка. ClickAdvisor строится вокруг детерминированного rule engine:
-
 - рекомендации привязаны к `rule_id`, tier и версии ClickHouse;
 - Tier `1A/1B/1C` явно отделяет формальные rewrite-правила от условных и приближённых;
 - retrieval advisory добавляет ссылки на документацию, но не заменяет rule engine;
