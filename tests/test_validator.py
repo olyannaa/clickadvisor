@@ -5,11 +5,17 @@ import pytest
 from scripts.kb.validator import deduplicate_chunk_tree, split_frontmatter, validate_chunk_tree
 
 
-def make_chunk(path: Path, body: str, *, url: str = "https://example.com/page") -> None:
+def make_chunk(
+    path: Path,
+    body: str,
+    *,
+    url: str = "https://example.com/page",
+    source: str = "docs.clickhouse.com",
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "---\n"
-        f"source: docs.clickhouse.com\n"
+        f"source: {source}\n"
         f"url: {url}\n"
         "topic: sample-topic\n"
         "ch_version_introduced: auto\n"
@@ -51,7 +57,12 @@ def test_validator_reports_duplicate_content(monkeypatch: pytest.MonkeyPatch, tm
 
 def test_validator_reports_broken_local_link(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     root = tmp_path / "chunks"
-    make_chunk(root / "docs" / "sample" / "001.md", "Broken [local](missing.md) link.")
+    make_chunk(
+        root / "local" / "sample" / "001.md",
+        "Broken [local](missing.md) link.",
+        url="unknown",
+        source="local",
+    )
     monkeypatch.setattr("scripts.kb.validator.requests.Session", lambda: object())
     issues = validate_chunk_tree(root)
     assert any("broken local link" in issue.message for issue in issues)
@@ -107,6 +118,34 @@ def test_validator_accepts_slug_relative_site_link(
         root / "kb.altinity.com" / "sample" / "001.md",
         "Body with [slug](altinity-kb-how-to-test-different-compression-codecs).",
         url="https://kb.altinity.com/altinity-kb-schema-design/example-page/",
+    )
+    monkeypatch.setattr("scripts.kb.validator.requests.Session", lambda: object())
+    issues = validate_chunk_tree(root)
+    assert issues == []
+
+
+def test_validator_accepts_unknown_url_web_root_relative_link(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = tmp_path / "chunks"
+    make_chunk(
+        root / "blog" / "sample" / "001.md",
+        "Body with [heading](/jp/blog/career-kitasako#intro).",
+        url="unknown",
+    )
+    monkeypatch.setattr("scripts.kb.validator.requests.Session", lambda: object())
+    issues = validate_chunk_tree(root)
+    assert issues == []
+
+
+def test_validator_accepts_web_filename_relative_link(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = tmp_path / "chunks"
+    make_chunk(
+        root / "blog" / "sample" / "001.md",
+        "Body with [config](next.config.js).",
+        url="https://clickhouse.com/blog/instrumenting-your-app-with-otel-clickstack",
     )
     monkeypatch.setattr("scripts.kb.validator.requests.Session", lambda: object())
     issues = validate_chunk_tree(root)

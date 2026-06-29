@@ -19,6 +19,14 @@ REQUIRED_FIELDS = {
     "chunk_index",
     "total_chunks_in_doc",
 }
+WEB_SOURCES = {
+    "blog",
+    "clickhouse.com_blog",
+    "docs.clickhouse.com",
+    "github_releases",
+    "kb.altinity.com",
+    "releases",
+}
 
 
 @dataclass(slots=True)
@@ -107,6 +115,26 @@ def document_base_url(document: ChunkDocument) -> str | None:
     return base_url
 
 
+def document_source(document: ChunkDocument) -> str:
+    source = document.frontmatter.get("source")
+    return source if isinstance(source, str) else ""
+
+
+def is_potential_web_relative_link(link: str, document: ChunkDocument) -> bool:
+    if link.startswith("#") or is_http_link(link):
+        return False
+    if urlparse(link).scheme:
+        return False
+    if document_source(document) in WEB_SOURCES:
+        return True
+    return document_base_url(document) is not None and (
+        link.startswith("/")
+        or link.startswith("./")
+        or link.startswith("../")
+        or "/" in link
+    )
+
+
 def document_relative_to_absolute(link: str, document: ChunkDocument) -> str | None:
     base_url = document_base_url(document)
     if base_url is None:
@@ -151,6 +179,9 @@ def validate_link(
             external_link_cache[link] = f"broken external link: {link} ({exc})"
             return external_link_cache[link]
         external_link_cache[link] = None
+        return None
+
+    if is_potential_web_relative_link(link, document):
         return None
 
     absolute_path = (document.path.parent / link).resolve()

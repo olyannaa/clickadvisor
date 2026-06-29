@@ -24,6 +24,8 @@ jobs:
         run: poetry run python scripts/kb/crawler.py
       - name: Chunk markdown KB
         run: poetry run python scripts/kb/chunker.py
+      - name: Deduplicate chunked KB
+        run: poetry run python scripts/kb/validator.py --dedup
       - name: Validate chunked KB
         run: poetry run python scripts/kb/validator.py
       - name: Create pull request

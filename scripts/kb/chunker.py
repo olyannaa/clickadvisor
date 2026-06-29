@@ -141,6 +141,8 @@ def chunk_document(path: Path, markdown_root: Path, output_dir: Path) -> list[Pa
     last_updated = date.today().isoformat()
     output_source_dir = output_dir / source / slugify(path.stem)
     output_source_dir.mkdir(parents=True, exist_ok=True)
+    for stale_chunk in output_source_dir.glob("*.md"):
+        stale_chunk.unlink()
 
     written_paths: list[Path] = []
     for index, chunk_content in enumerate(chunks, start=1):
