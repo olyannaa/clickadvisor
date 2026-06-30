@@ -6,7 +6,7 @@ from typing import Any
 import yaml
 
 from clickadvisor.rules.base import Rule
-from clickadvisor.rules.detectors import D003SelectStar, D004MissingLimit, D007FinalModifier
+from clickadvisor.rules.detectors import D003SelectStar, D004MissingLimit, D007FinalModifier, D014AsyncInsertNoWait
 from clickadvisor.rules.tier1 import (
     R001CountDistinct,
     R002CountDistinctApprox,
@@ -26,6 +26,8 @@ from clickadvisor.rules.tier1 import (
     R016OrderByWithoutLimit,
     R017SubqueryFilterPushdown,
     R018UnionToUnionAll,
+    R019UintNarrowing,
+    R020CastOrDefault,
 )
 
 DEFAULT_CARDS_DIR = Path("docs/rules/cards")
@@ -48,9 +50,12 @@ RULES = [
     R016OrderByWithoutLimit(),
     R017SubqueryFilterPushdown(),
     R018UnionToUnionAll(),
+    R019UintNarrowing(),
+    R020CastOrDefault(),
     D003SelectStar(),
     D004MissingLimit(),
     D007FinalModifier(),
+    D014AsyncInsertNoWait(),
 ]
 RULE_REGISTRY: dict[str, Rule] = {rule.rule_id: rule for rule in RULES}
 

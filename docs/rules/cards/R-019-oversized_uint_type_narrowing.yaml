@@ -1,0 +1,43 @@
+id: R-019
+name: oversized_uint_type_narrowing
+tier: 1B
+category: schema_types
+status: proposed
+statement: Колонка объявлена как UInt64/Int64, хотя по имени и смыслу домен предполагает
+  значительно меньший диапазон (status, type, category, flag, level). Использование
+  меньшего типа сокращает память и ускоряет GROUP BY/JOIN.
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена с типом UInt64 или Int64
+  semantic:
+  - Имя колонки указывает на низкокардинальный домен
+  data:
+  - Реальный диапазон значений не выходит за пределы меньшего типа
+  user:
+  - Требуется проверить реальный диапазон данных перед применением
+proof: "UInt8/UInt16/UInt32 занимают в 8‖2 раза меньше памяти, чем UInt64.\
+  \ ClickHouse хранит данные в MergeTree блоками — уменьшение типа напрямую снижает\
+  \ объём чтения с диска."
+explain_template: Колонка объявлена как UInt64 или Int64, но по имени ({column}) можно
+  предположить, что реальный диапазон значений намного меньше. Использование избыточно
+  большого типа ведёт к лишнему потреблению памяти и замедляет операции GROUP BY и
+  JOIN. Рекомендуется проверить максимальное значение в данных и выбрать минимально
+  достаточный тип (UInt8, UInt16 или UInt32).
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE events (\n  event_type UInt64,\n  user_id UInt64\n\
+  ) ENGINE = MergeTree();"
+example_after: "CREATE TABLE events (\n  event_type UInt8,\n  user_id UInt64\n) ENGINE\
+  \ = MergeTree();"
+expected_speedup:
+  estimate: null
+  measurement_method: Сравнение потребления памяти и времени GROUP BY до и после
+    смены типа на реальном датасете.
+risks:
+- Если реальные значения выходят за пределы выбранного типа — произойдёт переполнение
+  или ошибка вставки
+opt_in: true
+references: []

@@ -1,0 +1,38 @@
+id: D-014
+name: async_insert_without_wait_flag
+tier: detector
+category: insert_settings
+status: proposed
+statement: INSERT-запрос содержит async_insert = 1, но не содержит wait_for_async_insert
+  = 1. Данные попадут в буфер асинхронно, и при сбое сервера или таймауте flush-а
+  они будут потеряны без уведомления клиента.
+preconditions:
+  syntactic:
+  - Запрос является INSERT
+  - SETTINGS содержит async_insert = 1
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: Поведение документировано в ClickHouse docs — без wait_for_async_insert=1
+    клиент не дожидается подтверждения записи на диск.
+recommendation_template: 'INSERT использует async_insert=1 без wait_for_async_insert=1.
+  Это означает, что клиент не получит подтверждения о том, что данные действительно
+  записаны: при сбое буфер будет потерян. Добавьте SETTINGS async_insert=1, wait_for_async_insert=1
+  или используйте синхронный INSERT, если потеря данных недопустима.'
+ch_version:
+  introduced: '22.6'
+  deprecated: null
+  last_validated: '25.3'
+example_before: INSERT INTO events SETTINGS async_insert=1 VALUES (1, 'click')
+example_after: INSERT INTO events SETTINGS async_insert=1, wait_for_async_insert=1
+  VALUES (1, 'click')
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- Потеря данных при сбое сервера или переполнении буфера
+severity: high
+opt_in: false
+references:
+- https://clickhouse.com/docs/en/operations/settings/settings#async-insert

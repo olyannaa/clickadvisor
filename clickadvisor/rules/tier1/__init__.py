@@ -16,6 +16,8 @@ from clickadvisor.rules.tier1.R015_distinct_after_groupby import R015DistinctAft
 from clickadvisor.rules.tier1.R016_orderby_without_limit import R016OrderByWithoutLimit
 from clickadvisor.rules.tier1.R017_subquery_filter_pushdown import R017SubqueryFilterPushdown
 from clickadvisor.rules.tier1.R018_union_to_union_all import R018UnionToUnionAll
+from clickadvisor.rules.tier1.R019_uint_narrowing import R019UintNarrowing
+from clickadvisor.rules.tier1.R020_cast_or_default import R020CastOrDefault
 
 __all__ = [
     "R001CountDistinct",
@@ -36,4 +38,6 @@ __all__ = [
     "R016OrderByWithoutLimit",
     "R017SubqueryFilterPushdown",
     "R018UnionToUnionAll",
+    "R019UintNarrowing",
+    "R020CastOrDefault",
 ]
