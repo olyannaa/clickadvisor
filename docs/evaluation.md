@@ -20,7 +20,7 @@ Result on 2026-06-30:
 
 | Dataset | Cases | Precision | Recall | F1 | Notes |
 |---|---:|---:|---:|---:|---|
-| `synthetic_expanded` | 180 | 1.000 | 1.000 | 1.000 | Generated rule-regression set |
+| `synthetic_expanded` | 222 | 1.000 | 1.000 | 1.000 | Generated plus targeted SQL/schema/env rule-regression set |
 | held-out split only | 36 | 1.000 | 1.000 | 1.000 | `synthetic_expanded_v1.yaml` test IDs |
 
 This is a regression result for deterministic matchers. It should not be
@@ -81,6 +81,8 @@ Artifacts:
 
 - Synthetic dataset: `benchmark/cases/synthetic_expanded`
 - Split metadata: `benchmark/splits/synthetic_expanded_v1.yaml`
+- Context metadata: benchmark cases may declare `context_type`, inline
+  `schema_ddl`, and structured `environment` objects.
 - Classifier script: `scripts/eval/ablation_classifiers.py`
 - Retrieval script: `scripts/eval/ablation_embeddings.py`
 - Benchmark runner: `scripts/eval/run_benchmark.py`

@@ -8,6 +8,9 @@ source: "TODO: tpch | clickbench | job | synthetic | github-issues"
 sql: |
   -- TODO: paste SQL here
 schema_files: [] # TODO: add relative schema file paths if relevant
+schema_ddl: null # TODO: inline DDL for schema-aware cases when no schema file is needed
+environment: null # TODO: structured environment context for env-aware cases
+context_type: sql-only # sql-only | schema-aware | env-aware | explain-aware
 known_issues: [] # TODO: list of {issue_id, type, detected_by_rule, severity, description}
 expected_rules_to_fire: [] # TODO: expert-only labeling with DBA review
 expected_findings_count: 0 # TODO: expected number of findings in the final report

@@ -1,0 +1,19 @@
+status: validated
+case_id: synthetic_expanded_r101_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+schema_ddl: CREATE TABLE events (id UInt64) ENGINE = MergeTree ORDER BY tuple()
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: order_by_key_redesign
+  detected_by_rule: R-101
+  severity: high
+  description: MergeTree table uses ORDER BY tuple().
+expected_rules_to_fire:
+- R-101
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-101.

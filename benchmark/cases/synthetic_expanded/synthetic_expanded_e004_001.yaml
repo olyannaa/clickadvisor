@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_e004_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  caches:
+    mark_cache_size: 100
+    active_marks_bytes: 1000
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: mark_cache_sizing
+  detected_by_rule: E-004
+  severity: medium
+  description: Mark cache is small relative to active marks.
+expected_rules_to_fire:
+- E-004
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-004.

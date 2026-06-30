@@ -1,0 +1,21 @@
+status: validated
+case_id: synthetic_expanded_r103_001
+source: synthetic
+sql: SELECT user_id, count() FROM events GROUP BY user_id
+schema_files: []
+environment:
+  workload:
+    repeated_group_by: true
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: projection_recommendation
+  detected_by_rule: R-103
+  severity: medium
+  description: Repeated GROUP BY query shape may benefit from a projection.
+expected_rules_to_fire:
+- R-103
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-103.

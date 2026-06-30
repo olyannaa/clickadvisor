@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e006_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  hardware:
+    disk_type: hdd
+  settings:
+    background_pool_size: 32
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: merge_settings_for_disk_type
+  detected_by_rule: E-006
+  severity: medium
+  description: Merge concurrency is high for HDD storage.
+expected_rules_to_fire:
+- E-006
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-006.

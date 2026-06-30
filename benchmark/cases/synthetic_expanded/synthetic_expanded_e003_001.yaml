@@ -1,0 +1,21 @@
+status: validated
+case_id: synthetic_expanded_e003_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  settings:
+    max_memory_usage: 1000
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: external_groupby_threshold
+  detected_by_rule: E-003
+  severity: medium
+  description: External aggregation threshold is absent or too high.
+expected_rules_to_fire:
+- E-003
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-003.

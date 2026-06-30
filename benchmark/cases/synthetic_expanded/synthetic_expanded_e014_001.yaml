@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e014_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    large_parts: true
+  settings:
+    max_bytes_to_merge_at_max_space_in_pool: 0
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: merge_max_bytes_for_level
+  detected_by_rule: E-014
+  severity: medium
+  description: Large-parts workload lacks explicit merge max bytes tuning.
+expected_rules_to_fire:
+- E-014
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-014.

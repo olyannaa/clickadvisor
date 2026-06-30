@@ -1,0 +1,19 @@
+status: validated
+case_id: synthetic_expanded_r106_001
+source: synthetic
+sql: SELECT country FROM events LIMIT 10
+schema_files: []
+schema_ddl: CREATE TABLE events (country String, id UInt32) ENGINE = MergeTree ORDER BY id
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: lowcardinality_conversion
+  detected_by_rule: R-106
+  severity: medium
+  description: Low-cardinality String column may benefit from LowCardinality.
+expected_rules_to_fire:
+- R-106
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-106.

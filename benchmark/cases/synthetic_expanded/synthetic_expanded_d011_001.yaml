@@ -1,0 +1,30 @@
+status: validated
+case_id: synthetic_expanded_d011_001
+source: synthetic
+sql: SELECT count() FROM events e JOIN users u ON toUInt64(e.user_id) = u.id
+schema_files: []
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: implicit_type_coercion_in_join
+  detected_by_rule: D-011
+  severity: high
+  description: JOIN key comparison contains an explicit cast.
+- issue_id: I-2
+  type: redundant_cast_on_filter_removal
+  detected_by_rule: R-008
+  severity: medium
+  description: Cast around a column can block index use.
+- issue_id: I-3
+  type: throwing_cast_to_or_default_cast
+  detected_by_rule: R-020
+  severity: medium
+  description: Throwing toType conversion on a column can interrupt the query.
+expected_rules_to_fire:
+- D-011
+- R-008
+- R-020
+expected_findings_count: 3
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-011; explicit JOIN cast also exercises cast advisories.

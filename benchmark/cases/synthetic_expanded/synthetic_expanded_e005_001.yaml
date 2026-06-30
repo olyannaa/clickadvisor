@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e005_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    repeated_reads: true
+  caches:
+    use_uncompressed_cache: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: uncompressed_cache_sizing
+  detected_by_rule: E-005
+  severity: low
+  description: Repeated reads run without uncompressed cache.
+expected_rules_to_fire:
+- E-005
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-005.

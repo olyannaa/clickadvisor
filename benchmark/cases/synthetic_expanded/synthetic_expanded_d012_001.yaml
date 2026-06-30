@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d012_001
+source: synthetic
+sql: SELECT row_number() OVER (ORDER BY ts) FROM events LIMIT 10
+schema_files: []
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: window_function_without_partition
+  detected_by_rule: D-012
+  severity: medium
+  description: Window function has no PARTITION BY clause.
+expected_rules_to_fire:
+- D-012
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-012.

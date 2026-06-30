@@ -29,6 +29,13 @@ properties:
     type: array
     items:
       type: string
+  schema_ddl:
+    type: ["string", "null"]
+  environment:
+    type: ["object", "null"]
+  context_type:
+    type: string
+    enum: ["sql-only", "schema-aware", "env-aware", "explain-aware"]
   known_issues:
     type: array
     items:

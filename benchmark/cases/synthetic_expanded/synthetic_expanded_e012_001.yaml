@@ -1,0 +1,21 @@
+status: validated
+case_id: synthetic_expanded_e012_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  settings:
+    join_use_nulls: true
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: join_use_nulls_overhead
+  detected_by_rule: E-012
+  severity: medium
+  description: join_use_nulls adds Nullable overhead to JOIN output.
+expected_rules_to_fire:
+- E-012
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-012.

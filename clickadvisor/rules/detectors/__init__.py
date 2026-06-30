@@ -1,3 +1,15 @@
+from clickadvisor.rules.detectors.backlog import (
+    D001FullScanOnPartitionedTable,
+    D002CrossJoinRisk,
+    D005LeadingWildcardLike,
+    D006ArrayJoinBeforeFilter,
+    D008SampleWithoutSampleBy,
+    D009NullableWithoutNeed,
+    D010UnusedColumnsInSelect,
+    D011ImplicitTypeCoercionInJoin,
+    D012WindowFunctionWithoutPartition,
+    D013DeeplyNestedSubqueries,
+)
 from clickadvisor.rules.detectors.D003_select_star import D003SelectStar
 from clickadvisor.rules.detectors.D004_missing_limit import D004MissingLimit
 from clickadvisor.rules.detectors.D007_final_modifier import D007FinalModifier
@@ -20,6 +32,16 @@ from clickadvisor.rules.detectors.D025_mv_with_join import D025MVWithJoin
 
 __all__ = [
     "D003SelectStar",
+    "D001FullScanOnPartitionedTable",
+    "D002CrossJoinRisk",
+    "D005LeadingWildcardLike",
+    "D006ArrayJoinBeforeFilter",
+    "D008SampleWithoutSampleBy",
+    "D009NullableWithoutNeed",
+    "D010UnusedColumnsInSelect",
+    "D011ImplicitTypeCoercionInJoin",
+    "D012WindowFunctionWithoutPartition",
+    "D013DeeplyNestedSubqueries",
     "D004MissingLimit",
     "D007FinalModifier",
     "D014AsyncInsertNoWait",

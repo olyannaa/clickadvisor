@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e016_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    large_join: true
+  settings:
+    join_algorithm: hash
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: join_algorithm_for_large_tables
+  detected_by_rule: E-016
+  severity: high
+  description: Large JOIN workload uses a non-adaptive join algorithm.
+expected_rules_to_fire:
+- E-016
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-016.

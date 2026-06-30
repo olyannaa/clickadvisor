@@ -1,0 +1,19 @@
+status: validated
+case_id: synthetic_expanded_d001_001
+source: synthetic
+sql: SELECT count() FROM events WHERE user_id = 42
+schema_files: []
+schema_ddl: CREATE TABLE events (ts DateTime, user_id UInt64) ENGINE = MergeTree PARTITION BY toYYYYMM(ts) PRIMARY KEY user_id ORDER BY user_id
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: full_scan_on_partitioned_table
+  detected_by_rule: D-001
+  severity: high
+  description: Partitioned table query does not filter the partition key.
+expected_rules_to_fire:
+- D-001
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-001.

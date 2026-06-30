@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e001_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  settings:
+    max_threads: 64
+  hardware:
+    cpu_cores: 8
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: max_threads_vs_cpu_cores
+  detected_by_rule: E-001
+  severity: medium
+  description: max_threads is high relative to CPU cores.
+expected_rules_to_fire:
+- E-001
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-001.

@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_r105_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  system_metrics:
+    active_parts: 1000
+    active_partitions: 5
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: partition_strategy_adjustment
+  detected_by_rule: R-105
+  severity: high
+  description: Table has too many active parts per partition.
+expected_rules_to_fire:
+- R-105
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-105.

@@ -1,0 +1,27 @@
+status: validated
+case_id: synthetic_expanded_r108_001
+source: synthetic
+sql: SELECT * FROM events WHERE user_id = 42 LIMIT 10
+schema_files: []
+environment:
+  workload:
+    wide_table: true
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * reads all columns.
+- issue_id: I-2
+  type: prewhere_injection
+  detected_by_rule: R-108
+  severity: medium
+  description: Wide table query filters in WHERE only.
+expected_rules_to_fire:
+- D-003
+- R-108
+expected_findings_count: 2
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-108 with existing D-003 overlap.
