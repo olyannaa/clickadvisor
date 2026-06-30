@@ -1,0 +1,42 @@
+id: R-032
+name: int8_boolean_column_to_bool
+tier: 1B
+category: schema_types
+status: proposed
+statement: 'Колонка объявлена как UInt8 или Int8, но имя указывает на булево
+  значение (is_*, has_*, flag, enabled, active, deleted, published, visible).
+  Тип Bool хранится как UInt8 (те же 1 байт), но выводится как true/false,
+  обеспечивает самодокументирование схемы и проверку допустимых значений.'
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена с типом UInt8 или Int8
+  - Имя колонки указывает на булев домен
+  semantic: []
+  data: []
+  user:
+  - Убедиться, что значения только 0 и 1 (Bool отклоняет другие значения при строгом режиме)
+proof: 'Bool тип в ClickHouse хранится как UInt8 (1 байт). Замена UInt8 на
+  Bool не меняет хранение, но добавляет семантическую ясность и совместимость
+  с клиентами, ожидающими boolean-тип.'
+explain_template: 'Колонка {column} объявлена как {col_type}, но по имени
+  предположительно хранит булево значение. Замените на Bool для явного
+  документирования домена. Хранение идентично UInt8 (1 байт).'
+ch_version:
+  introduced: '22.1'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE users (\n  user_id UInt64,\n  is_active UInt8,\n  has_subscription\
+  \ Int8\n) ENGINE = MergeTree ORDER BY user_id"
+example_after: "CREATE TABLE users (\n  user_id UInt64,\n  is_active Bool,\n  has_subscription\
+  \ Bool\n) ENGINE = MergeTree ORDER BY user_id"
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — изменение семантики, не производительности.'
+risks:
+- Bool отклоняет значения кроме 0 и 1 при включённом strict_types
+- Требует CH >= 22.1
+opt_in: true
+references:
+- https://clickhouse.com/docs/sql-reference/data-types/boolean
+- https://clickhouse.com/docs/best-practices/select-data-types

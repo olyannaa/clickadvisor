@@ -1,0 +1,41 @@
+id: D-016
+name: alter_table_mutation
+tier: detector
+category: ddl_operations
+status: proposed
+statement: 'ALTER TABLE ... DELETE или ALTER TABLE ... UPDATE — мутации перезаписывают
+  весь data part, затронутый изменением. Даже изменение одной строки вызывает
+  перезапись сотен ГБ. Нельзя откатить после запуска.'
+preconditions:
+  syntactic:
+  - Запрос начинается с ALTER TABLE и содержит DELETE или UPDATE
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'Документировано в ClickHouse docs: мутации — асинхронные фоновые
+    процессы, перезаписывающие целые data parts. Не блокируют INSERT, но создают
+    огромную I/O нагрузку и продолжают выполняться после рестарта сервера.'
+recommendation_template: 'ALTER TABLE ... DELETE/UPDATE (мутация) обнаружен в SQL.
+  Мутации в ClickHouse перезаписывают весь затронутый data part — даже при изменении
+  одной строки. Рассмотрите альтернативы: для удаления данных — lightweight DELETE
+  (CH >= 22.8) или DROP PARTITION; для уточнения данных — ReplacingMergeTree или
+  CollapsingMergeTree.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'ALTER TABLE events DELETE WHERE dt < ''2023-01-01'''
+example_after: 'DELETE FROM events WHERE dt < ''2023-01-01''  -- lightweight delete,
+  CH >= 22.8'
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- Мутацию нельзя откатить после запуска
+- При сложных подзапросах (x IN (SELECT ...)) нагрузка на CPU и RAM многократно возрастает
+severity: high
+opt_in: false
+references:
+- https://clickhouse.com/docs/best-practices/avoid-mutations
+- https://clickhouse.com/docs/optimize/avoid-mutations

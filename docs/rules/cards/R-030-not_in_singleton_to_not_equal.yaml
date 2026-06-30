@@ -1,0 +1,35 @@
+id: R-030
+name: not_in_singleton_to_not_equal
+tier: 1A
+category: predicate_rewrite
+status: proposed
+statement: 'x NOT IN (single_value) семантически эквивалентен x != single_value
+  для не-Nullable колонок. NOT IN с одним элементом строит hash set из одного
+  значения, тогда как != — прямое скалярное сравнение без накладных расходов
+  на построение set.'
+preconditions:
+  syntactic:
+  - WHERE содержит NOT IN с ровно одним литеральным значением
+  semantic:
+  - Колонка не Nullable (NULL NOT IN (x) возвращает NULL, а не TRUE)
+  data: []
+  user: []
+proof: 'Для не-Nullable x: x NOT IN (c) ≡ x != c по стандарту SQL.
+  При одном элементе IN-оператор строит hash set O(1) вместо O(1) сравнения,
+  что излишне. ClickHouse optimizer не всегда упрощает это автоматически.'
+explain_template: '{col} NOT IN ({val}) заменяется {col} != {val}.
+  Семантика идентична для не-Nullable колонок, запрос становится проще.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE status NOT IN ('deleted')"
+example_after: "SELECT * FROM events WHERE status != 'deleted'"
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость и простота плана запроса.'
+risks:
+- Для Nullable колонок семантика различается (NULL != x возвращает NULL, а не TRUE)
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/operators/in

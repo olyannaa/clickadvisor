@@ -1,0 +1,42 @@
+id: R-031
+name: string_uuid_column_to_uuid_type
+tier: 1B
+category: schema_types
+status: proposed
+statement: 'Колонка объявлена как String, но имя указывает на UUID (uuid, guid,
+  trace_id, span_id, request_id). UUID-тип хранит идентификатор в 16 байтах
+  vs ~36 байт строки с дефисами, и поддерживает нативные UUID-функции.'
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена с типом String
+  - Имя колонки указывает на UUID-домен
+  semantic: []
+  data: []
+  user:
+  - Проверить реальный формат значений (должны быть валидные UUIDs)
+proof: 'UUID хранит 128 бит (16 байт) в бинарном виде. String UUID
+  '61f0c404-5cb3-11e7-907b-a6006ad3dba0' занимает 36 байт. Экономия ~2.25x
+  плюс нативная поддержка generateUUIDv4(), UUIDStringToNum(), toUUID().'
+explain_template: 'Колонка {column} объявлена как String, но по имени предположительно
+  хранит UUID. Тип UUID занимает 16 байт вместо ~36, поддерживает нативные
+  UUID-функции и корректно сортируется. Примечание: UUIDv7 сортируется по
+  второй половине в ClickHouse, что может влиять на PRIMARY KEY.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE spans (\n  trace_id String,\n  span_id String,\n  ts\
+  \ DateTime\n) ENGINE = MergeTree ORDER BY ts"
+example_after: "CREATE TABLE spans (\n  trace_id UUID,\n  span_id UUID,\n  ts\
+  \ DateTime\n) ENGINE = MergeTree ORDER BY ts"
+expected_speedup:
+  estimate: '~2x сжатие для UUID-колонок'
+  measurement_method: 'Сравнение data_compressed_bytes в system.parts_columns.'
+risks:
+- UUIDv7 в PRIMARY KEY даёт неоптимальную сортировку из-за особенности хранения в CH
+- Требует изменения INSERT-логики клиента (вставка UUID вместо строки)
+opt_in: true
+references:
+- https://clickhouse.com/docs/sql-reference/data-types/uuid
+- https://clickhouse.com/docs/best-practices/select-data-types

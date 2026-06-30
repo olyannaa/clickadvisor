@@ -1,0 +1,47 @@
+id: E-013
+name: async_insert_busy_timeout_tuning
+tier: env
+category: insert_settings
+status: proposed
+statement: 'При использовании async_insert=1 параметр async_insert_busy_timeout_ms
+  (default 200ms на OSS, 1000ms на Cloud) определяет максимальное время ожидания
+  до flush буфера. Слишком низкое значение ведёт к частым мелким flush,
+  слишком высокое — к задержке видимости данных.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '22.6'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- Увеличение timeout задерживает видимость свежих данных для SELECT
+- Уменьшение timeout увеличивает количество мелких parts и нагрузку на merge
+opt_in: false
+references:
+- https://clickhouse.com/docs/optimize/asynchronous-inserts
+- https://clickhouse.com/docs/best-practices/selecting-an-insert-strategy
+hardware_preconditions: []
+config_preconditions:
+- async_insert = 1 включён
+workload_preconditions:
+- Ingestion-нагрузка из многих параллельных мелких INSERT-запросов
+recommendation:
+  setting: async_insert_busy_timeout_ms
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''async_insert_busy_timeout_ms'''
+  recommended_formula: '200-1000ms для большинства workload.
+    При observability (logs/traces) — 1000ms для меньшего числа parts.
+    При OLTP-подобных workload — 200ms для свежести данных.'
+  example: 'SET async_insert_busy_timeout_ms = 1000;'
+reasoning: 'Flush по таймауту объединяет мелкие INSERT в один part.
+  Баланс между свежестью данных и количеством parts: больший timeout = меньше
+  parts = меньше merge-нагрузки, но свежесть данных хуже.'
+condition: 'async_insert = 1 активен'
