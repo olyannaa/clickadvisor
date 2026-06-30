@@ -34,16 +34,24 @@ For each rule in scope:
 This is the main unit for rule-catalog evolution because it reveals which rules
 are trustworthy and which ones over-trigger or under-trigger.
 
-### System-level F1
+### Rule engine test pass rate (not an ML metric)
 
-Aggregate F1 is measured over problem-type detection and overall finding
-quality.
+The deterministic rule engine is regression-tested, not trained. Reporting it
+as "F1" creates a false impression that a model could generalize incorrectly
+on this surface. Instead this project reports it as **test pass rate**,
+the same way unit-test coverage is reported for any deterministic codebase.
 
 Recommended reporting:
 
-- macro F1 across problem categories
-- micro F1 across all benchmark cases
-- by-tier breakdown (`1A`, `1B`, `1C`, `detector`)
+- cases passed / cases total (overall)
+- per-rule true positive / false positive / false negative counts
+- explicit negative-case count (queries with zero expected findings)
+
+100% pass rate is the *expected* outcome for a correct deterministic matcher,
+not a sign of overfitting. There is nothing to overfit: each rule is a fixed
+AST/regex pattern, not a parameter learned from data. A failing case here means
+a bug in the rule implementation or in the test itself, not a generalization
+gap.
 
 Current hand-authored synthetic benchmark command:
 
@@ -69,6 +77,17 @@ is still a rule-regression metric, not a trained-model result: F1 answers
 "does the deterministic analyzer fire the expected implemented rules on
 generated variations?", not "does ML generalize to unseen production queries?".
 The ML classifier evaluation must report train/test metrics separately.
+
+Be precise about what this split means here: it is useful metadata for
+downstream ML experiments (see "ML classifier evaluation" below), but for the
+rule engine itself it does not test generalization, because positive
+variations within a rule template share the same structural AST pattern (only
+literals, table names, and column names differ). This is documented explicitly
+so the number is never mistaken for an ML accuracy claim.
+
+**The only place F1 should be reported in this project is the ML classifier**
+(see "ML classifier evaluation" below), where there is an actual learned
+decision boundary and an actual risk of misclassifying an unseen case.
 
 ### Retrieval MRR@3
 
@@ -99,6 +118,37 @@ Latest documented 500-chunk result used for ADR-013:
 
 The default remains multilingual E5 because future KB sources and user queries
 include Russian. See `docs/adr/ADR-013-embedding-model-selection.md`.
+
+### ML classifier evaluation (where F1 belongs)
+
+This is the only evaluation surface in the project where a model is actually
+trained on data and could genuinely overfit or fail to generalize. It is
+implemented separately from the rule engine: `clickadvisor/ml/features.py`
+extracts AST/SQL features, `clickadvisor/ml/classifier.py` trains and compares
+candidate models on top of those features.
+
+Required reporting for every classifier experiment:
+
+- model name and hyperparameters
+- train F1 (macro and micro) and test F1 (macro and micro), reported
+  side by side so a large train/test gap is visible at a glance, not hidden
+- precision/recall per problem-type label
+- exact train/test split used (must reuse
+  `benchmark/splits/synthetic_expanded_v1.yaml` train/test case IDs, never a
+  fresh random split per run, so results are comparable across experiments)
+- baseline comparison: majority-class baseline, then increasingly complex
+  models (e.g. Logistic Regression as a simple baseline, Random Forest as a
+  mid-complexity baseline, CatBoost as the practical state-of-the-art choice
+  for tabular data)
+
+A test F1 close to 1.0 here would warrant the same scrutiny that was correctly
+raised for the rule-engine number, because here it would actually be
+plausible evidence of overfitting or of a test split too similar to train.
+Unlike the rule engine, a perfect score on this surface is a signal to
+investigate, not an expected baseline.
+
+Ablation script and results: see
+`scripts/eval/ablation_classifiers.py` and `docs/experiments/classifier_ablation.md`.
 
 ### EXPLAIN ESTIMATE impact quality
 
@@ -251,7 +301,7 @@ For each baseline:
 Compute:
 
 - per-rule precision/recall
-- system-level F1
+- rule engine test pass rate
 - retrieval MRR@3
 - EXPLAIN ESTIMATE impact summaries
 - latency summaries
