@@ -1,0 +1,37 @@
+id: R-020
+name: throwing_cast_to_or_default_cast
+tier: 1B
+category: type_safety
+status: proposed
+statement: '"Бросающий" CAST(expr AS Type) или toType(expr) применён к колонке (не\
+  \ к литералу). При грязных данных такой CAST вызовет исключение и прервёт запрос.\
+  \ Безопаснее использовать accurateCastOrDefault или toTypeOrDefault.'
+preconditions:
+  syntactic:
+  - Запрос содержит CAST(expr AS Type) или toType(expr)
+  - expr является ссылкой на колонку, а не литералом
+  semantic:
+  - Данные в колонке могут не соответствовать целевому типу
+  data: []
+  user:
+  - Нужно явно выбрать значение по умолчанию при ошибке преобразования
+proof: "CAST бросает исключение при невозможности конвертации. accurateCastOrDefault\
+  \ возвращает default вместо исключения — запрос продолжает выполнение."
+explain_template: "Вызов {cast_expr} применён к колонке {column}. Если данные в этой\
+  \ колонке содержат значения, несовместимые с целевым типом, запрос завершится ошибкой.\
+  \ Используйте accurateCastOrDefault({column}, '{target_type}', default_value), чтобы\
+  \ явно задать значение при ошибке конвертации, и запрос продолжит работу."
+ch_version:
+  introduced: '21.7'
+  deprecated: null
+  last_validated: '25.3'
+example_before: SELECT CAST(raw_value AS UInt32) FROM events
+example_after: SELECT accurateCastOrDefault(raw_value, 'UInt32', 0) FROM events
+expected_speedup:
+  estimate: null
+  measurement_method: Качественная метрика надёжности — устранение исключений при
+    грязных данных.
+risks:
+- Значение по умолчанию может маскировать реальные ошибки в данных
+opt_in: true
+references: []

@@ -1,5 +1,6 @@
 from clickadvisor.rules.detectors.D003_select_star import D003SelectStar
 from clickadvisor.rules.detectors.D004_missing_limit import D004MissingLimit
 from clickadvisor.rules.detectors.D007_final_modifier import D007FinalModifier
+from clickadvisor.rules.detectors.D014_async_insert_no_wait import D014AsyncInsertNoWait
 
-__all__ = ["D003SelectStar", "D004MissingLimit", "D007FinalModifier"]
+__all__ = ["D003SelectStar", "D004MissingLimit", "D007FinalModifier", "D014AsyncInsertNoWait"]
