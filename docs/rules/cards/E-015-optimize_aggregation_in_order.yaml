@@ -1,0 +1,45 @@
+id: E-015
+name: optimize_aggregation_in_order
+tier: env
+category: aggregation_settings
+status: proposed
+statement: 'optimize_aggregation_in_order = 1 позволяет ClickHouse использовать
+  порядок сортировки таблицы для потоковой агрегации без полного накопления
+  в памяти, если GROUP BY ключ — это префикс ORDER BY ключа таблицы. Снижает
+  memory footprint агрегации.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '20.8'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- В некоторых случаях (неоднородная кардинальность ключей) может замедлить запрос
+opt_in: false
+references:
+- https://clickhouse.com/docs/operations/settings/settings#optimize_aggregation_in_order
+- https://clickhouse.com/docs/sql-reference/statements/select/group-by
+hardware_preconditions: []
+config_preconditions:
+- GROUP BY содержит prefix ORDER BY ключа таблицы
+workload_preconditions:
+- Агрегационные запросы потребляют значительный объём RAM
+recommendation:
+  setting: optimize_aggregation_in_order
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''optimize_aggregation_in_order'''
+  recommended_formula: 'optimize_aggregation_in_order = 1 когда GROUP BY ключи
+    совпадают с prefix ORDER BY таблицы. Default = 0.'
+  example: 'SET optimize_aggregation_in_order = 1;'
+reasoning: 'Потоковая агрегация по ORDER BY-совместимому ключу позволяет
+  ClickHouse финализировать и отправить частичные результаты сразу, снижая
+  peak memory usage и улучшая latency.'
+condition: 'GROUP BY key prefix == ORDER BY key prefix'

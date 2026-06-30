@@ -1,0 +1,47 @@
+id: E-016
+name: join_algorithm_for_large_tables
+tier: env
+category: join_settings
+status: proposed
+statement: 'По умолчанию ClickHouse использует hash join, который требует загрузки
+  правой таблицы в RAM целиком. Для JOIN с большими правыми таблицами (> RAM)
+  следует использовать grace_hash или partial_merge алгоритм, который может
+  сбросить данные на диск.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '22.6'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- grace_hash и partial_merge используют диск — значительно медленнее in-memory hash join
+- Эти алгоритмы следует использовать только когда JOIN не помещается в RAM
+opt_in: false
+references:
+- https://clickhouse.com/docs/best-practices/minimize-optimize-joins
+- https://clickhouse.com/docs/sql-reference/statements/select/join
+hardware_preconditions:
+- Правая таблица JOIN превышает max_memory_usage
+config_preconditions: []
+workload_preconditions:
+- JOIN с правой таблицей > нескольких ГБ в памяти
+recommendation:
+  setting: join_algorithm
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''join_algorithm'''
+  recommended_formula: 'join_algorithm = ''grace_hash'' для JOIN с большими правыми
+    таблицами, которые не помещаются в RAM. join_algorithm = ''parallel_hash'' (default
+    в 24.12+) для большинства случаев.'
+  example: 'SET join_algorithm = ''grace_hash'';  -- при OOM в JOIN'
+reasoning: 'grace_hash JOIN может сбрасывать промежуточные состояния на диск,
+  избегая OOM при JOIN с большими таблицами. partial_merge аналогично, но
+  требует sort-merging и медленнее. Используйте как fallback при OOM.'
+condition: 'OOM при JOIN операции, правая таблица > RAM'

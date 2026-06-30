@@ -1,0 +1,32 @@
+id: R-037
+name: empty_string_eq_to_empty
+tier: 1A
+category: string_operations
+status: proposed
+statement: "col = '' для String-колонки семантически эквивалентно empty(col).
+  Функция empty() — специализированный предикат ClickHouse, не требующий
+  сравнения с пустым строковым литералом."
+preconditions:
+  syntactic:
+  - Запрос содержит col = '' (col сравнивается с пустой строкой)
+  semantic: []
+  data: []
+  user: []
+proof: 'По определению ClickHouse: empty(s) истинно тогда и только тогда,
+  когда s == ''''. Для String типа это математически идентично.'
+explain_template: "{col} = '' заменяется empty({col}). Более читаемо и\
+  \ выражает намерение напрямую."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE message = ''"
+example_after: 'SELECT * FROM events WHERE empty(message)'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks:
+- Для FixedString(N) empty() проверяет все N байт на нули, a = '' использует полное сравнение
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-functions

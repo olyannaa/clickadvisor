@@ -16,6 +16,9 @@ from clickadvisor.rules.detectors import (
     D017NullableColumnInDDL,
     D018DeprecatedNgramBFIndex,
     D019SetZeroUnlimitedSkipIndex,
+    D020PartitionByNonDate,
+    D021SelectStarInMV,
+    D022DeleteWithoutWhere,
 )
 from clickadvisor.rules.tier1 import (
     R001CountDistinct,
@@ -50,6 +53,20 @@ from clickadvisor.rules.tier1 import (
     R030NotInSingleton,
     R031StringUUIDColumn,
     R032Int8BooleanColumn,
+    R033MaxCaseToMaxIf,
+    R034MinCaseToMinIf,
+    R035AvgCaseToAvgIf,
+    R036NestedIfToMultiIf,
+    R037EmptyStringEqToEmpty,
+    R038NonEmptyStringNeqToNotEmpty,
+    R039LengthGteOneToNotEmpty,
+    R040TodateComparisonToDatetime,
+    R041StringCodeColumn,
+    R042GroupArrayNoLimit,
+    R043HavingCountGtZero,
+    R044ToDateTimeToDateToStartOfDay,
+    R045LikeWithoutWildcardsToEq,
+    R046NotEmptyToNotEmpty,
 )
 
 DEFAULT_CARDS_DIR = Path("docs/rules/cards")
@@ -95,6 +112,23 @@ RULES = [
     D017NullableColumnInDDL(),
     D018DeprecatedNgramBFIndex(),
     D019SetZeroUnlimitedSkipIndex(),
+    D020PartitionByNonDate(),
+    D021SelectStarInMV(),
+    D022DeleteWithoutWhere(),
+    R033MaxCaseToMaxIf(),
+    R034MinCaseToMinIf(),
+    R035AvgCaseToAvgIf(),
+    R036NestedIfToMultiIf(),
+    R037EmptyStringEqToEmpty(),
+    R038NonEmptyStringNeqToNotEmpty(),
+    R039LengthGteOneToNotEmpty(),
+    R040TodateComparisonToDatetime(),
+    R041StringCodeColumn(),
+    R042GroupArrayNoLimit(),
+    R043HavingCountGtZero(),
+    R044ToDateTimeToDateToStartOfDay(),
+    R045LikeWithoutWildcardsToEq(),
+    R046NotEmptyToNotEmpty(),
 ]
 RULE_REGISTRY: dict[str, Rule] = {rule.rule_id: rule for rule in RULES}
 

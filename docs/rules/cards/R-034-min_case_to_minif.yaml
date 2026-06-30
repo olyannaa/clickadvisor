@@ -1,0 +1,31 @@
+id: R-034
+name: min_case_to_minif
+tier: 1A
+category: aggregate_rewrite
+status: proposed
+statement: 'MIN(CASE WHEN cond THEN col END) семантически эквивалентен minIf(col, cond)
+  — встроенному комбинатору ClickHouse. NULL в CASE (при cond=false) игнорируется MIN.'
+preconditions:
+  syntactic:
+  - Запрос содержит MIN(CASE WHEN ... THEN col END) без ELSE
+  semantic: []
+  data: []
+  user: []
+proof: 'MIN(CASE WHEN cond THEN col END) = MIN(col WHERE cond) = minIf(col, cond).
+  NULL из CASE игнорируется MIN — аналогично поведению minIf.'
+explain_template: 'MIN(CASE WHEN {cond} THEN {col} END) заменяется minIf({col}, {cond}).
+  Результат идентичен, без материализации CASE.'
+ch_version:
+  introduced: '1.23'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT MIN(CASE WHEN is_paid THEN amount END) AS min_paid FROM orders'
+example_after: 'SELECT minIf(amount, is_paid) AS min_paid FROM orders'
+expected_speedup:
+  estimate: '5-10%'
+  measurement_method: 'Сравнение elapsed в system.query_log.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/combinators
+- https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states

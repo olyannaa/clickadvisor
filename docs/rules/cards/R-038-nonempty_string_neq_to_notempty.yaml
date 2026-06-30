@@ -1,0 +1,32 @@
+id: R-038
+name: nonempty_string_neq_to_notempty
+tier: 1A
+category: string_operations
+status: proposed
+statement: "col != '' или col <> '' для String-колонки семантически эквивалентно
+  notEmpty(col). Функция notEmpty() — специализированный предикат ClickHouse,
+  прямо выражающий намерение."
+preconditions:
+  syntactic:
+  - "Запрос содержит col != '' или col <> '' (col не равно пустой строке)"
+  semantic: []
+  data: []
+  user: []
+proof: "notEmpty(s) истинно тогда и только тогда, когда s != ''.
+  Для String типа это математически идентично NOT empty(s)."
+explain_template: "{col} != '' заменяется notEmpty({col}). Более читаемо и\
+  \ выражает намерение напрямую."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE message != ''"
+example_after: 'SELECT * FROM events WHERE notEmpty(message)'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks:
+- Для FixedString(N) notEmpty() и != '' могут иметь разное поведение для строк с нулевыми байтами
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-functions

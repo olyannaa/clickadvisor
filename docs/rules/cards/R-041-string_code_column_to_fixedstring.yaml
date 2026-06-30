@@ -1,0 +1,43 @@
+id: R-041
+name: string_code_column_to_fixedstring
+tier: 1B
+category: schema_types
+status: proposed
+statement: 'Колонка объявлена как String, но имя содержит суффикс _code или
+  _iso, указывающий на строку фиксированной длины (country_code, currency_code,
+  language_code, lang_iso). Тип FixedString(N) хранит строки точно N байт
+  без length-prefix overhead, что эффективнее String для значений фиксированной длины.'
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена как String
+  - Имя колонки содержит _code или _iso суффикс
+  semantic: []
+  data: []
+  user:
+  - Проверить фактическую длину значений перед заменой (country_code: 2, currency: 3)
+proof: 'FixedString(N) хранит ровно N байт без prefix длины. String хранит
+  с 1-4 байтной prefix длины. Для фиксированных кодов (ISO 2-3 символа)
+  FixedString(2/3) занимает меньше места и компрессируется лучше.'
+explain_template: 'Колонка {column} объявлена как String, но по имени предположительно
+  хранит код фиксированной длины. Используйте FixedString(2) для ISO-кодов стран
+  (''US'', ''DE'') или FixedString(3) для кодов валют (''USD'', ''EUR'').'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE orders (\n  order_id UInt64,\n  country_code String,\n\
+  \  currency_code String\n) ENGINE = MergeTree ORDER BY order_id"
+example_after: "CREATE TABLE orders (\n  order_id UInt64,\n  country_code FixedString(2),\n\
+  \  currency_code FixedString(3)\n) ENGINE = MergeTree ORDER BY order_id"
+expected_speedup:
+  estimate: '~30% сжатие для колонки кодов'
+  measurement_method: 'Сравнение data_compressed_bytes в system.parts_columns.'
+risks:
+- FixedString(N) дополняет строки нулевыми байтами при вставке; сравнение '
+  с != сложнее из-за trailing null bytes
+- Требует точного знания длины всех возможных значений
+opt_in: true
+references:
+- https://clickhouse.com/docs/sql-reference/data-types/fixedstring
+- https://clickhouse.com/docs/best-practices/select-data-types

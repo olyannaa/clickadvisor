@@ -11,6 +11,9 @@ from clickadvisor.rules.detectors.D018_deprecated_ngrambf_tokenbf_index import (
 from clickadvisor.rules.detectors.D019_set_zero_unlimited_skip_index import (
     D019SetZeroUnlimitedSkipIndex,
 )
+from clickadvisor.rules.detectors.D020_partition_by_non_date import D020PartitionByNonDate
+from clickadvisor.rules.detectors.D021_select_star_in_mv import D021SelectStarInMV
+from clickadvisor.rules.detectors.D022_delete_without_where import D022DeleteWithoutWhere
 
 __all__ = [
     "D003SelectStar",
@@ -22,4 +25,7 @@ __all__ = [
     "D017NullableColumnInDDL",
     "D018DeprecatedNgramBFIndex",
     "D019SetZeroUnlimitedSkipIndex",
+    "D020PartitionByNonDate",
+    "D021SelectStarInMV",
+    "D022DeleteWithoutWhere",
 ]

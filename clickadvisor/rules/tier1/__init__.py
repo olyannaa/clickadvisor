@@ -30,6 +30,20 @@ from clickadvisor.rules.tier1.R029_lower_like_to_ilike import R029LowerLikeToILi
 from clickadvisor.rules.tier1.R030_not_in_singleton import R030NotInSingleton
 from clickadvisor.rules.tier1.R031_string_uuid_column import R031StringUUIDColumn
 from clickadvisor.rules.tier1.R032_int8_boolean_column import R032Int8BooleanColumn
+from clickadvisor.rules.tier1.R033_max_case_to_maxif import R033MaxCaseToMaxIf
+from clickadvisor.rules.tier1.R034_min_case_to_minif import R034MinCaseToMinIf
+from clickadvisor.rules.tier1.R035_avg_case_to_avgif import R035AvgCaseToAvgIf
+from clickadvisor.rules.tier1.R036_nested_if_to_multiif import R036NestedIfToMultiIf
+from clickadvisor.rules.tier1.R037_empty_string_eq_to_empty import R037EmptyStringEqToEmpty
+from clickadvisor.rules.tier1.R038_nonempty_string_neq import R038NonEmptyStringNeqToNotEmpty
+from clickadvisor.rules.tier1.R039_length_gte_one_to_notempty import R039LengthGteOneToNotEmpty
+from clickadvisor.rules.tier1.R040_todate_comparison import R040TodateComparisonToDatetime
+from clickadvisor.rules.tier1.R041_string_code_column import R041StringCodeColumn
+from clickadvisor.rules.tier1.R042_grouparray_no_limit import R042GroupArrayNoLimit
+from clickadvisor.rules.tier1.R043_having_count_gt_zero import R043HavingCountGtZero
+from clickadvisor.rules.tier1.R044_todatetime_todate import R044ToDateTimeToDateToStartOfDay
+from clickadvisor.rules.tier1.R045_like_without_wildcards import R045LikeWithoutWildcardsToEq
+from clickadvisor.rules.tier1.R046_not_empty_to_notempty import R046NotEmptyToNotEmpty
 
 __all__ = [
     "R001CountDistinct",
@@ -64,4 +78,18 @@ __all__ = [
     "R030NotInSingleton",
     "R031StringUUIDColumn",
     "R032Int8BooleanColumn",
+    "R033MaxCaseToMaxIf",
+    "R034MinCaseToMinIf",
+    "R035AvgCaseToAvgIf",
+    "R036NestedIfToMultiIf",
+    "R037EmptyStringEqToEmpty",
+    "R038NonEmptyStringNeqToNotEmpty",
+    "R039LengthGteOneToNotEmpty",
+    "R040TodateComparisonToDatetime",
+    "R041StringCodeColumn",
+    "R042GroupArrayNoLimit",
+    "R043HavingCountGtZero",
+    "R044ToDateTimeToDateToStartOfDay",
+    "R045LikeWithoutWildcardsToEq",
+    "R046NotEmptyToNotEmpty",
 ]
