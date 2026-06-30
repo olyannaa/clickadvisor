@@ -122,7 +122,7 @@ must be labeled by trust tier:
 
 - Tier 1 for formally equivalent transformations
 - Tier 2 for cost-based recommendations
-- Tier 3 for LLM-originated advisory suggestions with verification
+- Tier 3 for speculative advisory suggestions with verification
 
 ## R
 

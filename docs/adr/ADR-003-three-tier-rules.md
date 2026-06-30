@@ -26,7 +26,7 @@ from a plausible idea, the tool teaches the wrong trust habit.
 The opposite failure mode also exists. If the system labels all recommendations
 as merely advisory, then formally safe and reusable rewrites lose their value.
 The user is forced to treat a mathematically equivalent transformation with the
-same suspicion as an unverified generative hint. That flattens the trust model
+same suspicion as an unverified speculative hint. That flattens the trust model
 and makes the product appear less rigorous than it actually is.
 
 ClickAdvisor therefore needs a rule taxonomy that preserves differences in

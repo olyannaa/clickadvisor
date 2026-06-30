@@ -218,9 +218,7 @@ poetry run chadvisor analyze --sql query.sql --retrieval
 poetry run chadvisor analyze --sql query.sql --no-retrieval
 ```
 
-Retrieval работает локально через embeddings и Qdrant. В текущем CLI нет флага
-`--llm`: remote/local LLM-режимы описаны в архитектурных документах как
-следующий этап, но не заявляются как готовая CLI-функция.
+Retrieval работает локально через embeddings и Qdrant. Generative LLM не входит в critical path MVP: Claude/Cursor могут вызывать ClickAdvisor через MCP, но сами рекомендации формируются rule engine и retrieval-компонентами.
 
 ## MCP Server
 
@@ -362,7 +360,7 @@ Integration test для version detection ожидает ClickHouse HTTP endpoin
 
 ## Что не заявляется как готовое в CLI v1
 
-- флаг `--llm=none/local/remote`;
+- продуктовый generative LLM в critical path;
 - автоматический анализ `query_log`;
 - автоматические DDL-изменения;
 - выполнение `ANALYZE` или реальный replay запросов на данных;

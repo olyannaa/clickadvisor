@@ -6,7 +6,12 @@ from typing import Any
 import yaml
 
 from clickadvisor.rules.base import Rule
-from clickadvisor.rules.detectors import D003SelectStar, D004MissingLimit, D007FinalModifier, D014AsyncInsertNoWait
+from clickadvisor.rules.detectors import (
+    D003SelectStar,
+    D004MissingLimit,
+    D007FinalModifier,
+    D014AsyncInsertNoWait,
+)
 from clickadvisor.rules.tier1 import (
     R001CountDistinct,
     R002CountDistinctApprox,

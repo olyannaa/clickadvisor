@@ -59,13 +59,7 @@ To support this mode, Tier 1 rule cards are extended with an
 `explain_template` field. This field contains a compact, beginner-friendly
 principle explanation that describes the relevant ClickHouse behavior in simple
 language. The template is not a free-form marketing string; it is a structured
-knowledge asset that can be rendered directly or expanded through the LLM layer.
-
-The LLM agent is used more actively in `explain` mode, especially when the tool
-needs to adapt a stored explanation to the current query context or to weave in
-retrieved documentation snippets. However, the rule catalog remains the anchor
-for educational correctness. The model is there to shape and contextualize the
-teaching output, not to invent the core principle from scratch.
+knowledge asset that can be rendered directly in CLI, Markdown, JSON, and MCP outputs. Retrieval snippets may add supporting documentation, but the core explanation remains curated and versionable.
 
 ## Consequences
 
@@ -81,13 +75,6 @@ that means expressing the engine principle in language a developer without deep
 ClickHouse background can understand. This increases authoring effort, but it
 creates durable educational assets that can be reused across CLI output, docs,
 and future interfaces.
-
-The LLM layer also gets a more legitimate role. In normal diagnostic mode, the
-project intentionally minimizes dependence on generation. In `explain` mode, the
-LLM can contribute more value by adapting tone, shaping educational narrative,
-and combining rule-card explanations with retrieved documentation. This does not
-weaken the core architecture because the authoritative content still originates
-from rules and KB rather than from model improvisation.
 
 There is a UX consequence as well: users must be able to predict what kind of
 output a mode change implies. `diagnose` should stay compact. `explain` should
@@ -115,9 +102,6 @@ product’s usefulness as a fast operational advisor. Many users want the shorte
 path from finding to action. Making every run educational would punish the
 default path for the sake of a secondary use case.
 
-### Leave explanations entirely to the LLM
+### Leave explanations to a generative LLM
 
-This was rejected because it would make educational quality too dependent on
-model recall and too weakly anchored in curated rule knowledge. The system needs
-stored principle explanations in the catalog so that educational output remains
-consistent, versionable, and reviewable.
+This was rejected because it would make educational quality too dependent on model recall and too weakly anchored in curated rule knowledge. The system needs stored principle explanations in the catalog so that educational output remains consistent, versionable, and reviewable.
