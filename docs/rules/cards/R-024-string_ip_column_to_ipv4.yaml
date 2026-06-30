@@ -1,0 +1,42 @@
+id: R-024
+name: string_ip_column_to_ipv4
+tier: 1B
+category: schema_types
+status: proposed
+statement: 'Колонка объявлена как String, но имя указывает на IP-адрес
+  (ip, ip_address, remote_addr, client_ip, server_ip, src_ip, dst_ip, remote_host).
+  Тип IPv4 хранит адрес в 4 байтах (UInt32) вместо ~15 байт строки и поддерживает
+  нативные IP-функции (IPv4CIDRToRange, toIPv4 и др.).'
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена с типом String
+  - Имя колонки содержит паттерн IP-адреса
+  semantic: []
+  data: []
+  user:
+  - Проверить реальный формат IP-адресов (IPv4, IPv6 или смешанный)
+proof: 'IPv4 тип хранит адрес как UInt32 (4 байта). Строка '192.168.1.1'
+  занимает 11 байт + overhead. Экономия ~4x плюс нативная поддержка CIDR-фильтрации.'
+explain_template: 'Колонка {column} объявлена как String, но по имени предположительно
+  хранит IP-адрес. Тип IPv4 экономит ~4x памяти, поддерживает нативные функции
+  IPv4NumToString/toIPv4/IPv4CIDRToRange и сортируется корректно для числовой
+  семантики адресов. Для IPv6 используйте тип IPv6.'
+ch_version:
+  introduced: '116.253'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE access_log (\n  request_id UInt64,\n  client_ip String,\n\
+  \  remote_addr String\n) ENGINE = MergeTree ORDER BY request_id"
+example_after: "CREATE TABLE access_log (\n  request_id UInt64,\n  client_ip IPv4,\n\
+  \  remote_addr IPv4\n) ENGINE = MergeTree ORDER BY request_id"
+expected_speedup:
+  estimate: '~4x сжатие для колонки IP'
+  measurement_method: 'Сравнение data_compressed_bytes в system.parts_columns.'
+risks:
+- IPv6-адреса не поместятся в IPv4 (нужен IPv6 или String)
+- Смешанные форматы (IPv4-mapped IPv6) требуют дополнительной обработки
+opt_in: true
+references:
+- https://kb.altinity.com/altinity-kb-schema-design/how-to-store-ips/
+- https://clickhouse.com/docs/sql-reference/data-types/ipv4

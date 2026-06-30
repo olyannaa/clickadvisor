@@ -1,0 +1,32 @@
+id: R-028
+name: coalesce_two_args_to_ifnull
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'COALESCE(x, y) с ровно двумя аргументами полностью эквивалентен
+  ifNull(x, y). ifNull — встроенная функция ClickHouse, которая компилируется
+  более эффективно и не требует перебора переменного числа аргументов.'
+preconditions:
+  syntactic:
+  - Запрос содержит COALESCE( с ровно двумя аргументами
+  semantic: []
+  data: []
+  user: []
+proof: 'COALESCE(x, y) = первый не-NULL из x, y = ifNull(x, y) при двух
+  аргументах. Это математически идентично. ifNull — специализированная
+  функция без overhead перебора varargs.'
+explain_template: 'COALESCE({x}, {y}) с двумя аргументами заменяется ifNull({x}, {y}).
+  Семантика идентична, ifNull компилируется без overhead varargs-перебора.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT COALESCE(user_name, 'anonymous') AS name FROM users"
+example_after: "SELECT ifNull(user_name, 'anonymous') AS name FROM users"
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; основное преимущество — читаемость и совместимость с типом.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/functions-for-nulls
