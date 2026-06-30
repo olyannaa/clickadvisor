@@ -5,10 +5,17 @@ the retrieval advisory layer in ClickAdvisor.
 
 ## Directory structure
 
-- `raw/` stores source captures before conversion
-- `markdown/` stores markdown-normalized source documents
-- `chunks/` stores chunked markdown files with YAML frontmatter
+- `raw/` stores source captures before conversion (git-ignored, local only)
+- `markdown/` stores markdown-normalized source documents (git-ignored, local only)
+- `chunks/` stores chunked markdown files with YAML frontmatter (version-controlled)
 - `logs/` stores crawl and validation diagnostics such as skipped URLs
+
+`raw/` and `markdown/` are intermediate build artifacts, fully reproducible
+from upstream sources via the crawl pipeline below. They are not committed to
+keep the repository lightweight and fast to clone; only the final `chunks/`
+output (the artifact actually consumed by indexing and by the retrieval
+ablation benchmark) is version-controlled. Run the pipeline locally if you
+need to inspect or regenerate `raw/`/`markdown/`.
 
 The KB pipeline:
 

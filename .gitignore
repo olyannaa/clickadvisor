@@ -38,3 +38,7 @@ docker-compose.override.yml
 .env.*
 tmp/
 .qdrant_db/
+
+# Regenerable KB intermediate artifacts (see data/kb/README.md)
+data/kb/raw/
+data/kb/markdown/

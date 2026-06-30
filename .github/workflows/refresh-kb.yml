@@ -32,12 +32,14 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: chore/refresh-kb
-          commit-message: "chore(kb): refresh knowledge base artifacts"
-          title: "chore(kb): refresh knowledge base artifacts"
+          add-paths: data/kb/chunks
+          commit-message: "chore(kb): refresh knowledge base chunks"
+          title: "chore(kb): refresh knowledge base chunks"
           body: |
             Automated weekly ClickHouse knowledge base refresh.
-            
-            - crawled upstream documentation sources
-            - rebuilt markdown and chunk artifacts
+
+            - crawled upstream documentation sources (raw/markdown are
+              intermediate build artifacts and are not committed)
+            - rebuilt chunk artifacts
             - validated frontmatter, duplicates, and links
           labels: documentation, automation
