@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r015_005
+source: synthetic
+sql: SELECT DISTINCT product_id, category FROM (SELECT product_id, category, COUNT(*)
+  AS cnt FROM views GROUP BY product_id, category) LIMIT 100
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: distinct_after_groupby
+  detected_by_rule: R-015
+  severity: high
+  description: DISTINCT после GROUP BY по тем же ключам не меняет результат.
+expected_rules_to_fire:
+- R-015
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-015.

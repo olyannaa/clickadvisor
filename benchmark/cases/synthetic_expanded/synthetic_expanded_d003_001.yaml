@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d003_001
+source: synthetic
+sql: SELECT * FROM events LIMIT 10
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * читает все колонки; для column-store лучше перечислить нужные
+    поля.
+expected_rules_to_fire:
+- D-003
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for D-003.

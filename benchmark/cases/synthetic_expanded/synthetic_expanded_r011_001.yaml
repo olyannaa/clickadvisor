@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r011_001
+source: synthetic
+sql: SELECT user_id, COUNT(*) FROM events GROUP BY user_id HAVING country = 'RU' AND
+  COUNT(*) > 100
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: having_without_aggregate
+  detected_by_rule: R-011
+  severity: high
+  description: Условие без агрегатов в HAVING следует применять раньше через WHERE.
+expected_rules_to_fire:
+- R-011
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-011.

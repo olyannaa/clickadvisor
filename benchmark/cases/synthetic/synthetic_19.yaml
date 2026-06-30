@@ -1,8 +1,10 @@
 case_id: synthetic_19
 source: synthetic
-sql: |
-  -- таблица events имеет 25 колонок
+sql: '-- таблица events имеет 25 колонок
+
   SELECT * FROM events
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -10,6 +12,12 @@ known_issues:
   detected_by_rule: D-003
   severity: medium
   description: Top-level SELECT * читает все 25 колонок широкой таблицы events.
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-2
 expected_rules_to_fire:
 - D-003
 - D-004

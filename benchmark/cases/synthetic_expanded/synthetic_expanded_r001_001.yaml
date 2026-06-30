@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_r001_001
+source: synthetic
+sql: SELECT COUNT(DISTINCT user_id) FROM events
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: exact_count_distinct_specialization
+  detected_by_rule: R-001
+  severity: high
+  description: COUNT(DISTINCT ...) имеет точный specialized rewrite через uniqExact.
+- issue_id: I-2
+  type: approx_count_distinct_advisory
+  detected_by_rule: R-002
+  severity: medium
+  description: Для approximate cardinality можно предложить uniq(...) как opt-in advisory.
+expected_rules_to_fire:
+- R-001
+- R-002
+expected_findings_count: 2
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-001, R-002.

@@ -1,0 +1,12 @@
+status: validated
+case_id: synthetic_expanded_negative_014
+source: synthetic
+sql: INSERT INTO events SETTINGS async_insert=1, wait_for_async_insert=1 VALUES (1,
+  'click')
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_findings_count: 0
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated negative synthetic case; no implemented rule should fire.

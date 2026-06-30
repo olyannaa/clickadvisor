@@ -1,0 +1,17 @@
+status: validated
+case_id: synthetic_expanded_r013_001
+source: synthetic
+sql: SELECT count() FROM comments WHERE length(body) > 0
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: length_empty_predicate
+  detected_by_rule: R-013
+  severity: high
+  description: length(s)=0/>0 лучше выразить через empty/notEmpty.
+expected_rules_to_fire:
+- R-013
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-013.

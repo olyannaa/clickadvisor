@@ -1,7 +1,9 @@
 case_id: synthetic_10
 source: synthetic
-sql: |
-  SELECT * FROM events WHERE country = 'RU' OR country = 'BY' OR country = 'KZ'
+sql: 'SELECT * FROM events WHERE country = ''RU'' OR country = ''BY'' OR country =
+  ''KZ''
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -9,6 +11,18 @@ known_issues:
   detected_by_rule: R-010
   severity: high
   description: Цепочку OR по одной колонке country можно свернуть в IN.
+- type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * читает все колонки; для column-store лучше перечислить нужные
+    поля.
+  issue_id: I-2
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-3
 expected_rules_to_fire:
 - R-010
 - D-003

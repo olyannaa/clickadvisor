@@ -1,7 +1,8 @@
 case_id: synthetic_01
 source: synthetic
-sql: |
-  SELECT COUNT(DISTINCT user_id) FROM events
+sql: 'SELECT COUNT(DISTINCT user_id) FROM events
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -9,6 +10,11 @@ known_issues:
   detected_by_rule: R-001
   severity: high
   description: COUNT(DISTINCT user_id) можно заменить на uniqExact(user_id).
+- type: approx_count_distinct_advisory
+  detected_by_rule: R-002
+  severity: medium
+  description: Для approximate cardinality можно предложить uniq(...) как opt-in advisory.
+  issue_id: I-2
 expected_rules_to_fire:
 - R-001
 - R-002

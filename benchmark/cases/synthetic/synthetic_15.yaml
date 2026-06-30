@@ -1,9 +1,7 @@
 case_id: synthetic_15
 source: synthetic
-sql: |
-  SELECT DISTINCT a, b FROM (
-      SELECT a, b, COUNT(*) as cnt FROM events GROUP BY a, b
-  )
+sql: "SELECT DISTINCT a, b FROM (\n    SELECT a, b, COUNT(*) as cnt FROM events GROUP\
+  \ BY a, b\n)\n"
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -11,6 +9,12 @@ known_issues:
   detected_by_rule: R-015
   severity: high
   description: DISTINCT поверх результата GROUP BY по тем же ключам избыточен.
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-2
 expected_rules_to_fire:
 - R-015
 - D-004

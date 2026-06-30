@@ -1,10 +1,16 @@
 case_id: synthetic_02
 source: synthetic
-sql: |
-  SELECT COUNT(DISTINCT session_id) FROM logs
+sql: 'SELECT COUNT(DISTINCT session_id) FROM logs
+
+  '
 schema_files: []
 known_issues:
-- issue_id: I-1
+- type: exact_count_distinct_specialization
+  detected_by_rule: R-001
+  severity: high
+  description: COUNT(DISTINCT ...) имеет точный specialized rewrite через uniqExact.
+  issue_id: I-1
+- issue_id: I-2
   type: count_distinct_to_uniq_approx
   detected_by_rule: R-002
   severity: medium

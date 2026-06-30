@@ -1,7 +1,8 @@
 case_id: synthetic_13
 source: synthetic
-sql: |
-  SELECT * FROM comments WHERE length(body) > 0
+sql: 'SELECT * FROM comments WHERE length(body) > 0
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -9,6 +10,18 @@ known_issues:
   detected_by_rule: R-013
   severity: high
   description: Проверку length(body) > 0 можно заменить на notEmpty(body).
+- type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * читает все колонки; для column-store лучше перечислить нужные
+    поля.
+  issue_id: I-2
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-3
 expected_rules_to_fire:
 - R-013
 - D-003

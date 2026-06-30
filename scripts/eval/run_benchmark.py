@@ -19,6 +19,12 @@ console = Console()
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ClickAdvisor synthetic benchmark.")
     parser.add_argument(
+        "--cases-dir",
+        type=Path,
+        default=BENCHMARK_ROOT,
+        help="Directory with benchmark case YAML files.",
+    )
+    parser.add_argument(
         "--mode",
         default="lenient",
         choices=["strict", "lenient"],
@@ -157,7 +163,7 @@ def print_case_mismatches(results: list[dict], mode: str) -> None:
 
 def main() -> None:
     args = parse_args()
-    cases = load_cases()
+    cases = load_cases(args.cases_dir)
     results = [run_case(case, mode=args.mode) for case in cases]
     rule_stats = build_rule_stats(results)
     print_overall(results, mode=args.mode)
