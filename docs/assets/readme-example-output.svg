@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="760" viewBox="0 0 1120 760" role="img" aria-labelledby="title desc">
+  <title id="title">ClickAdvisor CLI output example</title>
+  <desc id="desc">A terminal-style screenshot showing a real ClickAdvisor markdown report with ten findings.</desc>
+  <rect width="1120" height="760" rx="18" fill="#0d1117"/>
+  <rect x="28" y="28" width="1064" height="704" rx="14" fill="#161b22" stroke="#30363d"/>
+  <circle cx="58" cy="58" r="8" fill="#ff5f56"/>
+  <circle cx="84" cy="58" r="8" fill="#ffbd2e"/>
+  <circle cx="110" cy="58" r="8" fill="#27c93f"/>
+  <text x="138" y="64" fill="#8b949e" font-family="Menlo, Consolas, monospace" font-size="18">poetry run chadvisor analyze --sql query.sql --ch-version 25.3 --output-format markdown --no-retrieval</text>
+  <text x="56" y="112" fill="#f0f6fc" font-family="Menlo, Consolas, monospace" font-size="24" font-weight="700"># ClickAdvisor Report</text>
+  <text x="56" y="152" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="18">- ClickHouse version: 25.3</text>
+  <text x="56" y="180" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="18">- Findings count: 10</text>
+  <text x="56" y="208" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="18">- Rules skipped by version: 1</text>
+  <text x="56" y="260" fill="#ff7b72" font-family="Menlo, Consolas, monospace" font-size="20" font-weight="700">R-001 — count_distinct_to_uniqExact</text>
+  <text x="56" y="292" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">Severity: high · Tier: 1A</text>
+  <text x="56" y="320" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">COUNT(DISTINCT x) лучше выражать через специализированный агрегат.</text>
+  <text x="56" y="348" fill="#7ee787" font-family="Menlo, Consolas, monospace" font-size="17">Решение: заменить COUNT(DISTINCT x) на uniqExact(x).</text>
+  <text x="56" y="400" fill="#ff7b72" font-family="Menlo, Consolas, monospace" font-size="20" font-weight="700">R-011 — having_without_aggregate_to_where</text>
+  <text x="56" y="432" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">Severity: high · Tier: 1C</text>
+  <text x="56" y="460" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">В HAVING найдено условие без агрегатных функций.</text>
+  <text x="56" y="488" fill="#7ee787" font-family="Menlo, Consolas, monospace" font-size="17">Решение: перенести условие в WHERE: e.country = 'RU'.</text>
+  <text x="56" y="540" fill="#ffa657" font-family="Menlo, Consolas, monospace" font-size="20" font-weight="700">D-011 — implicit_type_coercion_in_join</text>
+  <text x="56" y="572" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">Severity: high · Tier: detector</text>
+  <text x="56" y="600" fill="#c9d1d9" font-family="Menlo, Consolas, monospace" font-size="17">JOIN ON содержит явное приведение типа.</text>
+  <text x="56" y="652" fill="#8b949e" font-family="Menlo, Consolas, monospace" font-size="17">Also found: R-002, R-008, R-014, R-020, D-005, D-007, R-102</text>
+  <text x="56" y="686" fill="#7ee787" font-family="Menlo, Consolas, monospace" font-size="18">Summary: 10 findings, no query execution, no external LLM call.</text>
+</svg>
