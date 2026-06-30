@@ -1,0 +1,27 @@
+id: R-059
+name: extract_hour_to_tohour
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "EXTRACT(HOUR FROM ts) эквивалентна toHour(ts) в ClickHouse."
+preconditions:
+  syntactic:
+  - Запрос содержит EXTRACT(HOUR FROM col)
+  semantic: []
+  data: []
+  user: []
+proof: "EXTRACT(HOUR FROM ts) = toHour(ts). Задокументированная эквивалентность."
+explain_template: 'EXTRACT(HOUR FROM {col}) заменяется toHour({col}).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT EXTRACT(HOUR FROM ts) AS hr FROM events'
+example_after: 'SELECT toHour(ts) AS hr FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

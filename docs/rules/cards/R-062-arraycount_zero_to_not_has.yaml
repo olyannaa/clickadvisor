@@ -1,0 +1,30 @@
+id: R-062
+name: arraycount_zero_to_not_has
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'arrayCount(x -> x = val, arr) = 0 семантически эквивалентно NOT has(arr, val).
+  has() — специализированная функция поиска элемента, более эффективная чем
+  полный перебор через arrayCount.'
+preconditions:
+  syntactic:
+  - Запрос содержит arrayCount(x -> x = val, arr) = 0
+  semantic: []
+  data: []
+  user: []
+proof: 'arrayCount(x -> x = val, arr) = 0 ≡ ни один элемент arr не равен val ≡
+  NOT has(arr, val). has() использует более оптимальный поиск.'
+explain_template: 'arrayCount(x -> x = {val}, {arr}) = 0 заменяется NOT has({arr}, {val}).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE arrayCount(x -> x = 'error', tags) = 0"
+example_after: "SELECT * FROM events WHERE NOT has(tags, 'error')"
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; has() может использовать оптимизации.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/array-functions

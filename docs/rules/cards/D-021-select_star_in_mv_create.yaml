@@ -1,0 +1,41 @@
+id: D-021
+name: select_star_in_mv_create
+tier: detector
+category: materialized_views
+status: proposed
+statement: 'CREATE MATERIALIZED VIEW ... AS SELECT * FROM ... использует SELECT *,
+  что делает MV хрупким: при добавлении столбца в источник MV не получает его
+  автоматически; при удалении столбца MV сломается. Лучше явно перечислить нужные
+  столбцы.'
+preconditions:
+  syntactic:
+  - Запрос содержит CREATE MATERIALIZED VIEW
+  - Подзапрос MV использует SELECT *
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'SELECT * в MV фиксирует список столбцов на момент создания MV.
+    Добавление нового столбца в источник не приводит к его появлению в MV.
+    Удаление столбца может сломать MV при следующем INSERT.'
+recommendation_template: 'CREATE MATERIALIZED VIEW использует SELECT * FROM {source}.
+  Это делает MV хрупким при изменении схемы источника. Замените SELECT * на
+  явный список колонок, которые нужны для агрегации или трансформации.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE MATERIALIZED VIEW events_mv\nTO events_agg\nAS SELECT *\
+  \ FROM events"
+example_after: "CREATE MATERIALIZED VIEW events_mv\nTO events_agg\nAS SELECT user_id,\
+  \ event_type, toYYYYMM(ts) AS month, count() AS cnt FROM events GROUP BY 1, 2, 3"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- При смене схемы источника MV с SELECT * может начать возвращать unexpected columns
+severity: medium
+opt_in: false
+references:
+- https://clickhouse.com/docs/best-practices/use-materialized-views
+- https://clickhouse.com/blog/ai-generated-clickhouse-schemas-mistakes-and-advice

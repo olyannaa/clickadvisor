@@ -1,0 +1,43 @@
+id: R-023
+name: string_datetime_column_to_date
+tier: 1B
+category: schema_types
+status: proposed
+statement: 'Колонка объявлена как String, но имя указывает на дату или время
+  (date, datetime, timestamp, created_at, updated_at, event_time, event_date,
+  occurred_at). Хранение дат как String лишает возможности использовать
+  date-функции напрямую, индексацию по дате и сжатие Delta-кодеком.'
+preconditions:
+  syntactic:
+  - DDL содержит CREATE TABLE
+  - Колонка объявлена с типом String
+  - Имя колонки содержит паттерн даты/времени
+  semantic: []
+  data: []
+  user:
+  - Проверить реальный формат дат в данных перед заменой
+proof: 'String хранит дату как UTF-8 текст (~10-19 байт). Date хранит как UInt16
+  (2 байта). DateTime хранит как UInt32 (4 байта). Числовые типы дат сжимаются
+  кодеком Delta намного лучше, чем строки.'
+explain_template: 'Колонка {column} объявлена как String, но по имени предположительно
+  хранит дату или время. Это препятствует использованию date-функций без явного
+  toDate()/toDateTime(), исключает Delta-сжатие и замедляет диапазонные фильтры.
+  Используйте Date или DateTime.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE TABLE events (\n  event_id UInt64,\n  created_at String,\n\
+  \  event_date String\n) ENGINE = MergeTree ORDER BY event_id"
+example_after: "CREATE TABLE events (\n  event_id UInt64,\n  created_at DateTime,\n\
+  \  event_date Date\n) ENGINE = MergeTree ORDER BY (event_date, event_id)"
+expected_speedup:
+  estimate: '3-5x сжатие для колонки дат'
+  measurement_method: 'Сравнение data_compressed_bytes в system.parts_columns.'
+risks:
+- Требует валидации формата строк в данных перед конвертацией
+- Строки вида '2024-01-01 00:00:00.000' требуют уточнения точности (DateTime vs DateTime64)
+opt_in: true
+references:
+- https://clickhouse.com/docs/best-practices/select-data-types
+- https://clickhouse.com/docs/sql-reference/data-types/datetime

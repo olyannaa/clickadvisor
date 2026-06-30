@@ -1,0 +1,46 @@
+id: E-018
+name: input_format_for_bulk_inserts
+tier: env
+category: insert_settings
+status: proposed
+statement: 'Формат вставки влияет на CPU-нагрузку при парсинге: JSONEachRow ~30с
+  user-CPU на 100M строк, Native ~2с. Для bulk-инжестии большого объёма данных
+  предпочтительны форматы RowBinary, Native или Parquet вместо JSONEachRow.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- Native и RowBinary — бинарные форматы, требуют специальных клиентов/конвертации
+- Parquet требует предварительного преобразования данных
+opt_in: false
+references:
+- https://kb.altinity.com/altinity-kb-schema-design/ingestion-performance-and-formats/
+- https://clickhouse.com/docs/best-practices/selecting-an-insert-strategy
+hardware_preconditions: []
+config_preconditions:
+- Использование JSONEachRow или CSV для высокочастотной вставки
+workload_preconditions:
+- Bulk ingestion > 10M строк в пакете
+recommendation:
+  setting: input_format
+  current_value_check: ''
+  recommended_formula: 'Для bulk ingestion: Native > RowBinary > TSV > Parquet > CSV > JSONEachRow
+    (по убыванию скорости парсинга). JSONEachRow использует в 10-15x больше CPU
+    чем Native.'
+  example: 'clickhouse-client --query "INSERT INTO t FORMAT RowBinary" < data.bin'
+reasoning: 'JSONEachRow требует парсинга каждой строки как JSON-объекта с проверкой
+  ключей, что создаёт значительную CPU нагрузку. RowBinary/Native — бинарные форматы
+  без такого overhead.'
+condition: 'INSERT throughput > 100k rows/s с высоким user CPU в clickhouse-client'

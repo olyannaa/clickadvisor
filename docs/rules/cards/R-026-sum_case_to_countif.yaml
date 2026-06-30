@@ -1,0 +1,35 @@
+id: R-026
+name: sum_case_to_countif
+tier: 1A
+category: aggregate_rewrite
+status: proposed
+statement: 'SUM(CASE WHEN cond THEN 1 ELSE 0 END) или COUNT(CASE WHEN cond THEN
+  1 END) эквивалентны countIf(cond). countIf — встроенный комбинатор ClickHouse,
+  работает без материализации промежуточного CASE-выражения.'
+preconditions:
+  syntactic:
+  - Запрос содержит SUM(CASE WHEN ... THEN 1 ELSE 0 END) или COUNT(CASE WHEN ... THEN 1 END)
+  semantic: []
+  data: []
+  user: []
+proof: 'countIf(cond) — синтаксический сахар поверх count() с суффиксом -If,
+  семантически идентичен COUNT(CASE WHEN cond THEN 1 END). ClickHouse выполняет
+  countIf без создания временного Int8-столбца результата CASE.'
+explain_template: 'SUM(CASE WHEN ... THEN 1 ELSE 0 END) в позиции агрегации
+  заменяется более читаемым и эффективным countIf(cond). Код проще и не требует
+  материализации промежуточного CASE-результата.'
+ch_version:
+  introduced: '1.23'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT\n  SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS\
+  \ active_cnt,\n  COUNT(CASE WHEN score > 90 THEN 1 END) AS high_scorers\nFROM users"
+example_after: "SELECT\n  countIf(status = 'active') AS active_cnt,\n  countIf(score\
+  \ > 90) AS high_scorers\nFROM users"
+expected_speedup:
+  estimate: '5-10% на больших наборах данных'
+  measurement_method: 'EXPLAIN PIPELINE до и после; сравнение elapsed в system.query_log.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/combinators

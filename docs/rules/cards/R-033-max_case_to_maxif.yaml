@@ -1,0 +1,33 @@
+id: R-033
+name: max_case_to_maxif
+tier: 1A
+category: aggregate_rewrite
+status: proposed
+statement: 'MAX(CASE WHEN cond THEN col END) семантически эквивалентен maxIf(col, cond)
+  — встроенному комбинатору ClickHouse. Когда cond = false, CASE возвращает NULL,
+  который MAX игнорирует — то же поведение, что maxIf.'
+preconditions:
+  syntactic:
+  - Запрос содержит MAX(CASE WHEN ... THEN col END) без ELSE
+  semantic: []
+  data: []
+  user: []
+proof: 'MAX(CASE WHEN cond THEN col END) = MAX(col WHERE cond) = maxIf(col, cond).
+  NULL в CASE (когда cond=false) игнорируется MAX, аналогично поведению maxIf.'
+explain_template: 'MAX(CASE WHEN {cond} THEN {col} END) заменяется maxIf({col}, {cond}).
+  Без материализации CASE-выражения. Результат идентичен.'
+ch_version:
+  introduced: '1.23'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT MAX(CASE WHEN status = ''active'' THEN score END) AS max_active_score
+  FROM users'
+example_after: 'SELECT maxIf(score, status = ''active'') AS max_active_score FROM users'
+expected_speedup:
+  estimate: '5-10%'
+  measurement_method: 'Сравнение elapsed в system.query_log.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/combinators
+- https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states

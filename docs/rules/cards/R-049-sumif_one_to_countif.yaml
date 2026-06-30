@@ -1,0 +1,29 @@
+id: R-049
+name: sumif_one_to_countif
+tier: 1A
+category: aggregate_rewrite
+status: proposed
+statement: 'sumIf(1, cond) — подсчёт строк через SUM — эквивалентен countIf(cond).
+  countIf — нативная функция ClickHouse для условного подсчёта строк.'
+preconditions:
+  syntactic:
+  - Запрос содержит sumIf(1, condition)
+  semantic: []
+  data: []
+  user: []
+proof: 'sumIf(1, cond) = SUM of 1 for rows where cond = count of rows where cond
+  = countIf(cond). Математически идентично.'
+explain_template: 'sumIf(1, {cond}) заменяется countIf({cond}).'
+ch_version:
+  introduced: '1.23'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT sumIf(1, status = 'active') AS active_cnt FROM users"
+example_after: "SELECT countIf(status = 'active') AS active_cnt FROM users"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/combinators

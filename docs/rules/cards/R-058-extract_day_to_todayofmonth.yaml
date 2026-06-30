@@ -1,0 +1,27 @@
+id: R-058
+name: extract_day_to_todayofmonth
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "EXTRACT(DAY FROM ts) эквивалентна toDayOfMonth(ts) в ClickHouse."
+preconditions:
+  syntactic:
+  - Запрос содержит EXTRACT(DAY FROM col)
+  semantic: []
+  data: []
+  user: []
+proof: "EXTRACT(DAY FROM ts) = toDayOfMonth(ts). Задокументированная эквивалентность."
+explain_template: 'EXTRACT(DAY FROM {col}) заменяется toDayOfMonth({col}).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT EXTRACT(DAY FROM ts) AS day_num FROM events'
+example_after: 'SELECT toDayOfMonth(ts) AS day_num FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

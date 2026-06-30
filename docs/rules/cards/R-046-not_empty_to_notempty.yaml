@@ -1,0 +1,30 @@
+id: R-046
+name: not_empty_to_notempty
+tier: 1A
+category: string_operations
+status: proposed
+statement: 'NOT empty(x) семантически эквивалентно notEmpty(x). notEmpty — нативная
+  функция ClickHouse, избавляющая от оператора NOT и более читаемая.'
+preconditions:
+  syntactic:
+  - Запрос содержит NOT empty(col)
+  semantic: []
+  data: []
+  user: []
+proof: 'По определению: notEmpty(x) = NOT empty(x). Это задокументированный
+  псевдоним в ClickHouse. Семантически идентично.'
+explain_template: 'NOT empty({col}) заменяется notEmpty({col}).
+  Нативный предикат, более читаемый.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT * FROM events WHERE NOT empty(message)'
+example_after: 'SELECT * FROM events WHERE notEmpty(message)'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-functions

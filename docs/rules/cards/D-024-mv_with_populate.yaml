@@ -1,0 +1,40 @@
+id: D-024
+name: mv_with_populate
+tier: detector
+category: materialized_views
+status: proposed
+statement: 'CREATE MATERIALIZED VIEW ... POPULATE читает данные из источника в фоне
+  и ОДНОВРЕМЕННО начинает триггериться на новые INSERT. Данные, вставленные ВО ВРЕМЯ
+  backfill-а, теряются: POPULATE не атомарен. Лучше делать backfill вручную.'
+preconditions:
+  syntactic:
+  - Запрос содержит CREATE MATERIALIZED VIEW ... POPULATE
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'Altinity KB: With POPULATE the data ingested to the source table during
+    MV populating will not appear in MV. POPULATE does not work with TO syntax.'
+recommendation_template: 'CREATE MATERIALIZED VIEW ... POPULATE создаёт окно потери
+  данных: строки, вставленные ВО ВРЕМЯ backfill-а, не попадут в MV. Вместо POPULATE
+  создайте MV без POPULATE, затем вручную: INSERT INTO target SELECT ... FROM source.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE MATERIALIZED VIEW events_mv TO events_target\nAS SELECT user_id,\
+  \ count() AS cnt\nFROM events GROUP BY user_id\nPOPULATE"
+example_after: "-- 1. Создать MV без POPULATE\nCREATE MATERIALIZED VIEW events_mv\
+  \ TO events_target\nAS SELECT user_id, count() AS cnt FROM events GROUP BY user_id;\n\
+  -- 2. Вручную залить исторические данные\nINSERT INTO events_target SELECT user_id,\
+  \ count() FROM events GROUP BY user_id"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- При ручном backfill возможна дублирование данных если одни строки были уже в target
+severity: medium
+opt_in: false
+references:
+- https://kb.altinity.com/altinity-kb-schema-design/materialized-views/
+- https://clickhouse.com/docs/best-practices/use-materialized-views

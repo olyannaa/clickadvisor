@@ -1,0 +1,32 @@
+id: R-048
+name: positioncaseinsensitive_to_ilike
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'positionCaseInsensitive(col, ''pattern'') > 0 семантически эквивалентно
+  col ILIKE ''%pattern%''. ILIKE более читаем и может использовать case-insensitive
+  skip-индексы.'
+preconditions:
+  syntactic:
+  - Запрос содержит positionCaseInsensitive(col, ''literal'') > 0
+  semantic: []
+  data: []
+  user: []
+proof: 'positionCaseInsensitive(s, n) > 0 = "n есть в s без учёта регистра" =
+  s ILIKE ''%n%''.'
+explain_template: 'positionCaseInsensitive({col}, ''{pattern}'') > 0 заменяется
+  {col} ILIKE ''%{pattern}%''.'
+ch_version:
+  introduced: '22.6'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM logs WHERE positionCaseInsensitive(message, 'error') > 0"
+example_after: "SELECT * FROM logs WHERE message ILIKE '%error%'"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- ILIKE требует CH >= 22.6
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-search-functions

@@ -1,0 +1,44 @@
+id: D-025
+name: mv_with_join_in_select
+tier: detector
+category: materialized_views
+status: proposed
+statement: 'CREATE MATERIALIZED VIEW ... AS SELECT ... JOIN ... MV с JOIN в SELECT
+  привязан к ЛЕВОЙ таблице. При каждом INSERT в левую таблицу выполняется JOIN
+  со ВСЕЙ правой таблицей — это критически бьёт по производительности вставки.'
+preconditions:
+  syntactic:
+  - Запрос содержит CREATE MATERIALIZED VIEW
+  - SELECT тела MV содержит JOIN
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'Altinity KB FAQ: Can I use JOINs in MV? It is possible but it is a very
+    bad idea for most use cases. The MV sees only freshly inserted rows of the left
+    table, but executes the JOIN with the WHOLE right table on every INSERT.'
+recommendation_template: 'CREATE MATERIALIZED VIEW с JOIN в SELECT выполняет JOIN
+  со всей правой таблицей при каждом INSERT в источник. Рассмотрите использование
+  Dictionary, engine=Join или engine=Set для правой таблицы — они всегда в памяти
+  и значительно быстрее для lookup.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE MATERIALIZED VIEW enriched_mv TO enriched_target\nAS SELECT\
+  \ e.user_id, u.country, count() AS cnt\nFROM events e\nLEFT JOIN users u ON e.user_id\
+  \ = u.user_id\nGROUP BY e.user_id, u.country"
+example_after: "-- Используйте Dictionary для lookup вместо JOIN:\nCREATE MATERIALIZED\
+  \ VIEW enriched_mv TO enriched_target\nAS SELECT user_id, dictGet('users_dict',\
+  \ 'country', user_id) AS country, count() AS cnt\nFROM events\nGROUP BY user_id,\
+  \ country"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- Dictionary может содержать устаревшие данные; JOIN даёт актуальные данные
+severity: medium
+opt_in: false
+references:
+- https://kb.altinity.com/altinity-kb-schema-design/materialized-views/
+- https://clickhouse.com/docs/best-practices/use-materialized-views

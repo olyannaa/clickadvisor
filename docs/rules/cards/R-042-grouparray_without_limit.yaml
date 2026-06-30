@@ -1,0 +1,36 @@
+id: R-042
+name: grouparray_without_limit
+tier: 1B
+category: aggregate_rewrite
+status: proposed
+statement: 'groupArray(col) без ограничения размера накапливает ВСЕ значения
+  в массив в памяти на агрегирующем узле. При большом числе строк в группе
+  это может исчерпать RAM. Рекомендуется явно задать лимит: groupArray(N)(col).'
+preconditions:
+  syntactic:
+  - Запрос содержит groupArray(col) без аргумента N
+  semantic: []
+  data: []
+  user:
+  - Оценить максимальный размер группы перед добавлением лимита
+proof: 'groupArray(col) накапливает все значения без ограничения.
+  groupArray(N)(col) останавливается после N значений. Без лимита на больших
+  данных результат может не помещаться в RAM.'
+explain_template: 'groupArray({col}) без лимита накапливает все значения колонки
+  для каждой группы в RAM. При большом числе строк это может вызвать OOM.
+  Добавьте явный лимит: groupArray({N})({col}), где N — максимально нужное число.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT user_id, groupArray(event_type) AS events FROM log GROUP BY user_id'
+example_after: 'SELECT user_id, groupArray(1000)(event_type) AS events FROM log GROUP BY user_id'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Контроль peak memory usage в system.query_log.'
+risks:
+- Лимит обрезает массив; если нужны все значения, лимит не подходит
+severity: medium
+opt_in: true
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/reference/grouparray
