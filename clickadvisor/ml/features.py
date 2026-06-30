@@ -231,7 +231,6 @@ class FeatureExtractor:
         )
 
     def _regex_fallback(self, sql: str) -> QueryFeatures:
-        s_upper = sql.upper()
         has_union = bool(re.search(r"\bUNION\b", sql, re.I))
         has_union_all = bool(re.search(r"\bUNION\s+ALL\b", sql, re.I))
         has_limit = bool(re.search(r"\bLIMIT\b", sql, re.I))

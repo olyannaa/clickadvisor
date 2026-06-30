@@ -53,7 +53,7 @@ class R022FloatMonetary(Rule):
                     example_before=f"CREATE TABLE t ({column} {col_type}) ENGINE = MergeTree ORDER BY tuple()",
                     example_after=f"CREATE TABLE t ({column} Decimal64(2)) ENGINE = MergeTree ORDER BY tuple()",
                     explain_why=(
-                        f"(a + b) - a может не равняться b при Float64 из-за рounding. "
+                        "(a + b) - a может не равняться b при Float64 из-за рounding. "
                         "Decimal(p, s) даёт точные целочисленные вычисления со смещённой точкой."
                     ),
                     confidence="advisory",

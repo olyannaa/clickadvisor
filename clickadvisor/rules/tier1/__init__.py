@@ -18,6 +18,18 @@ from clickadvisor.rules.tier1.R017_subquery_filter_pushdown import R017SubqueryF
 from clickadvisor.rules.tier1.R018_union_to_union_all import R018UnionToUnionAll
 from clickadvisor.rules.tier1.R019_uint_narrowing import R019UintNarrowing
 from clickadvisor.rules.tier1.R020_cast_or_default import R020CastOrDefault
+from clickadvisor.rules.tier1.R021_datetime64_zero import R021DateTime64ZeroToDateTime
+from clickadvisor.rules.tier1.R022_float_monetary import R022FloatMonetary
+from clickadvisor.rules.tier1.R023_string_datetime_column import R023StringDatetimeColumn
+from clickadvisor.rules.tier1.R024_string_ip_column import R024StringIPColumn
+from clickadvisor.rules.tier1.R025_order_by_tuple import R025OrderByTupleNoPK
+from clickadvisor.rules.tier1.R026_sum_case_to_countif import R026SumCaseToCountIf
+from clickadvisor.rules.tier1.R027_sum_case_col_to_sumif import R027SumCaseColToSumIf
+from clickadvisor.rules.tier1.R028_coalesce_to_ifnull import R028CoalesceToIfNull
+from clickadvisor.rules.tier1.R029_lower_like_to_ilike import R029LowerLikeToILike
+from clickadvisor.rules.tier1.R030_not_in_singleton import R030NotInSingleton
+from clickadvisor.rules.tier1.R031_string_uuid_column import R031StringUUIDColumn
+from clickadvisor.rules.tier1.R032_int8_boolean_column import R032Int8BooleanColumn
 
 __all__ = [
     "R001CountDistinct",
@@ -40,4 +52,16 @@ __all__ = [
     "R018UnionToUnionAll",
     "R019UintNarrowing",
     "R020CastOrDefault",
+    "R021DateTime64ZeroToDateTime",
+    "R022FloatMonetary",
+    "R023StringDatetimeColumn",
+    "R024StringIPColumn",
+    "R025OrderByTupleNoPK",
+    "R026SumCaseToCountIf",
+    "R027SumCaseColToSumIf",
+    "R028CoalesceToIfNull",
+    "R029LowerLikeToILike",
+    "R030NotInSingleton",
+    "R031StringUUIDColumn",
+    "R032Int8BooleanColumn",
 ]

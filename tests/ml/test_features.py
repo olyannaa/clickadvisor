@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import logging
 
-import pytest
-
 from clickadvisor.ml.features import FeatureExtractor, QueryFeatures
 
 _fx = FeatureExtractor()

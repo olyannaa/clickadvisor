@@ -11,6 +11,11 @@ from clickadvisor.rules.detectors import (
     D004MissingLimit,
     D007FinalModifier,
     D014AsyncInsertNoWait,
+    D015OptimizeTableFinal,
+    D016AlterTableMutation,
+    D017NullableColumnInDDL,
+    D018DeprecatedNgramBFIndex,
+    D019SetZeroUnlimitedSkipIndex,
 )
 from clickadvisor.rules.tier1 import (
     R001CountDistinct,
@@ -33,6 +38,18 @@ from clickadvisor.rules.tier1 import (
     R018UnionToUnionAll,
     R019UintNarrowing,
     R020CastOrDefault,
+    R021DateTime64ZeroToDateTime,
+    R022FloatMonetary,
+    R023StringDatetimeColumn,
+    R024StringIPColumn,
+    R025OrderByTupleNoPK,
+    R026SumCaseToCountIf,
+    R027SumCaseColToSumIf,
+    R028CoalesceToIfNull,
+    R029LowerLikeToILike,
+    R030NotInSingleton,
+    R031StringUUIDColumn,
+    R032Int8BooleanColumn,
 )
 
 DEFAULT_CARDS_DIR = Path("docs/rules/cards")
@@ -57,10 +74,27 @@ RULES = [
     R018UnionToUnionAll(),
     R019UintNarrowing(),
     R020CastOrDefault(),
+    R021DateTime64ZeroToDateTime(),
+    R022FloatMonetary(),
+    R023StringDatetimeColumn(),
+    R024StringIPColumn(),
+    R025OrderByTupleNoPK(),
+    R026SumCaseToCountIf(),
+    R027SumCaseColToSumIf(),
+    R028CoalesceToIfNull(),
+    R029LowerLikeToILike(),
+    R030NotInSingleton(),
+    R031StringUUIDColumn(),
+    R032Int8BooleanColumn(),
     D003SelectStar(),
     D004MissingLimit(),
     D007FinalModifier(),
     D014AsyncInsertNoWait(),
+    D015OptimizeTableFinal(),
+    D016AlterTableMutation(),
+    D017NullableColumnInDDL(),
+    D018DeprecatedNgramBFIndex(),
+    D019SetZeroUnlimitedSkipIndex(),
 ]
 RULE_REGISTRY: dict[str, Rule] = {rule.rule_id: rule for rule in RULES}
 
