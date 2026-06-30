@@ -1,0 +1,32 @@
+[
+  {
+    "elapsed_seconds": 17.74912425002549,
+    "max_chunks": 2000,
+    "model": "multilingual-e5-small (current)",
+    "model_name": "intfloat/multilingual-e5-small",
+    "mrr_at_3": 0.4583333333333333,
+    "query_count": 20,
+    "size": "117 MB",
+    "total_kb_chunks": 8804
+  },
+  {
+    "elapsed_seconds": 10.358752916974481,
+    "max_chunks": 2000,
+    "model": "all-MiniLM-L6-v2",
+    "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+    "mrr_at_3": 0.5166666666666667,
+    "query_count": 20,
+    "size": "80 MB",
+    "total_kb_chunks": 8804
+  },
+  {
+    "elapsed_seconds": 12.36237687501125,
+    "max_chunks": 2000,
+    "model": "paraphrase-multilingual-MiniLM-L12-v2",
+    "model_name": "paraphrase-multilingual-MiniLM-L12-v2",
+    "mrr_at_3": 0.24166666666666664,
+    "query_count": 20,
+    "size": "420 MB",
+    "total_kb_chunks": 8804
+  }
+]

@@ -1,0 +1,30 @@
+id: R-051
+name: date_trunc_to_native
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "DATE_TRUNC('unit', ts) — SQL-стандартная функция — имеет точные нативные
+  аналоги в ClickHouse: toStartOfDay, toStartOfHour, toStartOfMonth и т.д. Нативные
+  функции более явны и не требуют парсинга строки-единицы."
+preconditions:
+  syntactic:
+  - Запрос содержит DATE_TRUNC('unit', col) где unit — 'day', 'hour', 'month', 'year'
+  semantic: []
+  data: []
+  user: []
+proof: "DATE_TRUNC('day', ts) = toStartOfDay(ts). DATE_TRUNC('month', ts) = toStartOfMonth(ts).
+  Документировано в ClickHouse как эквивалентные функции."
+explain_template: "DATE_TRUNC('{unit}', {col}) заменяется toStartOf{Unit}({col})."
+ch_version:
+  introduced: '21.4'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT DATE_TRUNC('day', ts) AS day FROM events"
+example_after: 'SELECT toStartOfDay(ts) AS day FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость CH-кода.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

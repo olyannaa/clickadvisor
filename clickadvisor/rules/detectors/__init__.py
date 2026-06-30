@@ -14,6 +14,9 @@ from clickadvisor.rules.detectors.D019_set_zero_unlimited_skip_index import (
 from clickadvisor.rules.detectors.D020_partition_by_non_date import D020PartitionByNonDate
 from clickadvisor.rules.detectors.D021_select_star_in_mv import D021SelectStarInMV
 from clickadvisor.rules.detectors.D022_delete_without_where import D022DeleteWithoutWhere
+from clickadvisor.rules.detectors.D023_mv_without_to import D023MVWithoutTo
+from clickadvisor.rules.detectors.D024_mv_with_populate import D024MVWithPopulate
+from clickadvisor.rules.detectors.D025_mv_with_join import D025MVWithJoin
 
 __all__ = [
     "D003SelectStar",
@@ -28,4 +31,7 @@ __all__ = [
     "D020PartitionByNonDate",
     "D021SelectStarInMV",
     "D022DeleteWithoutWhere",
+    "D023MVWithoutTo",
+    "D024MVWithPopulate",
+    "D025MVWithJoin",
 ]

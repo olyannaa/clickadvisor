@@ -1,0 +1,28 @@
+id: R-055
+name: arrayreduce_min_to_arraymin
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "arrayReduce('min', arr) эквивалентен arrayMin(arr). arrayMin — специализированная
+  нативная функция ClickHouse."
+preconditions:
+  syntactic:
+  - "Запрос содержит arrayReduce('min', arr)"
+  semantic: []
+  data: []
+  user: []
+proof: "arrayReduce('min', arr) = arrayMin(arr). Задокументированный псевдоним."
+explain_template: "arrayReduce('min', {arr}) заменяется arrayMin({arr})."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT arrayReduce('min', scores) AS min_score FROM results"
+example_after: 'SELECT arrayMin(scores) AS min_score FROM results'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/array-functions

@@ -26,7 +26,7 @@ poetry run python scripts/eval/run_benchmark.py
 
 The repository also includes an expanded generated synthetic dataset:
 
-- `benchmark/cases/synthetic_expanded/`: 162 deterministic cases
+- `benchmark/cases/synthetic_expanded/`: 180 deterministic cases
 - `benchmark/splits/synthetic_expanded_v1.yaml`: fixed 80/20 train/test split
 - `scripts/benchmark/generate_synthetic_dataset.py`: reproducible generator
 
@@ -58,7 +58,7 @@ poetry run python scripts/eval/ablation_embeddings.py
 
 ## Planned scope
 
-The benchmark is expected to grow beyond the generated 162-case synthetic set
+The benchmark is expected to grow beyond the generated 180-case synthetic set
 with manually reviewed real-query cases made up
 of:
 
@@ -113,7 +113,7 @@ Core fields:
 - `cases/clickbench/`: ClickBench query seeds
 - `cases/job/`: selected JOIN-heavy JOB seeds
 - `cases/synthetic/`: 20 validated targeted rule cases
-- `cases/synthetic_expanded/`: 162 generated rule-regression cases with
+- `cases/synthetic_expanded/`: 180 generated rule-regression cases with
   negative examples and a fixed split
 - `cases/github-issues/`: placeholder for manually curated issue-derived cases
 

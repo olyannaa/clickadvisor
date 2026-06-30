@@ -1,0 +1,29 @@
+id: R-056
+name: extract_year_to_toyear
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "EXTRACT(YEAR FROM ts) — SQL-стандартная форма — эквивалентна нативной
+  функции toYear(ts) в ClickHouse. Нативная функция более явна."
+preconditions:
+  syntactic:
+  - Запрос содержит EXTRACT(YEAR FROM col)
+  semantic: []
+  data: []
+  user: []
+proof: "EXTRACT(YEAR FROM ts) = toYear(ts). Это документированная эквивалентность
+  в ClickHouse date-time functions."
+explain_template: 'EXTRACT(YEAR FROM {col}) заменяется toYear({col}).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT EXTRACT(YEAR FROM ts) AS yr FROM events'
+example_after: 'SELECT toYear(ts) AS yr FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — CH-идиоматичность.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

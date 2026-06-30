@@ -15,7 +15,7 @@ preconditions:
   semantic: []
   data: []
   user:
-  - Проверить фактическую длину значений перед заменой (country_code: 2, currency: 3)
+  - "Проверить фактическую длину значений перед заменой (country_code: 2, currency: 3)"
 proof: 'FixedString(N) хранит ровно N байт без prefix длины. String хранит
   с 1-4 байтной prefix длины. Для фиксированных кодов (ISO 2-3 символа)
   FixedString(2/3) занимает меньше места и компрессируется лучше.'
@@ -34,7 +34,7 @@ expected_speedup:
   estimate: '~30% сжатие для колонки кодов'
   measurement_method: 'Сравнение data_compressed_bytes в system.parts_columns.'
 risks:
-- FixedString(N) дополняет строки нулевыми байтами при вставке; сравнение '
+- FixedString(N) дополняет строки нулевыми байтами при вставке; сравнение
   с != сложнее из-за trailing null bytes
 - Требует точного знания длины всех возможных значений
 opt_in: true

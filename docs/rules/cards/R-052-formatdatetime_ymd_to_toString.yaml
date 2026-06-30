@@ -1,0 +1,32 @@
+id: R-052
+name: formatdatetime_ymd_to_toString
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "formatDateTime(ts, '%Y-%m-%d') возвращает дату в формате YYYY-MM-DD.
+  Это идентично toString(toDate(ts)), но требует парсинга format-строки. toString(toDate(ts))
+  — более прямой и эффективный путь."
+preconditions:
+  syntactic:
+  - "Запрос содержит formatDateTime(col, '%Y-%m-%d')"
+  semantic: []
+  data: []
+  user: []
+proof: "formatDateTime(ts, '%Y-%m-%d') = 'YYYY-MM-DD' для любого DateTime.
+  toString(toDate(ts)) = 'YYYY-MM-DD' (формат по умолчанию для Date в ClickHouse).
+  Математически идентично."
+explain_template: "formatDateTime({col}, '%Y-%m-%d') заменяется toString(toDate({col})).
+  toString(toDate) более прямой без overhead парсинга format-строки."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT formatDateTime(ts, '%Y-%m-%d') AS day FROM events"
+example_after: 'SELECT toString(toDate(ts)) AS day FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

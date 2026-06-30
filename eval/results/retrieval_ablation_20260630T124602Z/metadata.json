@@ -1,0 +1,8 @@
+{
+  "cases_dir": "benchmark/cases/synthetic",
+  "created_at": "2026-06-30T12:46:02.147707+00:00",
+  "experiment": "retrieval_ablation",
+  "kb_chunks_dir": "data/kb/chunks",
+  "scoring": "explicit rule gold URL fragments or keywords",
+  "top_k": 3
+}

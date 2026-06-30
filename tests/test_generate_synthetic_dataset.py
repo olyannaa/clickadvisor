@@ -4,8 +4,10 @@ from scripts.benchmark.generate_synthetic_dataset import build_cases, build_spli
 def test_generated_synthetic_dataset_has_expected_size_and_negatives() -> None:
     cases = build_cases()
     negative_cases = [case for case in cases if not case["expected_rules_to_fire"]]
-    assert len(cases) >= 150
+    labels = {rule_id for case in cases for rule_id in case["expected_rules_to_fire"]}
+    assert len(cases) == 180
     assert len(negative_cases) >= 20
+    assert {"R-057", "R-058", "R-059"}.issubset(labels)
     assert all(case["status"] == "validated" for case in cases)
 
 

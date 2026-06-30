@@ -5,37 +5,35 @@ train_case_ids:
 - synthetic_expanded_d003_001
 - synthetic_expanded_d003_002
 - synthetic_expanded_d003_003
-- synthetic_expanded_d003_004
 - synthetic_expanded_d003_005
 - synthetic_expanded_d003_006
 - synthetic_expanded_d004_001
-- synthetic_expanded_d004_002
 - synthetic_expanded_d004_003
 - synthetic_expanded_d004_004
 - synthetic_expanded_d004_005
+- synthetic_expanded_d004_006
 - synthetic_expanded_d007_001
 - synthetic_expanded_d007_002
-- synthetic_expanded_d007_003
-- synthetic_expanded_d007_004
-- synthetic_expanded_d007_005
 - synthetic_expanded_d007_006
-- synthetic_expanded_d014_001
+- synthetic_expanded_d014_002
 - synthetic_expanded_d014_003
+- synthetic_expanded_d014_004
 - synthetic_expanded_d014_005
 - synthetic_expanded_d014_006
 - synthetic_expanded_negative_001
+- synthetic_expanded_negative_002
 - synthetic_expanded_negative_003
-- synthetic_expanded_negative_004
-- synthetic_expanded_negative_005
+- synthetic_expanded_negative_006
 - synthetic_expanded_negative_007
 - synthetic_expanded_negative_008
-- synthetic_expanded_negative_009
-- synthetic_expanded_negative_012
+- synthetic_expanded_negative_010
+- synthetic_expanded_negative_011
+- synthetic_expanded_negative_013
 - synthetic_expanded_negative_014
 - synthetic_expanded_negative_015
 - synthetic_expanded_negative_016
 - synthetic_expanded_negative_017
-- synthetic_expanded_negative_018
+- synthetic_expanded_negative_019
 - synthetic_expanded_negative_020
 - synthetic_expanded_r001_001
 - synthetic_expanded_r001_003
@@ -131,16 +129,35 @@ train_case_ids:
 - synthetic_expanded_r020_004
 - synthetic_expanded_r020_005
 - synthetic_expanded_r020_006
+- synthetic_expanded_r057_001
+- synthetic_expanded_r057_002
+- synthetic_expanded_r057_003
+- synthetic_expanded_r057_004
+- synthetic_expanded_r057_005
+- synthetic_expanded_r057_006
+- synthetic_expanded_r058_001
+- synthetic_expanded_r058_002
+- synthetic_expanded_r058_003
+- synthetic_expanded_r058_004
+- synthetic_expanded_r058_005
+- synthetic_expanded_r059_001
+- synthetic_expanded_r059_002
+- synthetic_expanded_r059_003
+- synthetic_expanded_r059_004
+- synthetic_expanded_r059_005
+- synthetic_expanded_r059_006
 test_case_ids:
-- synthetic_expanded_d004_006
-- synthetic_expanded_d014_002
-- synthetic_expanded_d014_004
-- synthetic_expanded_negative_002
-- synthetic_expanded_negative_006
-- synthetic_expanded_negative_010
-- synthetic_expanded_negative_011
-- synthetic_expanded_negative_013
-- synthetic_expanded_negative_019
+- synthetic_expanded_d003_004
+- synthetic_expanded_d004_002
+- synthetic_expanded_d007_003
+- synthetic_expanded_d007_004
+- synthetic_expanded_d007_005
+- synthetic_expanded_d014_001
+- synthetic_expanded_negative_004
+- synthetic_expanded_negative_005
+- synthetic_expanded_negative_009
+- synthetic_expanded_negative_012
+- synthetic_expanded_negative_018
 - synthetic_expanded_r001_002
 - synthetic_expanded_r001_007
 - synthetic_expanded_r001_008
@@ -165,7 +182,8 @@ test_case_ids:
 - synthetic_expanded_r019_002
 - synthetic_expanded_r019_003
 - synthetic_expanded_r020_003
+- synthetic_expanded_r058_006
 counts:
-  total: 162
-  train: 129
-  test: 33
+  total: 180
+  train: 144
+  test: 36

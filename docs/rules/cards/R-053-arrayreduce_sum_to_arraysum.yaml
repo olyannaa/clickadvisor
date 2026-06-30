@@ -1,0 +1,29 @@
+id: R-053
+name: arrayreduce_sum_to_arraysum
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "arrayReduce('sum', arr) эквивалентен arraySum(arr). arraySum — специализированная
+  нативная функция ClickHouse, более читаемая и не требующая парсинга строки."
+preconditions:
+  syntactic:
+  - "Запрос содержит arrayReduce('sum', arr)"
+  semantic: []
+  data: []
+  user: []
+proof: "arrayReduce('sum', arr) применяет агрегацию sum ко всем элементам arr.
+  arraySum(arr) делает то же самое. Документировано как эквиваленты."
+explain_template: "arrayReduce('sum', {arr}) заменяется arraySum({arr})."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT arrayReduce('sum', amounts) AS total FROM orders"
+example_after: 'SELECT arraySum(amounts) AS total FROM orders'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/array-functions

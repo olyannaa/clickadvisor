@@ -13,3 +13,4 @@
 - [ADR-011: MCP Server as Secondary Interface](./ADR-011-mcp-server-interface.md) - Adds an MCP server as a thin second interface over the same core while keeping the CLI primary.
 - [ADR-012: Educational `explain` Mode](./ADR-012-explain-why-mode.md) - Introduces a separate explanation-first mode and requires explain templates in Tier 1 rule cards.
 - [ADR-013: Embedding Model Selection](./ADR-013-embedding-model-selection.md) - Keeps multilingual E5 as the default retrieval model while allowing MiniLM-L6 for English-only KB deployments.
+- [ADR-014: No Generative LLM in the Critical Path](./ADR-014-no-generative-llm-in-critical-path.md) - Freezes the trusted runtime boundary around rules, ML evaluation, and local retrieval rather than generated recommendations.

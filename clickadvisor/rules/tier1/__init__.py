@@ -44,6 +44,22 @@ from clickadvisor.rules.tier1.R043_having_count_gt_zero import R043HavingCountGt
 from clickadvisor.rules.tier1.R044_todatetime_todate import R044ToDateTimeToDateToStartOfDay
 from clickadvisor.rules.tier1.R045_like_without_wildcards import R045LikeWithoutWildcardsToEq
 from clickadvisor.rules.tier1.R046_not_empty_to_notempty import R046NotEmptyToNotEmpty
+from clickadvisor.rules.tier1.R047_position_to_like import R047PositionToLike
+from clickadvisor.rules.tier1.R048_positionci_to_ilike import R048PositionCIToILike
+from clickadvisor.rules.tier1.R049_sumif_one_to_countif import R049SumIfOneToCountIf
+from clickadvisor.rules.tier1.R050_toyyyymm_comparison import R050ToYYYYMMComparison
+from clickadvisor.rules.tier1.R051_date_trunc_to_native import R051DateTruncToNative
+from clickadvisor.rules.tier1.R052_formatdatetime_ymd import R052FormatDateTimeYMD
+from clickadvisor.rules.tier1.R053_arrayreduce_sum import R053ArrayReduceSum
+from clickadvisor.rules.tier1.R054_arrayreduce_max import R054ArrayReduceMax
+from clickadvisor.rules.tier1.R055_arrayreduce_min import R055ArrayReduceMin
+from clickadvisor.rules.tier1.R056_extract_year import R056ExtractToNative
+from clickadvisor.rules.tier1.R057_extract_month import R057ExtractMonthToMonth
+from clickadvisor.rules.tier1.R058_extract_day import R058ExtractDayToDayOfMonth
+from clickadvisor.rules.tier1.R059_extract_hour import R059ExtractHourToHour
+from clickadvisor.rules.tier1.R060_has_and_has_to_hasall import R060HasAndHasToHasAll
+from clickadvisor.rules.tier1.R061_has_or_has_to_hasany import R061HasOrHasToHasAny
+from clickadvisor.rules.tier1.R062_arraycount_zero_to_not_has import R062ArrayCountZeroToNotHas
 
 __all__ = [
     "R001CountDistinct",
@@ -92,4 +108,20 @@ __all__ = [
     "R044ToDateTimeToDateToStartOfDay",
     "R045LikeWithoutWildcardsToEq",
     "R046NotEmptyToNotEmpty",
+    "R047PositionToLike",
+    "R048PositionCIToILike",
+    "R049SumIfOneToCountIf",
+    "R050ToYYYYMMComparison",
+    "R051DateTruncToNative",
+    "R052FormatDateTimeYMD",
+    "R053ArrayReduceSum",
+    "R054ArrayReduceMax",
+    "R055ArrayReduceMin",
+    "R056ExtractToNative",
+    "R057ExtractMonthToMonth",
+    "R058ExtractDayToDayOfMonth",
+    "R059ExtractHourToHour",
+    "R060HasAndHasToHasAll",
+    "R061HasOrHasToHasAny",
+    "R062ArrayCountZeroToNotHas",
 ]
