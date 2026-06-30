@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass(slots=True)
@@ -10,6 +10,7 @@ class QueryContext:
     explain_output: Optional[str] = None
     schema_ddl: Optional[str] = None
     ch_version: Optional[str] = None
+    environment: dict[str, Any] | None = None
 
 
 @dataclass(slots=True)

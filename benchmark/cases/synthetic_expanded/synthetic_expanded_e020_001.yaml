@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e020_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    interactive_queries: true
+  settings:
+    max_execution_time: 0
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: max_execution_time_for_protection
+  detected_by_rule: E-020
+  severity: medium
+  description: Interactive workload has no max_execution_time guardrail.
+expected_rules_to_fire:
+- E-020
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-020.

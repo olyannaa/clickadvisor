@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e010_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  system_metrics:
+    active_parts: 900
+  settings:
+    parts_to_throw_insert: 1000
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: parts_to_throw_insert_tuning
+  detected_by_rule: E-010
+  severity: high
+  description: Active part count is close to parts_to_throw_insert.
+expected_rules_to_fire:
+- E-010
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-010.

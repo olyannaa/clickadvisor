@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_r107_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+schema_ddl: CREATE TABLE events (ts DateTime, value UInt64) ENGINE = MergeTree ORDER BY ts
+environment:
+  workload:
+    compression_sensitive: true
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: codec_recommendation
+  detected_by_rule: R-107
+  severity: low
+  description: Compressible columns have no explicit CODEC.
+expected_rules_to_fire:
+- R-107
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-107.

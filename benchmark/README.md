@@ -26,14 +26,17 @@ poetry run python scripts/eval/run_benchmark.py
 
 The repository also includes an expanded generated synthetic dataset:
 
-- `benchmark/cases/synthetic_expanded/`: 180 deterministic cases
+- `benchmark/cases/synthetic_expanded/`: 222 deterministic cases, including
+  SQL-only, schema-aware, and env-aware rule probes
 - `benchmark/splits/synthetic_expanded_v1.yaml`: fixed 80/20 train/test split
+  for the original 180-case ML dataset
 - `scripts/benchmark/generate_synthetic_dataset.py`: reproducible generator
 
 The expanded dataset exists to avoid presenting a suspicious metric on only 20
 hand-authored probes. It contains positive variations for implemented rules,
-multi-label overlaps where the current analyzer really emits several findings,
-and negative queries where no implemented rule should fire.
+targeted backlog-closure probes for `D-*`, `E-*`, and `R-101+`, multi-label
+overlaps where the current analyzer really emits several findings, and
+negative queries where no implemented rule should fire.
 
 Run the expanded benchmark:
 
@@ -101,6 +104,9 @@ Core fields:
 - `source`
 - `sql`
 - `schema_files`
+- `schema_ddl` for inline schema-aware cases
+- `environment` for env-aware cases
+- `context_type`: `sql-only`, `schema-aware`, `env-aware`, or `explain-aware`
 - `known_issues`
 - `expected_rules_to_fire`
 - `expected_improvement`
@@ -113,8 +119,9 @@ Core fields:
 - `cases/clickbench/`: ClickBench query seeds
 - `cases/job/`: selected JOIN-heavy JOB seeds
 - `cases/synthetic/`: 20 validated targeted rule cases
-- `cases/synthetic_expanded/`: 180 generated rule-regression cases with
-  negative examples and a fixed split
+- `cases/synthetic_expanded/`: 222 rule-regression cases with negative examples,
+  fixed split metadata for the original generated subset, and targeted
+  schema/env-aware probes for newly implemented rules
 - `cases/github-issues/`: placeholder for manually curated issue-derived cases
 
 ## Validation

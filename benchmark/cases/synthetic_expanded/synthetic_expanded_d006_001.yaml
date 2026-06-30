@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d006_001
+source: synthetic
+sql: SELECT arrayJoin(tags) AS tag FROM events WHERE user_id = 42 LIMIT 10
+schema_files: []
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: arrayjoin_before_filter
+  detected_by_rule: D-006
+  severity: high
+  description: arrayJoin appears before WHERE and may expand rows too early.
+expected_rules_to_fire:
+- D-006
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-006.

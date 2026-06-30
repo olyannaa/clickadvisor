@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e008_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    complex_expressions: true
+  settings:
+    compile_expressions: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: jit_compilation_toggle
+  detected_by_rule: E-008
+  severity: low
+  description: Complex expressions run without JIT compilation.
+expected_rules_to_fire:
+- E-008
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-008.

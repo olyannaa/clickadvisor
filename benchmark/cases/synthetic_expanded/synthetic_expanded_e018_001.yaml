@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_e018_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    bulk_inserts: true
+    insert_format: JSONEachRow
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: input_format_for_bulk_inserts
+  detected_by_rule: E-018
+  severity: medium
+  description: Bulk insert workload uses a less efficient text format.
+expected_rules_to_fire:
+- E-018
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-018.

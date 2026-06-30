@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d013_001
+source: synthetic
+sql: SELECT id FROM (SELECT id FROM (SELECT id FROM (SELECT id FROM (SELECT id FROM events)))) LIMIT 10
+schema_files: []
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: deeply_nested_subqueries
+  detected_by_rule: D-013
+  severity: low
+  description: Query contains deeply nested subqueries.
+expected_rules_to_fire:
+- D-013
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-013.

@@ -1,0 +1,21 @@
+status: validated
+case_id: synthetic_expanded_e007_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  storage:
+    has_hot_cold_data: true
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: storage_policy_recommendation
+  detected_by_rule: E-007
+  severity: low
+  description: Hot/cold data is present without a storage policy.
+expected_rules_to_fire:
+- E-007
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-007.

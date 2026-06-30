@@ -43,7 +43,11 @@ def load_cases(root: Path = BENCHMARK_ROOT) -> list[dict]:
 
 
 def run_case(case: dict, mode: str) -> dict:
-    context = QueryContext(sql=case["sql"])
+    context = QueryContext(
+        sql=case["sql"],
+        schema_ddl=case.get("schema_ddl"),
+        environment=case.get("environment"),
+    )
     rules = get_applicable_rules(None)
     pipeline = AnalysisPipeline(rules)
     report = pipeline.run(context)

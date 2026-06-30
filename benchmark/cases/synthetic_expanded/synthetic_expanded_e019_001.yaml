@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e019_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  cluster:
+    has_local_replica: true
+  settings:
+    prefer_localhost_replica: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: prefer_localhost_replica
+  detected_by_rule: E-019
+  severity: low
+  description: Local replica exists but prefer_localhost_replica is disabled.
+expected_rules_to_fire:
+- E-019
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-019.

@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d010_001
+source: synthetic
+sql: SELECT id FROM (SELECT id, payload FROM events) LIMIT 10
+schema_files: []
+context_type: sql-only
+known_issues:
+- issue_id: I-1
+  type: unused_columns_in_select
+  detected_by_rule: D-010
+  severity: low
+  description: Inner subquery projects a column unused by the outer query.
+expected_rules_to_fire:
+- D-010
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-010.

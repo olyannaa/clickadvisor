@@ -1,0 +1,19 @@
+status: validated
+case_id: synthetic_expanded_d008_001
+source: synthetic
+sql: SELECT count() FROM events SAMPLE 0.1
+schema_files: []
+schema_ddl: CREATE TABLE events (id UInt64) ENGINE = MergeTree ORDER BY id
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: sample_without_sample_by
+  detected_by_rule: D-008
+  severity: low
+  description: Query uses SAMPLE but table DDL has no SAMPLE BY expression.
+expected_rules_to_fire:
+- D-008
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-008.

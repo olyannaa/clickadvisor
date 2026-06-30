@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Annotated
 
@@ -32,6 +33,18 @@ def _read_optional(path: Path | None) -> str | None:
     return path.read_text(encoding="utf-8")
 
 
+def _read_environment(path: Path | None) -> dict[str, object] | None:
+    if path is None:
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise typer.BadParameter(f"invalid environment JSON: {error}") from error
+    if not isinstance(payload, dict):
+        raise typer.BadParameter("environment JSON must be an object")
+    return payload
+
+
 @app.command()
 def version() -> None:
     console.print(f"ClickAdvisor {__version__}")
@@ -50,6 +63,7 @@ def analyze(
     sql: Annotated[Path, typer.Option(help="SQL файл")],
     explain: Annotated[Path | None, typer.Option()] = None,
     schema: Annotated[Path | None, typer.Option()] = None,
+    environment: Annotated[Path | None, typer.Option(help="Environment JSON file")] = None,
     connect: Annotated[str | None, typer.Option(help="clickhouse://host:9000")] = None,
     ch_version: Annotated[str | None, typer.Option(help="24.3")] = None,
     ch_user: Annotated[str, typer.Option(help="ClickHouse user")] = "default",
@@ -82,6 +96,7 @@ def analyze(
     sql_text = sql.read_text(encoding="utf-8")
     explain_text = _read_optional(explain)
     schema_text = _read_optional(schema)
+    environment_data = _read_environment(environment)
 
     version = ch_version
     if connect and not ch_version:
@@ -92,6 +107,7 @@ def analyze(
         explain_output=explain_text,
         schema_ddl=schema_text,
         ch_version=version,
+        environment=environment_data,
     )
 
     rules = get_all_rules()

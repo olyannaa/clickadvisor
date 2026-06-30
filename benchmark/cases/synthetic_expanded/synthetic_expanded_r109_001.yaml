@@ -1,0 +1,21 @@
+status: validated
+case_id: synthetic_expanded_r109_001
+source: synthetic
+sql: SELECT count() FROM small s JOIN large l ON s.id = l.id
+schema_files: []
+environment:
+  workload:
+    right_table_larger_than_left: true
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: join_reorder_small_on_right
+  detected_by_rule: R-109
+  severity: medium
+  description: JOIN appears to put the larger table on the right side.
+expected_rules_to_fire:
+- R-109
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-109.

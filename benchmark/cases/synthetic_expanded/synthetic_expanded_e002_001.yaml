@@ -1,0 +1,24 @@
+status: validated
+case_id: synthetic_expanded_e002_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  settings:
+    max_memory_usage: 90
+    max_bytes_before_external_group_by: 60
+  hardware:
+    ram_bytes: 100
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: max_memory_usage_vs_total_ram
+  detected_by_rule: E-002
+  severity: high
+  description: max_memory_usage leaves too little RAM headroom.
+expected_rules_to_fire:
+- E-002
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-002.

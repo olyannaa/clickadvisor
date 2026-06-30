@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_r110_001
+source: synthetic
+sql: SELECT count() FROM events e JOIN users u ON e.user_id = u.id
+schema_files: []
+environment:
+  workload:
+    large_join: true
+  settings:
+    join_algorithm: auto
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: join_algorithm_choice
+  detected_by_rule: R-110
+  severity: medium
+  description: Large JOIN needs explicit algorithm review.
+expected_rules_to_fire:
+- R-110
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for R-110.

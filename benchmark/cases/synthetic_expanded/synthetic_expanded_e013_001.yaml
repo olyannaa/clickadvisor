@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_e013_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  settings:
+    async_insert: true
+    async_insert_busy_timeout_ms: 10
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: async_insert_busy_timeout_tuning
+  detected_by_rule: E-013
+  severity: low
+  description: async_insert busy timeout is too low for batching.
+expected_rules_to_fire:
+- E-013
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-013.

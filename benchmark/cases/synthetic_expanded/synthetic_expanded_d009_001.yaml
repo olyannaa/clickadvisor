@@ -1,0 +1,22 @@
+status: validated
+case_id: synthetic_expanded_d009_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+schema_ddl: CREATE TABLE events (status Nullable(String)) ENGINE = MergeTree ORDER BY status
+environment:
+  null_counts:
+    status: 0
+context_type: schema-aware
+known_issues:
+- issue_id: I-1
+  type: nullable_without_need
+  detected_by_rule: D-009
+  severity: low
+  description: Nullable column has no observed NULL values in supplied context.
+expected_rules_to_fire:
+- D-009
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for D-009.

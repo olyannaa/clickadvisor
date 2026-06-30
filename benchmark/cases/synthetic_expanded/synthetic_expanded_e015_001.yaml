@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e015_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    group_by_order_key_prefix: true
+  settings:
+    optimize_aggregation_in_order: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: optimize_aggregation_in_order
+  detected_by_rule: E-015
+  severity: medium
+  description: Workload can use aggregation in order but the setting is disabled.
+expected_rules_to_fire:
+- E-015
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-015.

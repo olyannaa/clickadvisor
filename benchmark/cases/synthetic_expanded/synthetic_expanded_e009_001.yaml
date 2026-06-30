@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e009_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    repeated_queries: true
+  settings:
+    use_query_cache: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: query_cache_for_repeated_workload
+  detected_by_rule: E-009
+  severity: low
+  description: Repeated queries run without query cache.
+expected_rules_to_fire:
+- E-009
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-009.

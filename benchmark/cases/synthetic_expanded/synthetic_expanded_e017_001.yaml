@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_e017_001
+source: synthetic
+sql: SELECT count() FROM events
+schema_files: []
+environment:
+  workload:
+    distributed_aggregation: true
+  settings:
+    distributed_aggregation_memory_efficient: false
+context_type: env-aware
+known_issues:
+- issue_id: I-1
+  type: distributed_aggregation_memory_efficient
+  detected_by_rule: E-017
+  severity: medium
+  description: Distributed aggregation runs without memory efficient mode.
+expected_rules_to_fire:
+- E-017
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Synthetic positive case for E-017.
