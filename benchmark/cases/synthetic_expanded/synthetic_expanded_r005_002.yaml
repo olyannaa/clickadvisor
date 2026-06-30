@@ -1,0 +1,23 @@
+status: validated
+case_id: synthetic_expanded_r005_002
+source: synthetic
+sql: SELECT count() FROM logs WHERE toDate(ts) = '2024-02-10'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: function_on_datetime_filter
+  detected_by_rule: R-005
+  severity: high
+  description: toDate(column) в фильтре мешает sparse primary key pruning.
+- issue_id: I-2
+  type: unsafe_cast_without_default
+  detected_by_rule: R-020
+  severity: medium
+  description: CAST/toType над сырой колонкой может падать на некорректных значениях.
+expected_rules_to_fire:
+- R-005
+- R-020
+expected_findings_count: 2
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-005, R-020.

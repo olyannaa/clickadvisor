@@ -1,7 +1,8 @@
 case_id: synthetic_06
 source: synthetic
-sql: |
-  SELECT * FROM events WHERE toYYYYMM(event_date) = 202401
+sql: 'SELECT * FROM events WHERE toYYYYMM(event_date) = 202401
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
@@ -9,6 +10,18 @@ known_issues:
   detected_by_rule: R-006
   severity: high
   description: toYYYYMM(event_date) в WHERE можно переписать в диапазон по дате.
+- type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * читает все колонки; для column-store лучше перечислить нужные
+    поля.
+  issue_id: I-2
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-3
 expected_rules_to_fire:
 - R-006
 - D-003

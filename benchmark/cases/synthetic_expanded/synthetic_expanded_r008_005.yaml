@@ -1,0 +1,24 @@
+status: validated
+case_id: synthetic_expanded_r008_005
+source: synthetic
+sql: SELECT count() FROM logs WHERE CAST(status_code AS UInt16) = 500
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: redundant_cast_on_filter
+  detected_by_rule: R-008
+  severity: medium
+  description: CAST/toType вокруг колонки в фильтре может блокировать использование
+    индекса.
+- issue_id: I-2
+  type: unsafe_cast_without_default
+  detected_by_rule: R-020
+  severity: medium
+  description: CAST/toType над сырой колонкой может падать на некорректных значениях.
+expected_rules_to_fire:
+- R-008
+- R-020
+expected_findings_count: 2
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-008, R-020.

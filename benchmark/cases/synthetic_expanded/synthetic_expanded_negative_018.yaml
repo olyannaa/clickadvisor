@@ -1,0 +1,11 @@
+status: validated
+case_id: synthetic_expanded_negative_018
+source: synthetic
+sql: SELECT user_id, event_type FROM events LIMIT 100
+schema_files: []
+known_issues: []
+expected_rules_to_fire: []
+expected_findings_count: 0
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated negative synthetic case; no implemented rule should fire.

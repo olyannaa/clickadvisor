@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d004_004
+source: synthetic
+sql: SELECT session_id, user_id, browser FROM sessions WHERE browser = 'Chrome'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+expected_rules_to_fire:
+- D-004
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for D-004.

@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r019_006
+source: synthetic
+sql: CREATE TABLE payments (payment_type UInt64, payment_id UInt64) ENGINE = MergeTree()
+  ORDER BY payment_id
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: oversized_uint_type_narrowing
+  detected_by_rule: R-019
+  severity: low
+  description: Широкий Int64/UInt64 для статусных или типовых колонок может быть избыточен.
+expected_rules_to_fire:
+- R-019
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-019.

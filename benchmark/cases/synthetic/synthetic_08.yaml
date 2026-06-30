@@ -1,15 +1,30 @@
 case_id: synthetic_08
 source: synthetic
-sql: |
-  -- user_id колонка типа UInt64
+sql: '-- user_id колонка типа UInt64
+
   SELECT * FROM users WHERE CAST(user_id AS UInt64) = 12345
+
+  '
 schema_files: []
 known_issues:
 - issue_id: I-1
   type: redundant_cast_on_filter_removal
   detected_by_rule: R-008
   severity: medium
-  description: Избыточный CAST над user_id в фильтре не меняет тип и мешает упрощению предиката.
+  description: Избыточный CAST над user_id в фильтре не меняет тип и мешает упрощению
+    предиката.
+- type: select_star_on_wide_table
+  detected_by_rule: D-003
+  severity: medium
+  description: SELECT * читает все колонки; для column-store лучше перечислить нужные
+    поля.
+  issue_id: I-2
+- type: missing_limit_on_unbounded_result
+  detected_by_rule: D-004
+  severity: medium
+  description: SELECT без LIMIT и без top-level агрегата может вернуть неограниченное
+    число строк.
+  issue_id: I-3
 expected_rules_to_fire:
 - R-008
 - D-003

@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_d014_004
+source: synthetic
+sql: INSERT INTO sessions SETTINGS async_insert=1 VALUES (100, 'Chrome')
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: async_insert_without_wait_flag
+  detected_by_rule: D-014
+  severity: high
+  description: async_insert без wait_for_async_insert может скрывать ошибки вставки
+    от клиента.
+expected_rules_to_fire:
+- D-014
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for D-014.

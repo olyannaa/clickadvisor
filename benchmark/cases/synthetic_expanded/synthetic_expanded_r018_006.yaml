@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r018_006
+source: synthetic
+sql: SELECT request_id FROM logs_a UNION SELECT request_id FROM logs_b
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: union_without_all
+  detected_by_rule: R-018
+  severity: medium
+  description: UNION выполняет дедупликацию; UNION ALL дешевле при непересекающихся
+    источниках.
+expected_rules_to_fire:
+- R-018
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-018.

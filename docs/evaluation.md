@@ -45,14 +45,30 @@ Recommended reporting:
 - micro F1 across all benchmark cases
 - by-tier breakdown (`1A`, `1B`, `1C`, `detector`)
 
-Current synthetic benchmark command:
+Current hand-authored synthetic benchmark command:
 
 ```bash
 poetry run python scripts/eval/run_benchmark.py
 ```
 
-The curated 20-case synthetic benchmark currently targets perfect rule coverage
-in lenient mode, where additional valid detector findings are not penalized.
+The original curated 20-case synthetic benchmark is a smoke/regression suite for
+implemented rules. It is intentionally small and should not be presented as a
+generalization result.
+
+Expanded synthetic benchmark command:
+
+```bash
+poetry run python scripts/eval/run_benchmark.py \
+  --cases-dir benchmark/cases/synthetic_expanded \
+  --mode strict
+```
+
+`benchmark/cases/synthetic_expanded/` contains 162 generated cases with a fixed
+train/test split in `benchmark/splits/synthetic_expanded_v1.yaml`. This metric
+is still a rule-regression metric, not a trained-model result: F1 answers
+"does the deterministic analyzer fire the expected implemented rules on
+generated variations?", not "does ML generalize to unseen production queries?".
+The ML classifier evaluation must report train/test metrics separately.
 
 ### Retrieval MRR@3
 
@@ -132,10 +148,19 @@ Latency should be reported at:
 
 ### Curated benchmark in `/benchmark/cases/`
 
-Primary benchmark target: approximately 100 hand-curated cases.
+Primary benchmark target: generated regression coverage plus approximately 100
+hand-curated real-query cases.
 
 Current v1.0 synthetic subset: 20 validated cases under
 `benchmark/cases/synthetic/`.
+
+Expanded generated subset: 162 validated cases under
+`benchmark/cases/synthetic_expanded/`, including:
+
+- positive variations for each implemented rule/detector family
+- explicit multi-label cases where rule overlaps are expected
+- negative cases with no expected findings
+- deterministic 80/20 split metadata for downstream ML experiments
 
 This dataset should contain:
 

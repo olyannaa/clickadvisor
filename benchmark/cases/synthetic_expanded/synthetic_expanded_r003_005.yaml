@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r003_005
+source: synthetic
+sql: SELECT quantileExact(0.75)(queue_time_ms) FROM jobs
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: exact_quantile_candidate
+  detected_by_rule: R-003
+  severity: medium
+  description: quantileExact может быть заменён approximate quantile только при явном
+    согласии.
+expected_rules_to_fire:
+- R-003
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-003.

@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r010_006
+source: synthetic
+sql: SELECT count() FROM payments WHERE currency = 'USD' OR currency = 'EUR' OR currency
+  = 'GBP'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: disjunction_chain_to_in
+  detected_by_rule: R-010
+  severity: high
+  description: OR-цепочку равенств по одной колонке можно канонизировать в IN.
+expected_rules_to_fire:
+- R-010
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-010.

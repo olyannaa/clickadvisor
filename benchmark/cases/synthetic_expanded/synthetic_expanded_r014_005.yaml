@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r014_005
+source: synthetic
+sql: SELECT city, COUNT(*) FROM users GROUP BY city
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: groupby_string_hash_candidate
+  detected_by_rule: R-014
+  severity: medium
+  description: GROUP BY по потенциально длинной строке является advisory-кандидатом
+    на hash strategy.
+expected_rules_to_fire:
+- R-014
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-014.

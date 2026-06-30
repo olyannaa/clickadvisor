@@ -1,0 +1,18 @@
+status: validated
+case_id: synthetic_expanded_r007_004
+source: synthetic
+sql: SELECT count() FROM sessions WHERE toStartOfHour(started_at) = '2024-04-20 09:00:00'
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: interval_start_filter_to_range
+  detected_by_rule: R-007
+  severity: high
+  description: toStartOf* в фильтре по времени лучше заменить диапазоном по исходной
+    колонке.
+expected_rules_to_fire:
+- R-007
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-007.
