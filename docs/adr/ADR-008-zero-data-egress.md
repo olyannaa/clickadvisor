@@ -28,41 +28,7 @@ configuration, and hardware characteristics. None of these require reading table
 contents. That means the product can keep a hard separation between reasoning
 about query behavior and touching the actual data being queried.
 
-Remote LLM usage introduces an additional concern. Even if the product does not
-read table rows, query text itself can contain literals, identifiers, or other
-fragments that reveal sensitive information. If remote inference is supported at
-all, a structured redaction step is required before any content leaves the
-host. A best-effort string scrub is not enough; redaction has to be syntax-aware
-so that the resulting prompt preserves query structure while stripping sensitive
-values where possible.
-
-## Decision
-
-ClickAdvisor adopts a zero-data-egress security posture for its core workflow.
-
-The utility does not read table data and does not require access to table
-contents. Its analysis inputs are restricted to:
-
-- SQL text
-- `EXPLAIN` outputs without `ANALYZE`
-- schemas and DDL context
-- metadata such as `system.parts`
-- database configuration and settings
-- hardware specifications relevant to analysis
-
-The runtime connection model is read-only. The utility does not execute `ALTER`,
-`INSERT`, `UPDATE`, `DELETE`, `DROP`, or any other mutating statements as part
-of normal operation. In practice, the product should be run with a read-only
-database role sufficient to fetch the required metadata and plan information.
-
-When `--llm=remote` is enabled, all outbound prompt content derived from SQL
-must first pass through PII- and literal-redaction logic implemented using
-`sqlglot` parsing. The intent is to preserve enough structural information for
-advisory reasoning while minimizing exposure of sensitive values and query
-payload details.
-
-This security model is part of the product contract, not an optional deployment
-recommendation.
+The MVP does not include remote generative LLM calls. AI-agent usage is handled through MCP: an external agent can call ClickAdvisor as a local tool, but ClickAdvisor itself does not send SQL or metadata to an LLM provider.
 
 ## Consequences
 
@@ -77,11 +43,7 @@ on shortcuts that inspect data directly. That is consistent with the product’s
 cost-model orientation and prevents accidental dependence on data access that
 would later be hard to remove.
 
-Remote LLM support becomes more constrained, but in a productive way. Any
-feature that depends on remote inference has to be designed around a redacted
-representation of SQL, which naturally limits leakage and keeps the remote path
-secondary to the deterministic core. This also makes the distinction between
-local and remote LLM modes concrete rather than merely operational.
+MCP-based AI-agent usage stays compatible with the zero-data-egress model because ClickAdvisor runs locally and returns deterministic findings to the calling agent. If a user chooses to paste those findings into an external tool, that is outside the analyzer runtime rather than hidden product behavior.
 
 There are tradeoffs. Some classes of advice that might benefit from direct data
 inspection or mutation-based validation are intentionally out of scope. The
@@ -107,8 +69,6 @@ This was rejected because ClickAdvisor is an advisory utility, not an execution
 or migration tool. Granting mutation privileges would be disproportionate to the
 problem being solved and would make the runtime significantly riskier.
 
-### Remote LLM without structured redaction
+### Hidden remote inference
 
-This was rejected because raw SQL can contain sensitive literals and business
-identifiers. Sending that content unredacted would conflict with the security
-model and would make remote mode difficult to justify operationally.
+This was rejected because raw SQL can contain sensitive literals and business identifiers. Any hidden outbound inference path would conflict with the security model and weaken the local-first product claim.

@@ -21,7 +21,7 @@ Rule tiers follow the contract defined in ADR-003 and specified in
 - `1C`: formal equivalence with statically verifiable preconditions
 - `2`: cost-based recommendation
 - `detector`: non-rewrite diagnostic signal
-- `3`: LLM-originated or advisory recommendation
+- `3`: speculative advisory recommendation that requires verification
 - `env`: environment or deployment adjustment rule
 
 The tier is not presentation-only metadata. It governs proof expectations,
