@@ -1,0 +1,48 @@
+id: E-017
+name: distributed_aggregation_memory_efficient
+tier: env
+category: aggregation_settings
+status: proposed
+statement: 'distributed_aggregation_memory_efficient = 1 снижает потребление RAM
+  при distributed GROUP BY запросах: вместо накопления всех partial results на
+  координаторе, результаты с шардов объединяются потоком. Особенно полезно
+  при использовании внешней агрегации (max_bytes_before_external_group_by).'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- Потоковое слияние может быть медленнее в некоторых сценариях (высокая кардинальность)
+- Требует координации между шардами с возможной дополнительной задержкой
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/statements/select/group-by
+- https://clickhouse.com/docs/operations/settings/settings#distributed_aggregation_memory_efficient
+hardware_preconditions:
+- Distributed deployment с несколькими шардами
+config_preconditions:
+- Запросы выполняются через distributed table
+workload_preconditions:
+- GROUP BY запросы с высокой кардинальностью ключей через distributed table
+recommendation:
+  setting: distributed_aggregation_memory_efficient
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''distributed_aggregation_memory_efficient'''
+  recommended_formula: 'distributed_aggregation_memory_efficient = 1 для distributed
+    GROUP BY запросов с большим числом уникальных ключей. Default = 1 с CH 21.10.'
+  example: 'SET distributed_aggregation_memory_efficient = 1;'
+reasoning: 'При distributed GROUP BY координатор обычно накапливает все partial
+  results от шардов в RAM перед финальным слиянием. С
+  distributed_aggregation_memory_efficient координатор сливает результаты
+  потоком (1/256 * threads от RAM), значительно снижая peak memory.'
+condition: 'Distributed GROUP BY с > 1 million уникальных ключей'

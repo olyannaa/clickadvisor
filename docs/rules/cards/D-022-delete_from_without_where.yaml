@@ -1,0 +1,39 @@
+id: D-022
+name: delete_from_without_where
+tier: detector
+category: ddl_operations
+status: proposed
+statement: 'DELETE FROM table без WHERE-условия удаляет ВСЕ строки таблицы.
+  Lightweight DELETE без WHERE — деструктивная операция, эквивалентная TRUNCATE,
+  но более медленная (помечает строки как удалённые вместо дропа партиции).'
+preconditions:
+  syntactic:
+  - Запрос содержит DELETE FROM без WHERE
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'DELETE FROM t без WHERE удаляет все строки. В ClickHouse lightweight
+    delete (CH >= 22.8) помечает строки deleted, что медленнее TRUNCATE.
+    Для удаления всех данных лучше использовать TRUNCATE TABLE.'
+recommendation_template: 'DELETE FROM {table} без WHERE удаляет все строки таблицы.
+  Если цель — очистить таблицу полностью, используйте TRUNCATE TABLE {table}
+  — это намного быстрее (просто удаляет все parts метаданных). Если DELETE
+  задуман без условий случайно, добавьте WHERE-предикат.'
+ch_version:
+  introduced: '22.8'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'DELETE FROM events'
+example_after: 'TRUNCATE TABLE events  -- если нужно очистить таблицу целиком'
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- TRUNCATE необратима; DELETE FROM без WHERE тоже необратима
+- DELETE FROM помечает строки deleted; фактическое удаление происходит при merge
+severity: high
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/statements/delete
+- https://clickhouse.com/docs/sql-reference/statements/truncate

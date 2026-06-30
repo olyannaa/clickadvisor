@@ -1,0 +1,45 @@
+id: E-019
+name: prefer_localhost_replica
+tier: env
+category: distributed_settings
+status: proposed
+statement: 'prefer_localhost_replica = 1 (default) заставляет ClickHouse читать
+  с локальной реплики, если она есть. Это снижает сетевой трафик и задержку.
+  Если отключено, ClickHouse может читать с удалённой реплики даже при наличии
+  локальной.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- При prefer_localhost_replica=1 локальная реплика может быть более загружена
+- Если локальная реплика отстаёт (lag), запросы могут читать стale данные
+opt_in: false
+references:
+- https://clickhouse.com/docs/operations/settings/settings#prefer_localhost_replica
+hardware_preconditions:
+- Distributed/replicated deployment с несколькими репликами
+config_preconditions: []
+workload_preconditions:
+- SELECT запросы через Distributed table
+recommendation:
+  setting: prefer_localhost_replica
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''prefer_localhost_replica'''
+  recommended_formula: 'prefer_localhost_replica = 1 (default). Отключать только
+    если нужно балансировать нагрузку между репликами или локальная реплика сильно
+    отстаёт.'
+  example: 'SET prefer_localhost_replica = 1;  -- default, обычно не нужно менять'
+reasoning: 'Чтение с локальной реплики устраняет сетевой round-trip, уменьшает
+  latency и снижает сетевой трафик между нодами кластера.'
+condition: 'Distributed queries с несколькими репликами'

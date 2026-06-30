@@ -1,0 +1,41 @@
+id: D-023
+name: mv_without_to_clause
+tier: detector
+category: materialized_views
+status: proposed
+statement: 'CREATE MATERIALIZED VIEW без TO-клаузы создаёт неявную целевую таблицу
+  с именем `.inner.mvname`. Управление такой таблицей сложнее: нельзя изменить
+  её ENGINE, добавить индекс или легко ALTER схему без пересоздания MV.'
+preconditions:
+  syntactic:
+  - Запрос содержит CREATE MATERIALIZED VIEW без ключевого слова TO
+  semantic: []
+  data: []
+proof:
+  status: advisory
+  notes: 'Altinity KB best practice: использовать явный TO-синтаксис для более
+    простого управления схемой MV и target table. Без TO создаётся скрытая таблица
+    с именем .inner.mvname, управляемая только через MV.'
+recommendation_template: 'CREATE MATERIALIZED VIEW без TO создаёт скрытую целевую
+  таблицу .inner.{mv_name}. Лучше создать target table явно и использовать TO
+  синтаксис: CREATE TABLE target ... ENGINE = ...; CREATE MATERIALIZED VIEW mv TO
+  target AS SELECT ...'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "CREATE MATERIALIZED VIEW events_mv\nAS SELECT user_id, count() AS\
+  \ cnt\nFROM events GROUP BY user_id"
+example_after: "CREATE TABLE events_mv_target (user_id UInt64, cnt UInt64) ENGINE\
+  \ = SummingMergeTree ORDER BY user_id;\nCREATE MATERIALIZED VIEW events_mv TO events_mv_target\n\
+  AS SELECT user_id, count() AS cnt FROM events GROUP BY user_id"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks:
+- Изменение ENGINE скрытой таблицы невозможно без пересоздания MV
+severity: low
+opt_in: false
+references:
+- https://kb.altinity.com/altinity-kb-schema-design/materialized-views/
+- https://clickhouse.com/docs/best-practices/use-materialized-views

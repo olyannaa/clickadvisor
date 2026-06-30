@@ -1,0 +1,32 @@
+id: R-044
+name: todatetime_todate_to_startofday
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'toDateTime(toDate(ts)) — двойное преобразование, вычисляющее начало
+  текущего дня (полночь) для DateTime/DateTime64 колонки. Нативная функция
+  toStartOfDay(ts) делает то же самое напрямую и более читаема.'
+preconditions:
+  syntactic:
+  - Запрос содержит toDateTime(toDate(col))
+  semantic: []
+  data: []
+  user: []
+proof: 'toDate(ts) = дата без времени. toDateTime(date) = date + 00:00:00.
+  Итог: toDateTime(toDate(ts)) = начало текущего дня для ts.
+  toStartOfDay(ts) возвращает то же самое.'
+explain_template: 'toDateTime(toDate({col})) вычисляет начало дня через двойное
+  преобразование. toStartOfDay({col}) — нативная функция для той же операции.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT toDateTime(toDate(ts)) AS day_start FROM events'
+example_after: 'SELECT toStartOfDay(ts) AS day_start FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

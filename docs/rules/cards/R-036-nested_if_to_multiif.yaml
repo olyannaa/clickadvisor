@@ -1,0 +1,34 @@
+id: R-036
+name: nested_if_to_multiif
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'IF(c1, v1, IF(c2, v2, v3)) — вложенный IF — эквивалентен
+  multiIf(c1, v1, c2, v2, v3). multiIf — нативная функция ClickHouse для
+  множественных условий, более читаемая и без накладных расходов вложенности.'
+preconditions:
+  syntactic:
+  - Запрос содержит IF(..., ..., IF(..., ..., ...)) — один IF вложен в ELSE-ветку другого
+  semantic: []
+  data: []
+  user: []
+proof: 'multiIf(c1, v1, c2, v2, else_v) ≡ IF(c1, v1, IF(c2, v2, else_v)).
+  Проверяет условия последовательно, возвращает первое совпавшее значение.
+  Семантически идентичны.'
+explain_template: 'Вложенный IF(c1, v1, IF(c2, v2, v3)) заменяется
+  multiIf(c1, v1, c2, v2, v3). Более читаемо и устраняет нежелательную вложенность.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT IF(score > 90, 'A', IF(score > 70, 'B', 'C')) AS grade FROM\
+  \ students"
+example_after: "SELECT multiIf(score > 90, 'A', score > 70, 'B', 'C') AS grade FROM\
+  \ students"
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальное ускорение; основное преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/conditional-functions

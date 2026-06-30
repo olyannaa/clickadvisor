@@ -1,0 +1,29 @@
+id: R-061
+name: has_or_has_to_hasany
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'has(arr, x) OR has(arr, y) — проверка хотя бы одного из двух значений —
+  эквивалентна hasAny(arr, [x, y]). hasAny более читаем и расширяем.'
+preconditions:
+  syntactic:
+  - Запрос содержит has(arr, x) OR has(arr, y) для одного и того же arr
+  semantic: []
+  data: []
+  user: []
+proof: 'hasAny(arr, [x, y]) = arr содержит хотя бы один из [x, y] = has(arr, x)
+  OR has(arr, y). Математически идентично по определению hasAny.'
+explain_template: 'has({arr}, {x}) OR has({arr}, {y}) заменяется hasAny({arr}, [{x}, {y}]).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE has(tags, 'error') OR has(tags, 'warning')"
+example_after: "SELECT * FROM events WHERE hasAny(tags, ['error', 'warning'])"
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/array-functions

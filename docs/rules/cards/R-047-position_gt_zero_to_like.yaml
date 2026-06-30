@@ -1,0 +1,30 @@
+id: R-047
+name: position_gt_zero_to_like
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'position(col, ''pattern'') > 0 семантически эквивалентно col LIKE ''%pattern%''.
+  LIKE может использовать skip-индекс (ngrambf_v1, text), position() — нет.'
+preconditions:
+  syntactic:
+  - Запрос содержит position(col, ''literal'') > 0
+  semantic: []
+  data: []
+  user: []
+proof: 'position(haystack, needle) возвращает 1-indexed позицию или 0 если не найдено.
+  > 0 значит "найдено". LIKE ''%pattern%'' проверяет то же самое.'
+explain_template: 'position({col}, ''{pattern}'') > 0 заменяется {col} LIKE ''%{pattern}%''.
+  LIKE может использовать skip-индекс для ускорения поиска.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM logs WHERE position(message, 'error') > 0"
+example_after: "SELECT * FROM logs WHERE message LIKE '%error%'"
+expected_speedup:
+  estimate: null
+  measurement_method: null
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-search-functions

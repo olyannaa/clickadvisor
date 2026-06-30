@@ -1,0 +1,27 @@
+id: R-057
+name: extract_month_to_tomonth
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: "EXTRACT(MONTH FROM ts) эквивалентна toMonth(ts) в ClickHouse."
+preconditions:
+  syntactic:
+  - Запрос содержит EXTRACT(MONTH FROM col)
+  semantic: []
+  data: []
+  user: []
+proof: "EXTRACT(MONTH FROM ts) = toMonth(ts). Задокументированная эквивалентность."
+explain_template: 'EXTRACT(MONTH FROM {col}) заменяется toMonth({col}).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT EXTRACT(MONTH FROM ts) AS mon FROM events'
+example_after: 'SELECT toMonth(ts) AS mon FROM events'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/date-time-functions

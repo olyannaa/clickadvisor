@@ -1,0 +1,33 @@
+id: R-035
+name: avg_case_to_avgif
+tier: 1A
+category: aggregate_rewrite
+status: proposed
+statement: 'AVG(CASE WHEN cond THEN col END) семантически эквивалентен avgIf(col, cond)
+  — встроенному комбинатору ClickHouse. NULL в CASE (при cond=false) исключается
+  из вычисления среднего — то же поведение avgIf.'
+preconditions:
+  syntactic:
+  - Запрос содержит AVG(CASE WHEN ... THEN col END) без ELSE
+  semantic: []
+  data: []
+  user: []
+proof: 'AVG(CASE WHEN cond THEN col END) = SUM(col WHERE cond) / COUNT(col WHERE cond)
+  = avgIf(col, cond). AVG игнорирует NULL, аналогично avgIf.'
+explain_template: 'AVG(CASE WHEN {cond} THEN {col} END) заменяется avgIf({col}, {cond}).
+  Результат идентичен, без материализации CASE.'
+ch_version:
+  introduced: '1.23'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT AVG(CASE WHEN status = 'paid' THEN amount END) AS avg_paid\
+  \ FROM orders"
+example_after: "SELECT avgIf(amount, status = 'paid') AS avg_paid FROM orders"
+expected_speedup:
+  estimate: '5-10%'
+  measurement_method: 'Сравнение elapsed в system.query_log.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/aggregate-functions/combinators
+- https://clickhouse.com/blog/aggregate-functions-combinators-in-clickhouse-for-arrays-maps-and-states

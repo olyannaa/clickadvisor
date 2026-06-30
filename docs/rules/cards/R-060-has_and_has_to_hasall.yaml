@@ -1,0 +1,30 @@
+id: R-060
+name: has_and_has_to_hasall
+tier: 1A
+category: function_rewrite
+status: proposed
+statement: 'has(arr, x) AND has(arr, y) — проверка содержания двух значений —
+  эквивалентна hasAll(arr, [x, y]). hasAll более читаем и допускает расширение
+  списка без добавления AND.'
+preconditions:
+  syntactic:
+  - Запрос содержит has(arr, x) AND has(arr, y) для одного и того же arr
+  semantic: []
+  data: []
+  user: []
+proof: 'hasAll(arr, [x, y]) = arr содержит все элементы [x, y] = has(arr, x) AND
+  has(arr, y). Математически идентично по определению hasAll.'
+explain_template: 'has({arr}, {x}) AND has({arr}, {y}) заменяется hasAll({arr}, [{x}, {y}]).'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT * FROM events WHERE has(tags, ''error'') AND has(tags, ''critical'')'
+example_after: 'SELECT * FROM events WHERE hasAll(tags, [''error'', ''critical''])'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/array-functions

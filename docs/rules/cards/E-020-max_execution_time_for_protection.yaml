@@ -1,0 +1,45 @@
+id: E-020
+name: max_execution_time_for_protection
+tier: env
+category: query_settings
+status: proposed
+statement: 'max_execution_time = 0 (default) означает неограниченное время выполнения
+  запроса. Без лимита один «тяжёлый» запрос может занять все ресурсы кластера
+  на неопределённое время. Рекомендуется установить разумный timeout для production.'
+preconditions:
+  syntactic: []
+  semantic: []
+  data: []
+proof: ''
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: ''
+example_after: ''
+expected_speedup:
+  estimate: null
+  measurement_method: 'N/A — environment rule, effect зависит от workload, hardware
+    и текущих settings.'
+risks:
+- Слишком короткий timeout может прерывать легитимные долгие запросы
+- Отменённый запрос возвращает ошибку клиенту — нужна обработка в приложении
+opt_in: false
+references:
+- https://clickhouse.com/docs/operations/settings/query-complexity#max-execution-time
+hardware_preconditions: []
+config_preconditions:
+- max_execution_time = 0 (default, unlimited)
+workload_preconditions:
+- Production-деплоймент с многопользовательским доступом
+recommendation:
+  setting: max_execution_time
+  current_value_check: 'SELECT value FROM system.settings WHERE name = ''max_execution_time'''
+  recommended_formula: 'max_execution_time = 300 (5 min) для интерактивных запросов.
+    max_execution_time = 3600 (1h) для batch-запросов. 0 оставлять только для
+    доверенных batch-процессов.'
+  example: 'SET max_execution_time = 300;'
+reasoning: 'Без ограничения на время одни запросы могут блокировать ресурсы кластера
+  бесконечно. Разумный timeout защищает от runaway queries и улучшает предсказуемость
+  производительности.'
+condition: 'SELECT queries от ненадёжных пользователей или неоптимизированных приложений'

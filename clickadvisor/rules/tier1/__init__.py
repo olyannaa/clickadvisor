@@ -18,6 +18,48 @@ from clickadvisor.rules.tier1.R017_subquery_filter_pushdown import R017SubqueryF
 from clickadvisor.rules.tier1.R018_union_to_union_all import R018UnionToUnionAll
 from clickadvisor.rules.tier1.R019_uint_narrowing import R019UintNarrowing
 from clickadvisor.rules.tier1.R020_cast_or_default import R020CastOrDefault
+from clickadvisor.rules.tier1.R021_datetime64_zero import R021DateTime64ZeroToDateTime
+from clickadvisor.rules.tier1.R022_float_monetary import R022FloatMonetary
+from clickadvisor.rules.tier1.R023_string_datetime_column import R023StringDatetimeColumn
+from clickadvisor.rules.tier1.R024_string_ip_column import R024StringIPColumn
+from clickadvisor.rules.tier1.R025_order_by_tuple import R025OrderByTupleNoPK
+from clickadvisor.rules.tier1.R026_sum_case_to_countif import R026SumCaseToCountIf
+from clickadvisor.rules.tier1.R027_sum_case_col_to_sumif import R027SumCaseColToSumIf
+from clickadvisor.rules.tier1.R028_coalesce_to_ifnull import R028CoalesceToIfNull
+from clickadvisor.rules.tier1.R029_lower_like_to_ilike import R029LowerLikeToILike
+from clickadvisor.rules.tier1.R030_not_in_singleton import R030NotInSingleton
+from clickadvisor.rules.tier1.R031_string_uuid_column import R031StringUUIDColumn
+from clickadvisor.rules.tier1.R032_int8_boolean_column import R032Int8BooleanColumn
+from clickadvisor.rules.tier1.R033_max_case_to_maxif import R033MaxCaseToMaxIf
+from clickadvisor.rules.tier1.R034_min_case_to_minif import R034MinCaseToMinIf
+from clickadvisor.rules.tier1.R035_avg_case_to_avgif import R035AvgCaseToAvgIf
+from clickadvisor.rules.tier1.R036_nested_if_to_multiif import R036NestedIfToMultiIf
+from clickadvisor.rules.tier1.R037_empty_string_eq_to_empty import R037EmptyStringEqToEmpty
+from clickadvisor.rules.tier1.R038_nonempty_string_neq import R038NonEmptyStringNeqToNotEmpty
+from clickadvisor.rules.tier1.R039_length_gte_one_to_notempty import R039LengthGteOneToNotEmpty
+from clickadvisor.rules.tier1.R040_todate_comparison import R040TodateComparisonToDatetime
+from clickadvisor.rules.tier1.R041_string_code_column import R041StringCodeColumn
+from clickadvisor.rules.tier1.R042_grouparray_no_limit import R042GroupArrayNoLimit
+from clickadvisor.rules.tier1.R043_having_count_gt_zero import R043HavingCountGtZero
+from clickadvisor.rules.tier1.R044_todatetime_todate import R044ToDateTimeToDateToStartOfDay
+from clickadvisor.rules.tier1.R045_like_without_wildcards import R045LikeWithoutWildcardsToEq
+from clickadvisor.rules.tier1.R046_not_empty_to_notempty import R046NotEmptyToNotEmpty
+from clickadvisor.rules.tier1.R047_position_to_like import R047PositionToLike
+from clickadvisor.rules.tier1.R048_positionci_to_ilike import R048PositionCIToILike
+from clickadvisor.rules.tier1.R049_sumif_one_to_countif import R049SumIfOneToCountIf
+from clickadvisor.rules.tier1.R050_toyyyymm_comparison import R050ToYYYYMMComparison
+from clickadvisor.rules.tier1.R051_date_trunc_to_native import R051DateTruncToNative
+from clickadvisor.rules.tier1.R052_formatdatetime_ymd import R052FormatDateTimeYMD
+from clickadvisor.rules.tier1.R053_arrayreduce_sum import R053ArrayReduceSum
+from clickadvisor.rules.tier1.R054_arrayreduce_max import R054ArrayReduceMax
+from clickadvisor.rules.tier1.R055_arrayreduce_min import R055ArrayReduceMin
+from clickadvisor.rules.tier1.R056_extract_year import R056ExtractToNative
+from clickadvisor.rules.tier1.R057_extract_month import R057ExtractMonthToMonth
+from clickadvisor.rules.tier1.R058_extract_day import R058ExtractDayToDayOfMonth
+from clickadvisor.rules.tier1.R059_extract_hour import R059ExtractHourToHour
+from clickadvisor.rules.tier1.R060_has_and_has_to_hasall import R060HasAndHasToHasAll
+from clickadvisor.rules.tier1.R061_has_or_has_to_hasany import R061HasOrHasToHasAny
+from clickadvisor.rules.tier1.R062_arraycount_zero_to_not_has import R062ArrayCountZeroToNotHas
 
 __all__ = [
     "R001CountDistinct",
@@ -40,4 +82,46 @@ __all__ = [
     "R018UnionToUnionAll",
     "R019UintNarrowing",
     "R020CastOrDefault",
+    "R021DateTime64ZeroToDateTime",
+    "R022FloatMonetary",
+    "R023StringDatetimeColumn",
+    "R024StringIPColumn",
+    "R025OrderByTupleNoPK",
+    "R026SumCaseToCountIf",
+    "R027SumCaseColToSumIf",
+    "R028CoalesceToIfNull",
+    "R029LowerLikeToILike",
+    "R030NotInSingleton",
+    "R031StringUUIDColumn",
+    "R032Int8BooleanColumn",
+    "R033MaxCaseToMaxIf",
+    "R034MinCaseToMinIf",
+    "R035AvgCaseToAvgIf",
+    "R036NestedIfToMultiIf",
+    "R037EmptyStringEqToEmpty",
+    "R038NonEmptyStringNeqToNotEmpty",
+    "R039LengthGteOneToNotEmpty",
+    "R040TodateComparisonToDatetime",
+    "R041StringCodeColumn",
+    "R042GroupArrayNoLimit",
+    "R043HavingCountGtZero",
+    "R044ToDateTimeToDateToStartOfDay",
+    "R045LikeWithoutWildcardsToEq",
+    "R046NotEmptyToNotEmpty",
+    "R047PositionToLike",
+    "R048PositionCIToILike",
+    "R049SumIfOneToCountIf",
+    "R050ToYYYYMMComparison",
+    "R051DateTruncToNative",
+    "R052FormatDateTimeYMD",
+    "R053ArrayReduceSum",
+    "R054ArrayReduceMax",
+    "R055ArrayReduceMin",
+    "R056ExtractToNative",
+    "R057ExtractMonthToMonth",
+    "R058ExtractDayToDayOfMonth",
+    "R059ExtractHourToHour",
+    "R060HasAndHasToHasAll",
+    "R061HasOrHasToHasAny",
+    "R062ArrayCountZeroToNotHas",
 ]

@@ -1,0 +1,32 @@
+id: R-045
+name: like_without_wildcards_to_eq
+tier: 1A
+category: predicate_rewrite
+status: proposed
+statement: "col LIKE 'pattern' где pattern не содержит символов-шаблонов (% и _)
+  семантически эквивалентен col = 'pattern'. LIKE без шаблонов компилируется
+  как регулярное выражение, тогда как = — прямое сравнение без накладных расходов."
+preconditions:
+  syntactic:
+  - WHERE содержит col LIKE 'literal' где literal не содержит % или _
+  semantic: []
+  data: []
+  user: []
+proof: "По определению SQL: LIKE 'pattern' без % и _ является exact match.
+  Это математически идентично = 'pattern'.
+  LIKE с шаблонами компилируется в regexp, без шаблонов — избыточный overhead."
+explain_template: "{col} LIKE '{pattern}' без шаблонов заменяется {col} = '{pattern}'.
+  = выполняет прямое сравнение без regexp overhead."
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT * FROM events WHERE event_type LIKE 'click'"
+example_after: "SELECT * FROM events WHERE event_type = 'click'"
+expected_speedup:
+  estimate: '5-20% при высокой частоте выполнения'
+  measurement_method: 'Сравнение elapsed в system.query_log.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-search-functions

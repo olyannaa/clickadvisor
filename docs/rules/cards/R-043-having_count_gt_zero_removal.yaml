@@ -1,0 +1,36 @@
+id: R-043
+name: having_count_gt_zero_removal
+tier: 1A
+category: predicate_rewrite
+status: proposed
+statement: 'GROUP BY x HAVING count() > 0 — избыточное условие: после GROUP BY
+  каждая группа по определению содержит хотя бы одну строку, поэтому count()
+  всегда >= 1. HAVING count() > 0 никогда не отфильтровывает строки.'
+preconditions:
+  syntactic:
+  - Запрос содержит GROUP BY ... HAVING count() > 0
+  semantic:
+  - Нет ссылок на NULL-возможные ключи которые могут создавать пустые группы
+  data: []
+  user: []
+proof: 'По определению GROUP BY: каждая результирующая строка соответствует
+  хотя бы одной строке исходной таблицы. Следовательно, count() >= 1 всегда.
+  HAVING count() > 0 = HAVING 1 > 0 = HAVING true — тавтология.'
+explain_template: 'HAVING count() > 0 после GROUP BY является тавтологией:
+  каждая группа содержит минимум одну строку. Удалите это условие — оно не
+  влияет на результат, но добавляет лишний шаг фильтрации.'
+ch_version:
+  introduced: '0.5'
+  deprecated: null
+  last_validated: '25.3'
+example_before: "SELECT user_id, count() FROM events GROUP BY user_id HAVING count()\
+  \ > 0"
+example_after: 'SELECT user_id, count() FROM events GROUP BY user_id'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — упрощение плана запроса.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/statements/select/group-by
+- https://clickhouse.com/docs/sql-reference/statements/select/having

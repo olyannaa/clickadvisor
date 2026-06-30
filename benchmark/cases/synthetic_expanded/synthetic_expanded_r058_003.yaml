@@ -1,0 +1,17 @@
+status: validated
+case_id: synthetic_expanded_r058_003
+source: synthetic
+sql: SELECT EXTRACT(DAY FROM started_at) AS day_num FROM sessions LIMIT 100
+schema_files: []
+known_issues:
+- issue_id: I-1
+  type: extract_day_to_todayofmonth
+  detected_by_rule: R-058
+  severity: low
+  description: EXTRACT(DAY FROM ts) эквивалентна toDayOfMonth(ts) в ClickHouse.
+expected_rules_to_fire:
+- R-058
+expected_findings_count: 1
+expected_improvement: null
+synthetic_explain_path: null
+notes: Generated positive synthetic case for R-058.

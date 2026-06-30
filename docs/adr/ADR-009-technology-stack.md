@@ -12,9 +12,9 @@ MCP interface for AI-agent workflows. The stack must match what the codebase
 actually runs today: deterministic rules first, optional retrieval context, and
 no generative LLM execution in the MVP critical path.
 
-The project still plans to add a classical ML problem classifier, but model
-libraries should be introduced when the classifier code and experiments are
-implemented, not kept as unused dependencies.
+The project includes a classical ML problem classifier for evaluation
+experiments. Heavy model libraries should stay tied to those scripts and
+reports, not become an implied runtime requirement for the rule engine.
 
 ## Decision
 
@@ -30,8 +30,9 @@ ClickAdvisor MVP standardizes on:
 - pytest, Hypothesis, Ruff, and mypy for development quality.
 
 The MVP intentionally does not depend on Anthropic, Ollama, vLLM, or other
-generative LLM runtimes. It also does not keep CatBoost in runtime dependencies
-until the classifier component is implemented and evaluated.
+generative LLM runtimes. CatBoost is used only as a classifier ablation backend
+when available in the evaluation environment; Logistic Regression and Random
+Forest remain the portable classical baselines.
 
 ### Python 3.11+
 
@@ -76,9 +77,9 @@ The dependency graph becomes easier to defend: every heavy dependency has a
 current code path. The project no longer claims internal LLM modes that are not
 implemented.
 
-When the ML classifier is added, its dependencies and SOTA/baseline rationale
-must be introduced together with code, datasets, and evaluation reports. That
-keeps future technical claims tied to reproducible experiments.
+ML classifier dependencies and SOTA/baseline rationale must remain tied to code,
+datasets, and evaluation reports. That keeps technical claims tied to
+reproducible experiments.
 
 ## Alternatives Considered
 

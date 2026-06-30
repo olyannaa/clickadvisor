@@ -1,0 +1,30 @@
+id: R-039
+name: length_gte_one_to_notempty
+tier: 1A
+category: string_operations
+status: proposed
+statement: 'length(x) >= 1 для String/Array/Map — эквивалентно notEmpty(x).
+  Аналогично R-013 (length(x) > 0), но использует оператор >= 1 вместо > 0.'
+preconditions:
+  syntactic:
+  - Запрос содержит length(x) >= 1
+  semantic: []
+  data: []
+  user: []
+proof: 'length(x) >= 1 ≡ length(x) > 0 ≡ notEmpty(x) для String, Array, Map.
+  length() всегда неотрицательна, поэтому >= 1 и > 0 математически эквивалентны.'
+explain_template: 'length({col}) >= 1 заменяется notEmpty({col}).
+  notEmpty — специализированный предикат, более читаемый.'
+ch_version:
+  introduced: '1.0'
+  deprecated: null
+  last_validated: '25.3'
+example_before: 'SELECT * FROM events WHERE length(tags) >= 1'
+example_after: 'SELECT * FROM events WHERE notEmpty(tags)'
+expected_speedup:
+  estimate: null
+  measurement_method: 'Минимальный эффект; преимущество — читаемость.'
+risks: []
+opt_in: false
+references:
+- https://clickhouse.com/docs/sql-reference/functions/string-functions
