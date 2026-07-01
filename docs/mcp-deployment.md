@@ -112,14 +112,14 @@ the defense".
 1. Push this repository to GitHub.
 2. Open Railway and create a new project from the GitHub repository.
 3. Railway reads `railway.json` and builds the root `Dockerfile`.
-4. In service variables, keep:
+4. The Docker command reads Railway's injected `PORT` value and starts the MCP
+   server on that port.
+5. Generate a public domain for the service. If using the CLI and Railway
+   reports the app listening on `8080`, use:
 
-```text
-PORT=8000
-MCP_PATH=/mcp
+```bash
+railway domain -p 8080
 ```
-
-5. Open the service settings and generate a public domain.
 
 Result:
 

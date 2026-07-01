@@ -39,7 +39,7 @@ source of production recommendations.
 - [Quick start](#quick-start)
 - [Single-query advisor](#single-query-advisor)
 - [Workload analyzer](#workload-analyzer)
-- [MCP deployment](#mcp-deployment)
+- [MCP](#mcp)
 - [Data Science and ML](#data-science-and-ml)
 - [Evaluation](#evaluation)
 - [Security](#security)
@@ -175,7 +175,7 @@ Normalized SQL: select * from events final where message like ?
 
 More details: [docs/workload.md](docs/workload.md).
 
-## MCP deployment
+## MCP
 
 Local stdio MCP for Claude Desktop, Cursor, Zed, and other MCP clients:
 
@@ -183,38 +183,55 @@ Local stdio MCP for Claude Desktop, Cursor, Zed, and other MCP clients:
 poetry run chadvisor mcp-server
 ```
 
-Streamable HTTP MCP endpoint for remote-compatible demos:
+Public MCP endpoint for testing without a local install:
+
+```text
+https://clickadvisor-mcp-production.up.railway.app/mcp
+```
+
+Claude / Anthropic API can connect to the remote MCP server as a URL-based
+server:
+
+```text
+Claude / Claude Desktop:
+Customize -> Connectors -> Add custom connector
+Name: ClickAdvisor
+URL:  https://clickadvisor-mcp-production.up.railway.app/mcp
+```
+
+Claude Code:
 
 ```bash
-poetry run chadvisor mcp-http-server \
-  --host 127.0.0.1 \
-  --port 8765 \
-  --path /mcp
+claude mcp add --transport http clickadvisor \
+  https://clickadvisor-mcp-production.up.railway.app/mcp
 ```
 
-Endpoint:
+Anthropic API:
 
-```text
-http://127.0.0.1:8765/mcp
+```json
+{
+  "mcp_servers": [
+    {
+      "type": "url",
+      "name": "clickadvisor",
+      "url": "https://clickadvisor-mcp-production.up.railway.app/mcp"
+    }
+  ]
+}
 ```
 
-For a defense/demo, the server can run as a remote endpoint behind HTTPS/auth:
-VPS + reverse proxy, Railway/Render/Fly.io, Cloudflare Tunnel, or Tailscale.
-A public unauthenticated MCP endpoint is not recommended because SQL and query
-context are sensitive.
+Available MCP tools:
 
-Fastest path to a public link:
+| Tool | Purpose |
+|---|---|
+| `analyze_query` | Markdown report for ClickHouse SQL |
+| `analyze_query_json` | Structured JSON for automation |
+| `list_rules` | Registered rule catalog |
+| `detect_ch_version` | ClickHouse version detection through HTTP API |
 
-1. push the repository to GitHub;
-2. create a Railway project from the GitHub repo or a Render Blueprint;
-3. let the platform build the root `Dockerfile`;
-4. generate/open the public domain;
-5. share an endpoint like:
-
-```text
-https://<your-service>.up.railway.app/mcp
-https://<your-service>.onrender.com/mcp
-```
+If you open `/mcp` in a browser, you may see `Not Acceptable: Client must
+accept text/event-stream`. That is expected: the endpoint is for MCP clients,
+not a regular HTML page.
 
 More details:
 
