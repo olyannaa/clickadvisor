@@ -43,7 +43,6 @@ confidence, объяснение и rewrite-пример там, где rewrite 
 - [Data Science и ML](#data-science-и-ml)
 - [Evaluation](#evaluation)
 - [Security](#security)
-- [Критерии проекта](#критерии-проекта)
 - [Документация](#документация)
 
 ## Что умеет
@@ -387,17 +386,6 @@ ClickAdvisor можно запускать внутри компании, CI/CD 
 - не делает hidden remote LLM calls.
 
 Подробнее: [docs/security-local-first.md](docs/security-local-first.md).
-
-## Критерии проекта
-
-| Критерий | Как закрыт |
-|---|---|
-| Development | Poetry, Docker, GitHub Actions, типизированное ядро, linting, tests, validators, ClickHouse integration |
-| Data Science | EDA, feature extraction, group split, CV/holdout, baseline ladder, error analysis |
-| AI usage | MCP tools, локальный и remote-compatible agent workflow, DS/research automation narrative |
-| Product thinking | целевые пользователи, боль, competitors/SOTA framing, MVP surfaces, impact path через workload analysis |
-
-Подробная самооценка: [docs/project-readiness.md](docs/project-readiness.md).
 
 ## Документация
 

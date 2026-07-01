@@ -43,7 +43,6 @@ source of production recommendations.
 - [Data Science and ML](#data-science-and-ml)
 - [Evaluation](#evaluation)
 - [Security](#security)
-- [Project criteria](#project-criteria)
 - [Documentation](#documentation)
 
 ## Capabilities
@@ -389,17 +388,6 @@ What it does not do by default:
 - does not make hidden remote LLM calls.
 
 More details: [docs/security-local-first.md](docs/security-local-first.md).
-
-## Project criteria
-
-| Criterion | How ClickAdvisor addresses it |
-|---|---|
-| Development | Poetry, Docker, GitHub Actions, typed core, linting, tests, validators, ClickHouse integration |
-| Data Science | EDA, feature extraction, group split, CV/holdout, baseline ladder, error analysis |
-| AI usage | MCP tools, local and remote-compatible agent workflow, DS/research automation narrative |
-| Product thinking | target users, pain, competitors/SOTA framing, MVP surfaces, impact path through workload analysis |
-
-Detailed self-assessment: [docs/project-readiness.en.md](docs/project-readiness.en.md).
 
 ## Documentation
 
