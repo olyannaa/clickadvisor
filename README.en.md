@@ -52,6 +52,7 @@ what you send to that client and on your organization's security policies.
 - Expose ClickAdvisor to AI agents as a local MCP server.
 - Add local links to ClickHouse docs / Altinity KB through embedded Qdrant.
 - Compare rewrite candidates with `EXPLAIN ESTIMATE` when `--connect` is explicitly provided.
+- Build prototype workload reports from sanitized `system.query_log` CSV exports.
 
 ## Project Numbers
 
@@ -308,6 +309,24 @@ Available MCP tools:
 
 More details: [docs/MCP.md](docs/MCP.md).
 
+## Workload Analyzer Prototype
+
+To move from single-query review toward a DBA review queue, ClickAdvisor includes
+a prototype for sanitized `system.query_log` CSV exports:
+
+```bash
+poetry run chadvisor workload \
+  --query-log examples/query_log_sample.csv \
+  --output-format markdown \
+  --top-n 3
+```
+
+It groups similar queries by normalized fingerprint, computes executions,
+total/avg/p95 latency, read rows/bytes, and memory, then runs the representative
+query through the rule engine and ranks top opportunities.
+
+More details: [docs/workload.md](docs/workload.md).
+
 ## Quality Metrics
 
 Current reproducible metrics as of 2026-06-30:
@@ -317,6 +336,8 @@ Current reproducible metrics as of 2026-06-30:
 | Rule detection | `222` synthetic/schema/env benchmark cases | precision `1.000`, recall `1.000`, F1 `1.000` |
 | ML classifier | `synthetic_expanded_v1` train/test split | best test macro F1 `0.691`, best test micro F1 `0.988` |
 | Retrieval | `20` explicit query -> relevant docs pairs | MRR@3 `0.517` with MiniLM-L6 |
+| Risk-label DS pipeline | `20 235` SQL records, group split + holdout | RF holdout macro F1 `0.949`, measured-only macro F1 `0.595` |
+| Workload prototype | sample sanitized `query_log` CSV | normalized groups + top-N risk report |
 
 What was evaluated:
 
@@ -334,7 +355,8 @@ poetry run python scripts/eval/run_benchmark.py \
 
 Methodology: [docs/evaluation.md](docs/evaluation.md),
 [docs/experiments/classifier_ablation.md](docs/experiments/classifier_ablation.md),
-[docs/experiments/retrieval_ablation.md](docs/experiments/retrieval_ablation.md).
+[docs/experiments/retrieval_ablation.md](docs/experiments/retrieval_ablation.md),
+[docs/experiments/risk_labeling_ds_summary.md](docs/experiments/risk_labeling_ds_summary.md).
 
 ## Security And Data Handling
 
@@ -352,6 +374,8 @@ company perimeter, CI/CD, or an engineer's local environment without sending
 SQL, DDL, EXPLAIN, or environment context to external LLM/API services. This
 reduces risks around compliance, banking secrecy, personal data, trade secrets,
 and internal naming conventions.
+
+More details: [docs/security-local-first.md](docs/security-local-first.md).
 
 ## Development
 
@@ -376,7 +400,7 @@ the rule engine, ML evaluation surface, and local retrieval.
 ## Not Claimed As Ready
 
 - Product generative LLM in the trusted runtime path.
-- Automatic `query_log` analysis.
+- Live `query_log` analysis through `--connect --since`; a CSV prototype exists.
 - Automatic DDL changes.
 - Running `ANALYZE` or replaying queries on user data.
 - Automatically applying Tier 2 design/storage recommendations without DBA review.

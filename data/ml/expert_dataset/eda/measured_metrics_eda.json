@@ -1,0 +1,308 @@
+{
+  "metrics": {
+    "memory_usage": {
+      "count": 9837,
+      "log10_histogram": [
+        {
+          "bar": "########################################",
+          "count": 8886,
+          "range": "0.00..0.76"
+        },
+        {
+          "bar": "",
+          "count": 0,
+          "range": "0.76..1.53"
+        },
+        {
+          "bar": "",
+          "count": 0,
+          "range": "1.53..2.29"
+        },
+        {
+          "bar": "#",
+          "count": 14,
+          "range": "2.29..3.05"
+        },
+        {
+          "bar": "#",
+          "count": 82,
+          "range": "3.05..3.82"
+        },
+        {
+          "bar": "#",
+          "count": 248,
+          "range": "3.82..4.58"
+        },
+        {
+          "bar": "#",
+          "count": 161,
+          "range": "4.58..5.34"
+        },
+        {
+          "bar": "#",
+          "count": 14,
+          "range": "5.34..6.11"
+        },
+        {
+          "bar": "#",
+          "count": 242,
+          "range": "6.11..6.87"
+        },
+        {
+          "bar": "#",
+          "count": 84,
+          "range": "6.87..7.63"
+        },
+        {
+          "bar": "#",
+          "count": 91,
+          "range": "7.63..8.39"
+        },
+        {
+          "bar": "#",
+          "count": 15,
+          "range": "8.39..9.16"
+        }
+      ],
+      "non_zero_count": 951,
+      "non_zero_percentiles": {
+        "p0": 640,
+        "p1": 976,
+        "p10": 6495,
+        "p100": 1438482176,
+        "p25": 35952,
+        "p5": 2991,
+        "p50": 126104,
+        "p75": 4317192,
+        "p90": 46674914,
+        "p95": 90673121,
+        "p99": 435832936
+      },
+      "percentiles": {
+        "p0": 0,
+        "p1": 0,
+        "p10": 0,
+        "p100": 1438482176,
+        "p25": 0,
+        "p5": 0,
+        "p50": 0,
+        "p75": 0,
+        "p90": 0,
+        "p95": 122125,
+        "p99": 46292175
+      },
+      "zero_count": 8886
+    },
+    "query_duration_ms": {
+      "count": 9837,
+      "log10_histogram": [
+        {
+          "bar": "########################################",
+          "count": 7462,
+          "range": "0.00..0.30"
+        },
+        {
+          "bar": "##########",
+          "count": 1848,
+          "range": "0.30..0.60"
+        },
+        {
+          "bar": "#",
+          "count": 262,
+          "range": "0.60..0.90"
+        },
+        {
+          "bar": "#",
+          "count": 68,
+          "range": "0.90..1.20"
+        },
+        {
+          "bar": "#",
+          "count": 62,
+          "range": "1.20..1.49"
+        },
+        {
+          "bar": "#",
+          "count": 47,
+          "range": "1.49..1.79"
+        },
+        {
+          "bar": "#",
+          "count": 25,
+          "range": "1.79..2.09"
+        },
+        {
+          "bar": "#",
+          "count": 20,
+          "range": "2.09..2.39"
+        },
+        {
+          "bar": "#",
+          "count": 8,
+          "range": "2.39..2.69"
+        },
+        {
+          "bar": "#",
+          "count": 17,
+          "range": "2.69..2.99"
+        },
+        {
+          "bar": "#",
+          "count": 7,
+          "range": "2.99..3.29"
+        },
+        {
+          "bar": "#",
+          "count": 11,
+          "range": "3.29..3.59"
+        }
+      ],
+      "non_zero_count": 2375,
+      "non_zero_percentiles": {
+        "p0": 1,
+        "p1": 1,
+        "p10": 1,
+        "p100": 3869,
+        "p25": 1,
+        "p5": 1,
+        "p50": 1,
+        "p75": 2,
+        "p90": 9,
+        "p95": 37,
+        "p99": 787
+      },
+      "percentiles": {
+        "p0": 0,
+        "p1": 0,
+        "p10": 0,
+        "p100": 3869,
+        "p25": 0,
+        "p5": 0,
+        "p50": 0,
+        "p75": 0,
+        "p90": 1,
+        "p95": 3,
+        "p99": 56
+      },
+      "zero_count": 7462
+    },
+    "read_rows": {
+      "count": 9837,
+      "log10_histogram": [
+        {
+          "bar": "########################################",
+          "count": 5299,
+          "range": "0.00..0.53"
+        },
+        {
+          "bar": "##############################",
+          "count": 3946,
+          "range": "0.53..1.05"
+        },
+        {
+          "bar": "#",
+          "count": 127,
+          "range": "1.05..1.58"
+        },
+        {
+          "bar": "#",
+          "count": 62,
+          "range": "1.58..2.10"
+        },
+        {
+          "bar": "#",
+          "count": 45,
+          "range": "2.10..2.63"
+        },
+        {
+          "bar": "#",
+          "count": 42,
+          "range": "2.63..3.15"
+        },
+        {
+          "bar": "#",
+          "count": 26,
+          "range": "3.15..3.68"
+        },
+        {
+          "bar": "#",
+          "count": 31,
+          "range": "3.68..4.20"
+        },
+        {
+          "bar": "#",
+          "count": 20,
+          "range": "4.20..4.73"
+        },
+        {
+          "bar": "#",
+          "count": 34,
+          "range": "4.73..5.25"
+        },
+        {
+          "bar": "#",
+          "count": 30,
+          "range": "5.25..5.78"
+        },
+        {
+          "bar": "#",
+          "count": 175,
+          "range": "5.78..6.30"
+        }
+      ],
+      "non_zero_count": 9745,
+      "non_zero_percentiles": {
+        "p0": 1,
+        "p1": 1,
+        "p10": 1,
+        "p100": 2000000,
+        "p25": 1,
+        "p5": 1,
+        "p50": 1,
+        "p75": 10,
+        "p90": 10,
+        "p95": 20,
+        "p99": 1000000
+      },
+      "percentiles": {
+        "p0": 0,
+        "p1": 1,
+        "p10": 1,
+        "p100": 2000000,
+        "p25": 1,
+        "p5": 1,
+        "p50": 1,
+        "p75": 10,
+        "p90": 10,
+        "p95": 20,
+        "p99": 1000000
+      },
+      "zero_count": 92
+    }
+  },
+  "notes": [
+    "Histograms use log10(value + 1) buckets because replay latency and scanned rows are heavy-tailed.",
+    "When an all-record percentile is zero, use non_zero_percentiles for threshold design."
+  ],
+  "ok_family_counts": {
+    "clickhouse_perf_xml": 125,
+    "clickhouse_stateless": 9606,
+    "olap_flat_web_analytics": 81,
+    "synthetic": 25
+  },
+  "ok_record_count": 9837,
+  "ok_source_counts": {
+    "clickadvisor_benchmark": 25,
+    "clickbench": 43,
+    "clickhouse_functional_tests": 9606,
+    "clickhouse_performance_tests": 103,
+    "expert_synthetic_antipatterns": 60
+  },
+  "record_count": 20235,
+  "status_counts": {
+    "error": 8773,
+    "ok": 9837,
+    "query_log_missing": 4,
+    "skipped": 1621
+  }
+}

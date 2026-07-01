@@ -156,6 +156,47 @@ def analyze(
 
 
 @app.command()
+def workload(
+    query_log: Annotated[
+        Path,
+        typer.Option(help="Sanitized CSV export from system.query_log"),
+    ],
+    top_n: Annotated[int, typer.Option(help="Number of normalized query groups to show")] = 10,
+    ch_version: Annotated[str | None, typer.Option(help="24.3")] = None,
+    output_format: Annotated[str, typer.Option(help="console|json|markdown")] = "console",
+    output: Annotated[Path | None, typer.Option(help="Write report to file")] = None,
+) -> None:
+    """Analyze a sanitized query_log CSV export and rank workload risks."""
+    from clickadvisor.workload.analyzer import (
+        analyze_query_log_csv,
+        render_workload_json,
+        render_workload_markdown,
+        workload_report_to_dict,
+    )
+
+    if output_format not in {"console", "json", "markdown"}:
+        raise typer.BadParameter("output_format must be one of: console, json, markdown")
+    if top_n <= 0:
+        raise typer.BadParameter("top_n must be positive")
+
+    report = analyze_query_log_csv(query_log, top_n=top_n, ch_version=ch_version)
+    if output_format == "json":
+        rendered = render_workload_json(report)
+    else:
+        rendered = render_workload_markdown(report)
+
+    if output is not None:
+        output.write_text(rendered + "\n", encoding="utf-8")
+        console.print(f"Wrote workload report to {output}")
+        return
+
+    if output_format == "json":
+        console.print_json(data=workload_report_to_dict(report))
+    else:
+        console.print(rendered)
+
+
+@app.command()
 def index_kb(
     chunks_dir: Annotated[
         str,

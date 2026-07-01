@@ -6,6 +6,9 @@ Desktop, Cursor, Continue, Zed, and other AI-agent clients.
 The MCP server uses stdio transport and wraps the same local analysis pipeline as
 the CLI. SQL and metadata do not leave your machine.
 
+MCP is an interface, not a second optimizer. The trusted findings still come
+from the deterministic ClickAdvisor rule engine.
+
 ## Start the server manually
 
 ```bash
@@ -89,6 +92,34 @@ Arguments:
 - `connect_url` (required), e.g. `http://localhost:8123`
 - `user` (default: `default`)
 - `password` (default: empty string)
+
+## Recommended Agent Workflow
+
+Use this instruction in MCP-capable AI clients:
+
+```text
+When reviewing ClickHouse SQL, call the local ClickAdvisor MCP tool first.
+Do not invent optimization advice. Summarize returned rule_id, severity, tier,
+confidence, and suggestion. If ClickAdvisor returns no finding, say that no
+deterministic issue was found and list remaining manual checks separately.
+```
+
+This workflow lowers hallucination risk because the AI client formats and
+explains structured findings instead of becoming the source of the finding set.
+
+## Security Boundary
+
+The MCP process runs locally. ClickAdvisor itself does not send SQL, DDL,
+EXPLAIN, or environment context to an external LLM provider.
+
+If you connect the local MCP server to an external AI client, data exposure is
+controlled by what you send to that client and by your organization's policy for
+that client. Treat SQL and query context as sensitive.
+
+More details:
+
+- [AI And MCP Workflow](ai-mcp-workflow.md)
+- [Security And Local-First Runtime](security-local-first.md)
 
 ## Prompts
 

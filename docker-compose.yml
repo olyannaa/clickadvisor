@@ -1,11 +1,30 @@
 services:
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:25.3
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: clickadvisor
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
     ports:
-      - "8123:8123"
-      - "9000:9000"
+      - "18123:8123"
+      - "19000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./docker/clickhouse/replay-config.xml:/etc/clickhouse-server/config.d/replay-config.xml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --user=default --password=clickadvisor -qO- 'http://localhost:8123/?query=SELECT%201' | grep -q 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
 
   chadvisor:
     build: .
     depends_on:
       - clickhouse
+
+volumes:
+  clickhouse_data:
