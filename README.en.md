@@ -17,8 +17,6 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-blue">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="ClickHouse" src="https://img.shields.io/badge/ClickHouse-performance%20advisor-ffcc01">
-  <img alt="Rules" src="https://img.shields.io/badge/rules-119-brightgreen">
-  <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-327%20cases-brightgreen">
   <img alt="MCP" src="https://img.shields.io/badge/MCP-stdio%20%2B%20HTTP-blueviolet">
   <img alt="Local First" src="https://img.shields.io/badge/security-local--first-success">
 </p>
@@ -43,7 +41,6 @@ source of production recommendations.
 - [Data Science and ML](#data-science-and-ml)
 - [Evaluation](#evaluation)
 - [Security](#security)
-- [Project criteria](#project-criteria)
 - [Documentation](#documentation)
 
 ## Capabilities
@@ -389,17 +386,6 @@ What it does not do by default:
 - does not make hidden remote LLM calls.
 
 More details: [docs/security-local-first.md](docs/security-local-first.md).
-
-## Project criteria
-
-| Criterion | How ClickAdvisor addresses it |
-|---|---|
-| Development | Poetry, Docker, GitHub Actions, typed core, linting, tests, validators, ClickHouse integration |
-| Data Science | EDA, feature extraction, group split, CV/holdout, baseline ladder, error analysis |
-| AI usage | MCP tools, local and remote-compatible agent workflow, DS/research automation narrative |
-| Product thinking | target users, pain, competitors/SOTA framing, MVP surfaces, impact path through workload analysis |
-
-Detailed self-assessment: [docs/project-readiness.en.md](docs/project-readiness.en.md).
 
 ## Documentation
 
