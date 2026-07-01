@@ -52,11 +52,25 @@ Artifacts:
 - `eval/results/classifier_ablation_current/metrics.csv`
 - `docs/experiments/classifier_ablation.md`
 
+Methodology note: this experiment is not the same task as the risk-label
+baseline ladder in section 4. Classifier ablation is a small synthetic
+multi-label experiment over `expected_rules_to_fire` (`144` train / `36` test).
+The risk-label ladder is a 20 235-record triage experiment over
+`low` / `medium` / `high` labels created from rule signals plus measured replay
+metrics. The Random Forest train/test gap here is a useful warning about
+overfitting and rare labels in the small synthetic benchmark; it does not
+contradict the risk-label holdout score because the labels, split, dataset size,
+and target definition are different.
+
 ## 3. Retrieval Ablation
 
 Retrieval quality is measured with `MRR@3` over explicit query-to-document gold
 references. A result is relevant only when its URL/path or text matches the
 gold reference for one of the expected rules.
+
+The current metric is stricter than early exploratory retrieval runs: generic
+near-topic ClickHouse chunks no longer count as relevant. Older MRR values
+around `0.61` are therefore not directly comparable with this repaired run.
 
 Current command:
 
@@ -98,6 +112,23 @@ Current dataset:
 | Feature rows | 20 235 |
 | Numeric features | 115 |
 
+Dataset composition and limitations:
+
+| Source | Records | Note |
+|---|---:|---|
+| `clickhouse_functional_tests` / `clickhouse_stateless` | 16 845 | Diverse ClickHouse SQL corpus from upstream functional tests, not production user workload |
+| `clickhouse_performance_tests` | 1 825 | Upstream performance-oriented SQL/XML workload material |
+| `expert_synthetic_antipatterns` | 1 145 | Project-curated anti-pattern and edge-case examples |
+| Other benchmarks and project cases | 420 | ClickBench, TPCH/TPCDS, JOB, rule benchmark, bug reproducers |
+
+The corpus should be described as a diverse ClickHouse query corpus with
+rule- and replay-derived weak labels, not as DBA-adjudicated ground truth.
+The label method is `benchmark_expected_rules_plus_feature_weak_labels_v1`:
+static rule findings are reconciled with percentile-based measured metrics from
+local ClickHouse replay where execution succeeded. This is suitable for
+triage-model research and prioritization experiments, while production findings
+remain deterministic rule-engine output.
+
 Current baseline ladder:
 
 | Model | CV macro-F1 | Test macro-F1 | Holdout macro-F1 |
@@ -122,11 +153,36 @@ The `measured_only` drop is the key sanity check: it shows where ML has less
 rule-derived signal to inherit. The `both` result shows the strongest core,
 where static rules and measured replay agree.
 
+Error analysis for the high class:
+
+- High false negatives: `27`; `26` of them are `measured_only`, so most misses
+  come from replay-heavy cases with weak or absent rule signal.
+- High false positives: `32`; `17` are `rule_only` and `13` are
+  `measured_only`, showing both over-prioritized rule patterns and noisy metric
+  thresholds.
+- `both` is the most stable slice: `132` records, `0.975` macro-F1, `1.000`
+  high recall, and only `2` total errors.
+
+Learning-curve diagnostic for the Random Forest risk model:
+
+| Train fraction | Train records | Holdout macro-F1 | Holdout high recall |
+|---:|---:|---:|---:|
+| 0.10 | 1 415 | 0.893 | 0.675 |
+| 0.25 | 3 539 | 0.916 | 0.796 |
+| 0.50 | 7 078 | 0.934 | 0.850 |
+| 0.75 | 10 616 | 0.944 | 0.871 |
+| 1.00 | 14 155 | 0.949 | 0.887 |
+
+The fixed holdout score rises with more training data and then stabilizes,
+which is a stronger sign than a single holdout number. Train macro-F1 remains
+higher, so the model is not claimed as an independent replacement for rules.
+
 Artifacts:
 
 - `data/ml/expert_dataset/eda/ds_report.md`
 - `docs/experiments/risk_labeling_ds_summary.md`
 - `eval/results/risk_baseline_ladder_current/metrics.json`
+- `eval/results/risk_learning_curve_current/summary.md`
 - `data/ml/expert_dataset/eda/risk_error_analysis/error_analysis.md`
 
 ## 5. Workload Analyzer Prototype

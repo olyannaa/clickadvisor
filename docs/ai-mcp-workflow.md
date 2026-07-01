@@ -57,6 +57,26 @@ dataset preparation, rule labeling, measured replay, feature extraction,
 baseline ladder, and holdout error analysis are all script-backed and
 reproducible.
 
+## Concrete Project Effect
+
+AI agents were used as orchestration and review assistants around deterministic
+scripts, not as labelers or runtime optimizers. The measurable outputs of that
+workflow are:
+
+- a 20 235-record ClickHouse query corpus assembled from public and project
+  sources;
+- 9 837 successfully replayed records enriched with measured ClickHouse
+  metrics;
+- a complete labeling pipeline with `rule_only`, `measured_only`, and `both`
+  provenance fields;
+- a five-step baseline ladder plus holdout error analysis for the risk model;
+- a public Streamable HTTP MCP demo endpoint that exposes the same analyzer
+  tools used locally.
+
+The important boundary is unchanged: AI helped build, inspect, and document the
+system; ClickAdvisor's product output still comes from deterministic code and
+script-generated metrics.
+
 ## Safety Rule
 
 If a recommendation is not backed by a ClickAdvisor finding, measured workload

@@ -30,6 +30,10 @@ The repaired metric no longer counts an arbitrary high-scoring ClickHouse chunk
 as relevant. A retrieved chunk must match an explicit gold reference for one of
 the expected rules.
 
+This explains the apparent drop from earlier exploratory `MRR@3` values around
+`0.61`: those runs used a looser relevance check and are not directly
+comparable with the repaired metric shown here.
+
 MiniLM-L6 is strongest on this English-heavy KB sample. The default can still
 remain multilingual E5 when Russian queries and multilingual KB growth matter
 more than this small English ablation.

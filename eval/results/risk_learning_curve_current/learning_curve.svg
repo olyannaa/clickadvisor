@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="420" viewBox="0 0 780 420" role="img" aria-label="Risk learning curve">
+<rect width="780" height="420" fill="#ffffff" />
+<text x="72" y="24" font-size="18" font-weight="700" fill="#0f172a">Risk-label learning curve: Random Forest</text>
+<line x1="72" y1="362.0" x2="746" y2="362.0" stroke="#e5e7eb" />
+<text x="60" y="366.0" text-anchor="end" font-size="12" fill="#475569">0.75</text>
+<line x1="72" y1="298.0" x2="746" y2="298.0" stroke="#e5e7eb" />
+<text x="60" y="302.0" text-anchor="end" font-size="12" fill="#475569">0.80</text>
+<line x1="72" y1="234.0" x2="746" y2="234.0" stroke="#e5e7eb" />
+<text x="60" y="238.0" text-anchor="end" font-size="12" fill="#475569">0.85</text>
+<line x1="72" y1="170.0" x2="746" y2="170.0" stroke="#e5e7eb" />
+<text x="60" y="174.0" text-anchor="end" font-size="12" fill="#475569">0.90</text>
+<line x1="72" y1="106.0" x2="746" y2="106.0" stroke="#e5e7eb" />
+<text x="60" y="110.0" text-anchor="end" font-size="12" fill="#475569">0.95</text>
+<line x1="72" y1="42.0" x2="746" y2="42.0" stroke="#e5e7eb" />
+<text x="60" y="46.0" text-anchor="end" font-size="12" fill="#475569">1.00</text>
+<line x1="72" y1="42" x2="72" y2="362" stroke="#334155" />
+<line x1="72" y1="362" x2="746" y2="362" stroke="#334155" />
+<polyline fill="none" stroke="#0f766e" stroke-width="3" points="72.0,70.5 184.3,89.4 371.6,79.9 558.8,77.6 746.0,76.9" />
+<polyline fill="none" stroke="#2563eb" stroke-width="3" points="72.0,178.6 184.3,149.7 371.6,126.0 558.8,113.5 746.0,107.2" />
+<circle cx="72.0" cy="70.5" r="4" fill="#0f766e" />
+<circle cx="184.3" cy="89.4" r="4" fill="#0f766e" />
+<circle cx="371.6" cy="79.9" r="4" fill="#0f766e" />
+<circle cx="558.8" cy="77.6" r="4" fill="#0f766e" />
+<circle cx="746.0" cy="76.9" r="4" fill="#0f766e" />
+<circle cx="72.0" cy="178.6" r="4" fill="#2563eb" />
+<circle cx="184.3" cy="149.7" r="4" fill="#2563eb" />
+<circle cx="371.6" cy="126.0" r="4" fill="#2563eb" />
+<circle cx="558.8" cy="113.5" r="4" fill="#2563eb" />
+<circle cx="746.0" cy="107.2" r="4" fill="#2563eb" />
+<text x="72.0" y="396" text-anchor="middle" font-size="12" fill="#475569">0.10</text>
+<text x="184.3" y="396" text-anchor="middle" font-size="12" fill="#475569">0.25</text>
+<text x="371.6" y="396" text-anchor="middle" font-size="12" fill="#475569">0.50</text>
+<text x="558.8" y="396" text-anchor="middle" font-size="12" fill="#475569">0.75</text>
+<text x="746.0" y="396" text-anchor="middle" font-size="12" fill="#475569">1.00</text>
+<text x="390.0" y="416" text-anchor="middle" font-size="13" fill="#334155">Train fraction</text>
+<text x="16" y="224" transform="rotate(-90 16 224)" text-anchor="middle" font-size="13" fill="#334155">Macro-F1</text>
+<rect x="540" y="42" width="14" height="4" fill="#0f766e" />
+<text x="562" y="49" font-size="12" fill="#334155">Train macro-F1</text>
+<rect x="540" y="64" width="14" height="4" fill="#2563eb" />
+<text x="562" y="71" font-size="12" fill="#334155">Holdout macro-F1</text>
+</svg>

@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "created_at": "2026-07-01T11:35:56.376283+00:00",
+    "script": "scripts/lab/generate_risk_learning_curve.py",
+    "features_path": "data/ml/expert_dataset/features/features.jsonl",
+    "split_path": "data/ml/expert_dataset/splits/risk_split_v1.json",
+    "random_state": 42,
+    "model": "random_forest_all_features",
+    "note": "Learning curve uses the risk-label train split and evaluates every fraction on the fixed holdout split. It is a stability diagnostic, not a separate model claim."
+  },
+  "rows": [
+    {
+      "fraction": 0.1,
+      "train_records": 1415,
+      "train_label_counts": {
+        "medium": 996,
+        "low": 299,
+        "high": 120
+      },
+      "train_macro_f1": 0.9777124859551805,
+      "train_mcc": 0.9753319573238626,
+      "train_high_recall": 0.975,
+      "holdout_macro_f1": 0.8932861794550314,
+      "holdout_mcc": 0.8944344270005464,
+      "holdout_high_recall": 0.675,
+      "holdout_high_precision": 0.81
+    },
+    {
+      "fraction": 0.25,
+      "train_records": 3539,
+      "train_label_counts": {
+        "medium": 2491,
+        "low": 748,
+        "high": 300
+      },
+      "train_macro_f1": 0.962934106881713,
+      "train_mcc": 0.9600182272047234,
+      "train_high_recall": 0.9366666666666666,
+      "holdout_macro_f1": 0.9158942499671004,
+      "holdout_mcc": 0.9144457309051403,
+      "holdout_high_recall": 0.7958333333333333,
+      "holdout_high_precision": 0.7925311203319502
+    },
+    {
+      "fraction": 0.5,
+      "train_records": 7078,
+      "train_label_counts": {
+        "medium": 4982,
+        "low": 1497,
+        "high": 599
+      },
+      "train_macro_f1": 0.9704071521957314,
+      "train_mcc": 0.9669318505264164,
+      "train_high_recall": 0.9499165275459098,
+      "holdout_macro_f1": 0.9343644420417401,
+      "holdout_mcc": 0.9301935928346581,
+      "holdout_high_recall": 0.85,
+      "holdout_high_precision": 0.8360655737704918
+    },
+    {
+      "fraction": 0.75,
+      "train_records": 10616,
+      "train_label_counts": {
+        "medium": 7472,
+        "low": 2246,
+        "high": 898
+      },
+      "train_macro_f1": 0.9721708654897511,
+      "train_mcc": 0.9688436088650182,
+      "train_high_recall": 0.9643652561247216,
+      "holdout_macro_f1": 0.944120222307378,
+      "holdout_mcc": 0.9390426931758646,
+      "holdout_high_recall": 0.8708333333333333,
+      "holdout_high_precision": 0.8636363636363636
+    },
+    {
+      "fraction": 1.0,
+      "train_records": 14155,
+      "train_label_counts": {
+        "medium": 9963,
+        "low": 2994,
+        "high": 1198
+      },
+      "train_macro_f1": 0.9727389104646452,
+      "train_mcc": 0.9698296739116526,
+      "train_high_recall": 0.9616026711185309,
+      "holdout_macro_f1": 0.9490414301820191,
+      "holdout_mcc": 0.945035207694112,
+      "holdout_high_recall": 0.8875,
+      "holdout_high_precision": 0.8693877551020408
+    }
+  ]
+}
