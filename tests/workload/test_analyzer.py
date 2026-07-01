@@ -6,7 +6,12 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from clickadvisor.cli.main import app
-from clickadvisor.workload.analyzer import analyze_query_log_csv, normalize_sql
+from clickadvisor.workload.analyzer import (
+    analyze_query_log_csv,
+    clickhouse_query_log_sql,
+    normalize_sql,
+    parse_since,
+)
 
 
 def test_normalize_sql_replaces_literals() -> None:
@@ -70,6 +75,17 @@ def test_analyze_query_log_groups_and_prioritizes(tmp_path: Path) -> None:
     assert top.total_duration_ms == 1500
     assert "D-007" in top.rule_ids
     assert top.priority_label in {"medium", "high"}
+
+
+def test_parse_since_and_build_live_query() -> None:
+    assert parse_since("24h") == (24, "HOUR")
+    assert parse_since("7d") == (7, "DAY")
+
+    query = clickhouse_query_log_sql("15m")
+
+    assert "FROM system.query_log" in query
+    assert "INTERVAL 15 MINUTE" in query
+    assert "FORMAT CSVWithNames" in query
 
 
 def test_workload_cli_outputs_markdown(tmp_path: Path) -> None:

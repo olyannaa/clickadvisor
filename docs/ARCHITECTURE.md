@@ -143,11 +143,13 @@ chadvisor analyze
 `chadvisor index-kb` builds the Qdrant retrieval index from `data/kb/chunks/`.
 It refuses to overwrite an existing index unless `--reindex` is supplied.
 
-`chadvisor workload` reads a sanitized `system.query_log` CSV export, groups
-queries by normalized fingerprint, runs representative SQL through the same rule
-engine, and renders a top-N workload risk report.
+`chadvisor workload` reads a sanitized `system.query_log` CSV export or recent
+query-log metadata through the ClickHouse HTTP API, groups queries by normalized
+fingerprint, runs representative SQL through the same rule engine, and renders a
+top-N workload risk report.
 
-`chadvisor mcp-server` starts the stdio MCP server.
+`chadvisor mcp-server` starts the stdio MCP server. `chadvisor mcp-http-server`
+starts a Streamable HTTP MCP endpoint for remote-compatible demos.
 
 ## MCP flow
 

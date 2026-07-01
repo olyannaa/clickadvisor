@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from mcp.server import Server
+from mcp.server.fastmcp import FastMCP
 from mcp.server.stdio import stdio_server
 from mcp.types import GetPromptResult, Prompt, PromptArgument, PromptMessage, TextContent, Tool
 
@@ -341,6 +342,99 @@ def _build_retrieval_advisor() -> Any | None:
 
 def _get_applicable_rules(ch_version: str | None) -> list[Rule]:
     return cast(list[Rule], get_applicable_rules(ch_version))
+
+
+def build_fastmcp_server(
+    *,
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    path: str = "/mcp",
+) -> FastMCP:
+    mcp = FastMCP(
+        "clickadvisor",
+        host=host,
+        port=port,
+        streamable_http_path=path,
+    )
+
+    @mcp.tool(name="analyze_query")
+    async def analyze_query_http(
+        sql: str,
+        ch_version: str | None = None,
+        schema_ddl: str | None = None,
+        mode: str = "diagnose",
+    ) -> str:
+        result = await _analyze_query(
+            {
+                "sql": sql,
+                "ch_version": ch_version,
+                "schema_ddl": schema_ddl,
+                "mode": mode,
+            }
+        )
+        return result[0].text
+
+    @mcp.tool(name="analyze_query_json")
+    async def analyze_query_json_http(
+        sql: str,
+        ch_version: str | None = None,
+        schema_ddl: str | None = None,
+    ) -> str:
+        result = await _analyze_query_json(
+            {
+                "sql": sql,
+                "ch_version": ch_version,
+                "schema_ddl": schema_ddl,
+            }
+        )
+        return result[0].text
+
+    @mcp.tool(name="list_rules")
+    async def list_rules_http(tier: str = "all") -> str:
+        result = await _list_rules({"tier": tier})
+        return result[0].text
+
+    @mcp.tool(name="detect_ch_version")
+    async def detect_ch_version_http(
+        connect_url: str,
+        user: str = "default",
+        password: str = "",
+    ) -> str:
+        result = await _detect_ch_version(
+            {
+                "connect_url": connect_url,
+                "user": user,
+                "password": password,
+            }
+        )
+        return result[0].text
+
+    @mcp.prompt(name="analyze")
+    def analyze_prompt(sql: str, ch_version: str = "", mode: str = "diagnose") -> str:
+        version_hint = f" (ClickHouse {ch_version})" if ch_version else ""
+        text = (
+            f"Проанализируй этот ClickHouse SQL запрос{version_hint} "
+            f"через локальный ClickAdvisor MCP tool analyze_query:\n\n"
+            f"```sql\n{sql}\n```"
+        )
+        if mode == "explain":
+            text += "\n\nИспользуй mode='explain'."
+        return text
+
+    @mcp.prompt(name="explain")
+    def explain_prompt(sql: str, ch_version: str = "") -> str:
+        version_hint = f" (ClickHouse {ch_version})" if ch_version else ""
+        return (
+            f"Объясни почему этот ClickHouse запрос{version_hint} может быть медленным. "
+            f"Используй analyze_query с mode='explain':\n\n"
+            f"```sql\n{sql}\n```"
+        )
+
+    return mcp
+
+
+def run_http(*, host: str = "127.0.0.1", port: int = 8765, path: str = "/mcp") -> None:
+    build_fastmcp_server(host=host, port=port, path=path).run(transport="streamable-http")
 
 
 async def main() -> None:

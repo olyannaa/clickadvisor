@@ -59,6 +59,23 @@ def mcp_server() -> None:
 
 
 @app.command()
+def mcp_http_server(
+    host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Bind port")] = 8765,
+    path: Annotated[str, typer.Option(help="MCP endpoint path")] = "/mcp",
+) -> None:
+    """Запустить Streamable HTTP MCP сервер для remote-compatible demo."""
+    from clickadvisor.mcp_server.server import run_http
+
+    if host not in {"127.0.0.1", "localhost"}:
+        console.print(
+            "[yellow]Внимание: remote MCP endpoint должен быть защищён HTTPS/auth proxy. "
+            "Для локального demo безопаснее использовать 127.0.0.1.[/yellow]"
+        )
+    run_http(host=host, port=port, path=path)
+
+
+@app.command()
 def analyze(
     sql: Annotated[Path, typer.Option(help="SQL файл")],
     explain: Annotated[Path | None, typer.Option()] = None,
@@ -166,9 +183,9 @@ def workload(
         typer.Option(help="ClickHouse HTTP URL for live mode, e.g. http://localhost:8123"),
     ] = None,
     since: Annotated[
-        int,
-        typer.Option(help="Hours back to read from system.query_log (live mode)"),
-    ] = 24,
+        str,
+        typer.Option(help="Live query_log window: 15m, 24h, 7d, 2w"),
+    ] = "24h",
     ch_user: Annotated[str, typer.Option("--user", help="ClickHouse user (live mode)")] = "default",
     ch_password: Annotated[
         str, typer.Option("--password", help="ClickHouse password (live mode)")
@@ -184,7 +201,7 @@ def workload(
 
       CSV:   chadvisor workload --query-log query_log.csv
 
-      Live:  chadvisor workload --connect http://localhost:8123 --since 24
+      Live:  chadvisor workload --connect http://localhost:8123 --since 24h
     """
     from clickadvisor.workload.analyzer import (
         analyze_query_log_csv,
@@ -212,7 +229,7 @@ def workload(
             url=connect,
             user=ch_user,
             password=ch_password,
-            since_hours=since,
+            since=since,
         )
         reader = ClickHouseLiveReader(reader_cfg)
 
@@ -220,7 +237,7 @@ def workload(
             typer.echo(f"Error: cannot reach ClickHouse at {connect}", err=True)
             raise typer.Exit(1)
 
-        typer.echo(f"Connected to {connect}. Reading last {since}h from system.query_log...")
+        typer.echo(f"Connected to {connect}. Reading {since} from system.query_log...")
         rows = reader.fetch()
 
         if not rows:

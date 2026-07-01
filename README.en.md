@@ -1,91 +1,76 @@
-# ClickAdvisor
+<p align="center">
+  <img src="docs/demo.png" alt="ClickAdvisor CLI demo" width="760">
+</p>
 
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![ClickHouse](https://img.shields.io/badge/ClickHouse-SQL%20advisor-ffcc01)
-![Rules](https://img.shields.io/badge/patterns-119-brightgreen)
-![Benchmark](https://img.shields.io/badge/benchmark-222%20cases-brightgreen)
+<h1 align="center">ClickAdvisor</h1>
 
-[![Русский](https://img.shields.io/badge/README-Русский-2ea44f?style=for-the-badge)](README.md)
-[![English](https://img.shields.io/badge/README-English-0969da?style=for-the-badge)](README.en.md)
+<p align="center">
+  Local-first ClickHouse Performance Advisor for SQL, workload review, and AI-agent workflows.
+</p>
 
-> Local-first CLI and MCP server for ClickHouse SQL analysis.
-> It detects anti-patterns, suggests safe rewrites, and explains why a
-> recommendation applies to ClickHouse.
+<p align="center">
+  <a href="README.md"><img alt="README Russian" src="https://img.shields.io/badge/README-Русский-2ea44f?style=for-the-badge"></a>
+  <a href="README.en.md"><img alt="README English" src="https://img.shields.io/badge/README-English-0969da?style=for-the-badge"></a>
+</p>
 
-ClickAdvisor helps DBAs, data engineers, and backend developers investigate slow
-or risky ClickHouse queries faster. It accepts SQL, optionally uses schema DDL,
-EXPLAIN, and environment context, applies deterministic rules, and returns a
-console, JSON, or Markdown report.
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-blue">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
+  <img alt="ClickHouse" src="https://img.shields.io/badge/ClickHouse-performance%20advisor-ffcc01">
+  <img alt="Rules" src="https://img.shields.io/badge/rules-119-brightgreen">
+  <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-327%20cases-brightgreen">
+  <img alt="MCP" src="https://img.shields.io/badge/MCP-stdio%20%2B%20HTTP-blueviolet">
+  <img alt="Local First" src="https://img.shields.io/badge/security-local--first-success">
+</p>
 
-[Project website](https://clickadvisor.lovable.app)
+ClickAdvisor helps DBAs, data engineers, backend engineers, and platform teams
+find risky ClickHouse SQL patterns before production incidents, CPU/RAM waste,
+and expensive cloud bills.
 
-## Why ClickAdvisor If ChatGPT Already Exists?
+It is not a generic SQL chatbot. The trusted runtime is built around a
+deterministic ClickHouse rule engine: every finding has a `rule_id`, severity,
+tier, confidence, explanation, and rewrite example where the rewrite is safe.
+AI is used as an interface through MCP and as a research workflow, not as the
+source of production recommendations.
 
-ChatGPT, Claude, and other assistants are excellent for thinking, coding, and
-exploring hypotheses. ClickAdvisor solves a different layer of the problem:
-repeatable ClickHouse SQL checks where determinism, versioned rules, audit
-trails, and data control matter.
+## Contents
 
-- Every finding has a `rule_id`, tier, ClickHouse version, and applicability conditions.
-- Version-aware filtering hides rules that do not match the selected ClickHouse version.
-- The tier model separates provable rewrites from approximate and advisory recommendations.
-- `--mode explain` explains ClickHouse behavior in practical language.
-- Local retrieval can add documentation links, but it does not replace the rule engine.
-
-This is especially important for enterprise environments. In banks, telecom,
-government, and other regulated sectors, SQL, DDL, EXPLAIN output, and
-environment details often fall under compliance requirements.
-
-By default, ClickAdvisor runs locally. When used through CLI, Docker, or CI
-inside your own environment, user SQL is not sent to external servers and is not
-sent to a generative LLM unless you explicitly do so. The MCP server is also
-local, but if you connect it to an external AI client, data sharing depends on
-what you send to that client and on your organization's security policies.
+- [Capabilities](#capabilities)
+- [Quick start](#quick-start)
+- [Single-query advisor](#single-query-advisor)
+- [Workload analyzer](#workload-analyzer)
+- [MCP deployment](#mcp-deployment)
+- [Data Science and ML](#data-science-and-ml)
+- [Evaluation](#evaluation)
+- [Security](#security)
+- [Project criteria](#project-criteria)
+- [Documentation](#documentation)
 
 ## Capabilities
 
-- Analyze ClickHouse SQL without connecting to a database.
-- Use ClickHouse version through `--ch-version` or HTTP `SELECT version()`.
-- Read optional inputs: `--schema`, `--explain`, `--environment`.
-- Produce `console`, `json`, and `markdown` reports.
-- Expose ClickAdvisor to AI agents as a local MCP server.
-- Add local links to ClickHouse docs / Altinity KB through embedded Qdrant.
-- Compare rewrite candidates with `EXPLAIN ESTIMATE` when `--connect` is explicitly provided.
-- Build prototype workload reports from sanitized `system.query_log` CSV exports.
+| Surface | Capability |
+|---|---|
+| SQL advisor | Analyze one ClickHouse SQL query through CLI, JSON, Markdown, or MCP |
+| Rule engine | 119 ClickHouse-specific rules, detectors, and environment checks |
+| Workload analyzer | `system.query_log` CSV/live analysis, normalized fingerprints, top-N risks |
+| EXPLAIN ESTIMATE | Planner rows/marks comparison without executing user queries |
+| MCP server | Local stdio MCP and Streamable HTTP MCP for remote-compatible demos |
+| Local retrieval | Embedded Qdrant KB over ClickHouse docs, Altinity KB, blog/release notes |
+| DS/ML lab | Expert dataset, EDA, features, group split, baselines, error analysis |
 
-## Project Numbers
+## Why this matters for ClickHouse
 
-| Area | Value |
-|---|---:|
-| SQL/config/workload analysis patterns | 119 |
-| Rewrite/advisory rules `R-*` | 74 |
-| Anti-pattern detectors `D-*` | 25 |
-| Environment rules `E-*` | 20 |
-| Total benchmark YAML cases | 327 |
-| `synthetic_expanded` benchmark cases | 222 |
-| Unit / validation / benchmark tests excluding integration | 325 |
+ClickHouse can execute analytical queries extremely fast, but performance
+depends on engine details: MergeTree, sparse primary keys, marks/parts, `FINAL`,
+skip indexes, `PREWHERE`, materialized views, distributed execution,
+memory/thread settings, and the actual workload.
 
-## Architecture
+ClickAdvisor solves a practical problem: it does not “guess an optimization”.
+It produces a verifiable ClickHouse-specific signal that can be reviewed by a
+DBA, used in CI, passed to an AI agent through MCP, or turned into a workload
+review queue.
 
-```mermaid
-flowchart LR
-    SQL[SQL query] --> Parser[sqlglot parser]
-    Schema[Schema DDL] --> Context[QueryContext]
-    Env[environment.json] --> Context
-    Explain[EXPLAIN] --> Context
-    Parser --> Context
-    Context --> Rules[119 rules]
-    Rules --> Report[Console / JSON / Markdown / MCP]
-    KB[Local knowledge base] --> Retrieval[retrieval advisory]
-    Retrieval --> Report
-```
-
-More details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Quick Start
-
-### From Source
+## Quick start
 
 ```bash
 git clone https://github.com/olyannaa/clickadvisor.git
@@ -94,16 +79,28 @@ poetry install
 poetry run chadvisor analyze --sql query.sql
 ```
 
-### Docker
+Docker:
 
 ```bash
 docker build -t clickadvisor .
-docker run --rm -v "$(pwd)":/queries clickadvisor analyze --sql /queries/query.sql
+docker run --rm -p 8000:8000 clickadvisor
 ```
 
-## Real Example
+By default, the Docker image starts a lightweight Streamable HTTP MCP endpoint
+at `/mcp`. The image is meant for demo/deploy use and does not install heavy
+ML/retrieval dependencies.
 
-`query.sql`:
+## Single-query advisor
+
+```bash
+poetry run chadvisor analyze \
+  --sql query.sql \
+  --ch-version 25.3 \
+  --output-format markdown \
+  --no-retrieval
+```
+
+Example risky query:
 
 ```sql
 SELECT
@@ -124,107 +121,119 @@ HAVING e.country = 'RU'
 ORDER BY paid_revenue DESC;
 ```
 
-Run:
+For this query, ClickAdvisor returns 10 findings, including:
+
+- `R-001`: `COUNT(DISTINCT user_id)` -> `uniqExact(user_id)`;
+- `R-002`: approximate distinct with `uniq` when acceptable;
+- `D-005` / `R-102`: leading wildcard search and skip-index/search strategy;
+- `D-007`: expensive `FINAL` on MergeTree;
+- `D-011`, `R-008`, `R-020`: type casts around JOIN/filter keys;
+- `R-011`: non-aggregate `HAVING` can move to `WHERE`;
+- `R-014`: expensive `GROUP BY` over a string column.
+
+<p align="center">
+  <img src="docs/assets/readme-example-output.svg" alt="ClickAdvisor markdown report example" width="780">
+</p>
+
+## Workload analyzer
+
+CSV export from `system.query_log`:
+
+```bash
+poetry run chadvisor workload \
+  --query-log examples/query_log_sample.csv \
+  --output-format markdown \
+  --top-n 3
+```
+
+Live read-only mode through the ClickHouse HTTP API:
+
+```bash
+poetry run chadvisor workload \
+  --connect http://localhost:8123 \
+  --user default \
+  --password secret \
+  --since 24h \
+  --output-format markdown \
+  --top-n 10
+```
+
+`workload` groups similar queries by normalized fingerprint, computes
+executions, total/avg/p95 latency, read rows/bytes, and memory usage, then runs
+representative SQL through the rule engine and builds a top-N DBA review queue.
+
+Example top risk from the sample:
+
+```text
+Priority: high
+Executions: 2
+Total duration: 2180 ms
+Read bytes: 350000000
+Rule IDs: D-003, D-004, D-005, D-007, R-102
+Normalized SQL: select * from events final where message like ?
+```
+
+More details: [docs/workload.md](docs/workload.md).
+
+## MCP deployment
+
+Local stdio MCP for Claude Desktop, Cursor, Zed, and other MCP clients:
+
+```bash
+poetry run chadvisor mcp-server
+```
+
+Streamable HTTP MCP endpoint for remote-compatible demos:
+
+```bash
+poetry run chadvisor mcp-http-server \
+  --host 127.0.0.1 \
+  --port 8765 \
+  --path /mcp
+```
+
+Endpoint:
+
+```text
+http://127.0.0.1:8765/mcp
+```
+
+For a defense/demo, the server can run as a remote endpoint behind HTTPS/auth:
+VPS + reverse proxy, Railway/Render/Fly.io, Cloudflare Tunnel, or Tailscale.
+A public unauthenticated MCP endpoint is not recommended because SQL and query
+context are sensitive.
+
+Fastest path to a public link:
+
+1. push the repository to GitHub;
+2. create a Railway project from the GitHub repo or a Render Blueprint;
+3. let the platform build the root `Dockerfile`;
+4. generate/open the public domain;
+5. share an endpoint like:
+
+```text
+https://<your-service>.up.railway.app/mcp
+https://<your-service>.onrender.com/mcp
+```
+
+More details:
+
+- [docs/MCP.md](docs/MCP.md)
+- [docs/mcp-deployment.md](docs/mcp-deployment.md)
+- [docs/ai-mcp-workflow.md](docs/ai-mcp-workflow.md)
+
+## Schema, EXPLAIN, and environment
 
 ```bash
 poetry run chadvisor analyze \
   --sql query.sql \
-  --ch-version 25.3 \
-  --output-format markdown \
-  --no-retrieval
-```
-
-On this query, ClickAdvisor reports 10 findings, including:
-
-- `R-001`: replace `COUNT(DISTINCT user_id)` with `uniqExact(user_id)`;
-- `R-002`: consider `uniq(user_id)` when approximate distinct is acceptable;
-- `D-005` and `R-102`: `LIKE '%...'` may need a skip index or another search strategy;
-- `D-007`: `FINAL` can be expensive on large MergeTree tables;
-- `D-011`, `R-008`, `R-020`: check type conversion around the JOIN key;
-- `R-011`: move a non-aggregate `HAVING` predicate to `WHERE`.
-- `R-014`: `GROUP BY` over a string column can be expensive and needs type/cardinality review.
-
-Actual CLI output excerpt:
-
-![ClickAdvisor output example](docs/assets/readme-example-output.svg)
-
-## CLI Usage
-
-### Basic Analysis
-
-```bash
-poetry run chadvisor analyze --sql query.sql
-```
-
-### ClickHouse Version
-
-```bash
-poetry run chadvisor analyze --sql query.sql --ch-version 25.3
-```
-
-The version is used to filter rules by `ch_version_introduced`.
-
-### Version Detection Through HTTP API
-
-```bash
-poetry run chadvisor analyze --sql query.sql \
-  --connect http://localhost:8123 \
-  --ch-user default \
-  --ch-password secret
-```
-
-ClickAdvisor only runs `SELECT version()` and normalizes responses such as
-`25.3.2.39` -> `25.3`.
-
-### Explain Mode
-
-```bash
-poetry run chadvisor analyze --sql query.sql --mode explain
-```
-
-Explain mode describes why the recommendation matters for ClickHouse: sparse
-primary key indexes, granules, `WHERE` / `HAVING` order, `FINAL`, `UNION` vs
-`UNION ALL`, and related concepts.
-
-### Output Formats
-
-```bash
-poetry run chadvisor analyze --sql query.sql --output-format console
-poetry run chadvisor analyze --sql query.sql --output-format json
-poetry run chadvisor analyze --sql query.sql --output-format markdown
-```
-
-`console` is useful locally, `json` fits CI/CD, and `markdown` works well for PR
-comments and MCP responses.
-
-### EXPLAIN ESTIMATE
-
-```bash
-poetry run chadvisor analyze --sql query.sql \
-  --connect http://localhost:8123 \
-  --ch-user default \
-  --ch-password secret \
-  --explain-estimate
-```
-
-ClickAdvisor compares the original SQL and rewrite candidate through `EXPLAIN
-ESTIMATE`. It does not execute the query, run `ANALYZE`, or read user table
-data.
-
-### Schema, EXPLAIN, And Environment
-
-```bash
-poetry run chadvisor analyze --sql query.sql \
   --schema schema.sql \
-  --environment environment.json \
-  --explain explain.json
+  --explain explain.json \
+  --environment environment.json
 ```
 
-`environment.json` carries settings, hardware, cluster/workload facts, and
-system metrics for `E-*` rules and some Tier 2 advisory rules. If no
-environment file is provided, environment rules do not fire.
-
-Minimal example:
+Environment context includes settings, hardware, cluster, and workload facts
+for `E-*` rules and selected Tier 2 advisory rules:
 
 ```json
 {
@@ -241,171 +250,150 @@ Minimal example:
   "workload": {
     "interactive_queries": true,
     "large_join": true,
-    "bulk_inserts": true,
-    "insert_format": "JSONEachRow"
+    "bulk_inserts": true
   },
   "cluster": {
     "shards": 4,
-    "replicas": 2,
-    "has_local_replica": true
+    "replicas": 2
   }
 }
 ```
 
-## Knowledge Base And Retrieval Advisory
-
-The knowledge base is built in `/data/kb/` from ClickHouse docs, Altinity KB,
-ClickHouse blog posts, and release notes. To enable local semantic search,
-index Markdown chunks:
+EXPLAIN ESTIMATE:
 
 ```bash
-poetry run chadvisor index-kb
+poetry run chadvisor analyze \
+  --sql query.sql \
+  --connect http://localhost:8123 \
+  --ch-user default \
+  --ch-password secret \
+  --explain-estimate
 ```
 
-Reindex:
+ClickAdvisor runs only `EXPLAIN ESTIMATE`; it does not execute the user query
+and does not read result data.
 
-```bash
-poetry run chadvisor index-kb --reindex
-```
+## Data Science and ML
 
-Embedding model selection:
+The DS layer is not meant to replace the rule engine. Its job is to formalize
+quality, compare approaches, expose limitations, and prepare a
+triage/prioritization layer.
 
-```bash
-poetry run chadvisor index-kb --embedding-model multilingual-e5-small
-poetry run chadvisor index-kb --embedding-model minilm-l6
-```
+Expert dataset:
 
-After indexing, `.qdrant_db` is created locally. If it exists, `analyze` adds a
-section with relevant documentation snippets.
+| Metric | Value |
+|---|---:|
+| SQL records | 20 235 |
+| Real / synthetic | 19 090 / 1 145 |
+| Successful local replay records | 9 837 |
+| Final labels | low 4 253 / medium 14 285 / high 1 697 |
+| Numeric feature count | 115 |
+| Rule vocabulary | 54 |
 
-## MCP Server
+Key label-source fact:
 
-ClickAdvisor can be exposed to AI agents as a local MCP server:
+| Label source | Records | Interpretation |
+|---|---:|---|
+| `rule_only` | 14 693 | model mostly learns a compressed rule-engine signal |
+| `measured_only` | 4 635 | independent signal from latency/read/memory metrics |
+| `both` | 907 | strongest core where static and measured signals agree |
 
-```bash
-poetry run chadvisor mcp-server
-```
+Baseline ladder:
 
-Example `claude_desktop_config.json`:
+| Model | CV macro-F1 | Holdout macro-F1 |
+|---|---:|---:|
+| Dummy most frequent | 0.275 +/- 0.000 | 0.278 |
+| Dummy stratified | 0.328 +/- 0.009 | 0.335 |
+| TF-IDF + Logistic Regression | 0.864 +/- 0.011 | 0.882 |
+| Structural/rule LR | 0.827 +/- 0.004 | 0.837 |
+| Random Forest all features | 0.938 +/- 0.006 | 0.949 |
+| CatBoost tabular | 0.873 +/- 0.008 | 0.871 |
 
-```json
-{
-  "mcpServers": {
-    "clickadvisor": {
-      "command": "poetry",
-      "args": ["run", "chadvisor", "mcp-server"],
-      "cwd": "/path/to/clickadvisor"
-    }
-  }
-}
-```
+Random Forest holdout error analysis:
 
-Available MCP tools:
+| Slice | Records | Macro-F1 | High recall |
+|---|---:|---:|---:|
+| all_holdout | 3 039 | 0.949 | 0.887 |
+| rule_only | 2 235 | 0.970 | 0.990 |
+| measured_only | 672 | 0.595 | 0.785 |
+| both | 132 | 0.975 | 1.000 |
 
-- `analyze_query` — Markdown SQL report;
-- `analyze_query_json` — structured JSON report;
-- `list_rules` — registered rules;
-- `detect_ch_version` — ClickHouse version detection through HTTP API.
+Conclusion: ML is useful for triage, confidence grouping, and review queue
+ordering, but production recommendations remain rule-first.
 
-More details: [docs/MCP.md](docs/MCP.md).
+More details:
 
-## Workload Analyzer Prototype
+- [docs/evaluation.md](docs/evaluation.md)
+- [docs/experiments/risk_labeling_ds_summary.md](docs/experiments/risk_labeling_ds_summary.md)
+- [data/ml/expert_dataset/eda/ds_report.md](data/ml/expert_dataset/eda/ds_report.md)
 
-To move from single-query review toward a DBA review queue, ClickAdvisor includes
-a prototype for sanitized `system.query_log` CSV exports:
+## Evaluation
 
-```bash
-poetry run chadvisor workload \
-  --query-log examples/query_log_sample.csv \
-  --output-format markdown \
-  --top-n 3
-```
-
-It groups similar queries by normalized fingerprint, computes executions,
-total/avg/p95 latency, read rows/bytes, and memory, then runs the representative
-query through the rule engine and ranks top opportunities.
-
-More details: [docs/workload.md](docs/workload.md).
-
-## Quality Metrics
-
-Current reproducible metrics as of 2026-06-30:
-
-| Evaluation surface | Data | Metric |
+| Evaluation surface | Data | Result |
 |---|---|---:|
-| Rule detection | `222` synthetic/schema/env benchmark cases | precision `1.000`, recall `1.000`, F1 `1.000` |
-| ML classifier | `synthetic_expanded_v1` train/test split | best test macro F1 `0.691`, best test micro F1 `0.988` |
-| Retrieval | `20` explicit query -> relevant docs pairs | MRR@3 `0.517` with MiniLM-L6 |
-| Risk-label DS pipeline | `20 235` SQL records, group split + holdout | RF holdout macro F1 `0.949`, measured-only macro F1 `0.595` |
-| Workload prototype | sample sanitized `query_log` CSV | normalized groups + top-N risk report |
+| Rule detection | 222 synthetic/schema/env cases | precision 1.000 / recall 1.000 / F1 1.000 |
+| Retrieval | 20 query -> docs pairs | best MRR@3 0.517 |
+| Risk-label DS | 20 235 SQL records | RF holdout macro-F1 0.949 |
+| Workload prototype | sample query_log CSV | normalized groups + top-N risk report |
 
-What was evaluated:
-
-- Rule detection: strict check that the analyzer returns exactly the expected `rule_id` set.
-- Classifier ablation: multi-label classification over AST/SQL features.
-- Retrieval ablation: `MRR@3` over explicit gold query -> relevant URL/keyword mappings.
-
-Run the expanded synthetic benchmark:
+Reproducible checks:
 
 ```bash
-poetry run python scripts/eval/run_benchmark.py \
-  --cases-dir benchmark/cases/synthetic_expanded \
-  --mode strict
+poetry run ruff check clickadvisor tests scripts
+poetry run mypy clickadvisor
+poetry run pytest --ignore=tests/integration -q
+poetry run python scripts/rules/validate_catalog.py
+poetry run python scripts/benchmark/validate_cases.py
+poetry run python scripts/eval/run_benchmark.py --cases-dir benchmark/cases/synthetic_expanded --mode strict
 ```
 
-Methodology: [docs/evaluation.md](docs/evaluation.md),
-[docs/experiments/classifier_ablation.md](docs/experiments/classifier_ablation.md),
-[docs/experiments/retrieval_ablation.md](docs/experiments/retrieval_ablation.md),
-[docs/experiments/risk_labeling_ds_summary.md](docs/experiments/risk_labeling_ds_summary.md).
+## Security
 
-## Security And Data Handling
+ClickAdvisor can run inside a company network, CI/CD, or an engineer's local
+environment without sending SQL, DDL, EXPLAIN, environment context, or
+`query_log` data to external LLM/API services.
 
-ClickAdvisor does not execute user SQL to measure speedup. When connected to
-ClickHouse, it only uses:
+What ClickAdvisor may read:
 
+- SQL text;
+- optional schema DDL;
+- optional EXPLAIN output;
+- optional environment JSON;
+- sanitized `system.query_log` CSV or read-only live metadata;
 - `SELECT version()` for version detection;
-- `EXPLAIN ESTIMATE ...` when `--explain-estimate` is explicitly enabled.
+- `EXPLAIN ESTIMATE` only when explicitly requested.
 
-For basic analysis, a SQL file is enough. Schema, EXPLAIN, environment context,
-and ClickHouse connection are optional.
+What it does not do by default:
 
-For enterprise adoption, the key point is that ClickAdvisor can run inside the
-company perimeter, CI/CD, or an engineer's local environment without sending
-SQL, DDL, EXPLAIN, or environment context to external LLM/API services. This
-reduces risks around compliance, banking secrecy, personal data, trade secrets,
-and internal naming conventions.
+- does not execute user SQL for speedup measurement;
+- does not read result data;
+- does not run `ANALYZE`;
+- does not apply DDL/mutations;
+- does not make hidden remote LLM calls.
 
 More details: [docs/security-local-first.md](docs/security-local-first.md).
 
-## Development
+## Project criteria
 
-```bash
-poetry install
-poetry run ruff check clickadvisor tests scripts
-poetry run mypy clickadvisor
-poetry run pytest --ignore=tests/integration
-poetry run python scripts/eval/run_benchmark.py
-```
+| Criterion | How ClickAdvisor addresses it |
+|---|---|
+| Development | Poetry, Docker, GitHub Actions, typed core, linting, tests, validators, ClickHouse integration |
+| Data Science | EDA, feature extraction, group split, CV/holdout, baseline ladder, error analysis |
+| AI usage | MCP tools, local and remote-compatible agent workflow, DS/research automation narrative |
+| Product thinking | target users, pain, competitors/SOTA framing, MVP surfaces, impact path through workload analysis |
 
-The version detection integration test expects a ClickHouse HTTP endpoint at
-`localhost:8123`. GitHub Actions starts it as a service container.
+Detailed self-assessment: [docs/project-readiness.en.md](docs/project-readiness.en.md).
 
-## AI-Assisted Development
+## Documentation
 
-Codex and Claude were used systematically during development for architecture
-review, test variants, documentation, and consistency checks. They are not part
-of ClickAdvisor's trusted runtime path: CLI/MCP recommendations are produced by
-the rule engine, ML evaluation surface, and local retrieval.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Evaluation](docs/evaluation.md)
+- [Workload Analyzer](docs/workload.md)
+- [MCP](docs/MCP.md)
+- [MCP Deployment](docs/mcp-deployment.md)
+- [Security / Local-First](docs/security-local-first.md)
+- [Rule Catalog](docs/rules/README.md)
 
-## Not Claimed As Ready
+## License
 
-- Product generative LLM in the trusted runtime path.
-- Live `query_log` analysis through `--connect --since`; a CSV prototype exists.
-- Automatic DDL changes.
-- Running `ANALYZE` or replaying queries on user data.
-- Automatically applying Tier 2 design/storage recommendations without DBA review.
-
----
-
-[![Русский](https://img.shields.io/badge/README-Русский-2ea44f?style=for-the-badge)](README.md)
-[![English](https://img.shields.io/badge/README-English-0969da?style=for-the-badge)](README.en.md)
+MIT

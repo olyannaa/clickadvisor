@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: clickadvisor-mcp
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: MCP_PATH
+        value: /mcp

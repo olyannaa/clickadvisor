@@ -35,7 +35,7 @@ event_time,query,query_duration_ms,read_rows,read_bytes,memory_usage
 2026-07-01 10:00:00,"SELECT * FROM events FINAL WHERE message LIKE '%timeout%'",1200,900000,180000000,220000000
 ```
 
-## Run
+## Run From CSV
 
 ```bash
 poetry run chadvisor workload \
@@ -60,6 +60,31 @@ poetry run chadvisor workload \
   --query-log examples/query_log_sample.csv \
   --output-format json
 ```
+
+## Run Live Against ClickHouse
+
+If ClickAdvisor can reach the ClickHouse HTTP API, it can read recent
+`system.query_log` metadata directly:
+
+```bash
+poetry run chadvisor workload \
+  --connect http://localhost:8123 \
+  --user default \
+  --password secret \
+  --since 24h \
+  --output-format markdown \
+  --top-n 10
+```
+
+Supported `--since` values:
+
+- `15m`
+- `24h`
+- `7d`
+- `2w`
+
+The live mode runs a read-only query against `system.query_log` and requests
+`FORMAT CSVWithNames`; the rest of the pipeline is the same as the CSV mode.
 
 ## Example Output
 
@@ -113,6 +138,6 @@ WHERE type = 'QueryFinish'
 FORMAT CSVWithNames
 ```
 
-The future production version should add live `--connect`, time windows,
-identifier hashing, stricter redaction modes, and ranking metrics such as
-Precision@K and NDCG@K.
+The future production version should add identifier hashing, stricter redaction
+modes, richer source filters, and ranking metrics such as Precision@K and
+NDCG@K.
