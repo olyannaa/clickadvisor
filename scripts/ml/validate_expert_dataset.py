@@ -31,12 +31,21 @@ def main() -> None:
             print(issue)
         raise SystemExit(1)
     risks = Counter(record["risk"]["label"] for record in records)
+    final_risks = Counter(str(record.get("final_risk_label")) for record in records)
+    label_sources = Counter(str(record.get("label_source")) for record in records)
+    reconciled_suffix = ""
+    if isinstance(manifest.get("risk_reconciliation"), dict):
+        reconciled_suffix = (
+            f", final_risk_distribution={dict(sorted(final_risks.items()))}, "
+            f"label_source_distribution={dict(sorted(label_sources.items()))}"
+        )
     print(
         "Validated expert dataset: "
         f"{len(records)} records, "
         f"{sum(1 for record in records if not record['is_synthetic'])} real, "
         f"{sum(1 for record in records if record['is_synthetic'])} synthetic, "
         f"risk distribution={dict(sorted(risks.items()))}"
+        f"{reconciled_suffix}"
     )
 
 

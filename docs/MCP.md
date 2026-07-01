@@ -15,6 +15,26 @@ from the deterministic ClickAdvisor rule engine.
 poetry run chadvisor mcp-server
 ```
 
+This starts the local stdio MCP server.
+
+For Streamable HTTP MCP:
+
+```bash
+poetry run chadvisor mcp-http-server \
+  --host 127.0.0.1 \
+  --port 8765 \
+  --path /mcp
+```
+
+Endpoint:
+
+```text
+http://127.0.0.1:8765/mcp
+```
+
+For a remote demo, expose this endpoint only through HTTPS and authentication.
+See [MCP Deployment Options](mcp-deployment.md).
+
 ## Connect to Claude Desktop
 
 Add this to `~/Library/Application Support/Claude/claude_desktop_config.json`:
@@ -118,6 +138,7 @@ that client. Treat SQL and query context as sensitive.
 
 More details:
 
+- [MCP Deployment Options](mcp-deployment.md)
 - [AI And MCP Workflow](ai-mcp-workflow.md)
 - [Security And Local-First Runtime](security-local-first.md)
 
@@ -131,5 +152,7 @@ The server exposes MCP prompts for slash-command style workflows:
 
 ## Compatibility
 
-The server is tested with the Python `mcp` package over stdio transport and is
-compatible with MCP clients that support tools and prompts over stdio.
+The server is tested with the Python `mcp` package over stdio and Streamable
+HTTP transports. It is compatible with MCP clients that support tools and
+prompts over stdio, and with clients that can connect to a Streamable HTTP MCP
+endpoint such as `/mcp`.

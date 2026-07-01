@@ -66,6 +66,13 @@ async def test_list_prompts() -> None:
     assert "explain" in names
 
 
+def test_build_fastmcp_server() -> None:
+    from clickadvisor.mcp_server.server import build_fastmcp_server
+
+    app = build_fastmcp_server(host="127.0.0.1", port=8765, path="/mcp")
+    assert app is not None
+
+
 @pytest.mark.asyncio
 async def test_unknown_tool() -> None:
     results = await call_tool("unknown_tool", {})

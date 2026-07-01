@@ -1,0 +1,17 @@
+.git
+.mypy_cache
+.pytest_cache
+.qdrant_db
+.ruff_cache
+**/__pycache__/
+**/*.pyc
+.DS_Store
+
+data/ml/
+eval/results/
+htmlcov/
+.coverage
+
+.env
+.env.*
+!.env.example

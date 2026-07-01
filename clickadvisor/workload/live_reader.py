@@ -1,23 +1,16 @@
-"""
-clickadvisor/workload/live_reader.py
-
-Reads query_log directly from a running ClickHouse instance via HTTP API.
-Produces the same row format as CSV import so analyzer.py stays unchanged.
-"""
-
 from __future__ import annotations
 
 import csv
 import io
 import logging
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 
 import httpx
 
+from clickadvisor.workload.analyzer import parse_since
+
 logger = logging.getLogger(__name__)
 
-# Columns we need — matches query_log_sample.csv schema
 _QUERY = """
 SELECT
     query,
@@ -33,7 +26,7 @@ SELECT
 FROM system.query_log
 WHERE
     type = 'QueryFinish'
-    AND event_time >= '{since}'
+    AND event_time >= now() - INTERVAL {since_value} {since_unit}
     AND query_kind IN ('Select', 'AsyncInsertFlush')
     AND query NOT ILIKE '%system.query_log%'
     AND query NOT ILIKE '%system.processes%'
@@ -43,12 +36,12 @@ FORMAT CSVWithNames
 """.strip()
 
 
-@dataclass
+@dataclass(slots=True)
 class LiveReaderConfig:
-    url: str                  # e.g. http://localhost:8123
+    url: str
     user: str = "default"
     password: str = ""
-    since_hours: int = 24
+    since: str = "24h"
     limit: int = 10_000
     timeout: float = 30.0
 
@@ -61,19 +54,18 @@ class ClickHouseLiveReader:
         self._base_url = config.url.rstrip("/")
 
     def fetch(self) -> list[dict[str, str]]:
-        """
-        Returns list of row-dicts with the same keys as query_log_sample.csv.
-        Raises httpx.HTTPStatusError on ClickHouse errors.
-        """
-        since_dt = datetime.now(tz=UTC) - timedelta(hours=self.config.since_hours)
-        since_str = since_dt.strftime("%Y-%m-%d %H:%M:%S")
-
-        sql = _QUERY.format(since=since_str, limit=self.config.limit)
+        """Return row dicts with the same keys as query_log_sample.csv."""
+        since_value, since_unit = parse_since(self.config.since)
+        sql = _QUERY.format(
+            since_value=since_value,
+            since_unit=since_unit,
+            limit=self.config.limit,
+        )
 
         logger.info(
             "Fetching query_log from %s (since %s, limit %d)",
             self._base_url,
-            since_str,
+            self.config.since,
             self.config.limit,
         )
 
@@ -92,12 +84,15 @@ class ClickHouseLiveReader:
             logger.error("ClickHouse returned error:\n%s", response.text[:2000])
             raise exc
 
-        rows = list(csv.DictReader(io.StringIO(response.text)))
+        rows: list[dict[str, str]] = [
+            {str(key): str(value or "") for key, value in row.items()}
+            for row in csv.DictReader(io.StringIO(response.text))
+        ]
         logger.info("Fetched %d rows from query_log", len(rows))
         return rows
 
     def check_connection(self) -> bool:
-        """Quick ping — returns True if ClickHouse responds."""
+        """Return True if ClickHouse responds to /ping."""
         try:
             r = httpx.get(f"{self._base_url}/ping", timeout=5.0)
             return r.status_code == 200 and r.text.strip() == "Ok."

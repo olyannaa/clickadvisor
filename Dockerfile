@@ -1,38 +1,22 @@
-# ClickAdvisor MCP Server
-# Supports:
-#   Local:   docker run -p 8000:8000 clickadvisor-mcp
-#   Railway: auto-detects PORT env var
-
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000 \
+    MCP_PATH=/mcp \
+    PYTHONPATH=/app
 
-# Install poetry
-RUN pip install --no-cache-dir poetry==1.8.2
+COPY requirements-mcp.txt ./
+RUN pip install --no-cache-dir -r requirements-mcp.txt
 
-# Copy only dependency files first (layer cache)
-COPY pyproject.toml poetry.lock* ./
-
-# Install dependencies without dev extras
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --only main
-
-# Copy source
 COPY clickadvisor/ ./clickadvisor/
-COPY README.md ./
+COPY docs/rules/cards/ ./docs/rules/cards/
 
-# Health check
+EXPOSE 8000
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+    CMD python -c "import os, socket; s=socket.create_connection(('127.0.0.1', int(os.environ.get('PORT', '8000'))), 5); s.close()"
 
-# Railway / Render inject PORT automatically; fall back to 8000 locally
-ENV PORT=8000
-
-EXPOSE ${PORT}
-
-CMD ["sh", "-c", "python -m clickadvisor.mcp_server --transport sse --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "python -c 'import os; from clickadvisor.mcp_server.server import run_http; run_http(host=\"0.0.0.0\", port=int(os.environ.get(\"PORT\", \"8000\")), path=os.environ.get(\"MCP_PATH\", \"/mcp\"))'"]

@@ -23,6 +23,8 @@ READ_ROWS_COLUMNS = ("read_rows", "rows_read", "rows")
 READ_BYTES_COLUMNS = ("read_bytes", "bytes_read", "bytes")
 MEMORY_COLUMNS = ("memory_usage", "peak_memory_usage", "memory_usage_bytes")
 SEVERITY_WEIGHT = {"high": 100.0, "medium": 35.0, "low": 10.0}
+SINCE_RE = re.compile(r"^(?P<value>[1-9]\d*)(?P<unit>m|h|d|w)$", re.IGNORECASE)
+SINCE_UNITS = {"m": "MINUTE", "h": "HOUR", "d": "DAY", "w": "WEEK"}
 
 
 @dataclass(slots=True)
@@ -143,6 +145,31 @@ def analyze_query_log_csv(
     return _build_report(
         str(path), rows_read, rows_used, groups, top_n=top_n, ch_version=ch_version
     )
+
+
+def clickhouse_query_log_sql(since: str) -> str:
+    interval_value, interval_unit = parse_since(since)
+    return f"""
+SELECT
+    event_time,
+    query,
+    query_duration_ms,
+    read_rows,
+    read_bytes,
+    memory_usage
+FROM system.query_log
+WHERE type = 'QueryFinish'
+  AND event_time >= now() - INTERVAL {interval_value} {interval_unit}
+  AND query != ''
+FORMAT CSVWithNames
+""".strip()
+
+
+def parse_since(since: str) -> tuple[int, str]:
+    match = SINCE_RE.match(since.strip())
+    if not match:
+        raise ValueError("since must look like 15m, 24h, 7d, or 2w")
+    return int(match.group("value")), SINCE_UNITS[match.group("unit").lower()]
 
 
 def analyze_query_log_rows(
