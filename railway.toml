@@ -1,0 +1,17 @@
+# railway.toml
+# Deploy ClickAdvisor MCP server to Railway with one click.
+# https://railway.app/new/template — point at this repo.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "clickadvisor-mcp"
+
+[services.env]
+PORT = { default = "8000" }
