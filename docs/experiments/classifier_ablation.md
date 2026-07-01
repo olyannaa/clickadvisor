@@ -32,3 +32,22 @@ is small and several labels have only one or two positive examples in test.
 Random Forest is the strongest baseline in this run, but the train/test gap
 shows why these numbers should be reported as synthetic classifier ablation
 metrics, not as production generalization claims.
+
+The gap is expected for this specific setup: the split has only `36` test cases,
+and rare rule labels may have one or two positives. Tree models can memorize
+the training side of this compact benchmark (`train macro-F1` about `0.97`)
+while test macro-F1 stays around `0.67`-`0.69`.
+
+## Relationship to Risk-Label Baselines
+
+This experiment must not be compared directly with
+`risk_baseline_ladder_current`.
+
+| Experiment | Dataset | Target | Split | What it answers |
+|---|---:|---|---|---|
+| Classifier ablation | 180 synthetic benchmark cases | multi-label `expected_rules_to_fire` | 144 train / 36 test | Can ML features predict expected rule IDs on a compact rule benchmark? |
+| Risk baseline ladder | 20 235 query records | `low` / `medium` / `high` risk | group-aware train/test/holdout | Can SQL/text/rule/measured features triage query risk? |
+
+The classifier ablation gap is a warning about rare-label generalization in the
+small rule benchmark. The risk-label holdout score is a separate triage result
+with different labels, features, split semantics, and dataset size.
