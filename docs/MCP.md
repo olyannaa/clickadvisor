@@ -35,6 +35,50 @@ http://127.0.0.1:8765/mcp
 For a remote demo, expose this endpoint only through HTTPS and authentication.
 See [MCP Deployment Options](mcp-deployment.md).
 
+## Connect To Public Remote MCP
+
+Remote MCP clients connect to ClickAdvisor through the hosted Streamable HTTP
+endpoint:
+
+```text
+https://clickadvisor-mcp-production.up.railway.app/mcp
+```
+
+Claude / Anthropic API URL-based server config:
+
+Claude / Claude Desktop:
+
+```text
+Customize -> Connectors -> Add custom connector
+Name: ClickAdvisor
+URL:  https://clickadvisor-mcp-production.up.railway.app/mcp
+```
+
+Claude Code:
+
+```bash
+claude mcp add --transport http clickadvisor \
+  https://clickadvisor-mcp-production.up.railway.app/mcp
+```
+
+Anthropic API:
+
+```json
+{
+  "mcp_servers": [
+    {
+      "type": "url",
+      "name": "clickadvisor",
+      "url": "https://clickadvisor-mcp-production.up.railway.app/mcp"
+    }
+  ]
+}
+```
+
+Opening the endpoint in a browser can return `Not Acceptable: Client must
+accept text/event-stream`. This is expected for Streamable HTTP MCP; use an MCP
+client or MCP Inspector to test the tool calls.
+
 ## Connect to Claude Desktop
 
 Add this to `~/Library/Application Support/Claude/claude_desktop_config.json`:
