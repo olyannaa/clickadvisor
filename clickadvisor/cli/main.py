@@ -158,17 +158,37 @@ def analyze(
 @app.command()
 def workload(
     query_log: Annotated[
-        Path,
+        Path | None,
         typer.Option(help="Sanitized CSV export from system.query_log"),
-    ],
+    ] = None,
+    connect: Annotated[
+        str | None,
+        typer.Option(help="ClickHouse HTTP URL for live mode, e.g. http://localhost:8123"),
+    ] = None,
+    since: Annotated[
+        int,
+        typer.Option(help="Hours back to read from system.query_log (live mode)"),
+    ] = 24,
+    ch_user: Annotated[str, typer.Option("--user", help="ClickHouse user (live mode)")] = "default",
+    ch_password: Annotated[
+        str, typer.Option("--password", help="ClickHouse password (live mode)")
+    ] = "",
     top_n: Annotated[int, typer.Option(help="Number of normalized query groups to show")] = 10,
     ch_version: Annotated[str | None, typer.Option(help="24.3")] = None,
     output_format: Annotated[str, typer.Option(help="console|json|markdown")] = "console",
     output: Annotated[Path | None, typer.Option(help="Write report to file")] = None,
 ) -> None:
-    """Analyze a sanitized query_log CSV export and rank workload risks."""
+    """Analyze ClickHouse workload risk.
+
+    Two modes:
+
+      CSV:   chadvisor workload --query-log query_log.csv
+
+      Live:  chadvisor workload --connect http://localhost:8123 --since 24
+    """
     from clickadvisor.workload.analyzer import (
         analyze_query_log_csv,
+        analyze_query_log_rows,
         render_workload_json,
         render_workload_markdown,
         workload_report_to_dict,
@@ -178,8 +198,40 @@ def workload(
         raise typer.BadParameter("output_format must be one of: console, json, markdown")
     if top_n <= 0:
         raise typer.BadParameter("top_n must be positive")
+    if connect and query_log:
+        typer.echo("Error: use --connect OR --query-log, not both.", err=True)
+        raise typer.Exit(1)
+    if not connect and not query_log:
+        typer.echo("Error: provide --connect <url> or --query-log <path>.", err=True)
+        raise typer.Exit(1)
 
-    report = analyze_query_log_csv(query_log, top_n=top_n, ch_version=ch_version)
+    if connect:
+        from clickadvisor.workload.live_reader import ClickHouseLiveReader, LiveReaderConfig
+
+        reader_cfg = LiveReaderConfig(
+            url=connect,
+            user=ch_user,
+            password=ch_password,
+            since_hours=since,
+        )
+        reader = ClickHouseLiveReader(reader_cfg)
+
+        if not reader.check_connection():
+            typer.echo(f"Error: cannot reach ClickHouse at {connect}", err=True)
+            raise typer.Exit(1)
+
+        typer.echo(f"Connected to {connect}. Reading last {since}h from system.query_log...")
+        rows = reader.fetch()
+
+        if not rows:
+            typer.echo("No query_log rows found for the given time range.")
+            raise typer.Exit(0)
+
+        report = analyze_query_log_rows(rows, source=connect, top_n=top_n, ch_version=ch_version)
+    else:
+        assert query_log is not None
+        report = analyze_query_log_csv(query_log, top_n=top_n, ch_version=ch_version)
+
     if output_format == "json":
         rendered = render_workload_json(report)
     else:

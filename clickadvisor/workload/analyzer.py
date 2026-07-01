@@ -66,43 +66,43 @@ class _GroupAccumulator:
     memory_values: list[int] = field(default_factory=list)
 
 
-def analyze_query_log_csv(
-    path: Path,
-    *,
-    top_n: int = 10,
-    ch_version: str | None = None,
-) -> WorkloadReport:
-    """Analyze a sanitized ClickHouse query_log CSV export.
-
-    The analyzer reads metadata and query text only. It does not connect to
-    ClickHouse and does not execute user SQL.
-    """
+def _accumulate_rows(
+    rows: list[dict[str, str]],
+) -> tuple[int, int, dict[str, _GroupAccumulator]]:
     rows_read = 0
     rows_used = 0
     groups: dict[str, _GroupAccumulator] = {}
+    for row in rows:
+        rows_read += 1
+        sql = first_text(row, QUERY_COLUMNS)
+        if not sql:
+            continue
+        rows_used += 1
+        normalized = normalize_sql(sql)
+        fingerprint = fingerprint_sql(normalized)
+        accumulator = groups.setdefault(
+            fingerprint,
+            _GroupAccumulator(
+                normalized_sql=normalized,
+                representative_sql=sql.strip(),
+            ),
+        )
+        accumulator.durations_ms.append(first_int(row, DURATION_COLUMNS))
+        accumulator.read_rows += first_int(row, READ_ROWS_COLUMNS)
+        accumulator.read_bytes += first_int(row, READ_BYTES_COLUMNS)
+        accumulator.memory_values.append(first_int(row, MEMORY_COLUMNS))
+    return rows_read, rows_used, groups
 
-    with path.open(encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            rows_read += 1
-            sql = first_text(row, QUERY_COLUMNS)
-            if not sql:
-                continue
-            rows_used += 1
-            normalized = normalize_sql(sql)
-            fingerprint = fingerprint_sql(normalized)
-            accumulator = groups.setdefault(
-                fingerprint,
-                _GroupAccumulator(
-                    normalized_sql=normalized,
-                    representative_sql=sql.strip(),
-                ),
-            )
-            accumulator.durations_ms.append(first_int(row, DURATION_COLUMNS))
-            accumulator.read_rows += first_int(row, READ_ROWS_COLUMNS)
-            accumulator.read_bytes += first_int(row, READ_BYTES_COLUMNS)
-            accumulator.memory_values.append(first_int(row, MEMORY_COLUMNS))
 
+def _build_report(
+    source: str,
+    rows_read: int,
+    rows_used: int,
+    groups: dict[str, _GroupAccumulator],
+    *,
+    top_n: int,
+    ch_version: str | None,
+) -> WorkloadReport:
     analyzed_groups = [
         build_query_group(fingerprint, accumulator, ch_version=ch_version)
         for fingerprint, accumulator in groups.items()
@@ -117,12 +117,49 @@ def analyze_query_log_csv(
         reverse=True,
     )
     return WorkloadReport(
-        source=str(path),
+        source=source,
         rows_read=rows_read,
         rows_used=rows_used,
         group_count=len(analyzed_groups),
         top_n=top_n,
         groups=analyzed_groups[:top_n],
+    )
+
+
+def analyze_query_log_csv(
+    path: Path,
+    *,
+    top_n: int = 10,
+    ch_version: str | None = None,
+) -> WorkloadReport:
+    """Analyze a sanitized ClickHouse query_log CSV export.
+
+    The analyzer reads metadata and query text only. It does not connect to
+    ClickHouse and does not execute user SQL.
+    """
+    with path.open(encoding="utf-8", newline="") as handle:
+        raw_rows: list[dict[str, str]] = list(csv.DictReader(handle))
+    rows_read, rows_used, groups = _accumulate_rows(raw_rows)
+    return _build_report(
+        str(path), rows_read, rows_used, groups, top_n=top_n, ch_version=ch_version
+    )
+
+
+def analyze_query_log_rows(
+    rows: list[dict[str, str]],
+    *,
+    source: str,
+    top_n: int = 10,
+    ch_version: str | None = None,
+) -> WorkloadReport:
+    """Analyze query_log rows fetched from a live ClickHouse instance.
+
+    Accepts the same row format as analyze_query_log_csv (list of dicts with
+    string values), so ClickHouseLiveReader output can be passed directly.
+    """
+    rows_read, rows_used, groups = _accumulate_rows(rows)
+    return _build_report(
+        source, rows_read, rows_used, groups, top_n=top_n, ch_version=ch_version
     )
 
 
