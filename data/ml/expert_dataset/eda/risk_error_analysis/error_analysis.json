@@ -1,0 +1,1407 @@
+{
+  "created_at": "2026-07-01T05:12:05.999339+00:00",
+  "high_false_negatives": {
+    "by_family": {
+      "clickhouse_perf_xml": 1,
+      "clickhouse_stateless": 21,
+      "join_order_benchmark": 1,
+      "olap_flat_web_analytics": 2,
+      "synthetic": 2
+    },
+    "by_label_source": {
+      "measured_only": 26,
+      "rule_only": 1
+    },
+    "by_measured_risk_label": {
+      "None": 1,
+      "high": 26
+    },
+    "by_predicted_label": {
+      "low": 2,
+      "medium": 25
+    },
+    "by_rule_risk_label": {
+      "high": 1,
+      "low": 4,
+      "medium": 22
+    },
+    "by_source": {
+      "clickadvisor_benchmark": 2,
+      "clickbench": 1,
+      "clickhouse_functional_tests": 21,
+      "clickhouse_performance_tests": 1,
+      "expert_synthetic_antipatterns": 1,
+      "job": 1
+    },
+    "records": 27
+  },
+  "high_false_positives": {
+    "by_family": {
+      "clickhouse_perf_xml": 5,
+      "clickhouse_stateless": 25,
+      "olap_flat_web_analytics": 1,
+      "synthetic": 1
+    },
+    "by_label_source": {
+      "both": 2,
+      "measured_only": 13,
+      "rule_only": 17
+    },
+    "by_measured_risk_label": {
+      "None": 16,
+      "low": 1,
+      "medium": 15
+    },
+    "by_predicted_label": {
+      "high": 32
+    },
+    "by_rule_risk_label": {
+      "low": 15,
+      "medium": 17
+    },
+    "by_source": {
+      "clickadvisor_benchmark": 1,
+      "clickhouse_functional_tests": 25,
+      "clickhouse_performance_tests": 4,
+      "expert_synthetic_antipatterns": 2
+    },
+    "records": 32
+  },
+  "high_fn_samples": [
+    {
+      "family": "olap_flat_web_analytics",
+      "id": "expert_00018",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90",
+        "query_duration_ms_gt_p90",
+        "memory_usage_gt_non_zero_p90"
+      ],
+      "memory_usage": 146728743,
+      "predicted": "low",
+      "query_duration_ms": 17,
+      "read_rows": 1000000,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickbench",
+      "sql": "SELECT UserID, SearchPhrase, COUNT(*) FROM hits GROUP BY UserID, SearchPhrase LIMIT 10",
+      "target": "high"
+    },
+    {
+      "family": "join_order_benchmark",
+      "id": "expert_00169",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "R-009",
+        "D-005",
+        "R-102"
+      ],
+      "rule_risk_label": "high",
+      "source": "job",
+      "sql": "SELECT MIN(t.title) AS movie_title FROM keyword AS k, movie_info AS mi, movie_keyword AS mk, title AS t WHERE k.keyword LIKE '%sequel%' AND mi.info IN ('Bulgaria') AND t.production_year > 2010 AND t.id = mi.movie_id AND t.id = mk.movie_id AND mk.movie_id = mi.movie_id AND k.id = mk.keyword_id",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_perf_xml",
+      "id": "expert_01960",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90",
+        "query_duration_ms_gt_p90",
+        "memory_usage_gt_non_zero_p90"
+      ],
+      "memory_usage": 66166736,
+      "predicted": "medium",
+      "query_duration_ms": 44,
+      "read_rows": 1000000,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_performance_tests",
+      "sql": "select uniq(number) from (select number from numbers(1000000) group by number)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_03850",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 0,
+      "read_rows": 11,
+      "rule_ids": [
+        "R-008",
+        "R-020",
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT number FROM numbers(11) ORDER BY 'x', toString(number), 'y' COLLATE 'el'",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_10852",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 5307944,
+      "predicted": "medium",
+      "query_duration_ms": 7,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT UUIDv7ToDateTime(toUUID('018f05c9-4ab8-7b86-b64e-c9f03fbd45d1'), 'America/New_York')",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_10921",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 5353808,
+      "predicted": "medium",
+      "query_duration_ms": 5,
+      "read_rows": 7,
+      "rule_ids": [
+        "R-020"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT 1301146200 + 1800 * number AS ts, toString(toDateTime(ts), 'Australia/Sydney') AS time_in_sydney FROM system.numbers LIMIT 7",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11072",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 1,
+      "read_rows": 15,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT coalesce(number % 2 = 0 ? number : NULL, number % 3 = 0 ? number : NULL, number) AS res, toTypeName(res) FROM system.numbers LIMIT 15",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11160",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 49552,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 4,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT uniqForEach(x) FROM (SELECT emptyArrayUInt8() AS x UNION ALL SELECT [1, 2, 3] UNION ALL SELECT emptyArrayUInt8() UNION ALL SELECT [2, 2])",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11862",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT is_leader FROM system.replicas WHERE database = currentDatabase() AND table = 'with_settings'",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11940",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "select lcm(11, 121)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12620",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 36872,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT uniq(x) FROM (SELECT arrayJoin([[1, 2], [1, 2], [1, 2, 3], []]) AS x)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12621",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 36056,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT uniqExact(x) FROM (SELECT arrayJoin([[1, 2], [1, 2], [1, 2, 3], []]) AS x)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12999",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 125440,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT groupArrayMerge(y * 5) FROM (SELECT groupArrayState(x) AS y FROM (SELECT 1 AS x))",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_13322",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "select toUInt64(toLowCardinality(val)) from (select arrayJoin(['1']) as val)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_13370",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 25869696,
+      "predicted": "medium",
+      "query_duration_ms": 3,
+      "read_rows": 6,
+      "rule_ids": [
+        "D-003",
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT * FROM numbers(3) AS a ANY LEFT JOIN numbers(3) AS b ON a.number = b.number ORDER BY a.number",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_14602",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 5311432,
+      "predicted": "medium",
+      "query_duration_ms": 4,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT formatDateTime(toDateTime('2020-01-01 01:00:00', 'Europe/Moscow'), '%z')",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_14739",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 5315144,
+      "predicted": "medium",
+      "query_duration_ms": 4,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT concat('With ', materialize('2023-11-14 05:50:12' :: DateTime('Europe/Amsterdam')))",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_15883",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT bitmapToArray(bitmapAnd(bitmapBuild([1,2,3]),bitmapBuild([3,4,5])))",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_16769",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 122512,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004",
+        "R-042"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "select groupArray(s) from (select sum(n) s from (select toDecimal64(1, 5) as n))",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_17065",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 4,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 1 = multiMatchAny(materialize('abc'), ['...']) from system.numbers limit 10",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_17236",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 12,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "select multiFuzzyMatchAny('halo some wrld', 2, ['^halo.*world$', '^hello.*world$'])",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_18154",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90"
+      ],
+      "memory_usage": 38800,
+      "predicted": "low",
+      "query_duration_ms": 1,
+      "read_rows": 1000,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT count() FROM numbers(1000)",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_18546",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 2,
+      "rule_ids": [
+        "D-003",
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT * FROM (SELECT 1 AS a, 2 AS b) AS foo RIGHT JOIN (SELECT 1 AS a, 2 AS b) AS bar ON (foo.b = bar.a) AND (foo.b = bar.b) ORDER BY foo.a, foo.b, bar.a, bar.b",
+      "target": "high"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_18576",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90",
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "medium",
+      "query_duration_ms": 2,
+      "read_rows": 1230,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT DISTINCT description LIKE '\"%\"' FROM system.settings",
+      "target": "high"
+    },
+    {
+      "family": "synthetic",
+      "id": "expert_18900",
+      "label_source": "measured_only",
+      "measured_risk_label": "high",
+      "measured_risk_reasons": [
+        "read_rows_gt_p90",
+        "query_duration_ms_gt_p90"
+      ],
+      "memory_usage": 47768,
+      "predicted": "medium",
+      "query_duration_ms": 3,
+      "read_rows": 1000000,
+      "rule_ids": [
+        "D-007"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickadvisor_benchmark",
+      "sql": "SELECT count() FROM events FINAL WHERE user_id = 1",
+      "target": "high"
+    }
+  ],
+  "high_fp_samples": [
+    {
+      "family": "clickhouse_perf_xml",
+      "id": "expert_01633",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_performance_tests",
+      "sql": "WITH 'Many years later as he faced the firing squad, Colonel Aureliano Buendia was to remember that distant afternoon when his father took him to discover ice.' AS s SELECT replaceRegexpOne(materialize(s), ' ', '\\n') AS w FROM numbers_mt(5000000) FORMAT Null",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_perf_xml",
+      "id": "expert_02001",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 4578776,
+      "predicted": "high",
+      "query_duration_ms": 5002,
+      "read_rows": 100000,
+      "rule_ids": [
+        "D-012"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_performance_tests",
+      "sql": "SELECT number, avg(DISTINCT number) OVER (ORDER BY number ROWS BETWEEN UNBOUNDED PRECEDING AND 20 FOLLOWING) FROM numbers(0, 100_000) FORMAT Null",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_perf_xml",
+      "id": "expert_02006",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-012"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_performance_tests",
+      "sql": "SELECT id % 100000 AS key, sipHash64(sum(frame)) AS value FROM ( SELECT id, AVG(value) OVER (ORDER BY id ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) AS frame FROM window_test) GROUP BY key ORDER BY key, value",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_perf_xml",
+      "id": "expert_02018",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-012"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_performance_tests",
+      "sql": "SELECT count() OVER (ORDER BY k RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM (SELECT number % 10 AS k FROM numbers(20000000)) FORMAT Null",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_03893",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT k, js1.s, t2.s FROM (SELECT number AS k, number AS s FROM system.numbers LIMIT 10) js1 ANY LEFT JOIN t2 ON js1.k == t2.k OR js1.s == t2.k ORDER BY k",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_04338",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 2,
+      "read_rows": 0,
+      "rule_ids": [
+        "R-016",
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT k, finalizeAggregation(sum_state), runningAccumulate(sum_state) FROM (SELECT intDiv(number, 50000) AS k, sumState(number) AS sum_state FROM (SELECT number FROM system.numbers LIMIT 1000000) GROUP BY k ORDER BY k)",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_04407",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "R-038"
+      ],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT WatchID, ClientIP, count() AS c, sum(Refresh), avg(ResolutionWidth) FROM test.hits_s3 WHERE SearchPhrase != '' GROUP BY WatchID, ClientIP ORDER BY c, WatchID DESC LIMIT 10",
+      "target": "low"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_04936",
+      "label_source": "rule_only",
+      "measured_risk_label": "low",
+      "measured_risk_reasons": [
+        "read_rows_lte_p50",
+        "query_duration_ms_lte_p50"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 1,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT toStartOfDay(toDateTime(1412106600), 'Asia/Istanbul')",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05838",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 2 = position('abcdefgh', materialize('bcdefgh')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05841",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 1 = position('abcdefgh', materialize('abcdef')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05849",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 3 = position('abcdefgh', materialize('cde')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05854",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 4 = position('abcdefgh', materialize('defg')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05860",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 5 = position('abcdefgh', materialize('efg')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05932",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 0 = position('abc', materialize('bcdefgh')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05933",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 0 = position('abc', materialize('abcdefg')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_05952",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "select 1 = position('abc', materialize('')) from system.numbers limit 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_06439",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 4194540,
+      "predicted": "high",
+      "query_duration_ms": 1,
+      "read_rows": 2,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT number * 246 + 10 AS n, toDate('2000-01-01') + n AS d, range(n) AS arr, arrayStringConcat(arrayMap(x -> reinterpretAsString(x), arr)) AS s, (n, d) AS tuple FROM system.numbers LIMIT 2 FORMAT XML",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_10564",
+      "label_source": "both",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 10,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT hex(CAST(countState() AS String)) FROM (SELECT * FROM system.numbers LIMIT 10)",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_10661",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 1,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT splitByChar('0', toString(intHash64(number))) AS arr, 3 AS lim, arrayResize(arrayPartialSort(lim, arr), lim) AS sorted, arrayResize(arrayPartialSort(x -> toUInt64OrZero(x), lim, arr), lim) AS sorted_nums FROM system.numbers LIMIT 10",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11242",
+      "label_source": "both",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 1,
+      "read_rows": 10,
+      "rule_ids": [
+        "R-008",
+        "R-020",
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT groupArrayInsertAt(toString(number), number * 2) FROM (SELECT * FROM system.numbers LIMIT 10)",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_11667",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 3,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT pointInPolygon((106.677085876465,10.7744951248169), [(106.667161868227,10.7675128359024),(106.667165727127,10.7675059912261),(106.667170817563,10.7674904752629),(106.667229225265,10.7672278502066),(106.667231193621,10.7672115129572),(106.667229912029,10.7671951075415),(106.667225430503,10.767179274157),(106.667217923927,10.7671646306786),(106.667207685234,10.7671517485471),(106.667195113975,10.7671411304688),(106.667180700725,10.7671331907989),(106.66716500794,10.7671282393715),(106.66662",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12364",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-004"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT id AS id2, name AS value FROM merge_tree_in_subqueries WHERE num IN (SELECT number FROM system.numbers LIMIT 10) ORDER BY id",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12518",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 122880,
+      "predicted": "high",
+      "query_duration_ms": 1,
+      "read_rows": 10,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT count() FROM (SELECT sum(x), avg(x) FROM (SELECT number AS x FROM numbers(10)))",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_12800",
+      "label_source": "rule_only",
+      "measured_risk_label": null,
+      "measured_risk_reasons": [],
+      "memory_usage": 0,
+      "predicted": "high",
+      "query_duration_ms": 0,
+      "read_rows": 0,
+      "rule_ids": [
+        "D-003"
+      ],
+      "rule_risk_label": "medium",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT * FROM system.numbers WHERE number NOT IN truncate_test_set LIMIT 1",
+      "target": "medium"
+    },
+    {
+      "family": "clickhouse_stateless",
+      "id": "expert_13140",
+      "label_source": "measured_only",
+      "measured_risk_label": "medium",
+      "measured_risk_reasons": [
+        "between_p50_and_p90"
+      ],
+      "memory_usage": 35960,
+      "predicted": "high",
+      "query_duration_ms": 1,
+      "read_rows": 1,
+      "rule_ids": [],
+      "rule_risk_label": "low",
+      "source": "clickhouse_functional_tests",
+      "sql": "SELECT uniqUpTo(3)(x) FROM (SELECT arrayJoin([[[]], [['a', 'b']], [['a'], ['b']], [['a', 'b']]]) AS x)",
+      "target": "medium"
+    }
+  ],
+  "holdout_records": 3039,
+  "interpretation": {
+    "both_core": "Both-source holdout macro-F1 is 0.975. This slice is the most reliable core because rule and measured signals agree.",
+    "high_fn": "High false negatives: 27. These are the highest product-risk misses and should be inspected before changing thresholds or model choice.",
+    "high_fp": "High false positives: 32. These show where risk-like features over-prioritize queries whose final label is low or medium.",
+    "measured_only": "Measured-only holdout macro-F1 is 0.595. This is the key check for whether the model generalizes beyond direct rule-derived labels.",
+    "runtime_policy": "Production runtime should remain rule-first. ML is useful for triage, prioritization, and review queues, not as a source of deterministic recommendations."
+  },
+  "label_source_error_breakdown": {
+    "both": {
+      "error_rate": 0.015151515151515152,
+      "errors": 2,
+      "high_fn": 0,
+      "high_fp": 2,
+      "records": 132
+    },
+    "measured_only": {
+      "error_rate": 0.07589285714285714,
+      "errors": 51,
+      "high_fn": 26,
+      "high_fp": 13,
+      "records": 672
+    },
+    "rule_only": {
+      "error_rate": 0.009395973154362415,
+      "errors": 21,
+      "high_fn": 1,
+      "high_fp": 17,
+      "records": 2235
+    }
+  },
+  "model": "random_forest_all_features",
+  "rule_family_error_breakdown": {
+    "detectors": {
+      "errors": 40,
+      "high_fn": 22,
+      "high_fp": 18,
+      "records": 1750
+    },
+    "no_rule": {
+      "errors": 32,
+      "high_fn": 4,
+      "high_fp": 13,
+      "records": 1197
+    },
+    "rewrite_rules": {
+      "errors": 10,
+      "high_fn": 5,
+      "high_fp": 5,
+      "records": 273
+    }
+  },
+  "script": "scripts/lab/analyze_risk_errors.py",
+  "slice_metrics": {
+    "all_holdout": {
+      "label_counts": {
+        "high": 240,
+        "low": 626,
+        "medium": 2173
+      },
+      "macro_f1": 0.9490414301820191,
+      "mcc": 0.945035207694112,
+      "per_label": {
+        "high": {
+          "f1": 0.8783505154639175,
+          "precision": 0.8693877551020408,
+          "recall": 0.8875,
+          "support": 240
+        },
+        "low": {
+          "f1": 0.9849325931800159,
+          "precision": 0.9779527559055118,
+          "recall": 0.9920127795527156,
+          "support": 626
+        },
+        "medium": {
+          "f1": 0.9838411819021238,
+          "precision": 0.9870310328855951,
+          "recall": 0.98067188219052,
+          "support": 2173
+        }
+      },
+      "predicted_counts": {
+        "high": 245,
+        "low": 635,
+        "medium": 2159
+      },
+      "records": 3039
+    },
+    "both": {
+      "label_counts": {
+        "high": 14,
+        "low": 3,
+        "medium": 115
+      },
+      "macro_f1": 0.9748538011695906,
+      "mcc": 0.9390251383228052,
+      "per_label": {
+        "high": {
+          "f1": 0.9333333333333333,
+          "precision": 0.875,
+          "recall": 1.0,
+          "support": 14
+        },
+        "low": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 3
+        },
+        "medium": {
+          "f1": 0.9912280701754386,
+          "precision": 1.0,
+          "recall": 0.9826086956521739,
+          "support": 115
+        }
+      },
+      "predicted_counts": {
+        "high": 16,
+        "low": 3,
+        "medium": 113
+      },
+      "records": 132
+    },
+    "both_high_core": {
+      "label_counts": {
+        "high": 14
+      },
+      "macro_f1": 0.3333333333333333,
+      "mcc": 0.0,
+      "per_label": {
+        "high": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 14
+        },
+        "low": {
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 0
+        },
+        "medium": {
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 0
+        }
+      },
+      "predicted_counts": {
+        "high": 14
+      },
+      "records": 14
+    },
+    "measured_only": {
+      "label_counts": {
+        "high": 121,
+        "medium": 551
+      },
+      "macro_f1": 0.5950631092284769,
+      "mcc": 0.7480941236560337,
+      "per_label": {
+        "high": {
+          "f1": 0.8296943231441049,
+          "precision": 0.8796296296296297,
+          "recall": 0.7851239669421488,
+          "support": 121
+        },
+        "low": {
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 0
+        },
+        "medium": {
+          "f1": 0.9554950045413261,
+          "precision": 0.9563636363636364,
+          "recall": 0.9546279491833031,
+          "support": 551
+        }
+      },
+      "predicted_counts": {
+        "high": 108,
+        "low": 14,
+        "medium": 550
+      },
+      "records": 672
+    },
+    "rule_only": {
+      "label_counts": {
+        "high": 105,
+        "low": 623,
+        "medium": 1507
+      },
+      "macro_f1": 0.9699993223700197,
+      "mcc": 0.9800806779477799,
+      "per_label": {
+        "high": {
+          "f1": 0.9203539823008849,
+          "precision": 0.859504132231405,
+          "recall": 0.9904761904761905,
+          "support": 105
+        },
+        "low": {
+          "f1": 0.9959709911361805,
+          "precision": 1.0,
+          "recall": 0.9919743178170144,
+          "support": 623
+        },
+        "medium": {
+          "f1": 0.9936729936729937,
+          "precision": 0.9973262032085561,
+          "recall": 0.9900464499004645,
+          "support": 1507
+        }
+      },
+      "predicted_counts": {
+        "high": 121,
+        "low": 618,
+        "medium": 1496
+      },
+      "records": 2235
+    }
+  },
+  "source_family_error_breakdown": [
+    {
+      "error_rate": 0.023483365949119372,
+      "errors": 60,
+      "family": "clickhouse_stateless",
+      "high_fn": 21,
+      "high_fp": 25,
+      "records": 2555,
+      "source": "clickhouse_functional_tests"
+    },
+    {
+      "error_rate": 0.01984126984126984,
+      "errors": 5,
+      "family": "clickhouse_perf_xml",
+      "high_fn": 1,
+      "high_fp": 4,
+      "records": 252,
+      "source": "clickhouse_performance_tests"
+    },
+    {
+      "error_rate": 0.14285714285714285,
+      "errors": 4,
+      "family": "synthetic",
+      "high_fn": 2,
+      "high_fp": 1,
+      "records": 28,
+      "source": "clickadvisor_benchmark"
+    },
+    {
+      "error_rate": 0.14285714285714285,
+      "errors": 2,
+      "family": "olap_flat_web_analytics",
+      "high_fn": 1,
+      "high_fp": 1,
+      "records": 14,
+      "source": "expert_synthetic_antipatterns"
+    },
+    {
+      "error_rate": 0.16666666666666666,
+      "errors": 1,
+      "family": "olap_flat_web_analytics",
+      "high_fn": 1,
+      "high_fp": 0,
+      "records": 6,
+      "source": "clickbench"
+    },
+    {
+      "error_rate": 0.05555555555555555,
+      "errors": 1,
+      "family": "join_order_benchmark",
+      "high_fn": 1,
+      "high_fp": 0,
+      "records": 18,
+      "source": "job"
+    },
+    {
+      "error_rate": 0.008333333333333333,
+      "errors": 1,
+      "family": "clickhouse_perf_xml",
+      "high_fn": 0,
+      "high_fp": 1,
+      "records": 120,
+      "source": "expert_synthetic_antipatterns"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "tpch",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 4,
+      "source": "clickadvisor_benchmark"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "tpcds",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 3,
+      "source": "clickhouse_benchmarks_tpcds"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "tpch",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 4,
+      "source": "clickhouse_benchmarks_tpch"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "tpch",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 8,
+      "source": "expert_synthetic_antipatterns"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "tpcds",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 12,
+      "source": "expert_synthetic_antipatterns"
+    },
+    {
+      "error_rate": 0.0,
+      "errors": 0,
+      "family": "join_order_benchmark",
+      "high_fn": 0,
+      "high_fp": 0,
+      "records": 15,
+      "source": "expert_synthetic_antipatterns"
+    }
+  ],
+  "split": "holdout",
+  "top_rule_ids_in_high_fn": {
+    "<no_rule>": 4,
+    "D-003": 4,
+    "D-004": 19,
+    "D-005": 2,
+    "D-007": 1,
+    "R-008": 1,
+    "R-009": 1,
+    "R-020": 2,
+    "R-042": 1,
+    "R-102": 2
+  },
+  "top_rule_ids_in_high_fp": {
+    "<no_rule>": 13,
+    "D-003": 2,
+    "D-004": 12,
+    "D-007": 1,
+    "D-012": 3,
+    "D-013": 2,
+    "R-008": 1,
+    "R-014": 1,
+    "R-016": 2,
+    "R-020": 1,
+    "R-038": 1
+  }
+}

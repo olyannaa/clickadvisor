@@ -1,0 +1,216 @@
+{
+  "builder": "scripts/ml/build_expert_dataset.py",
+  "builder_args": {
+    "max_bugs": 500,
+    "max_functional": 3200,
+    "sources_dir": ".cache/dataset_sources",
+    "synthetic_target": 1800
+  },
+  "baseline_ladder": {
+    "artifacts_dir": "eval/results/risk_baseline_ladder_current",
+    "best_holdout_macro_f1": {
+      "model": "random_forest_all_features",
+      "value": 0.949
+    },
+    "created_at": "2026-07-01T05:08:55+00:00",
+    "models": [
+      "dummy_most_frequent",
+      "dummy_stratified",
+      "tfidf_logistic_regression",
+      "structured_rule_logistic_regression",
+      "random_forest_all_features",
+      "catboost_tabular"
+    ],
+    "script": "scripts/lab/run_risk_baseline_ladder.py"
+  },
+  "created_at": "2026-07-01T04:13:06.949383+00:00",
+  "dataset": "clickadvisor_expert_sql_dataset",
+  "family_counts": {
+    "clickhouse_bugs": 1,
+    "clickhouse_perf_xml": 2635,
+    "clickhouse_stateless": 16845,
+    "join_order_benchmark": 226,
+    "olap_flat_web_analytics": 151,
+    "synthetic": 204,
+    "tpcds": 88,
+    "tpch": 85
+  },
+  "feature_extraction": {
+    "created_at": "2026-07-01T05:05:45.980162+00:00",
+    "feature_count": 115,
+    "features_path": "data/ml/expert_dataset/features/features.jsonl",
+    "group_count": 19882,
+    "rule_vocabulary_size": 54,
+    "script": "scripts/lab/extract_training_features.py"
+  },
+  "holdout_error_analysis": {
+    "artifacts_dir": "data/ml/expert_dataset/eda/risk_error_analysis",
+    "both_holdout_macro_f1": 0.975,
+    "created_at": "2026-07-01T05:15:00+00:00",
+    "high_false_negatives": 27,
+    "high_false_positives": 32,
+    "measured_only_holdout_macro_f1": 0.595,
+    "model": "random_forest_all_features",
+    "script": "scripts/lab/analyze_risk_errors.py"
+  },
+  "git_commit": "8917fd3f85f8fa75de070760290a98e4da402f9b",
+  "label_method": "Benchmark expected rules plus feature-derived static weak labels. measured_metrics is reserved for future query_log replay labels.",
+  "measured_metrics_replay": {
+    "counts": {
+      "executed_error": 8777,
+      "executed_ok": 9837,
+      "query_log_missing": 4,
+      "skipped": 1621
+    },
+    "created_at": "2026-07-01T04:30:24.769323+00:00",
+    "max_execution_seconds": 5,
+    "max_memory_usage": 1500000000,
+    "max_rows_to_read": 2000000,
+    "run_id": "local_20260701",
+    "url": "http://localhost:18123"
+  },
+  "ml_split": {
+    "created_at": "2026-07-01T05:06:02+00:00",
+    "folds": 5,
+    "group_key": "source::family::origin.parent_sql_hash_or_sql_hash",
+    "holdout_records": 3039,
+    "script": "scripts/lab/create_ml_splits.py",
+    "split_path": "data/ml/expert_dataset/splits/risk_split_v1.json",
+    "test_records": 3041,
+    "train_records": 14155
+  },
+  "real_record_count": 19090,
+  "record_count": 20235,
+  "risk_counts": {
+    "high": 142,
+    "low": 860,
+    "medium": 11039,
+    "no_known_risk": 8194
+  },
+  "risk_reconciliation": {
+    "counts": {
+      "final:high": 1697,
+      "final:low": 4253,
+      "final:medium": 14285,
+      "label_source:both": 907,
+      "label_source:measured_only": 4635,
+      "label_source:rule_only": 14693,
+      "measured:high": 960,
+      "measured:low": 4272,
+      "measured:medium": 4605,
+      "measured:none": 10398,
+      "measured_status:not_applicable": 10398,
+      "measured_status:ok": 9837,
+      "risk_signal_disagreement": 8930
+    },
+    "created_at": "2026-07-01T04:49:33.336101+00:00",
+    "rule": "final_risk_label = max(rule_risk_label, measured_risk_label); non-ok measured records use rule_only.",
+    "script": "scripts/lab/reconcile_risk_labels.py",
+    "thresholds": {
+      "high": {
+        "memory_usage_gt": 46674914,
+        "memory_usage_source": "non_zero_p90",
+        "query_duration_ms_gt": 1,
+        "read_rows_gt": 10
+      },
+      "low": {
+        "query_duration_ms_lte": 0,
+        "read_rows_lte": 1
+      },
+      "non_zero_memory_p90": 46674914,
+      "ok_record_count": 9837,
+      "raw_percentiles": {
+        "memory_usage": {
+          "p50": 0,
+          "p90": 0,
+          "p95": 122125,
+          "p99": 46292175
+        },
+        "query_duration_ms": {
+          "p50": 0,
+          "p90": 1,
+          "p95": 3,
+          "p99": 56
+        },
+        "read_rows": {
+          "p50": 1,
+          "p90": 10,
+          "p95": 20,
+          "p99": 1000000
+        }
+      }
+    }
+  },
+  "rule_labeling": {
+    "ch_version": null,
+    "counts": {
+      "ok": 20235,
+      "risk:high": 836,
+      "risk:low": 8342,
+      "risk:medium": 11057
+    },
+    "created_at": "2026-07-01T04:42:51.233183+00:00",
+    "limit": null,
+    "records_processed": 20235,
+    "script": "scripts/lab/label_dataset.py"
+  },
+  "skipped_counts": {
+    "duplicate_sql": 3104,
+    "parse_error": 1105
+  },
+  "source_counts": {
+    "clickadvisor_benchmark": 226,
+    "clickbench": 43,
+    "clickhouse_benchmarks_tpcds": 15,
+    "clickhouse_benchmarks_tpch": 22,
+    "clickhouse_bug_reproducers": 1,
+    "clickhouse_functional_tests": 16845,
+    "clickhouse_performance_tests": 1825,
+    "expert_synthetic_antipatterns": 1145,
+    "job": 113
+  },
+  "synthetic_record_count": 1145,
+  "top_rule_counts": {
+    "D-001": 1,
+    "D-002": 37,
+    "D-003": 1559,
+    "D-004": 10579,
+    "D-005": 244,
+    "D-006": 1,
+    "D-007": 523,
+    "D-008": 1,
+    "D-009": 1,
+    "D-010": 1,
+    "D-011": 1,
+    "D-012": 1,
+    "D-013": 13,
+    "D-014": 6,
+    "R-001": 51,
+    "R-002": 51,
+    "R-003": 18,
+    "R-004": 7,
+    "R-005": 7,
+    "R-006": 7,
+    "R-007": 7,
+    "R-008": 14,
+    "R-009": 90,
+    "R-010": 15,
+    "R-011": 29,
+    "R-012": 7,
+    "R-013": 13,
+    "R-014": 6,
+    "R-015": 7,
+    "R-016": 55,
+    "R-017": 7,
+    "R-019": 6,
+    "R-020": 1162,
+    "R-057": 6,
+    "R-058": 6,
+    "R-059": 6,
+    "R-102": 1,
+    "R-103": 1,
+    "R-106": 1,
+    "R-112": 689
+  },
+  "version": "2026-07-01"
+}

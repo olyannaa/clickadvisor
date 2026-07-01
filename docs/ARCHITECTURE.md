@@ -30,6 +30,7 @@ clickadvisor/
   rules/          Deterministic ClickHouse rules and detectors
   retrieval/      Embedding model wrapper, Qdrant indexer, retriever, RAG advisor
   explain/        EXPLAIN ESTIMATE parser, HTTP estimator, before/after comparator
+  workload/       sanitized query_log CSV grouping and workload risk prototype
   mcp_server/     stdio MCP tools and prompts over the same pipeline
 ```
 
@@ -142,6 +143,10 @@ chadvisor analyze
 `chadvisor index-kb` builds the Qdrant retrieval index from `data/kb/chunks/`.
 It refuses to overwrite an existing index unless `--reindex` is supplied.
 
+`chadvisor workload` reads a sanitized `system.query_log` CSV export, groups
+queries by normalized fingerprint, runs representative SQL through the same rule
+engine, and renders a top-N workload risk report.
+
 `chadvisor mcp-server` starts the stdio MCP server.
 
 ## MCP flow
@@ -181,6 +186,10 @@ Embedding model selection is documented in
   synthetic benchmark cases.
 - `scripts/eval/ablation_embeddings.py` compares retrieval embedding models via
   MRR@3 over synthetic cases and KB chunks.
+- `scripts/lab/` contains the risk-label DS dataset, feature, split, baseline,
+  and error-analysis pipeline.
+- `chadvisor workload --query-log examples/query_log_sample.csv` smoke-tests the
+  workload prototype.
 - `tests/explain/` covers EXPLAIN ESTIMATE parsing and comparison.
 - `tests/test_mcp_server.py` covers MCP tool and prompt handlers.
 

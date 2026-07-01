@@ -1,0 +1,49 @@
+{
+  "created_at": "2026-07-01T05:06:36.341993+00:00",
+  "features_path": "data/ml/expert_dataset/features/features.jsonl",
+  "labels": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "methodology_note": "Risk-label baselines are triage models over deterministic rule labels plus measured metric labels. They are not intended to replace the rule engine.",
+  "random_state": 42,
+  "record_count": 20235,
+  "script": "scripts/lab/run_risk_baseline_ladder.py",
+  "split_path": "data/ml/expert_dataset/splits/risk_split_v1.json",
+  "split_summary": {
+    "all_group_count": 19882,
+    "all_label_counts": {
+      "high": 1697,
+      "low": 4253,
+      "medium": 14285
+    },
+    "group_leakage": {
+      "test_holdout_overlap": 0,
+      "train_holdout_overlap": 0,
+      "train_test_overlap": 0
+    },
+    "holdout_group_count": 2983,
+    "holdout_label_counts": {
+      "high": 240,
+      "low": 626,
+      "medium": 2173
+    },
+    "test_group_count": 2983,
+    "test_label_counts": {
+      "high": 259,
+      "low": 633,
+      "medium": 2149
+    },
+    "train_group_count": 13916,
+    "train_label_counts": {
+      "high": 1198,
+      "low": 2994,
+      "medium": 9963
+    }
+  },
+  "unavailable_models": {
+    "catboost": null,
+    "lightgbm": "not installed in current Poetry environment"
+  }
+}

@@ -1,0 +1,6 @@
+event_time,query,query_duration_ms,read_rows,read_bytes,memory_usage
+2026-07-01 10:00:00,"SELECT * FROM events FINAL WHERE message LIKE '%timeout%'",1200,900000,180000000,220000000
+2026-07-01 10:05:00,"SELECT * FROM events FINAL WHERE message LIKE '%error%'",980,850000,170000000,190000000
+2026-07-01 10:10:00,"SELECT country, count() FROM events GROUP BY country",40,20000,800000,3000000
+2026-07-01 10:15:00,"SELECT country, count() FROM events GROUP BY country",55,22000,880000,3200000
+2026-07-01 10:20:00,"SELECT count() FROM hits WHERE EventDate = '2026-07-01'",8,1000,16000,120000
