@@ -17,8 +17,6 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-blue">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="ClickHouse" src="https://img.shields.io/badge/ClickHouse-performance%20advisor-ffcc01">
-  <img alt="Rules" src="https://img.shields.io/badge/rules-119-brightgreen">
-  <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-327%20cases-brightgreen">
   <img alt="MCP" src="https://img.shields.io/badge/MCP-stdio%20%2B%20HTTP-blueviolet">
   <img alt="Local First" src="https://img.shields.io/badge/security-local--first-success">
 </p>
