@@ -35,6 +35,7 @@ multi-label targets from `expected_rules_to_fire`.
 Current command:
 
 ```bash
+poetry install --with ml
 poetry run python scripts/eval/ablation_classifiers.py --run-id classifier_ablation_current
 ```
 
@@ -49,6 +50,7 @@ Current results:
 Artifacts:
 
 - `eval/results/classifier_ablation_current/metrics.json`
+- `eval/results/classifier_ablation_current/metadata.json` with split and metrics SHA-256
 - `eval/results/classifier_ablation_current/metrics.csv`
 - `docs/experiments/classifier_ablation.md`
 
@@ -131,6 +133,13 @@ remain deterministic rule-engine output.
 
 Current baseline ladder:
 
+ML dependencies for this experiment live in the optional Poetry group:
+
+```bash
+poetry install --with ml
+poetry run python scripts/lab/run_risk_baseline_ladder.py
+```
+
 | Model | CV macro-F1 | Test macro-F1 | Holdout macro-F1 |
 |---|---:|---:|---:|
 | dummy_most_frequent | 0.275 +/- 0.000 | 0.276 | 0.278 |
@@ -182,6 +191,7 @@ Artifacts:
 - `data/ml/expert_dataset/eda/ds_report.md`
 - `docs/experiments/risk_labeling_ds_summary.md`
 - `eval/results/risk_baseline_ladder_current/metrics.json`
+- `eval/results/risk_baseline_ladder_current/metadata.json` with dataset, split, and metrics SHA-256
 - `eval/results/risk_learning_curve_current/summary.md`
 - `data/ml/expert_dataset/eda/risk_error_analysis/error_analysis.md`
 

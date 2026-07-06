@@ -32,6 +32,15 @@ ruff = "^0.11.13"
 pytest-asyncio = "^1.4.0"
 pytest-cov = "^7.1.0"
 
+[tool.poetry.group.ml]
+optional = true
+
+[tool.poetry.group.ml.dependencies]
+numpy = ">=1.26,<3.0"
+scipy = ">=1.11,<1.17"
+scikit-learn = ">=1.4,<2.0"
+catboost = ">=1.2,<2.0"
+
 [tool.poetry.scripts]
 clickadvisor = "clickadvisor.cli.main:app"
 chadvisor = "clickadvisor.cli.main:app"

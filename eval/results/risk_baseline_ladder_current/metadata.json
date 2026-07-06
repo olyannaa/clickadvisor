@@ -1,5 +1,11 @@
 {
   "created_at": "2026-07-01T05:06:36.341993+00:00",
+  "artifacts_sha256": {
+    "data/ml/expert_dataset/features/features.jsonl": "90e7d5875fdfc6fa7b91fe8c1389a88943a1689c6d5657ddd6fe15e28224db40",
+    "data/ml/expert_dataset/queries.jsonl": "7c34f54fe8e1da4f396cec55d8622b6cb6b6ec8d231b6327594c03b146291220",
+    "data/ml/expert_dataset/splits/risk_split_v1.json": "c393acb70439197cd57524222b8ad6eb7d486f5555ef5521a12362e4a85e00d0",
+    "eval/results/risk_baseline_ladder_current/metrics.json": "074b56034288721fa392e9d4b955da25439644d2e107761a4045f407a8ed3910"
+  },
   "features_path": "data/ml/expert_dataset/features/features.jsonl",
   "labels": [
     "low",
