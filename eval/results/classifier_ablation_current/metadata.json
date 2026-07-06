@@ -1,6 +1,10 @@
 {
   "cases_dir": "benchmark/cases/synthetic_expanded",
   "created_at": "2026-06-30T13:09:41.929111+00:00",
+  "artifacts_sha256": {
+    "benchmark/splits/synthetic_expanded_v1.yaml": "4463be7a48259cde089c35e47f86b3c1a23769d1f275d61cc8c1e3dff6e03311",
+    "eval/results/classifier_ablation_current/metrics.json": "5d58b6941e464fca4e12a4c890f114a9fa3431570596bb8caf54e87e72006fe3"
+  },
   "experiment": "classifier_ablation",
   "random_state": 42,
   "split_path": "benchmark/splits/synthetic_expanded_v1.yaml"

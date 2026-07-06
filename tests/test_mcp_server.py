@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import pytest
 
 from clickadvisor.mcp_server import server as mcp_server
-from clickadvisor.mcp_server.server import call_tool
+from clickadvisor.mcp_server.server import HttpSecurityMiddleware, call_tool, run_http
 
 
 @pytest.mark.asyncio
@@ -42,6 +43,19 @@ async def test_list_rules() -> None:
     results = await call_tool("list_rules", {})
     assert "R-001" in results[0].text
     assert "Tier 1A" in results[0].text
+    assert "Tier 2" in results[0].text
+    assert "Environment checks" in results[0].text
+
+
+@pytest.mark.asyncio
+async def test_list_rules_filters_tier2_and_environment_rules() -> None:
+    tier2 = await call_tool("list_rules", {"tier": "2"})
+    assert "R-103" in tier2[0].text
+    assert "E-001" not in tier2[0].text
+
+    env = await call_tool("list_rules", {"tier": "env"})
+    assert "E-001" in env[0].text
+    assert "R-103" not in env[0].text
 
 
 @pytest.mark.asyncio
@@ -71,6 +85,59 @@ def test_build_fastmcp_server() -> None:
 
     app = build_fastmcp_server(host="127.0.0.1", port=8765, path="/mcp")
     assert app is not None
+
+
+def test_remote_http_requires_bearer_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CLICKADVISOR_MCP_BEARER_TOKEN", raising=False)
+
+    with pytest.raises(RuntimeError, match="CLICKADVISOR_MCP_BEARER_TOKEN"):
+        run_http(host="0.0.0.0", port=8765, path="/mcp")
+
+
+@pytest.mark.asyncio
+async def test_http_security_middleware_requires_bearer_token() -> None:
+    async def app(scope: dict[str, Any], receive: Any, send: Any) -> None:
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        await send({"type": "http.response.body", "body": b"ok"})
+
+    middleware = HttpSecurityMiddleware(app, bearer_token="secret", rate_limit_per_minute=10)
+    sent: list[dict[str, Any]] = []
+
+    async def send(message: dict[str, Any]) -> None:
+        sent.append(message)
+
+    await middleware(
+        {"type": "http", "headers": [], "client": ("127.0.0.1", 12345)},
+        lambda: None,
+        send,
+    )
+
+    assert sent[0]["status"] == 401
+
+
+@pytest.mark.asyncio
+async def test_http_security_middleware_accepts_valid_bearer_token() -> None:
+    async def app(scope: dict[str, Any], receive: Any, send: Any) -> None:
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        await send({"type": "http.response.body", "body": b"ok"})
+
+    middleware = HttpSecurityMiddleware(app, bearer_token="secret", rate_limit_per_minute=10)
+    sent: list[dict[str, Any]] = []
+
+    async def send(message: dict[str, Any]) -> None:
+        sent.append(message)
+
+    await middleware(
+        {
+            "type": "http",
+            "headers": [(b"authorization", b"Bearer secret")],
+            "client": ("127.0.0.1", 12345),
+        },
+        lambda: None,
+        send,
+    )
+
+    assert sent[0]["status"] == 200
 
 
 @pytest.mark.asyncio

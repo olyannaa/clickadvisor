@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import secrets
+import time
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,6 +22,83 @@ from clickadvisor.rules.registry import get_applicable_rules
 
 server = Server("clickadvisor")
 
+LOCAL_HTTP_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def _env_bool(name: str, *, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, *, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+async def _send_json_error(send: Any, *, status: int, message: str) -> None:
+    body = json.dumps({"error": message}, ensure_ascii=False).encode("utf-8")
+    await send(
+        {
+            "type": "http.response.start",
+            "status": status,
+            "headers": [
+                (b"content-type", b"application/json; charset=utf-8"),
+                (b"content-length", str(len(body)).encode("ascii")),
+            ],
+        }
+    )
+    await send({"type": "http.response.body", "body": body})
+
+
+class HttpSecurityMiddleware:
+    def __init__(
+        self,
+        app: Any,
+        *,
+        bearer_token: str | None = None,
+        rate_limit_per_minute: int = 60,
+    ) -> None:
+        self.app = app
+        self.bearer_token = bearer_token
+        self.rate_limit_per_minute = rate_limit_per_minute
+        self._hits_by_client: dict[str, list[float]] = {}
+
+    async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
+        if scope.get("type") != "http":
+            await self.app(scope, receive, send)
+            return
+
+        if self.bearer_token:
+            headers = {
+                key.decode("latin1").lower(): value.decode("latin1")
+                for key, value in scope.get("headers", [])
+            }
+            expected = f"Bearer {self.bearer_token}"
+            if not secrets.compare_digest(headers.get("authorization", ""), expected):
+                await _send_json_error(send, status=401, message="missing or invalid bearer token")
+                return
+
+        client = scope.get("client")
+        client_host = str(client[0]) if client else "unknown"
+        now = time.monotonic()
+        window_start = now - 60.0
+        hits = [stamp for stamp in self._hits_by_client.get(client_host, []) if stamp >= window_start]
+        if len(hits) >= self.rate_limit_per_minute:
+            await _send_json_error(send, status=429, message="rate limit exceeded")
+            return
+        hits.append(now)
+        self._hits_by_client[client_host] = hits
+
+        await self.app(scope, receive, send)
+
 
 @server.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]
 async def list_tools() -> list[Tool]:
@@ -28,7 +108,7 @@ async def list_tools() -> list[Tool]:
             description=(
                 "Анализирует ClickHouse SQL-запрос на антипаттерны и проблемы производительности. "
                 "Возвращает структурированный отчёт с формально обоснованными рекомендациями. "
-                "Использует библиотеку из 20+ правил из реляционной алгебры и инвариантов ClickHouse. "
+                "Использует библиотеку из 119 ClickHouse-specific правил и детекторов. "
                 "Не отправляет данные во внешние сервисы — работает локально. "
                 "ВАЖНО: если пользователь упомянул версию ClickHouse в разговоре — "
                 "всегда передавай её в ch_version. Если упомянул адрес кластера — "
@@ -92,7 +172,7 @@ async def list_tools() -> list[Tool]:
                 "properties": {
                     "tier": {
                         "type": "string",
-                        "enum": ["1A", "1B", "1C", "detector", "all"],
+                        "enum": ["1A", "1B", "1C", "2", "detector", "env", "all"],
                         "description": "Фильтр по типу правил",
                         "default": "all",
                     }
@@ -276,7 +356,7 @@ async def _list_rules(arguments: dict[str, Any]) -> list[TextContent]:
     rules = _get_applicable_rules(None)
 
     lines = ["# Правила оптимизации ClickAdvisor\n"]
-    tier_order = {"1A": 0, "1B": 1, "1C": 2, "detector": 3, "rag": 4}
+    tier_order = {"1A": 0, "1B": 1, "1C": 2, "2": 3, "detector": 4, "env": 5, "rag": 6}
     sorted_rules = sorted(rules, key=lambda rule: (tier_order.get(rule.tier, 5), rule.rule_id))
 
     current_tier = None
@@ -289,7 +369,9 @@ async def _list_rules(arguments: dict[str, Any]) -> list[TextContent]:
                 "1A": "## Tier 1A — Формально эквивалентные (применяются автоматически)",
                 "1B": "## Tier 1B — Приближённые (требуют opt-in)",
                 "1C": "## Tier 1C — Условные (зависят от схемы или контекста)",
+                "2": "## Tier 2 — Cost / design advisory",
                 "detector": "## Детекторы — Антипаттерны",
+                "env": "## Environment checks — Настройки и окружение",
             }
             lines.append(tier_labels.get(current_tier, f"## {current_tier}"))
         lines.append(
@@ -349,6 +431,7 @@ def build_fastmcp_server(
     host: str = "127.0.0.1",
     port: int = 8765,
     path: str = "/mcp",
+    allow_detect_version: bool = True,
 ) -> FastMCP:
     mcp = FastMCP(
         "clickadvisor",
@@ -394,20 +477,22 @@ def build_fastmcp_server(
         result = await _list_rules({"tier": tier})
         return result[0].text
 
-    @mcp.tool(name="detect_ch_version")
-    async def detect_ch_version_http(
-        connect_url: str,
-        user: str = "default",
-        password: str = "",
-    ) -> str:
-        result = await _detect_ch_version(
-            {
-                "connect_url": connect_url,
-                "user": user,
-                "password": password,
-            }
-        )
-        return result[0].text
+    if allow_detect_version:
+
+        @mcp.tool(name="detect_ch_version")
+        async def detect_ch_version_http(
+            connect_url: str,
+            user: str = "default",
+            password: str = "",
+        ) -> str:
+            result = await _detect_ch_version(
+                {
+                    "connect_url": connect_url,
+                    "user": user,
+                    "password": password,
+                }
+            )
+            return result[0].text
 
     @mcp.prompt(name="analyze")
     def analyze_prompt(sql: str, ch_version: str = "", mode: str = "diagnose") -> str:
@@ -433,8 +518,64 @@ def build_fastmcp_server(
     return mcp
 
 
-def run_http(*, host: str = "127.0.0.1", port: int = 8765, path: str = "/mcp") -> None:
-    build_fastmcp_server(host=host, port=port, path=path).run(transport="streamable-http")
+def build_streamable_http_app(
+    *,
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    path: str = "/mcp",
+    bearer_token: str | None = None,
+    rate_limit_per_minute: int = 60,
+    allow_detect_version: bool | None = None,
+) -> Any:
+    if allow_detect_version is None:
+        allow_detect_version = _env_bool(
+            "CLICKADVISOR_MCP_ALLOW_DETECT_VERSION",
+            default=host in LOCAL_HTTP_HOSTS,
+        )
+    mcp = build_fastmcp_server(
+        host=host,
+        port=port,
+        path=path,
+        allow_detect_version=allow_detect_version,
+    )
+    app = mcp.streamable_http_app()
+    return HttpSecurityMiddleware(
+        app,
+        bearer_token=bearer_token,
+        rate_limit_per_minute=rate_limit_per_minute,
+    )
+
+
+def run_http(
+    *,
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    path: str = "/mcp",
+    bearer_token: str | None = None,
+    rate_limit_per_minute: int | None = None,
+    allow_detect_version: bool | None = None,
+) -> None:
+    import uvicorn
+
+    token = bearer_token or os.environ.get("CLICKADVISOR_MCP_BEARER_TOKEN")
+    if host not in LOCAL_HTTP_HOSTS and not token:
+        raise RuntimeError(
+            "CLICKADVISOR_MCP_BEARER_TOKEN is required when binding MCP HTTP "
+            "server to a non-local host."
+        )
+    rate_limit = rate_limit_per_minute or _env_int(
+        "CLICKADVISOR_MCP_RATE_LIMIT_PER_MINUTE",
+        default=60,
+    )
+    app = build_streamable_http_app(
+        host=host,
+        port=port,
+        path=path,
+        bearer_token=token,
+        rate_limit_per_minute=rate_limit,
+        allow_detect_version=allow_detect_version,
+    )
+    uvicorn.run(app, host=host, port=port)
 
 
 async def main() -> None:

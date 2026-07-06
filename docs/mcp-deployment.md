@@ -57,7 +57,9 @@ server to `0.0.0.0` so the tunneled Host header is accepted:
 poetry run chadvisor mcp-http-server \
   --host 0.0.0.0 \
   --port 8765 \
-  --path /mcp
+  --path /mcp \
+  --bearer-token "$CLICKADVISOR_MCP_BEARER_TOKEN" \
+  --disable-detect-version
 ```
 
 Then, in another terminal:
@@ -112,9 +114,11 @@ the defense".
 1. Push this repository to GitHub.
 2. Open Railway and create a new project from the GitHub repository.
 3. Railway reads `railway.json` and builds the root `Dockerfile`.
-4. The Docker command reads Railway's injected `PORT` value and starts the MCP
+4. Add a Railway variable named `CLICKADVISOR_MCP_BEARER_TOKEN` and share it
+   only with demo participants.
+5. The Docker command reads Railway's injected `PORT` value and starts the MCP
    server on that port.
-5. Generate a public domain for the service. If using the CLI and Railway
+6. Generate a public domain for the service. If using the CLI and Railway
    reports the app listening on `8080`, use:
 
 ```bash
@@ -129,6 +133,11 @@ https://<your-service>.up.railway.app/mcp
 
 This endpoint is suitable for demo SQL and read-only testing. If experts will
 send real company SQL, use local MCP instead.
+
+Public Docker/Railway deployments bind to `0.0.0.0`, so ClickAdvisor refuses to
+start unless `CLICKADVISOR_MCP_BEARER_TOKEN` is configured. `detect_ch_version`
+is disabled by default on non-local HTTP deployments; set
+`CLICKADVISOR_MCP_ALLOW_DETECT_VERSION=true` only inside a trusted network.
 
 ### Alternative: Render
 
