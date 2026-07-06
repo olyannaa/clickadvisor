@@ -149,6 +149,34 @@ poetry run python scripts/lab/run_risk_baseline_ladder.py
 | random_forest_all_features | 0.938 +/- 0.006 | 0.938 | 0.949 |
 | catboost_tabular | 0.873 +/- 0.008 | 0.871 | 0.871 |
 
+Leakage-aware control run:
+
+```bash
+poetry install --with ml
+poetry run python scripts/lab/run_risk_baseline_ladder.py \
+  --run-id risk_baseline_ladder_leakage_aware \
+  --feature-policy leakage_aware \
+  --models dummy_stratified tfidf_logistic_regression random_forest_all_features
+```
+
+`--feature-policy leakage_aware` removes explicit `rule_*` features and
+rule-shaped parser flags such as `base_has_count_distinct`,
+`base_has_final_modifier`, and `has_final`. It keeps neutral query shape/count
+features plus SQL text. This does not make the weak labels independent from the
+rule engine, but it is a stricter leakage-control baseline.
+
+| Model | CV macro-F1 | Test macro-F1 | Holdout macro-F1 |
+|---|---:|---:|---:|
+| dummy_stratified | 0.328 +/- 0.009 | 0.342 | 0.335 |
+| tfidf_logistic_regression | 0.864 +/- 0.011 | 0.869 | 0.882 |
+| random_forest_all_features | 0.879 +/- 0.006 | 0.890 | 0.900 |
+
+The Random Forest drop from `0.949` to `0.900` confirms that part of the
+headline score came from rule-derived features. The remaining lift over the
+stratified dummy baseline comes mostly from SQL text and neutral query-shape
+signals, so it should be presented as triage research rather than an
+independent production classifier.
+
 Important holdout slices for Random Forest:
 
 | Slice | Records | Macro-F1 | High recall |
@@ -192,6 +220,7 @@ Artifacts:
 - `docs/experiments/risk_labeling_ds_summary.md`
 - `eval/results/risk_baseline_ladder_current/metrics.json`
 - `eval/results/risk_baseline_ladder_current/metadata.json` with dataset, split, and metrics SHA-256
+- `eval/results/risk_baseline_ladder_leakage_aware/metrics.json`
 - `eval/results/risk_learning_curve_current/summary.md`
 - `data/ml/expert_dataset/eda/risk_error_analysis/error_analysis.md`
 

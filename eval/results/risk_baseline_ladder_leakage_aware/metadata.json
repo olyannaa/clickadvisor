@@ -1,0 +1,55 @@
+{
+  "artifacts_sha256": {
+    "data/ml/expert_dataset/features/features.jsonl": "90e7d5875fdfc6fa7b91fe8c1389a88943a1689c6d5657ddd6fe15e28224db40",
+    "data/ml/expert_dataset/splits/risk_split_v1.json": "c393acb70439197cd57524222b8ad6eb7d486f5555ef5521a12362e4a85e00d0",
+    "eval/results/risk_baseline_ladder_leakage_aware/metrics.json": "746e9aa7ea52a5b832d52b518384705d9ec220cab638fab76b7165d000d48229"
+  },
+  "created_at": "2026-07-06T07:58:28.826995+00:00",
+  "feature_policy": "leakage_aware",
+  "features_path": "data/ml/expert_dataset/features/features.jsonl",
+  "labels": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "methodology_note": "Risk-label baselines are triage models over deterministic rule labels plus measured metric labels. They are not intended to replace the rule engine. Use --feature-policy leakage_aware for a stricter run without explicit rule-derived features and rule-shaped parser flags.",
+  "random_state": 42,
+  "record_count": 20235,
+  "script": "scripts/lab/run_risk_baseline_ladder.py",
+  "split_path": "data/ml/expert_dataset/splits/risk_split_v1.json",
+  "split_summary": {
+    "all_group_count": 19882,
+    "all_label_counts": {
+      "high": 1697,
+      "low": 4253,
+      "medium": 14285
+    },
+    "group_leakage": {
+      "test_holdout_overlap": 0,
+      "train_holdout_overlap": 0,
+      "train_test_overlap": 0
+    },
+    "holdout_group_count": 2983,
+    "holdout_label_counts": {
+      "high": 240,
+      "low": 626,
+      "medium": 2173
+    },
+    "test_group_count": 2983,
+    "test_label_counts": {
+      "high": 259,
+      "low": 633,
+      "medium": 2149
+    },
+    "train_group_count": 13916,
+    "train_label_counts": {
+      "high": 1198,
+      "low": 2994,
+      "medium": 9963
+    }
+  },
+  "unavailable_models": {
+    "catboost": null,
+    "lightgbm": "not installed in current Poetry environment"
+  }
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from collections import Counter
 from datetime import UTC, datetime
@@ -33,6 +34,34 @@ DEFAULT_FEATURES_PATH = Path("data/ml/expert_dataset/features/features.jsonl")
 DEFAULT_SPLIT_PATH = Path("data/ml/expert_dataset/splits/risk_split_v1.json")
 DEFAULT_RESULTS_DIR = Path("eval/results")
 LABELS = ["low", "medium", "high"]
+FEATURE_POLICIES = {"full", "no_rule_derived", "leakage_aware"}
+LEAKAGE_AWARE_FEATURES = {
+    "aggregation_count",
+    "base_aggregate_call_count",
+    "base_contains_comment",
+    "base_contains_settings_clause",
+    "base_function_call_count",
+    "base_groupby_key_count",
+    "base_is_create",
+    "base_is_insert",
+    "base_is_select",
+    "base_join_count",
+    "base_limit_count",
+    "base_literal_count",
+    "base_order_count",
+    "base_parse_error",
+    "base_select_count",
+    "base_sql_length_chars",
+    "base_sql_line_count",
+    "base_subquery_count",
+    "base_table_count",
+    "base_where_count",
+    "join_count",
+    "sql_char_length",
+    "sql_token_length",
+    "struct_parse_error",
+    "subquery_count",
+}
 
 
 class Estimator(Protocol):
@@ -47,7 +76,13 @@ def main() -> None:
     split = json.loads(args.split.read_text(encoding="utf-8"))
     rows_by_id = {str(row["id"]): row for row in rows}
     model_names = args.models or default_model_names()
-    results = run_models(rows_by_id, split, model_names, random_state=args.random_state)
+    results = run_models(
+        rows_by_id,
+        split,
+        model_names,
+        random_state=args.random_state,
+        feature_policy=args.feature_policy,
+    )
     output_dir = write_results(results, rows_by_id, split, args)
     print_summary(results)
     print(f"Saved risk baseline ladder results to {output_dir}")
@@ -60,6 +95,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS_DIR)
     parser.add_argument("--run-id", default="risk_baseline_ladder_current")
     parser.add_argument("--random-state", type=int, default=42)
+    parser.add_argument(
+        "--feature-policy",
+        choices=sorted(FEATURE_POLICIES),
+        default="full",
+        help=(
+            "Feature filtering policy. full keeps all current features; "
+            "no_rule_derived removes explicit rule_* features; leakage_aware also "
+            "removes rule-shaped boolean parser flags."
+        ),
+    )
     parser.add_argument(
         "--models",
         nargs="*",
@@ -97,6 +142,7 @@ def run_models(
     model_names: list[str],
     *,
     random_state: int,
+    feature_policy: str,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for model_name in model_names:
@@ -110,6 +156,7 @@ def run_models(
                     train_rows,
                     valid_rows,
                     random_state=random_state,
+                    feature_policy=feature_policy,
                     split_name=f"fold_{fold['fold']}",
                 )
             )
@@ -122,6 +169,7 @@ def run_models(
             train_rows,
             test_rows,
             random_state=random_state,
+            feature_policy=feature_policy,
             split_name="test",
         )
         holdout_metrics = train_and_evaluate(
@@ -129,6 +177,7 @@ def run_models(
             train_rows,
             holdout_rows,
             random_state=random_state,
+            feature_policy=feature_policy,
             split_name="holdout",
         )
         results.append(
@@ -153,6 +202,7 @@ def train_and_evaluate(
     eval_rows: list[dict[str, Any]],
     *,
     random_state: int,
+    feature_policy: str,
     split_name: str,
 ) -> dict[str, Any]:
     x_train, x_eval, estimator = build_model_input(
@@ -160,6 +210,7 @@ def train_and_evaluate(
         train_rows,
         eval_rows,
         random_state=random_state,
+        feature_policy=feature_policy,
     )
     y_train = labels_for(train_rows)
     y_eval = labels_for(eval_rows)
@@ -176,6 +227,7 @@ def build_model_input(
     eval_rows: list[dict[str, Any]],
     *,
     random_state: int,
+    feature_policy: str,
 ) -> tuple[Any, Any, Estimator]:
     if model_name == "dummy_most_frequent":
         return (
@@ -200,7 +252,7 @@ def build_model_input(
         x_eval = vectorizer.transform(texts_for(eval_rows))
         return x_train, x_eval, logistic_regression(random_state)
     if model_name == "structured_rule_logistic_regression":
-        x_train, x_eval = numeric_matrices(train_rows, eval_rows)
+        x_train, x_eval = numeric_matrices(train_rows, eval_rows, feature_policy=feature_policy)
         estimator = Pipeline(
             [
                 ("scale", StandardScaler(with_mean=False)),
@@ -209,7 +261,11 @@ def build_model_input(
         )
         return x_train, x_eval, estimator
     if model_name == "random_forest_all_features":
-        x_train, x_eval = all_feature_matrices(train_rows, eval_rows)
+        x_train, x_eval = all_feature_matrices(
+            train_rows,
+            eval_rows,
+            feature_policy=feature_policy,
+        )
         estimator = RandomForestClassifier(
             n_estimators=220,
             min_samples_leaf=2,
@@ -219,7 +275,7 @@ def build_model_input(
         )
         return x_train, x_eval, estimator
     if model_name == "catboost_tabular" and CatBoostClassifier is not None:
-        x_train, x_eval = numeric_matrices(train_rows, eval_rows)
+        x_train, x_eval = numeric_matrices(train_rows, eval_rows, feature_policy=feature_policy)
         estimator = CatBoostClassifier(
             iterations=160,
             depth=5,
@@ -254,20 +310,32 @@ def labels_for(rows: list[dict[str, Any]]) -> np.ndarray:
 def numeric_matrices(
     train_rows: list[dict[str, Any]],
     eval_rows: list[dict[str, Any]],
+    *,
+    feature_policy: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     vectorizer = DictVectorizer(sparse=False)
-    x_train = vectorizer.fit_transform([row["features"] for row in train_rows])
-    x_eval = vectorizer.transform([row["features"] for row in eval_rows])
+    x_train = vectorizer.fit_transform(
+        [features_for_policy(row["features"], feature_policy) for row in train_rows]
+    )
+    x_eval = vectorizer.transform(
+        [features_for_policy(row["features"], feature_policy) for row in eval_rows]
+    )
     return np.asarray(x_train, dtype=float), np.asarray(x_eval, dtype=float)
 
 
 def all_feature_matrices(
     train_rows: list[dict[str, Any]],
     eval_rows: list[dict[str, Any]],
+    *,
+    feature_policy: str,
 ) -> tuple[sparse.csr_matrix, sparse.csr_matrix]:
     dict_vectorizer = DictVectorizer(sparse=True)
-    x_train_num = dict_vectorizer.fit_transform([row["features"] for row in train_rows])
-    x_eval_num = dict_vectorizer.transform([row["features"] for row in eval_rows])
+    x_train_num = dict_vectorizer.fit_transform(
+        [features_for_policy(row["features"], feature_policy) for row in train_rows]
+    )
+    x_eval_num = dict_vectorizer.transform(
+        [features_for_policy(row["features"], feature_policy) for row in eval_rows]
+    )
     text_vectorizer = TfidfVectorizer(
         min_df=2,
         max_features=5000,
@@ -280,6 +348,24 @@ def all_feature_matrices(
         sparse.hstack([x_train_num, x_train_text], format="csr"),
         sparse.hstack([x_eval_num, x_eval_text], format="csr"),
     )
+
+
+def features_for_policy(features: dict[str, Any], feature_policy: str) -> dict[str, Any]:
+    if feature_policy == "full":
+        return features
+    if feature_policy == "no_rule_derived":
+        return {
+            key: value
+            for key, value in features.items()
+            if not key.startswith("rule_")
+        }
+    if feature_policy == "leakage_aware":
+        return {
+            key: value
+            for key, value in features.items()
+            if key in LEAKAGE_AWARE_FEATURES
+        }
+    raise ValueError(f"unknown feature policy: {feature_policy}")
 
 
 def metrics_for(
@@ -349,7 +435,8 @@ def write_results(
 ) -> Path:
     output_dir = args.results_dir / args.run_id
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "metrics.json").write_text(
+    metrics_path = output_dir / "metrics.json"
+    metrics_path.write_text(
         json.dumps(results, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
@@ -365,12 +452,20 @@ def write_results(
         "features_path": str(args.features),
         "split_path": str(args.split),
         "random_state": args.random_state,
+        "feature_policy": args.feature_policy,
         "labels": LABELS,
         "record_count": len(rows_by_id),
         "split_summary": split.get("summary"),
+        "artifacts_sha256": {
+            str(args.features): file_sha256(args.features),
+            str(args.split): file_sha256(args.split),
+            str(metrics_path): file_sha256(metrics_path),
+        },
         "methodology_note": (
             "Risk-label baselines are triage models over deterministic rule labels plus "
-            "measured metric labels. They are not intended to replace the rule engine."
+            "measured metric labels. They are not intended to replace the rule engine. "
+            "Use --feature-policy leakage_aware for a stricter run without explicit "
+            "rule-derived features and rule-shaped parser flags."
         ),
         "unavailable_models": {
             "lightgbm": "not installed in current Poetry environment",
@@ -383,6 +478,14 @@ def write_results(
     )
     (output_dir / "summary.md").write_text(render_markdown(results, metadata), encoding="utf-8")
     return output_dir
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def flat_metric_rows(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
