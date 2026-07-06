@@ -108,7 +108,7 @@ async def list_tools() -> list[Tool]:
             description=(
                 "Анализирует ClickHouse SQL-запрос на антипаттерны и проблемы производительности. "
                 "Возвращает структурированный отчёт с формально обоснованными рекомендациями. "
-                "Использует библиотеку из 20+ правил из реляционной алгебры и инвариантов ClickHouse. "
+                "Использует библиотеку из 119 ClickHouse-specific правил и детекторов. "
                 "Не отправляет данные во внешние сервисы — работает локально. "
                 "ВАЖНО: если пользователь упомянул версию ClickHouse в разговоре — "
                 "всегда передавай её в ch_version. Если упомянул адрес кластера — "
@@ -172,7 +172,7 @@ async def list_tools() -> list[Tool]:
                 "properties": {
                     "tier": {
                         "type": "string",
-                        "enum": ["1A", "1B", "1C", "detector", "all"],
+                        "enum": ["1A", "1B", "1C", "2", "detector", "env", "all"],
                         "description": "Фильтр по типу правил",
                         "default": "all",
                     }
@@ -356,7 +356,7 @@ async def _list_rules(arguments: dict[str, Any]) -> list[TextContent]:
     rules = _get_applicable_rules(None)
 
     lines = ["# Правила оптимизации ClickAdvisor\n"]
-    tier_order = {"1A": 0, "1B": 1, "1C": 2, "detector": 3, "rag": 4}
+    tier_order = {"1A": 0, "1B": 1, "1C": 2, "2": 3, "detector": 4, "env": 5, "rag": 6}
     sorted_rules = sorted(rules, key=lambda rule: (tier_order.get(rule.tier, 5), rule.rule_id))
 
     current_tier = None
@@ -369,7 +369,9 @@ async def _list_rules(arguments: dict[str, Any]) -> list[TextContent]:
                 "1A": "## Tier 1A — Формально эквивалентные (применяются автоматически)",
                 "1B": "## Tier 1B — Приближённые (требуют opt-in)",
                 "1C": "## Tier 1C — Условные (зависят от схемы или контекста)",
+                "2": "## Tier 2 — Cost / design advisory",
                 "detector": "## Детекторы — Антипаттерны",
+                "env": "## Environment checks — Настройки и окружение",
             }
             lines.append(tier_labels.get(current_tier, f"## {current_tier}"))
         lines.append(

@@ -43,6 +43,19 @@ async def test_list_rules() -> None:
     results = await call_tool("list_rules", {})
     assert "R-001" in results[0].text
     assert "Tier 1A" in results[0].text
+    assert "Tier 2" in results[0].text
+    assert "Environment checks" in results[0].text
+
+
+@pytest.mark.asyncio
+async def test_list_rules_filters_tier2_and_environment_rules() -> None:
+    tier2 = await call_tool("list_rules", {"tier": "2"})
+    assert "R-103" in tier2[0].text
+    assert "E-001" not in tier2[0].text
+
+    env = await call_tool("list_rules", {"tier": "env"})
+    assert "E-001" in env[0].text
+    assert "R-103" not in env[0].text
 
 
 @pytest.mark.asyncio
