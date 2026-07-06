@@ -63,16 +63,38 @@ def mcp_http_server(
     host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
     port: Annotated[int, typer.Option(help="Bind port")] = 8765,
     path: Annotated[str, typer.Option(help="MCP endpoint path")] = "/mcp",
+    bearer_token: Annotated[
+        str | None,
+        typer.Option(help="Bearer token required by Streamable HTTP clients"),
+    ] = None,
+    rate_limit_per_minute: Annotated[
+        int,
+        typer.Option(help="Per-client HTTP request limit per minute"),
+    ] = 60,
+    allow_detect_version: Annotated[
+        bool | None,
+        typer.Option(
+            "--allow-detect-version/--disable-detect-version",
+            help="Expose detect_ch_version over HTTP. Defaults to local-only.",
+        ),
+    ] = None,
 ) -> None:
     """Запустить Streamable HTTP MCP сервер для remote-compatible demo."""
     from clickadvisor.mcp_server.server import run_http
 
     if host not in {"127.0.0.1", "localhost"}:
         console.print(
-            "[yellow]Внимание: remote MCP endpoint должен быть защищён HTTPS/auth proxy. "
+            "[yellow]Внимание: remote MCP endpoint требует bearer token. "
             "Для локального demo безопаснее использовать 127.0.0.1.[/yellow]"
         )
-    run_http(host=host, port=port, path=path)
+    run_http(
+        host=host,
+        port=port,
+        path=path,
+        bearer_token=bearer_token,
+        rate_limit_per_minute=rate_limit_per_minute,
+        allow_detect_version=allow_detect_version,
+    )
 
 
 @app.command()

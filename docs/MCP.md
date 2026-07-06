@@ -38,10 +38,12 @@ See [MCP Deployment Options](mcp-deployment.md).
 ## Connect To Public Remote MCP
 
 Remote MCP clients connect to ClickAdvisor through the hosted Streamable HTTP
-endpoint:
+endpoint. Public/demo HTTP deployments require a bearer token and are intended
+for synthetic SQL examples, not private production queries:
 
 ```text
 https://clickadvisor-mcp-production.up.railway.app/mcp
+Authorization: Bearer <demo-token>
 ```
 
 Claude / Anthropic API URL-based server config:
@@ -78,6 +80,10 @@ Anthropic API:
 Opening the endpoint in a browser can return `Not Acceptable: Client must
 accept text/event-stream`. This is expected for Streamable HTTP MCP; use an MCP
 client or MCP Inspector to test the tool calls.
+
+Public demo deployments disable `detect_ch_version` by default because it
+accepts arbitrary ClickHouse URLs. Use local stdio MCP or a self-hosted trusted
+HTTP deployment when version detection against private clusters is needed.
 
 ## Connect to Claude Desktop
 
