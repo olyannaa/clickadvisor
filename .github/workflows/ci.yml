@@ -47,7 +47,12 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction --no-ansi
       - name: Run pytest
-        run: poetry run pytest --ignore=tests/integration
+        run: >
+          poetry run pytest --ignore=tests/integration
+          --cov=clickadvisor
+          --cov-report=term-missing
+          --cov-report=xml
+          --cov-fail-under=80
 
   integration-test:
     runs-on: ubuntu-latest
