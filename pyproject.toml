@@ -2,7 +2,7 @@
 name = "clickadvisor"
 version = "1.0.0"
 description = "Local-first CLI for ClickHouse query optimization with formally grounded rewrite rules."
-authors = ["OpenAI Codex <codex@openai.com>"]
+authors = ["Olga Vershinina <olyaasolya@gmail.com>"]
 readme = "README.md"
 license = "MIT"
 packages = [{ include = "clickadvisor" }]
