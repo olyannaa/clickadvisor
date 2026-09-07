@@ -1,0 +1,43 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"ClickHouse
+topic: clickhouse-fivetran-destination-moves-to-beta-clickhouse
+ch_version_introduced: '26.8'
+last_updated: '2026-09-07'
+chunk_index: 5
+total_chunks_in_doc: 9
+---
+
+in the 24\.8 release blog post](https://clickhouse.com/blog/clickhouse-release-24-08#control-of-projections-during-merges) Check out Tom’s blog for [Projections as secondary indices](https://clickhouse.com/blog/projections-secondary-indices#example-combining-multiple-projection-indexes) for more examples of combining multiple projection indices and Mark’s video explaining how you can use them. ##### Option 3: Materialised Views \#
+
+[Materialized views](https://clickhouse.com/docs/materialized-view/incremental-materialized-view) transform data at insert time and write it to a separate target table. You can transform, filter, or aggregate data during ingestion to create a table perfectly optimised for your specific query patterns. This gives you complete control over the target table’s schema, primary and ordering keys, and additional optimisations.
+
+```
+1-- Create an optimised target table
+2CREATE TABLE my_schema.my_optimised_table (
+3
+4) 
+5PRIMARY KEY 
+6ORDER BY ;
+7
+8-- Create materialised view
+9CREATE MATERIALIZED VIEW my_schema.my_table_mv
+10TO my_schema.my_optimised_table
+11AS SELECT  FROM my_schema.fivetran_table_name
+```
+Copy command
+The trade\-off is duplicated storage for all data, and schema changes to the source table are not automatically reflected in the target table, this requires manual management. You can get more information on [Materialised views vs Projections](https://clickhouse.com/docs/managing-data/materialized-views-versus-projections) from the ClickHouse docs.
+
+#### Consider a Medallion Architecture \#
+
+Since you cannot modify a table’s primary key after creation, there are several strategies to optimise query performance. Consider implementing a Medallion Architect where Fivetran lands data in its raw data into a "bronze" layer, and you transform it into optimised "silver" and “gold” tables with the appropriate primary and ordering keys for your query patterns.
+
+![](/_next/image?url=%2Fuploads%2Ffivetran_feb2026_image5_f073b52273.png&w=2048&q=75)
+
+[Blog post: Building a Medallion architecture with ClickHouse](https://clickhouse.com/blog/building-a-medallion-architecture-with-clickhouse)
+
+Using ClickHouse materialised views, you can automatically transform Fivetran synced data as it arrives. Deduplicating records, joining reference tables and building aggregations without external tooling. This keeps your raw data intact for debugging or reprocessing while serving clean, performant datasets to your end users.
+
+#### Consider isolating workloads with Warehouses. \#
+
+If you’re running heavy analytical queries alongside your Fivetran ingestion, consider using [ClickHouse Cloud’s Warehouses](https://clickhouse.com/blog/introducing-warehouses-compute-compute-separation-in-clickhouse-cloud), our compute\-compute separation architecture. This feature allows you to create multiple compute services that share the same underlying data, so you can dedicate one service for Fivetran writes and another for serving analytical queries.

@@ -1,0 +1,28 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"What's
+topic: what-s-new-in-clickstack-july-25-clickhouse
+ch_version_introduced: '1.2'
+last_updated: '2026-09-07'
+chunk_index: 2
+total_chunks_in_doc: 9
+---
+
+the efforts of the individuals who contributed to ClickStack \- whether through the OpenTelemetry collector, the Helm chart, or HyperDX. Your work is greatly appreciated. [Huynguyen\-anduin](https://github.com/huynguyen-anduin), [OhJuhun](https://github.com/OhJuhun), [mGolestan98](https://github.com/mGolestan98) ## ClickStack supports the JSON type for faster queries \#
+
+The biggest update to ClickStack this month is simple \- but transformative. We’re adding beta support for the native JSON column type in ClickStack. This unlocks a whole new level of scalability, performance, and compression for observability workloads on ClickHouse \- **with queries now upto 9x faster over the Map type in our tests**.
+
+### Try ClickStack today \#
+
+Getting started with the world’s fastest and most scalable open source observability stack, just takes one command.
+
+[Try now](https://clickhouse.com/docs/use-cases/observability/clickstack/getting-started?loc=blog-o11y-global-cta&utm_source=clickhouse&utm_medium=web&utm_campaign=blog)
+### Why is JSON support needed? \#
+
+Users building observability solutions need to simply be able to “send events” without worrying about rigid schemas. In practice, observability data comes from many sources \- different apps, teams, or even organizations, each with its own evolving structure. While standards like structured logging and OpenTelemetry help, teams still need to capture arbitrary tags and fields that vary widely in number, type, and nesting.
+
+Until now, ClickStack schemas for OpenTelemetry data relied on the `Map` type to handle the columns like `LogAttributes`, `ResourceAttributes`, and `SpanAttributes` which contain dynamic attributes. While this approach worked, it came with real trade\-offs:
+
+- **Loss of type precision:** Map keys and values were stored as strings, forcing everything into a single type. This means numeric comparisons needed query\-time casts, adding verbosity, increasing latency, and consuming more memory.
+- **Linear scans on a single column:** All JSON paths live in one column when using the Map type, so reading a single key requires loading and scanning the entire map. This leads to unnecessary I/O, especially with many keys, slowing down queries. To work around this, users would [pre\-extract values into materialized columns](https://clickhouse.com/docs/use-cases/observability/schema-design#materialized-columns).
+- **No native nesting:** While the Map type handled primitive values reasonably well (despite loss of precision), it struggled even more with nested maps and arrays, since everything was coerced into a String. Complex data had to be serialized as JSON strings, leading to awkward and inefficient querying. For example, take this `LogAttributes` structure:

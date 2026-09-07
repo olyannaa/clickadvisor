@@ -1,0 +1,48 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"Accelerating
+topic: accelerating-clickhouse-queries-on-json-data-for-faster-bluesky-insights-clickhouse
+ch_version_introduced: '4.14'
+last_updated: '2026-09-07'
+chunk_index: 10
+total_chunks_in_doc: 23
+---
+
+### Memory consumption of the optimized query (16 MiB vs 1 GiB) \# To quantify the efficiency of our approach, the table below compares memory usage at each stage—showing how incremental materialized views dramatically reduce query overhead. ![Blog-bluesky-faster-v3.006.png](/_next/image?url=%2Fuploads%2FBlog_bluesky_faster_v3_006_ffef95ed04.png&w=2048&q=75)
+
+| **Metric** | **Baseline query** | **① Incremental MV** | **② Optimized query** |
+| --- | --- | --- | --- |
+| **Memory usage** | 1 GiB | 276\.47 MiB | 16\.58 MiB |
+| **Rows processed** | Full dataset | \~571\.42k per update | 109 rows |
+| **Duration** | 56 sec | \~746 ms per update | Instantaneous |
+| **Metrics source** | [Execution statistics](/blog/accelerating-clickhouse-json-queries-for-fast-bluesky-dashboards#baseline-query-counting-unique-users-56s) | [Query views log](https://gist.github.com/tom-clickhouse/ee2ebbd5868fc99e1ff03439b76a7043) | [Query log](https://gist.github.com/tom-clickhouse/7bc8ba48b32b1c4bd39a97a4d8971b79) |
+
+
+The optimized query consumes just **16 MiB** of memory, a sharp contrast to the **1 GiB** used by the baseline query. Even when factoring in the **276 MiB** required by the incremental materialized view to process new rows, the total memory footprint remains significantly lower—ensuring fast, efficient real\-time analytics.
+
+> Once again, incremental pre\-aggregation minimizes memory usage while maintaining low query latency, making large\-scale JSON analytics highly efficient.
+
+## Dashboard 3: Discovering the most reposted Bluesky posts \#
+
+![Blog-bluesky-faster.007.png](/_next/image?url=%2Fuploads%2FBlog_bluesky_faster_007_2b5f4e1e16.png&w=2048&q=75)
+
+Our third scenario is a real\-time dashboard [highlighting](https://sql.clickhouse.com?query=U0VMRUNUICoKRlJPTSBibHVlc2t5LnJlcG9zdHNfcGVyX3Bvc3RfdG9wMTBfdjIKT1JERVIgQlkgcmVwb3N0cyBERVNDOw&chart=eyJ0eXBlIjoiYmFyIiwiY29uZmlnIjp7InRpdGxlIjoiTnVtYmVyIG9mIGV2ZW50cyBwZXIgaG91ciBvZiBkYXkiLCJ4YXhpcyI6ImhvdXJfb2ZfZGF5IiwieWF4aXMiOiJjb3VudCIsInNlcmllcyI6ImV2ZW50Iiwic3RhY2siOmZhbHNlfX0&run_query=true&tab=results) the most reposted Bluesky posts.
+
+### Challenges in identifying reposts efficiently \#
+
+At first glance, identifying the most reposted Bluesky posts seems simple. However, this dashboard introduces some key challenges:
+
+- **Repost events don’t contain post content**: They only store the [CID](https://blueskydirectory.com/glossary/cid) (Content Identifier) of the original post—without text:
+
+![Blog-bluesky-faster.001.png](/_next/image?url=%2Fuploads%2FBlog_bluesky_faster_001_4295ba4b79.png&w=2048&q=75)
+
+- **Counting reposts is expensive**: To compute the number of reposts per post, we must aggregate on the high\-cardinality `cid` JSON path, which slows queries.
+- **Posts don’t contain user handles**: BLuesky event JSON documents track only the [DID](https://blueskydirectory.com/glossary/cid) (Decentralized Identifier) of users—not their actual username or handle:
+
+![Blog-bluesky-faster.001.png](/_next/image?url=%2Fuploads%2FBlog_bluesky_faster_001_80577d40e2.png&w=2048&q=75)
+
+Before solving these problems, let’s look at a baseline query to find the most reposted posts.
+
+### Why repost queries are slow (baseline: 37s execution time) \#
+
+Before we address these aforementioned issues—enriching most reposted posts with content and mapping DIDs to user handles—let’s start with a basic query to retrieve the top 10 most reposted posts:
