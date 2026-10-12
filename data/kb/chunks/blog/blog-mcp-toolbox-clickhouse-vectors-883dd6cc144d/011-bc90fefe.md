@@ -1,0 +1,39 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"How
+topic: how-mcp-toolbox-turns-agent-text-into-clickhouse-vectors-clickhouse
+ch_version_introduced: '1.9'
+last_updated: '2026-10-12'
+chunk_index: 11
+total_chunks_in_doc: 19
+---
+
+just these two: ``` 1kind: toolset 2name: semantic_search 3tools: 4 - insert_doc 5 - search_docs ``` Copy commandTwo constraints to remember. Only `string`\-typed parameters can declare `embeddedBy`, which the config parser catches before the server will even start:
+
+```
+1ERROR "unable to parse config file at \"tools.yaml\": document 3: error unmarshaling
+2tool \"dim_probe\": … parameter type \"integer\" cannot specify 'embeddedBy'"
+```
+Copy commandThe referenced embedding model must also be defined in the same configuration \- but that one is *not* checked at parse time. A tool pointing at a model that doesn't exist loads happily and fails on first use, which is a much worse place to find out:
+
+```
+1ERROR "error embedding parameters: embedding model does not exist: does-not-exist"
+```
+Copy command### Step 3: Run it \#
+
+```
+1./toolbox --config tools.yaml   # listens on 127.0.0.1:5000
+```
+Copy commandI usually go straight to the bundled UI at `http://127.0.0.1:5000/ui` (add `--ui` when you start the server) to eyeball what loaded. But before wiring up a client at all, you can exercise a tool straight from the shell:
+
+```
+1toolbox invoke search_docs '{"query":"making queries faster"}' \
+2  --config tools.yaml --log-level ERROR
+```
+Copy commandThe `--log-level ERROR` matters if you're piping into `jq`: Toolbox writes its startup log lines to stdout alongside the JSON result, so a default\-level invocation produces output that isn't valid JSON. This one\-liner is the fastest way to prove your embedding credentials work before you start debugging a client integration.
+
+## Loading a corpus \#
+
+A two\-row demo doesn't tell you much about whether semantic search is working, so we can load something with enough topical spread to be falsifiable: 57 short documents across five clusters \- ClickHouse internals, operations and Kubernetes, general programming, cooking, and hillwalking. Retrieval that's actually semantic should cross those cluster boundaries when the wording demands it and stay inside them when it doesn't.
+
+Ingestion goes through the `insert_doc` tool itself, so Toolbox does all the embedding. Note that **the `/api/tool/<name>/invoke` REST endpoints are off by default in 1\.9**, and hitting one without the flag returns `410 Gone` with an error:

@@ -1,0 +1,49 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"ClickHouse
+topic: clickhouse-and-postgresql-a-match-made-in-data-heaven-part-1-clickhouse
+ch_version_introduced: '28535.465'
+last_updated: '2026-10-12'
+chunk_index: 14
+total_chunks_in_doc: 15
+---
+
+│ EC3R │ 230000 │ 2840000 │ 1135 │ │ W1S │ 590000 │ 6410000 │ 986 │ 191 rows in set. Elapsed: 0.062 sec. Processed 2.62 million rows, 19.45 MB (41.98 million rows/s., 311.48 MB/s.) [✎](https://sql.clickhouse.com?query_id=7PEVSKK5MBGK5PTEQ6FUOD) ```
+
+The difference here in query performance is dramatic. In the interests of transparency, there are reasons for this beyond simply “ClickHouse is faster on analytical queries”:
+
+- This is a developer instance in ClickHouse Cloud with 8GB of RAM and 2 cores. We don’t have visibility regarding the resources assigned to each Supabase instance, but this is likely more.
+- All queries were executed 5x with the minimum of these used. This ensures that we use both databases' “hot” performance and exploit any file system caches.
+- We have optimized our primary key for our ClickHouse table to minimize the number of rows scanned.
+
+Despite these differences, ClickHouse clearly excels on linear scans and analytical\-type queries, especially when the primary index can be exploited \- this is [reinforced by our more rigorous benchmarks](https://benchmark.clickhouse.com).
+
+## Conclusion \#
+
+In the first part of this blog series, we have shown how ClickHouse and Postgres are complementary, demonstrating with examples how data can be moved effortlessly between them using the native ClickHouse functions and table engine. In the next part, we will show how Postgres can be used to power dictionaries which are automatically kept in sync and used to accelerate join queries.
+
+In the meantime, if you want to learn more about out Postgres integration we have [free training course on data ingestion](https://learn.clickhouse.com/visitor_catalog_class/show/912833/) which covers these topics extensively.
+
+### Get started today
+
+Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.
+
+[Sign up](https://console.clickhouse.cloud/signUp?loc=blog-global-cta&utm_blogctaid=0)
+
+---
+
+Share this post
+
+- Copy URL
+- [![Y Combinator icon](/_next/static/immutable/media/ycombinator.37q2g-no9bowl.svg)](https://news.ycombinator.com/submitlink?u= "Share on Y Combinator")
+- [![X icon](/_next/static/immutable/media/x.3nm91lx52ia7n.svg)](https://x.com/intent/tweet?text= "Share on X")
+- [![Bluesky icon](/_next/static/immutable/media/bluesky.292c8t8kns7n1.svg)](https://bsky.app/intent/compose?text= "Share on Bluesky")
+- [![Facebook icon](/_next/static/immutable/media/facebook.32ysyflv7kktz.svg)](https://www.facebook.com/sharer/sharer.php?u= "Share on Facebook")
+- [![LinkedIn icon](/_next/static/immutable/media/linkedin.37911rnwi-sdg.svg)](https://www.linkedin.com/sharing/share-offsite/?url= "Share on LinkedIn")
+### Subscribe to our newsletter
+
+Stay informed on feature releases, product roadmap, support, and cloud offerings!
+
+## Recent posts
+
+[View all Blogs](/blog)![isam customer story blog cover white](/_next/image?url=%2Fuploads%2Fi_SAM_Customer_Story_blog_cover_white_9d07b4b15f.jpg&w=750&q=75)User stories### [How iSAM Funds built an options research platform for a 10,000x data problem with ClickHouse Cloud](/blog/isam-market-data-research-platform)

@@ -1,0 +1,86 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"ClickHouse
+topic: clickhouse-release-26-9-clickhouse
+ch_version_introduced: '26.9'
+last_updated: '2026-10-12'
+chunk_index: 11
+total_chunks_in_doc: 15
+---
+
+ClickHouse 26\.9 introduces a new system table, `system.session_query_ids`, which keeps track of all the query ids in the current session in execution order. We can query that table like this: ``` 1SELECT * FROM system.session_query_ids; ``` Copy command
+
+```
+1┌─sequence_number─┬─query_id─────────────────────────────┐
+2│               1 │ 8ebdec91-0636-44e7-9d1a-66974c2d0fe3 │
+3│               2 │ 471e8bef-2042-4394-9a08-3538f4ebcf85 │
+4│               3 │ f9757bd2-8fe3-4b14-b681-8e938a396880 │
+5│               4 │ 36903bb2-9f85-420b-b37b-66f0d23ce41e │
+6│               5 │ 4127be18-3e58-45f6-8153-5ff9a0d04675 │
+7│               6 │ a81309ab-3498-4ba9-9217-8145406a168d │
+8└─────────────────┴──────────────────────────────────────┘
+```
+Copy command
+The `system.query_log` table includes a `query_id` per entry, which means we can now check which queries we just ran, without having to manually specify query ids when querying that table:
+
+```
+1SELECT query, query_duration_ms FROM system.query_log
+2WHERE query_id IN (SELECT query_id FROM system.session_query_ids)
+3AND type = 'QueryFinish' 
+4ORDER BY event_time_microseconds;
+```
+Copy command
+
+```
+1┌─query─────────────────────────────────────────────────────────────┬─query_duration_ms─┐
+2│ SELECT * FROM lake_order_events;                                  │                10 │
+3│ system flush logs;                                                │                 0 │
+4│ SELECT query, query_duration_ms FROM system.query_log            ↴│                 3 │
+5│↳WHERE query_id IN (SELECT query_id FROM system.session_query_ids)↴│                   │
+6│↳  AND type = 'QueryFinish' ORDER BY event_time_microseconds;      │                   │
+7│ SELECT * FROM system.session_query_ids;                           │                 0 │
+8│ set output_format_pretty_row_numbers=0;                           │                 0 │
+9│ SELECT * FROM system.session_query_ids;                           │                 0 │
+10└───────────────────────────────────────────────────────────────────┴───────────────────┘
+```
+Copy command
+## Limits on table size and table count \#
+
+### Contributed by Alexey Milovidov \#
+
+ClickHouse 26\.9 lets us put limits on how large an individual table can grow, as well as how many tables can be created in a database.
+
+This is useful for multi\-tenant, temporary, and demo environments, where we don’t want one workload to consume everything.
+
+Let’s start by creating a table that can contain a maximum of three rows:
+
+```
+1CREATE TABLE limited_events
+2(
+3    id UInt64,
+4    message String
+5)
+6ENGINE = MergeTree
+7ORDER BY id
+8SETTINGS max_table_size_rows = 3;
+```
+Copy command
+We’ll insert three rows:
+
+```
+1INSERT INTO limited_events VALUES
+2    (1, 'started'),
+3    (2, 'processing'),
+4    (3, 'finished');
+```
+Copy command
+If we insert one more row, it still succeeds:
+
+```
+1INSERT INTO limited_events VALUES
+2    (4, 'one past limit');
+3
+4SELECT count()
+5FROM limited_events;
+```
+Copy command

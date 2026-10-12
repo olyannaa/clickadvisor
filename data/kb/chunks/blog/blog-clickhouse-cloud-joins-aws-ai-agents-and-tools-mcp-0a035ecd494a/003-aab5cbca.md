@@ -1,0 +1,43 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"ClickHouse
+topic: clickhouse-cloud-joins-the-new-aws-marketplace-ai-agents-and-tools-category-with-a-remote-mcp-server-for-a-turn-key-ai-to-data-connectivity-clickhouse
+ch_version_introduced: auto
+last_updated: '2026-10-12'
+chunk_index: 3
+total_chunks_in_doc: 4
+---
+
+top of the ClickHouse playground service at: [llm.clickhouse.com](https://llm.clickhouse.com) Now with the remote MCP server for ClickHouse Cloud, it is easier than ever to experience conversational data exploration against real\-time data with minimal setup. ## Security and MCP \#
+
+Ensuring the security of the remote MCP server was paramount in its design and implementation. Like all other ClickHouse Cloud services, the remote MCP server has undergone a stringent internal security process to guarantee its security.
+
+**OAuth\-based authorization**  
+
+The remote MCP server uses the OAuth protocol to ensure that the permissions are properly checked on a user level; after registration and authentication, the identity used by the MCP server is only able to act on behalf of the user. This decision limits the MCP server to what the user can interact with directly in Clickhouse Cloud and ensures that no accidental privilege escalation can take place. Existing permissions in a ClickHouse Cloud service will therefore apply to the MCP server.
+
+**Disabled by default, and read\-only by design**  
+
+The remote MCP Server feature is disabled by default for ClickHouse Cloud services; it can be enabled via the Connect menu. We also took the conscious decision to limit the MCP server capabilities to read\-only operations. With an expanding attack surface through [prompt injections](https://www.ibm.com/think/topics/prompt-injection) and the LLM behavior landscape ever evolving, the risk of a prompt injection triggering destructive actions exists.
+
+![mcpaws2.png](/_next/image?url=%2Fuploads%2Fmcpaws2_0bf21e253b.png&w=2048&q=75)
+
+## Get started today \#
+
+Ready to give your AI agents and applications direct access to lightning\-fast analytics? Here's how to begin:
+
+1. Join the waitlist by filling out the form at [clickhouse.ai](http://clickhouse.ai)
+2. Connect to your ClickHouse service or find ClickHouse Cloud in the [AWS Marketplace AI Agents category](http://aws.amazon.com/marketplace/solutions/ai-agents-and-tools/)
+3. Check out our [Remote MCP Server documentation](https://clickhouse.com/docs/use-cases/AI/MCP/remote_mcp) for setup guides
+
+The combination of a lightning\-fast database and a Remote MCP Server creates new possibilities for AI\-powered analytics. We can't wait to see what you build!
+
+### Get started today
+
+Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.
+
+[Sign up](https://console.clickhouse.cloud/signUp?loc=blog-global-cta&utm_blogctaid=0)
+
+---
+
+Share this post
