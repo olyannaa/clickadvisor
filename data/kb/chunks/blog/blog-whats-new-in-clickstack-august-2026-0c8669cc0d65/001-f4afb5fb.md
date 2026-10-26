@@ -1,0 +1,38 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"What's
+topic: what-s-new-in-clickstack-aug-26-clickhouse
+ch_version_introduced: auto
+last_updated: '2026-10-26'
+chunk_index: 1
+total_chunks_in_doc: 13
+---
+
+# What's new in ClickStack \- Aug ’26 \| ClickHouse
+
+\[{"@context":"https://schema.org","@type":"BlogPosting","headline":"What's new in ClickStack \- Aug ’26","description":"The August ClickStack update brings dashboard variables, chart formulas, PromQL support, a metrics browser, LLM observability, and improvements to alerting and tracing.","image":"/uploads/clickstack\_aug2026\_image1\_full\_579cefd6d2\.png","publisher":{"@type":"Organization","@id":"https://clickhouse.com/\#organization","name":"ClickHouse","url":"https://clickhouse.com/","logo":{"@type":"ImageObject","url":"https://clickhouse.com/\_next/static/immutable/media/icon1\.3b4swr1c2xvk2\.png"}},"datePublished":"2026\-09\-17T16:53:18\.042Z","dateModified":"2026\-09\-17T16:53:17\.880Z","author":{"@context":"https://schema.org","@type":"Person","name":"The ClickStack Team","url":"https://clickhouse.com/authors/the\-clickstack\-team","@id":"https://clickhouse.com/authors/the\-clickstack\-team\#person","image":"/uploads/neutral\_avatar\_white\_add9f20d0f.png"}}]\-\>Scroll to top\<\-Back- [Blog](/blog)
+- /
+- [Product](/blog?category=product)
+
+Copy pageCopied!More actions- ![View as Markdown](/_next/static/immutable/media/icon-markdown.2-p3ljls89_ww.svg)**View as Markdown** Open this page in Markdown
+- ![Open in ChatGPT](/_next/static/immutable/media/icon-chatgpt.0aw932qxrira1.svg)**Open in ChatGPT** Ask questions about this page
+- ![Open in Claude](/_next/static/immutable/media/icon-claude.42qslf9ajhpwk.svg)**Open in Claude** Ask questions about this page
+- ![Open in v0](/_next/static/immutable/media/icon-v0.0mczhus58alob.svg)**Open in v0** Ask questions about this page
+# What's new in ClickStack \- Aug ’26
+
+![neutral avatar white](/_next/image?url=%2Fuploads%2Fneutral_avatar_white_add9f20d0f.png&w=96&q=75)[The ClickStack Team](/authors/the-clickstack-team)Sep 16, 2026 · 21 minutes read
+> For those of you who can’t wait for these monthly ClickStack updates, we have weekly [Demo Day videos](https://clickhouse.com/docs/clickstack/demo-days/2026/2026-09-10). The dev team records demos of the features they’re working on, so you can see what’s taking shape before it reaches this newsletter. We share them in [Slack](https://clickhouse.com/slack) too in the \#o11y\-clickstack channel.
+
+Welcome to the August edition of What's New in ClickStack. Five releases shipped between v2\.34 and v2\.38, and dashboards took most of the attention.
+
+Dashboard variables are now generally available. A filter's selection can be referenced anywhere in a tile, from raw SQL and builder fields to Lucene and PromQL, and one dropdown can narrow another. Charts also gained formulas, so two series on a chart can be combined into a rate or a ratio.
+
+Two other additions make dashboards quicker to build and easier to read. A metrics explorer in the chart editor lets you browse what a deployment actually emits before you pick a metric.
+
+Release markers overlay the moment each version of a service first appeared, so a latency spike can be lined up against the deploy that caused it.
+
+We also shipped a beta LLM observability dashboard with Alerting receiving a long list of improvements, several of which came directly from user requests: up to ten notification targets per alert, alert names and tags, an evaluation history you can read over the API, and richer webhook payloads.
+
+We’ll cover all of this below, alongside new dashboard filter types, OIDC authentication for the collector, and another round of MCP server improvements.
+
+## New contributors \#

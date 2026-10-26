@@ -1,0 +1,70 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"pg\_clickhouse
+topic: pg-clickhouse-chdb-updates-encoding-nesting-and-types-clickhouse
+ch_version_introduced: '0.1'
+last_updated: '2026-10-26'
+chunk_index: 3
+total_chunks_in_doc: 8
+---
+
+'POST', 'PUT', 'DELETE', 'PATCH') NOT NULL, 7 node_id Int64 NOT NULL, 8 response Int32 NOT NULL 9) ENGINE = MergeTree 10 ORDER BY start_at; ``` Copy command On import, pg\_clickhouse creates a table with a `duration interval` column:
+
+| Column | Type | Nullable |
+| --- | --- | --- |
+| req\_id | bigint | not null |
+| start\_at | timestamp(6\) with time zone | not null |
+| duration | interval | not null |
+| resource | text | not null |
+| method | text | not null |
+| node\_id | bigint | not null |
+| response | integer | not null |
+
+
+Of course pushdown also works. Say you want to count all the transactions that
+*completed* before the end of the day yesterday. Just add the duration to the
+start time:
+
+```
+1try=# EXPLAIN (VERBOSE, COSTS OFF)
+2 SELECT COUNT(*)
+3   FROM logs
+4  WHERE start_at + duration < date_trunc('day', now());
+5                                                QUERY PLAN
+6-----------------------------------------------------------------------------------------------------------
+7 Foreign Scan
+8   Output: (count(*))
+9   Relations: Aggregate on (logs)
+10   Remote SQL: SELECT count(*) FROM "default".logs WHERE (((start_at + duration) < toStartOfDay(now64())))
+11(4 rows)
+```
+Copy command
+The `EXPLAIN (VERBOSE)` output shows the remote query that executes on
+ClickHouse, which plainly pushes down `start_at + duration` for execution in
+ClickHouse (along with the `COUNT()` aggregate[2](#user-content-fn-ival_agg), of course).
+
+The same pattern applies [chdb\_hook](https://clickhouse.com/docs/products/managed-postgres/extensions/chdb/chdb_hook) v0\.1\.2: it imports chDB [interval types](https://clickhouse.com/docs/reference/data-types/special-data-types/interval)
+as Postgres `interval` values. Both extensions also allow the interval types
+to be imported as `bigint`s, instead. Simply create the foreign or copy target
+table with `duration bigint` and the extension will do the rest.
+
+## Nesting instinct \#
+
+The pg\_clickhouse http driver has supported the [JSON type](https://clickhouse.com/docs/reference/data-types/newjson) since v0\.1, and
+the binary driver since v0\.3\. However, although it would push down a
+JSON property accessor, e.g.,
+
+```
+1SELECT * FROM things ORDER BY data ->> 'name';
+```
+Copy command
+ClickHouse would return an error:
+
+```
+1DB::Exception: Data types Variant/Dynamic are not allowed in ORDER BY keys, because it can lead to unexpected results.
+2Consider using a subcolumn with a specific data type instead
+```
+Copy command
+This error derives from the implementation of ClickHouse JSON objects:
+ClickHouse wants to know a JSON property exists to sort. ClickHouse 25\.3\+
+parameterized sub\-columns assure property presence. An example:
