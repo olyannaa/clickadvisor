@@ -1,0 +1,57 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"New
+topic: new-terraform-provider-manage-clickhouse-database-users-roles-and-privileges-with-code-clickhouse
+ch_version_introduced: '0.0'
+last_updated: '2026-11-09'
+chunk_index: 5
+total_chunks_in_doc: 6
+---
+
+trial offered [here!](https://clickhouse.com/)). This new clickhousedbops provider also has support for our customers who want to use Terraform for managing their self\-hosted ClickHouse database users, roles, and grant privileges in their own self hosted cloud or on\-prem environment.
+
+To support these open source ClickHouse deployments, if users have multiple replicas then a “cluster\_name” variable (database resource [example](https://registry.terraform.io/providers/ClickHouse/clickhousedbops/latest/docs/resources/role#optional)) can be defined in each of the clickhousedbops resource definitions. This will create the resources in all of the replicas in that cluster. If omitted, that resource will be created on the replica hit by the query. We recommend that this should always be set when hitting a cluster with more than one replica.
+
+> Note: This field must be left null when using a ClickHouse Cloud cluster. When using a self hosted ClickHouse instance, this field should only be set for non database resources when there is more than one replica and you are not using 'replicated' storage for [user\_directory](https://clickhouse.com/docs/operations/server-configuration-parameters/settings#user_directories).
+
+You would define your clickhousedbops database resource as such:
+
+```
+resource "clickhousedbops_database" "logs" {
+  name = "logs"
+  cluster_name = "cluster1"
+  comment = "Database for logs"
+}
+```
+Copy command
+## Try it out and give us feedback \#
+
+We hope our new Terraform support makes managing ClickHouse infrastructure easier and more reliable. We encourage users who are interested to try out our terraform providers and give us feedback directly through opening an issue in either GitHub repository \- [ClickHouse](https://github.com/ClickHouse/terraform-provider-clickhouse) or [Clickhousedops](https://github.com/ClickHouse/terraform-provider-clickhousedbops).
+
+### Get started today
+
+Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.
+
+[Sign up](https://console.clickhouse.cloud/signUp?loc=blog-global-cta&utm_blogctaid=0)
+
+---
+
+Share this post
+
+- Copy URL
+- [![Y Combinator icon](/_next/static/immutable/media/ycombinator.37q2g-no9bowl.svg)](https://news.ycombinator.com/submitlink?u= "Share on Y Combinator")
+- [![X icon](/_next/static/immutable/media/x.3nm91lx52ia7n.svg)](https://x.com/intent/tweet?text= "Share on X")
+- [![Bluesky icon](/_next/static/immutable/media/bluesky.292c8t8kns7n1.svg)](https://bsky.app/intent/compose?text= "Share on Bluesky")
+- [![Facebook icon](/_next/static/immutable/media/facebook.32ysyflv7kktz.svg)](https://www.facebook.com/sharer/sharer.php?u= "Share on Facebook")
+- [![LinkedIn icon](/_next/static/immutable/media/linkedin.37911rnwi-sdg.svg)](https://www.linkedin.com/sharing/share-offsite/?url= "Share on LinkedIn")
+### Subscribe to our newsletter
+
+Stay informed on feature releases, product roadmap, support, and cloud offerings!
+
+## Recent posts
+
+[View all Blogs](/blog)![img 5912](/_next/image?url=%2Fuploads%2FIMG_5912_4fde8778dc.jpg&w=750&q=75)Engineering### [What I learned from a month with WalShadow on ClickHouse Managed Postgres](/blog/a-month-with-walshadow-clickhouse-managed-postgres)
+
+Hidehiko ASAHI · Nov 6, 2026![blog cover 1200x630 14](/_next/image?url=%2Fuploads%2FBlog_Cover_1200x630_14_380a4d0d49.png&w=750&q=75)Engineering### [ClickHouse release 26\.10](/blog/clickhouse-release-26-10)
+
+ClickHouse · Nov 6, 2026![mongodb clickpipes ga](/_next/image?url=%2Fuploads%2FMongo_DB_Click_Pipes_GA_28ee291c8e.png&w=750&q=75)Product### [MongoDB CDC connector for ClickPipes is now generally available](/blog/mongodb-cdc-connector-clickpipes-ga)
