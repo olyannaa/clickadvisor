@@ -1,0 +1,21 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"Introducing
+topic: introducing-clickhouse-security-in-private-preview-built-on-runreveal-clickhouse
+ch_version_introduced: auto
+last_updated: '2026-11-16'
+chunk_index: 2
+total_chunks_in_doc: 4
+---
+
+threats as described in the [RunReveal documentation](http://docs.runreveal.com/). ### How ClickHouse Security works \# ClickHouse Security turns a ClickHouse Cloud service into a battery\-included agentic SIEM, using the schemas and views provisioned on the service you pick during setup.
+
+- **Put agents to work:** Agents are part of the platform, not an add\-on. Using the AI capabilities within ClickHouse Security, security engineers can create agents for alert triage, detection tuning and generation, threat hunting, and more. Team members can ask follow\-up questions in natural language through AI chat, without writing traditional queries. Security teams that want to go further can build their own agentic workflows with the LLM of their choice, through an MCP server, API, CLI, and Slack bot.
+- **Get data in fast:** First\-party integrations connect over one hundred cloud, identity, and SaaS sources and bring data in normalized. Built\-in pipelines filter, route, and enrich logs before they’re stored, so there’s no separate pipeline layer to buy or manage.
+- **Detection built\-in, or your own:** Managed detections cover common threats from day one. Write your own as scheduled SQL or streaming Sigma rules, and manage them as code with the CLI (export, test, sync, dry run). Each finding stores the matched log, MITRE ATT\&CK mapping, risk score, and the rule that fired.
+
+### Why run it in ClickHouse \#
+
+ClickHouse Security sits on the database built for how telemetry looks today: continuous high\-volume ingest, retention measured in years, and investigation queries that need to return while an analyst is still looking at the screen. ClickHouse’s columnar storage and compression keep large volumes of logs affordable to retain, and its parallel query execution keeps searches fast as the data grows, so teams don’t have to choose between keeping the data and being able to search it.
+
+A SIEM is usually one more silo to send data to. If you already use ClickHouse, ClickHouse Security is an extension of the platform you’re familiar with. It runs on your own ClickHouse Cloud service and uses your ClickHouse Cloud sign\-in, so there’s no separate system to feed and no separate login to manage.
