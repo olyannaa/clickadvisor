@@ -1,0 +1,51 @@
+---
+source: blog
+url: https://schema.org","@type":"BlogPosting","headline":"How
+topic: how-we-made-clickstack-5x-faster-for-clickhouse-observability-clickhouse
+ch_version_introduced: '0.001'
+last_updated: '2026-11-23'
+chunk_index: 18
+total_chunks_in_doc: 19
+---
+
+8192, ttl_only_drop_parts = 1, enable_block_number_column = 1, enable_block_offset_column = 1; ``` Copy command ![](/_next/image?url=%2Fuploads%2Fclickstack_perf_jul2026_image14_ae58510e68.png&w=2048&q=75) ![](/_next/image?url=%2Fuploads%2Fclickstack_perf_jul2026_image8_124b1be29c.png&w=2048&q=75) *Green bars represent the previous schema, while yellow bars represent the optimized schema. Query 11 is shown separately because of its larger scale.*
+
+The results have already paid dividends. Queries that previously struggled at scale now benefit from improvements across multiple layers of the stack, from primary key design and text indexes to alias columns and materialized views. Rather than relying on isolated optimizations for specific workloads, the schemas now provide a strong general\-purpose foundation. Just as importantly, many of the techniques described here build on native ClickHouse features, allowing us to benefit from ongoing improvements in the database itself as new releases become available.
+
+This work is only one part of the story. In the next post in this series, we'll explore how we used ClickCannon and this evolved schema to build a comprehensive benchmarking framework for ClickStack. We'll look at how we modeled observability workloads, how we translated throughput into infrastructure requirements, and what the resulting benchmarks tell us about the cost of operating ClickStack at scale.
+
+### Get started today
+
+Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.
+
+[Sign up](https://console.clickhouse.cloud/signUp?loc=blog-cta-1195-get-started-today-sign-up&utm_blogctaid=1195)### Get started today
+
+Interested in seeing how ClickHouse works on your data? Get started with ClickHouse Cloud in minutes and receive $300 in free credits.
+
+[Sign up](https://console.clickhouse.cloud/signUp?loc=blog-global-cta&utm_blogctaid=0)
+
+---
+
+Share this post
+
+- Copy URL
+- [![Y Combinator icon](/_next/static/immutable/media/ycombinator.37q2g-no9bowl.svg)](https://news.ycombinator.com/submitlink?u= "Share on Y Combinator")
+- [![X icon](/_next/static/immutable/media/x.3nm91lx52ia7n.svg)](https://x.com/intent/tweet?text= "Share on X")
+- [![Bluesky icon](/_next/static/immutable/media/bluesky.292c8t8kns7n1.svg)](https://bsky.app/intent/compose?text= "Share on Bluesky")
+- [![Facebook icon](/_next/static/immutable/media/facebook.32ysyflv7kktz.svg)](https://www.facebook.com/sharer/sharer.php?u= "Share on Facebook")
+- [![LinkedIn icon](/_next/static/immutable/media/linkedin.37911rnwi-sdg.svg)](https://www.linkedin.com/sharing/share-offsite/?url= "Share on LinkedIn")
+### Subscribe to our newsletter
+
+Stay informed on feature releases, product roadmap, support, and cloud offerings!
+
+## Recent posts
+
+[View all Blogs](/blog)![nov2026 nl image1](/_next/image?url=%2Fuploads%2Fnov2026_nl_image1_32f768551e.png&w=750&q=75)Community### [November 2026 newsletter](/blog/202611-newsletter)
+
+Mark Needham · Nov 20, 2026![What's new in clickhousectl v0.6.0](/_next/image?url=%2Fuploads%2FWhat_s_new_in_clickhousectl_v0_6_0_e73baf28fa.jpg&w=750&q=75)Product### [What's new in clickhousectl v0\.6\.0](/blog/clickhousectl-v0-6-0)
+
+Al Brown · Nov 19, 2026![power bi arrow flight nov2026 preview banner](/_next/image?url=%2Fuploads%2Fpower_bi_arrow_flight_nov2026_preview_banner_52ea3b50f1.png&w=750&q=75)Product### [ClickHouse and Power BI, columnar end to end: the Arrow Flight connector is in public preview](/blog/power-bi-arrow-flight-connector-public-preview)
+
+Bentsi Leviav and Alex Francoeur · Nov 19, 2026![pg clickhouse updates 1](/_next/image?url=%2Fuploads%2Fpg_clickhouse_updates_1_f7acda6ce0.png&w=750&q=75)Engineering### [pg\_clickhouse 0\.11\.1: Now with pgvector, UPDATE, DELETE pushdown](/blog/pg-clickhouse-0-11-1)
+
+David Wheeler · Nov 19, 2026[View all Blogs](/blog)## Follow us
